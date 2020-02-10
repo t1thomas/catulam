@@ -2,6 +2,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 import GitAuth from '../views/GitAuthentication.vue';
+import repoandbranchselector from '../views/repoandbranchselector.vue';
 
 Vue.use(VueRouter);
 
@@ -23,6 +24,11 @@ const routes = [
     path: '/gitauth/callback',
     name: 'GitAuth',
     component: GitAuth,
+  },
+  {
+    path: '/repoandbranch',
+    name: 'repoandbranchselector',
+    component: repoandbranchselector,
   },
 ];
 

@@ -1,15 +1,35 @@
 <template>
   <div class="hello">
     <h1>{{ msg }}</h1>
-    <a href="https://github.com/login/oauth/authorize?client_id=b1ce3f7c7d9048bf31c6">Link Github Repo</a>
+    <a href="https://github.com/login/oauth/authorize?client_id=Iv1.bf366849374cf879&scope=user public_repo repo repo_deployment repo:status read:repo_hook read:org read:public_key read:gpg_key">Link Github Repo</a>
+    <br><br>
+
   </div>
 </template>
 
 <script>
+import Vue from 'vue';
+
 export default {
   name: 'HelloWorld',
   props: {
     msg: String,
+  },
+  mounted() {
+    // this.sendTempCode();
+  },
+  methods: {
+    getRepoList() {
+      if (this.$route.query.code) {
+        // console.log(this.$route.query.code);
+        Vue.$axios.get('/repoList', { code: this.$route.query.code })
+          .then((response) => {
+            console.log(response.data);
+          }, (error) => {
+            console.error(`error ${error}`);
+          });
+      }
+    },
   },
 };
 </script>

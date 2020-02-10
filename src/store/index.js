@@ -5,10 +5,23 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    repoAndBranch: {},
   },
   mutations: {
+    set_repoAndBranch(state, obj) {
+      state.repoAndBranch = obj;
+    },
   },
   actions: {
+    async fetchRepoAndBranch({ commit }) {
+      await Vue.$axios.get('/getRepoInfo')
+        .then((response) => {
+          commit('set_repoAndBranch', response.data);
+          console.log(response.data);
+        }, (error) => {
+          console.error(error);
+        });
+    },
   },
   modules: {
   },
