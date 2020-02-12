@@ -21,7 +21,6 @@
 
     <q-drawer
       v-model="leftDrawerOpen"
-      show-if-above
       bordered
       content-class="bg-grey-2"
     >
@@ -76,19 +75,18 @@
     </q-drawer>
 
     <q-page-container>
-      <HelloWorld />
+      <router-view/>
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue';
+// import HelloWorld from './components/HelloWorld.vue';
 
 export default {
   name: 'LayoutDefault',
 
   components: {
-    HelloWorld,
   },
 
   data() {

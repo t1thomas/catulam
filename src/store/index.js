@@ -23,6 +23,9 @@ export default new Vuex.Store({
         });
     },
   },
+  getters: {
+    getRepoNames: state => state.repoAndBranch.forEach(repo => repo.name),
+  },
   modules: {
   },
 });

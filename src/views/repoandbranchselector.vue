@@ -1,36 +1,40 @@
 <template>
-  <div>
-  <label>Repo:
-    <select name="cars" style="width: 150px">
-      <option value="volvo">Volvo</option>
-      <option value="saab">Saab</option>
-      <option value="fiat">Fiat</option>
-      <option value="audi">Audi</option>
-    </select>
-  </label>
-  <label>Branch:
-    <select name="cars" style="width: 150px">
-      <option value="volvo">Volvo</option>
-      <option value="saab">Saab</option>
-      <option value="fiat">Fiat</option>
-      <option value="audi">Audi</option>
-    </select>
-  </label>
-  </div>
+    <div class="q-pa-md" style="max-width: 400px">
+      <div class="q-gutter-md">
+        <q-select rounded filled v-model="model" :options="getRepoNames" label="Rounded filled" />
+        <q-select rounded filled v-model="model" :options="options" label="Rounded filled" />
+      </div>
+    </div>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
   name: 'repoandbranchselector',
+  data() {
+    return {
+      model: null,
+      options: [
+        'Google', 'Facebook', 'Twitter', 'Apple', 'Oracle',
+      ],
+    };
+  },
   mounted() {
     this.fetchRepoAndBranch();
+  },
+  computed: {
+    ...mapGetters([
+      'getRepoNames',
+    ]),
   },
   methods: {
     ...mapActions([
       'fetchRepoAndBranch',
     ]),
+    printRepos() {
+      console.log(this.getRepoNames);
+    },
   },
 };
 </script>
