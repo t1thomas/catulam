@@ -4,6 +4,7 @@ import router from './router';
 import store from './store';
 import './plugins/axios';
 import { createProvider } from './vue-apollo';
+import './quasar';
 
 Vue.config.productionTip = false;
 
