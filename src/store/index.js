@@ -24,7 +24,14 @@ export default new Vuex.Store({
     },
   },
   getters: {
-    getRepoNames: state => state.repoAndBranch.forEach(repo => repo.name),
+    getRepoNames: state => state.repoAndBranch.reduce((arr, repo) => {
+      arr.push(repo.name);
+      return arr;
+    }, []),
+    // getRepoBranches: state => repoName => state.repoAndBranch.reduce((arr, repo) => {
+    //   arr.push(repo.name);
+    //   return arr;
+    // }, []),
   },
   modules: {
   },
