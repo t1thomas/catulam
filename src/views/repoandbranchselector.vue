@@ -1,14 +1,18 @@
 <template>
     <div class="q-pa-md" style="max-width: 400px">
       <div class="q-gutter-md">
-        <q-select rounded filled v-if="loaded"
-                  v-model="model" :options="getRepoNames" label="Rounded filled" />
+        <q-select rounded filled
+                  v-if="loaded"
+                  v-model="model1"
+                  :options="getRepoNames"
+                  label="Rounded filled"
+        />
 <!--        <q-select rounded filled v-if="loaded"-->
 <!--                  v-model="model" :options="options" label="Rounded filled" />-->
         <q-select
           filled
-          v-bind:disable="getdisabled"
-          v-model="model1"
+          v-bind:disable="getDisabled"
+          v-model="model2"
           :options="options"
           label="Select Branch"
           color="teal"
@@ -29,7 +33,7 @@
             </q-item>
           </template>
         </q-select>
-        <q-btn @click="printRepos">test</q-btn>
+<!--        <q-btn @click="printRepos">test</q-btn>-->
       </div>
     </div>
 </template>
@@ -42,30 +46,9 @@ export default {
   data() {
     return {
       loaded: false,
-      model: [],
+      model1: [],
       model2: [],
-      options: [
-        {
-          label: 'Google',
-          lastCommit: '(10/03/2013 02:00)',
-        },
-        {
-          label: 'Google',
-          lastCommit: '(10/03/2013 02:00)',
-        },
-        {
-          label: 'Google',
-          lastCommit: '(10/03/2013 02:00)',
-        },
-        {
-          label: 'Google',
-          lastCommit: '(10/03/2013 02:00)',
-        },
-        {
-          label: 'Google',
-          lastCommit: '(10/03/2013 02:00)',
-        },
-      ],
+      options: [],
     };
   },
   async mounted() {
@@ -77,11 +60,17 @@ export default {
       'getRepoNames',
       'getRepoBranches',
     ]),
-    getdisabled() {
-      if (!this.model.length > 0) {
+    getDisabled() {
+      if (!this.model1.length > 0) {
         return true;
       }
       return false;
+    },
+  },
+  watch: {
+    model1() {
+      this.model2 = [];
+      this.changeOptions(this.model1);
     },
   },
   methods: {
@@ -93,6 +82,9 @@ export default {
       const string = 'test';
       console.log(this.getRepoBranches(string));
     },
+    changeOptions(repoName){
+     this.options = this.getRepoBranches(repoName);
+    }
   },
 };
 </script>

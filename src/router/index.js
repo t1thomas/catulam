@@ -3,6 +3,7 @@ import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 import GitAuth from '../views/GitAuthentication.vue';
 import repoandbranchselector from '../views/repoandbranchselector.vue';
+import backlog from '../views/backlog.vue';
 
 Vue.use(VueRouter);
 
@@ -29,6 +30,11 @@ const routes = [
     path: '/repoandbranch',
     name: 'repoandbranchselector',
     component: repoandbranchselector,
+  },
+  {
+    path: '/backlog',
+    name: 'backlog',
+    component: backlog,
   },
 ];
 
