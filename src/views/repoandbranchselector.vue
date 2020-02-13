@@ -7,7 +7,8 @@
 <!--                  v-model="model" :options="options" label="Rounded filled" />-->
         <q-select
           filled
-          v-model="model"
+          v-bind:disable="getdisabled"
+          v-model="model1"
           :options="options"
           label="Select Branch"
           color="teal"
@@ -41,14 +42,8 @@ export default {
   data() {
     return {
       loaded: false,
-      model: null,
-      options1: {
-        Google1: new Date('2019-06-24T23:09:12Z'),
-        Google2: '2019-06-24T23:09:12Z',
-        Google3: '2019-06-24T23:09:12Z',
-        Google4: '2019-06-24T23:09:12Z',
-        Google5: '2019-06-24T23:09:12Z',
-      },
+      model: [],
+      model2: [],
       options: [
         {
           label: 'Google',
@@ -80,7 +75,14 @@ export default {
   computed: {
     ...mapGetters([
       'getRepoNames',
+      'getRepoBranches',
     ]),
+    getdisabled() {
+      if (!this.model.length > 0) {
+        return true;
+      }
+      return false;
+    },
   },
   methods: {
     ...mapActions([
@@ -88,7 +90,8 @@ export default {
     ]),
     /* eslint-disable */
     printRepos() {
-      console.log(this.getRepoNames);
+      const string = 'test';
+      console.log(this.getRepoBranches(string));
     },
   },
 };

@@ -28,10 +28,26 @@ export default new Vuex.Store({
       arr.push(repo.name);
       return arr;
     }, []),
-    // getRepoBranches: state => repoName => state.repoAndBranch.reduce((arr, repo) => {
-    //   arr.push(repo.name);
-    //   return arr;
-    // }, []),
+    getRepoBranches: state => repoName => state.repoAndBranch
+      .filter(repo => repoName === repo.name)
+      .reduce((arr, repo) => {
+        (repo.refs.nodes).forEach((branch) => {
+          const currentDatetime = new Date(branch.target.committedDate);
+          const formattedDate = `${currentDatetime.getFullYear()}-${currentDatetime.getMonth() + 1}-${currentDatetime.getDate()} ${currentDatetime.getHours()}:${currentDatetime.getMinutes()}`;
+          arr.push({
+            label: branch.name,
+            lastCommit: formattedDate,
+            lastCommitFullDate: currentDatetime,
+          });
+        });
+        return arr;
+      }, []).sort((a, b) => {
+        /* eslint-disable no-param-reassign, no-nested-ternary */
+        a = new Date(a.lastCommitFullDate);
+        b = new Date(b.lastCommitFullDate);
+        return a > b ? -1 : a < b ? 1 : 0;
+        /* eslint-enable */
+      }),
   },
   modules: {
   },
