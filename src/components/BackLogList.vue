@@ -1,16 +1,13 @@
 <template>
     <q-list bordered class="rounded-borders" style="max-width: 600px">
-      <q-item-label header>Google Inbox style</q-item-label>
-
-      <q-item>
-
+      <q-item v-for="issue in bklgList" v-bind:key="issue.issueID">
         <q-item-section top>
           <q-item-label lines="1">
-            <span class="text-weight-medium">001</span>
-            <span class="text-grey-8"> - Login Page</span>
+            <span class="text-weight-medium">{{issue.issueNumber}}</span>
+            <span class="text-grey-8"> - {{issue.title}}</span>
           </q-item-label>
           <q-item-label caption lines="1">
-            Create Login Page for users to enter credentials
+            {{issue.desc}}
           </q-item-label>
         </q-item-section>
 
@@ -19,50 +16,70 @@
             <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />
             <q-btn size="12px" flat dense round icon="more_vert" />
             <q-btn class="gt-xs" size="12px" color="primary"
-                   icon="account_tree" label="Link Github" />
+                   icon="account_tree" label="Link Github"
+                   v-on:click="$emit('toggleBranchSelector', issue.issueID)"
+            />
           </div>
         </q-item-section>
       </q-item>
 
-      <q-separator spaced />
 
-      <q-item>
-        <q-item-section avatar top>
-          <q-icon name="account_tree" color="black" size="34px" />
-        </q-item-section>
-
-        <q-item-section top class="col-2 gt-sm">
-          <q-item-label class="q-mt-sm">GitHub</q-item-label>
-        </q-item-section>
-
-        <q-item-section top>
-          <q-item-label lines="1">
-            <span class="text-weight-medium">[quasarframework/quasar]</span>
-            <span class="text-grey-8"> - GitHub repository</span>
-          </q-item-label>
-          <q-item-label caption lines="1">
-            @rstoenescu in #1: > The build system
-          </q-item-label>
-          <q-item-label lines="1"
-                        class="q-mt-xs text-body2 text-weight-bold text-primary text-uppercase">
-            <span class="cursor-pointer">Open in GitHub</span>
-          </q-item-label>
-        </q-item-section>
-
-        <q-item-section top side>
-          <div class="text-grey-8 q-gutter-xs">
-            <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />
-            <q-btn class="gt-xs" size="12px" flat dense round icon="done" />
-            <q-btn size="12px" flat dense round icon="more_vert" />
-          </div>
-        </q-item-section>
-      </q-item>
     </q-list>
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   name: 'BackLogList',
+  data() {
+    return {
+      loaded: false,
+      model1: [],
+      model2: [],
+      bklgList: [
+        {
+          issueID: 'ASDFASDFA232323SDF',
+          issueNumber: 1,
+          created: '2020-02-14T17:52:12.652Z',
+          lastEdit: '2020-02-14T18:20:07.537Z',
+          githubLink: null,
+          assigendTo: 'user2',
+          title: 'login page',
+          creator: 'user1',
+          desc: 'Create Login Page for users to enter credentials',
+        },
+        {
+          issueID: 'ASDFASDh3SDF',
+          issueNumber: 2,
+          created: '2020-02-14T17:52:12.652Z',
+          lastEdit: '2020-02-14T18:20:07.537Z',
+          githubLink: null,
+          assigendTo: 'user2',
+          title: 'Set Up API',
+          creator: 'user1',
+          desc: 'Create API for backend and frontend communication',
+        },
+        {
+          issueID: 'ASDhklSDF',
+          issueNumber: 3,
+          created: '2020-02-14T17:52:12.652Z',
+          lastEdit: '2020-02-14T18:20:07.537Z',
+          githubLink: null,
+          assigendTo: 'user2',
+          title: 'Landing page',
+          creator: 'user1',
+          desc: 'Create landing page for user',
+        },
+
+      ],
+    };
+  },
+  computed: {
+    ...mapState([
+      'issueType',
+    ]),
+  },
 };
 </script>
 

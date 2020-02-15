@@ -6,6 +6,12 @@ Vue.use(Vuex);
 export default new Vuex.Store({
   state: {
     repoAndBranch: {},
+    issueType: Object.freeze({
+      USERSTORY: 'User Story',
+      TASK: 'Task',
+      BUGFIX: 'Bugfix',
+      TEST: 'Test',
+    }),
   },
   mutations: {
     set_repoAndBranch(state, obj) {
@@ -24,6 +30,7 @@ export default new Vuex.Store({
     },
   },
   getters: {
+    getIssueType: state => state.issueType,
     getRepoNames: state => state.repoAndBranch.reduce((arr, repo) => {
       arr.push(repo.name);
       return arr;

@@ -4,16 +4,28 @@
     <q-btn class="crt-btn" color="primary" icon="add" rounded  label="Create Issue" />
   </div>
   <div class="bklg-list">
-    <BackLogList/>
+    <BackLogList @toggleBranchSelector="toggleBranchSelector"/>
   </div>
+  <BranchSelector ref="brnSlct"/>
 </q-page>
 </template>
 <script>
 import BackLogList from '../components/BackLogList.vue';
+import BranchSelector from '../components/BranchSelector.vue';
 
 export default {
   name: 'backlog',
-  components: { BackLogList },
+  components: { BackLogList, BranchSelector },
+  data() {
+    return {
+      showBranchSelector: false,
+    };
+  },
+  methods: {
+    toggleBranchSelector(id) {
+      this.$refs.brnSlct.toggleShow(id);
+    },
+  },
 };
 </script>
 
@@ -35,7 +47,7 @@ export default {
   .bklg-list {
     display: flex;
     position: absolute;
-    top: 20%;
+    top: 23%;
     left: 8%;
     width: 84vw;
     justify-content: center;
