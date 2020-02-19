@@ -12,10 +12,14 @@ export default new Vuex.Store({
       BUGFIX: 'Bugfix',
       TEST: 'Test',
     }),
+    issues: {},
   },
   mutations: {
     set_repoAndBranch(state, obj) {
       state.repoAndBranch = obj;
+    },
+    set_issues(state, obj) {
+      state.issues = obj;
     },
   },
   actions: {
@@ -28,9 +32,19 @@ export default new Vuex.Store({
           console.error(`frontend error ${error}`);
         });
     },
+    async fetchIssues({ commit }) {
+      await Vue.$axios.get('/getIssues')
+        .then((response) => {
+          commit('set_issues', response.data);
+          console.log(response.data);
+        }, (error) => {
+          console.error(error);
+        });
+    },
   },
   getters: {
     getIssueType: state => state.issueType,
+    getIssues: state => state.issues,
     getRepoNames: state => state.repoAndBranch.reduce((arr, repo) => {
       arr.push(repo.name);
       return arr;
