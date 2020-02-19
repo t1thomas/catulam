@@ -25,7 +25,7 @@ export default new Vuex.Store({
           commit('set_repoAndBranch', response.data);
           console.log(response.data);
         }, (error) => {
-          console.error(error);
+          console.error(`frontend error ${error}`);
         });
     },
   },
@@ -40,11 +40,12 @@ export default new Vuex.Store({
       .reduce((arr, repo) => {
         (repo.refs.nodes).forEach((branch) => {
           const currentDatetime = new Date(branch.target.committedDate);
-          const formattedDate = `${currentDatetime.getFullYear()}-${currentDatetime.getMonth() + 1}-${currentDatetime.getDate()} ${currentDatetime.getHours()}:${currentDatetime.getMinutes()}`;
+          const formattedDate = `${currentDatetime.getDate()}-${currentDatetime.getMonth() + 1}-${currentDatetime.getFullYear()} ${currentDatetime.getHours()}:${currentDatetime.getMinutes()}`;
           arr.push({
             label: branch.name,
             lastCommit: formattedDate,
             lastCommitFullDate: currentDatetime,
+            oid: branch.target.oid,
           });
         });
         return arr;

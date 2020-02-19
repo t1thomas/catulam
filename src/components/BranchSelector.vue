@@ -6,17 +6,23 @@
             <div class="row">
               <div class="col">
                   Create New Branch
-                  <q-btn color="primary" label="Create New Branch" />
+                  <q-btn color="primary" @click="createNewBranch" label="Create New Branch" />
               </div>
               <div class="col">
                 Link To Existing Branch
-                <q-btn color="primary" label="Link To Existing Branch" />
+                <q-btn color="primary" @click="linkExistingBranch"
+                       label="Link To Existing Branch" />
               </div>
             </div>
           </q-step>
           <q-step :name="2" prefix="2" title="Create an ad group" caption="Optional"
                   style="min-height: 200px;">
-            An ad group contains one or more ads which target a shared set of keywords.
+            <div v-if="stepperConfig.operation === 'exist'">
+                <rbs/>
+            </div>
+            <div v-if="stepperConfig.operation === 'new'">
+              New Branch
+            </div>
           </q-step>
           <q-step :name="3" prefix="3" title="Create an ad" style="min-height: 200px;">
             Try out different ad text to see what brings in the most customers, and learn how to
@@ -24,9 +30,9 @@
             your ads, find out how to tell if they're running and how to resolve approval issues.
           </q-step>
           <template v-slot:navigation>
-            <q-stepper-navigation>
-              <q-btn @click="$refs.stepper.next()" color="primary"
-                     :label="step === 3 ? 'Finish' : 'Continue'" />
+            <q-stepper-navigation align="right">
+<!--              <q-btn @click="$refs.stepper.next()" color="primary"-->
+<!--                     :label="step === 3 ? 'Finish' : 'Continue'" />-->
               <q-btn v-if="step > 1" flat color="primary"
                      @click="$refs.stepper.previous()" label="Back" class="q-ml-sm" />
             </q-stepper-navigation>
@@ -37,7 +43,7 @@
               Campaign settings are important...
             </q-banner>
             <q-banner v-else-if="step === 2" class="bg-orange-8 text-white q-px-lg">
-              The ad group helps you to...
+              Select Repo and branch..
             </q-banner>
             <q-banner v-else-if="step === 3" class="bg-green-8 text-white q-px-lg">
               The Ad template is disabled - this won't be displayed
@@ -53,6 +59,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import repoandbranchselector from './repoandbranchselector.vue';
 
 export default {
   name: 'BranchSelector',
@@ -65,11 +72,15 @@ export default {
       model1: [],
       model2: [],
       options: [],
+      stepperConfig: { operation: '' },
     };
   },
   async mounted() {
     // await this.fetchRepoAndBranch();
     this.loaded = true;
+  },
+  components: {
+    rbs: repoandbranchselector,
   },
   computed: {
     ...mapGetters([
@@ -87,6 +98,14 @@ export default {
     },
   },
   methods: {
+    createNewBranch() {
+      this.stepperConfig.operation = 'new';
+      this.$refs.stepper.next();
+    },
+    linkExistingBranch() {
+      this.stepperConfig.operation = 'exist';
+      this.$refs.stepper.next();
+    },
     toggleShow() {
       this.show = !this.show;
     },

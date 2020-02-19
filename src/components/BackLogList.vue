@@ -39,6 +39,7 @@ export default {
       model2: [],
       bklgList: [
         {
+          projectID: 'firstproject24rrwaefpj',
           issueID: 'ASDFASDFA232323SDF',
           issueNumber: 1,
           created: '2020-02-14T17:52:12.652Z',
@@ -50,6 +51,7 @@ export default {
           desc: 'Create Login Page for users to enter credentials',
         },
         {
+          projectID: 'firstproject24rrwaefpj',
           issueID: 'ASDFASDh3SDF',
           issueNumber: 2,
           created: '2020-02-14T17:52:12.652Z',
@@ -61,6 +63,7 @@ export default {
           desc: 'Create API for backend and frontend communication',
         },
         {
+          projectID: 'firstproject24rrwaefpj',
           issueID: 'ASDhklSDF',
           issueNumber: 3,
           created: '2020-02-14T17:52:12.652Z',
