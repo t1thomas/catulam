@@ -17,7 +17,7 @@
             <q-btn size="12px" flat dense round icon="more_vert" />
             <q-btn class="gt-xs" size="12px" color="primary"
                    icon="account_tree" label="Link Github"
-                   v-on:click="$emit('toggleBranchSelector', issue.issueID)"
+                   v-on:click="$emit('toggleBranchSelector', issue._id)"
             />
           </div>
         </q-item-section>

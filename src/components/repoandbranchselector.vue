@@ -37,7 +37,9 @@
         </div>
         <div class="col-2" style="align-self: flex-end">
           <q-btn color="primary"
-                 v-bind:disable="getDisabledModel2">Continue</q-btn>
+                 v-bind:disable="getDisabledModel2"
+                 @click="$emit('sendBranchData', model2)"
+          >Continue</q-btn>
         </div>
       </div>
     </div>

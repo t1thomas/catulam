@@ -18,21 +18,19 @@
           <q-step :name="2" prefix="2" title="Create an ad group" caption="Optional"
                   style="min-height: 200px;">
             <div v-if="stepperConfig.operation === 'exist'">
-                <rbs/>
+                <rbs @sendBranchData="proceedWithBranchData"/>
             </div>
             <div v-if="stepperConfig.operation === 'new'">
               New Branch
             </div>
           </q-step>
           <q-step :name="3" prefix="3" title="Create an ad" style="min-height: 200px;">
-            Try out different ad text to see what brings in the most customers, and learn how to
-            enhance your ads using features like ad extensions. If you run into any problems with
-            your ads, find out how to tell if they're running and how to resolve approval issues.
+            Confirm attachemnt of githubbranch to ticket
+            <q-btn color="primary"
+                   @click="attachBranchToTicket" label="Confirm" class="q-ml-sm" />
           </q-step>
           <template v-slot:navigation>
             <q-stepper-navigation align="right">
-<!--              <q-btn @click="$refs.stepper.next()" color="primary"-->
-<!--                     :label="step === 3 ? 'Finish' : 'Continue'" />-->
               <q-btn v-if="step > 1" flat color="primary"
                      @click="$refs.stepper.previous()" label="Back" class="q-ml-sm" />
             </q-stepper-navigation>
@@ -46,10 +44,7 @@
               Select Repo and branch..
             </q-banner>
             <q-banner v-else-if="step === 3" class="bg-green-8 text-white q-px-lg">
-              The Ad template is disabled - this won't be displayed
-            </q-banner>
-            <q-banner v-else class="bg-blue-8 text-white q-px-lg">
-              The final step is creating the ad...
+              Confirm branch selection..
             </q-banner>
           </template>
         </q-stepper>
@@ -58,7 +53,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import Vue from 'vue';
 import repoandbranchselector from './repoandbranchselector.vue';
 
 export default {
@@ -68,36 +63,27 @@ export default {
     return {
       show: false,
       step: 1,
-      loaded: false,
-      model1: [],
-      model2: [],
-      options: [],
+      selectedTicketId: null,
+      selectedBranch: null,
       stepperConfig: { operation: '' },
     };
-  },
-  async mounted() {
-    // await this.fetchRepoAndBranch();
-    this.loaded = true;
   },
   components: {
     rbs: repoandbranchselector,
   },
-  computed: {
-    ...mapGetters([
-      'getRepoNames',
-      'getRepoBranches',
-    ]),
-    getDisabled() {
-      return !this.model1.length > 0;
-    },
-  },
-  watch: {
-    model1() {
-      this.model2 = [];
-      this.changeOptions(this.model1);
-    },
-  },
   methods: {
+    async attachBranchToTicket() {
+      console.log(this.selectedTicketId);
+      console.log(this.selectedBranch);
+
+      await Vue.$axios.put('/attachBranch', { ticketId: this.selectedTicketId, branchData: this.selectedBranch })
+        .then((response) => {
+          console.log(response.data.message);
+          this.$emit('updateTickets');
+        }, (error) => {
+          console.error(error);
+        });
+    },
     createNewBranch() {
       this.stepperConfig.operation = 'new';
       this.$refs.stepper.next();
@@ -106,21 +92,15 @@ export default {
       this.stepperConfig.operation = 'exist';
       this.$refs.stepper.next();
     },
-    toggleShow() {
+    proceedWithBranchData(branchData) {
+      this.selectedBranch = branchData;
+      this.$refs.stepper.next();
+    },
+    toggleShow(id) {
+      this.selectedTicketId = id;
       this.show = !this.show;
     },
-    ...mapActions([
-      'fetchRepoAndBranch',
-    ]),
-    /* eslint-disable */
-      printRepos() {
-        const string = 'test';
-        console.log(this.getRepoBranches(string));
-      },
-      changeOptions(repoName){
-        this.options = this.getRepoBranches(repoName);
-      }
-    },
+  },
 };
 </script>
 

@@ -4,9 +4,9 @@
     <q-btn class="crt-btn" color="primary" icon="add" rounded  label="Create Issue" />
   </div>
   <div class="bklg-list">
-    <BackLogList @toggleBranchSelector="toggleBranchSelector"/>
+    <BackLogList ref="bkList" @toggleBranchSelector="toggleBranchSelector"/>
   </div>
-  <BranchSelector ref="brnSlct"/>
+  <BranchSelector ref="brnSlct" @updateTickets="$refs.bkList.fetchIssues()"/>
 </q-page>
 </template>
 <script>
