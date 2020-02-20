@@ -27,7 +27,7 @@ export default new Vuex.Store({
       await Vue.$axios.get('/getRepoInfo')
         .then((response) => {
           commit('set_repoAndBranch', response.data);
-          console.log(response.data);
+          // console.log(response.data);
         }, (error) => {
           console.error(`frontend error ${error}`);
         });
@@ -60,6 +60,7 @@ export default new Vuex.Store({
             lastCommit: formattedDate,
             lastCommitFullDate: currentDatetime,
             oid: branch.target.oid,
+            branchUrl: `${repo.url}/tree/${branch.name}`,
           });
         });
         return arr;

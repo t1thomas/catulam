@@ -1,39 +1,44 @@
 <template>
     <div class="q-pa-md" style="max-width: 400px">
-      <div class="q-gutter-md">
-        <q-select rounded filled
-                  v-if="loaded"
-                  v-model="model1"
-                  :options="getRepoNames"
-                  label="Rounded filled"
-        />
-<!--        <q-select rounded filled v-if="loaded"-->
-<!--                  v-model="model" :options="options" label="Rounded filled" />-->
-        <q-select
-          filled
-          v-bind:disable="getDisabled"
-          v-model="model2"
-          :options="options"
-          label="Select Branch"
-          color="teal"
-          options-selected-class="text-deep-orange"
-        >
-          <template v-slot:option="scope">
-            <q-item
-              v-bind="scope.itemProps"
-              v-on="scope.itemEvents"
-            >
-              <q-item-section>
-                <q-item-label>{{ scope.opt.label }}</q-item-label>
-              </q-item-section>
-              <q-item-section side>
-                <q-item-label>{{ scope.opt.lastCommit }}</q-item-label>
-                <q-item-label caption>Last Commit</q-item-label>
-              </q-item-section>
-            </q-item>
-          </template>
-        </q-select>
-<!--        <q-btn @click="printRepos">test</q-btn>-->
+      <div class="row">
+        <div class="col-8">
+          <q-select rounded filled
+                    v-if="loaded"
+                    v-model="model1"
+                    :options="getRepoNames"
+                    @input="changeOptions"
+                    label="Rounded filled"
+          />
+          <q-select
+            filled
+            v-if="loaded"
+            v-bind:disable="getDisabledModel1"
+            v-model="model2"
+            :options="options"
+            label="Select Branch"
+            color="teal"
+            options-selected-class="text-deep-orange"
+          >
+            <template v-slot:option="scope">
+              <q-item
+                v-bind="scope.itemProps"
+                v-on="scope.itemEvents"
+              >
+                <q-item-section>
+                  <q-item-label>{{ scope.opt.label }}</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-item-label>{{ scope.opt.lastCommit }}</q-item-label>
+                  <q-item-label caption>Last Commit</q-item-label>
+                </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
+        </div>
+        <div class="col-2" style="align-self: flex-end">
+          <q-btn color="primary"
+                 v-bind:disable="getDisabledModel2">Continue</q-btn>
+        </div>
       </div>
     </div>
 </template>
@@ -46,9 +51,10 @@ export default {
   data() {
     return {
       loaded: false,
-      model1: [],
-      model2: [],
+      model1: null,
+      model2: null,
       options: [],
+      btnDisable: true,
     };
   },
   async mounted() {
@@ -60,31 +66,21 @@ export default {
       'getRepoNames',
       'getRepoBranches',
     ]),
-    getDisabled() {
-      if (!this.model1.length > 0) {
-        return true;
-      }
-      return false;
+    getDisabledModel1() {
+      return this.model1 === null;
     },
-  },
-  watch: {
-    model1() {
-      this.model2 = [];
-      this.changeOptions(this.model1);
+    getDisabledModel2() {
+      return this.model2 === null;
     },
   },
   methods: {
     ...mapActions([
       'fetchRepoAndBranch',
     ]),
-    /* eslint-disable */
-    printRepos() {
-      const string = 'test';
-      console.log(this.getRepoBranches(string));
+    changeOptions() {
+      this.model2 = null;
+      this.options = this.getRepoBranches(this.model1);
     },
-    changeOptions(repoName){
-     this.options = this.getRepoBranches(repoName);
-    }
   },
 };
 </script>
