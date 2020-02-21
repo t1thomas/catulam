@@ -134,18 +134,20 @@ export default {
       this.stepperConfig.operation = '';
     },
     async createNewBranch() {
-      await Vue.$axios.put('/createNewBranch', { repoId: this.selectedBranch.repoId, newBranchName: this.newBranchName, oid: this.selectedBranch.oid })
+      await Vue.$axios.patch('/createNewBranch', {
+        ticketId: this.selectedTicketId,
+        repoId: this.selectedBranch.repoId,
+        newBranchName: this.newBranchName,
+        oid: this.selectedBranch.oid,
+      })
         .then((response) => {
-          console.log(response.data.message);
-          // this.$emit('updateTickets');
+          console.log(response.data);
+          this.$emit('updateTickets');
         }, (error) => {
           console.error(error);
         });
     },
     async attachBranchToTicket() {
-      console.log(this.selectedTicketId);
-      console.log(this.selectedBranch);
-
       await Vue.$axios.put('/attachBranchToTicket', { ticketId: this.selectedTicketId, branchData: this.selectedBranch })
         .then((response) => {
           console.log(response.data.message);
