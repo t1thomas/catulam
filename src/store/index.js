@@ -45,6 +45,11 @@ export default new Vuex.Store({
   getters: {
     getIssueType: state => state.issueType,
     getIssues: state => state.issues,
+    /* eslint-disable no-underscore-dangle */
+    getIssueById: state => issueId => state.issues.find(issue => issueId === issue._id),
+    /* eslint-enable */
+
+
     getRepoNames: state => state.repoAndBranch.reduce((arr, repo) => {
       arr.push(repo.name);
       return arr;

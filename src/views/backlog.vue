@@ -11,7 +11,7 @@
 </template>
 <script>
 import BackLogList from '../components/BackLogList.vue';
-import BranchSelector from '../components/BranchSelector.vue';
+import BranchSelector from '../components/GitHubLinkStepper.vue';
 
 export default {
   name: 'backlog',

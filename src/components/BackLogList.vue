@@ -18,7 +18,9 @@
             <q-btn class="gt-xs" size="12px" color="primary"
                    icon="account_tree" label="Link Github"
                    v-on:click="$emit('toggleBranchSelector', issue._id)"
+                   v-if="issue.githubLink === null"
             />
+            <a v-else :href=issue.githubLink.branchUrl>GitHub Branch Link</a>
           </div>
         </q-item-section>
       </q-item>
