@@ -133,8 +133,14 @@ export default {
       this.selectedBranch = null;
       this.stepperConfig.operation = '';
     },
-    createNewBranch() {
-
+    async createNewBranch() {
+      await Vue.$axios.put('/createNewBranch', { repoId: this.selectedBranch.repoId, newBranchName: this.newBranchName, oid: this.selectedBranch.oid })
+        .then((response) => {
+          console.log(response.data.message);
+          // this.$emit('updateTickets');
+        }, (error) => {
+          console.error(error);
+        });
     },
     async attachBranchToTicket() {
       console.log(this.selectedTicketId);
