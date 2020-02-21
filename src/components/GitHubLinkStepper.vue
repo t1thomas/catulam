@@ -6,7 +6,7 @@
             <div class="row">
               <div class="col">
                   Create New Branch
-                  <q-btn color="primary" @click="createNewBranch" label="Create New Branch" />
+                  <q-btn color="primary" @click="proceedWithNewBranch" label="Create New Branch" />
               </div>
               <div class="col">
                 Link To Existing Branch
@@ -32,7 +32,7 @@
               <q-btn color="primary"
                      @click="attachBranchToTicket" label="Confirm" class="q-ml-sm" />
             </div>
-            <div v-if="stepperConfig.operation === 'new'">
+            <div v-else-if="stepperConfig.operation === 'new'">
               Confirm New Branch name
               <q-input
                 clearable
@@ -42,6 +42,8 @@
                 v-model="newBranchName"
                 label="Label"
               />
+              <q-btn color="primary"
+                     @click="createNewBranch" label="Confirm" class="q-ml-sm" />
             </div>
           </q-step>
           <template v-slot:navigation>
@@ -100,26 +102,13 @@ export default {
     ]),
   },
   methods: {
-    async attachBranchToTicket() {
-      console.log(this.selectedTicketId);
-      console.log(this.selectedBranch);
-
-      await Vue.$axios.put('/attachBranch', { ticketId: this.selectedTicketId, branchData: this.selectedBranch })
-        .then((response) => {
-          console.log(response.data.message);
-          this.$emit('updateTickets');
-        }, (error) => {
-          console.error(error);
-        });
-    },
-    createNewBranch() {
+    proceedWithNewBranch() {
       this.stepperConfig.operation = 'new';
       this.setNewBranchName();
       this.$refs.stepper.next();
     },
     setNewBranchName() {
       const selectedIssue = this.getIssueById(this.selectedTicketId);
-      // this.newBranchName = this.getIssueById(this.selectedTicketId).
       /* eslint-disable no-underscore-dangle */
       // add issue number to string and issue title (with whitespace removed )
       this.newBranchName = `${selectedIssue.issueNumber}-${(selectedIssue.title).replace(/\s/g, '')}-feat`;
@@ -143,6 +132,21 @@ export default {
       this.selectedTicketId = null;
       this.selectedBranch = null;
       this.stepperConfig.operation = '';
+    },
+    createNewBranch() {
+
+    },
+    async attachBranchToTicket() {
+      console.log(this.selectedTicketId);
+      console.log(this.selectedBranch);
+
+      await Vue.$axios.put('/attachBranchToTicket', { ticketId: this.selectedTicketId, branchData: this.selectedBranch })
+        .then((response) => {
+          console.log(response.data.message);
+          this.$emit('updateTickets');
+        }, (error) => {
+          console.error(error);
+        });
     },
   },
 };
