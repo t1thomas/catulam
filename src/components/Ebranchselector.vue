@@ -1,15 +1,31 @@
 <template>
-    <div class="q-pa-md" style="max-width: 400px">
+    <div class="q-pa-sm">
       <div class="row">
+        <div class="col-4">
+        <span class="selector-label">Repository:</span>
+        </div>
         <div class="col-8">
-          <q-select rounded filled
+          <q-select filled
+                    dense
                     v-if="loaded"
                     v-model="model1"
                     :options="getRepoNames"
                     @input="changeOptions"
-                    label="Rounded filled"
-          />
+                    label="Select Repo"
+          >
+            <template v-slot:prepend>
+              <q-icon name="fab fa-github-square" />
+            </template>
+          </q-select>
+        </div>
+        </div>
+      <div class="row">
+        <div class="col-4">
+          <span>Branch From:</span>
+        </div>
+        <div class="col-8">
           <q-select
+            dense
             filled
             v-if="loaded"
             v-bind:disable="getDisabledModel1"
@@ -19,6 +35,10 @@
             color="teal"
             options-selected-class="text-deep-orange"
           >
+
+            <template v-slot:prepend>
+              <q-icon name="mdi-source-repository" />
+            </template>
             <template v-slot:option="scope">
               <q-item
                 v-bind="scope.itemProps"
@@ -35,13 +55,12 @@
             </template>
           </q-select>
         </div>
-        <div class="col-2" style="align-self: flex-end">
+      </div>
+
           <q-btn color="primary"
                  v-bind:disable="getDisabledModel2"
                  @click="$emit('sendBranchData', model2)"
           >Continue</q-btn>
-        </div>
-      </div>
     </div>
 </template>
 
@@ -59,11 +78,15 @@ export default {
       btnDisable: true,
     };
   },
+  props: ['selectorOpertation'],
   async mounted() {
     await this.fetchRepoAndBranch();
     this.loaded = true;
   },
   computed: {
+    getOpertaion() {
+      return this.selectorOpertation;
+    },
     ...mapGetters([
       'getRepoNames',
       'getRepoBranches',
@@ -88,5 +111,7 @@ export default {
 </script>
 
 <style scoped>
-
+  .row + .row {
+    margin-top: 1rem;
+  }
 </style>

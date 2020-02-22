@@ -2,7 +2,7 @@
   <q-dialog class="dialog-card" v-model="show">
     <q-card>
         <q-stepper v-model="step" ref="stepper" color="primary" animated>
-          <q-step :name="1" prefix="1" title="Select campaign settings" style="min-height: 200px;">
+          <q-step :name="1" prefix="1" title="Choose Operation" style="min-height: 200px;">
             <div class="row">
               <div class="col">
                   Create New Branch
@@ -15,18 +15,18 @@
               </div>
             </div>
           </q-step>
-          <q-step :name="2" prefix="2" title="Create an ad group" caption="Optional"
-                  style="min-height: 200px;">
+          <q-step :name="2" prefix="2" title="Select Branch" style="min-height: 200px;">
             <div v-if="stepperConfig.operation === 'exist'">
               Existing Branch
-                <ebs @sendBranchData="proceedWithBranchData"/>
+                <ebs @sendBranchData="proceedWithBranchData" selector-opertation="exist"/>
             </div>
             <div v-if="stepperConfig.operation === 'new'">
               New Branch
-              <nbs @sendBranchData="proceedWithBranchData"/>
+<!--              <nbs @sendBranchData="proceedWithBranchData"/>-->
+              <ebs @sendBranchData="proceedWithBranchData" selector-opertation="new"/>
             </div>
           </q-step>
-          <q-step :name="3" prefix="3" title="Create an ad" style="min-height: 200px;">
+          <q-step :name="3" prefix="3" title="Confirm changes" style="min-height: 200px;">
             <div v-if="stepperConfig.operation === 'exist'">
               Confirm attachemnt of githubbranch to ticket
               <q-btn color="primary"
@@ -47,9 +47,11 @@
             </div>
           </q-step>
           <template v-slot:navigation>
-            <q-stepper-navigation align="right">
+            <q-stepper-navigation>
               <q-btn v-if="step > 1" flat color="primary"
-                     @click="$refs.stepper.previous()" label="Back" class="q-ml-sm" />
+                     @click="$refs.stepper.previous()" label="Back" class="q-ml-sm"
+                     align="right"
+              />
             </q-stepper-navigation>
           </template>
 
@@ -78,7 +80,7 @@
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
 import Ebranchselector from './Ebranchselector.vue';
-import Nbranchselector from './Nbranchselector.vue';
+// import Nbranchselector from './Nbranchselector.vue';
 
 export default {
   name: 'BranchSelector',
@@ -94,7 +96,7 @@ export default {
   },
   components: {
     ebs: Ebranchselector,
-    nbs: Nbranchselector,
+    // nbs: Nbranchselector,
   },
   computed: {
     ...mapGetters([
