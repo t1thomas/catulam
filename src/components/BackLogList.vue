@@ -7,7 +7,7 @@
           tag="div"
           v-bind="dragOptions"
           class="rounded-borders q-list q-list--bordered"
-          style="height: 100%; min-width: 600px"
+          style="height: 100%; min-width: 600px; background: cadetblue"
         >
           <q-item
             v-for="issue in bklgList"
@@ -15,23 +15,7 @@
             class="issue-items"
             clickable
           >
-            <q-card
-              style="width: 100%"
-            >
-              <q-card-section horizontal>
-                <span class="text-weight-medium">{{ issue.issueNumber }}</span>
-                <span class="text-grey-8"> - {{ issue.title }}</span>
-              </q-card-section>
-              <q-separator horizontal />
-              <q-card-actions align="right">
-                <q-btn
-                  flat
-                  class="handler"
-                >
-                  Handle
-                </q-btn>
-              </q-card-actions>
-            </q-card>
+            <ticketCard :ticket="issue"/>
           </q-item>
         </draggable>
       </div>
@@ -49,48 +33,33 @@
             class="issue-items"
             clickable
           >
-            <q-card
-              style="width: 100%"
-            >
-              <q-card-section horizontal>
-                <span class="text-weight-medium">{{ issue.issueNumber }}</span>
-                <span class="text-grey-8"> - {{ issue.title }}</span>
-              </q-card-section>
-              <q-separator horizontal />
-              <q-card-actions align="right">
-                <q-btn
-                  flat
-                  class="handler"
-                >
-                  Handle
-                </q-btn>
-              </q-card-actions>
-            </q-card>
+            <ticketCard :ticket="issue"/>
           </q-item>
         </draggable>
       </div>
     </div>
-    <div class="row">
-      <div class="col">
-        <pre>{{ listString }}</pre>
-      </div>
-      <div class="col">
-        <pre>{{ list2String }}</pre>
-      </div>
-    </div>
+    <!--    <div class="row">-->
+    <!--      <div class="col">-->
+    <!--        <pre>{{ listString }}</pre>-->
+    <!--      </div>-->
+    <!--      <div class="col">-->
+    <!--        <pre>{{ list2String }}</pre>-->
+    <!--      </div>-->
+    <!--    </div>-->
   </q-page-container>
 </template>
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-// import sortableList from './sortableList.vue';
 import draggable from 'vuedraggable';
+import backlogTicketQcard from './backlogTicketQcard.vue';
 
 export default {
   name: 'BackLogList',
   components: {
     // sortableList,
     draggable,
+    ticketCard: backlogTicketQcard,
   },
   data() {
     return {
@@ -103,18 +72,20 @@ export default {
           _id: '5e4d982360b45418a87cbaf3',
           projectID: 'firstproject24rrwaefpj',
           issueNumber: 1,
+          hourEstimate: 3,
           created: '2020-02-14T17:52:12.652Z',
           lastEdit: '2020-02-14T18:20:07.537Z',
           githubLink: null,
           assigendTo: 'user2',
           title: 'Set Up API',
           creator: 'user1',
-          desc: 'Create API for backend and frontend communication',
+          desc: 'Create API for backend and frontend communication so data can be requested from and send to database by client frontend',
         },
         {
           _id: '5e4d992f4281b818a8c2988d',
           projectID: 'firstproject24rrwaefpj',
           issueNumber: 2,
+          hourEstimate: 3,
           created: '2020-02-14T17:52:12.652Z',
           lastEdit: '2020-02-14T18:20:07.537Z',
           githubLink: {
@@ -126,12 +97,13 @@ export default {
           assigendTo: 'user2',
           title: 'login page',
           creator: 'user1',
-          desc: 'Create Login Page for users to enter credentials',
+          desc: 'Create Login Page for users to enter credentials blajds Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim.  ',
         },
         {
           _id: '5e4d99314281b818a8c2988e',
           projectID: 'firstproject24rrwaefpj',
           issueNumber: 3,
+          hourEstimate: 3,
           created: '2020-02-14T17:52:12.652Z',
           lastEdit: '2020-02-14T18:20:07.537Z',
           githubLink: {
@@ -144,7 +116,7 @@ export default {
           assigendTo: 'user2',
           title: 'Landing page',
           creator: 'user1',
-          desc: 'Create landing page for user',
+          desc: 'Create landing page for Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. ',
         },
       ],
     };
