@@ -1,97 +1,181 @@
 <template>
-    <q-list v-if="loaded" bordered class="rounded-borders" style="max-width: 600px">
-      <q-item v-for="issue in getIssues" v-bind:key="issue.issueID">
-        <q-item-section top>
-          <q-item-label lines="1">
-            <span class="text-weight-medium">{{issue.issueNumber}}</span>
-            <span class="text-grey-8"> - {{issue.title}}</span>
-          </q-item-label>
-          <q-item-label caption lines="1">
-            {{issue.desc}}
-          </q-item-label>
-        </q-item-section>
-
-        <q-item-section bottom side>
-          <div class="text-grey-8 q-gutter-xs">
-            <q-btn class="gt-xs" size="12px" flat dense round icon="delete" />
-            <q-btn size="12px" flat dense round icon="more_vert" />
-            <q-btn class="gt-xs" size="12px" color="primary"
-                   icon="account_tree" label="Link Github"
-                   v-on:click="$emit('toggleBranchSelector', issue._id)"
-                   v-if="issue.githubLink === null"
-            />
-            <a v-else :href=issue.githubLink.branchUrl>GitHub Branch Link</a>
-          </div>
-        </q-item-section>
-      </q-item>
-
-
-    </q-list>
+  <q-page-container>
+    <div class="row">
+      <div class="col">
+        <draggable
+          v-model="bklgList"
+          tag="div"
+          v-bind="dragOptions"
+          class="rounded-borders q-list q-list--bordered"
+          style="height: 100%; min-width: 600px"
+        >
+          <q-item
+            v-for="issue in bklgList"
+            :key="issue._id"
+            class="issue-items"
+            clickable
+          >
+            <q-card
+              style="width: 100%"
+            >
+              <q-card-section horizontal>
+                <span class="text-weight-medium">{{ issue.issueNumber }}</span>
+                <span class="text-grey-8"> - {{ issue.title }}</span>
+              </q-card-section>
+              <q-separator horizontal />
+              <q-card-actions align="right">
+                <q-btn
+                  flat
+                  class="handler"
+                >
+                  Handle
+                </q-btn>
+              </q-card-actions>
+            </q-card>
+          </q-item>
+        </draggable>
+      </div>
+      <div class="col">
+        <draggable
+          v-model="sprintList"
+          tag="div"
+          v-bind="dragOptions"
+          class="rounded-borders q-list q-list--bordered"
+          style="height: 100%; min-width: 600px; background: darkgray"
+        >
+          <q-item
+            v-for="issue in sprintList"
+            :key="issue._id"
+            class="issue-items"
+            clickable
+          >
+            <q-card
+              style="width: 100%"
+            >
+              <q-card-section horizontal>
+                <span class="text-weight-medium">{{ issue.issueNumber }}</span>
+                <span class="text-grey-8"> - {{ issue.title }}</span>
+              </q-card-section>
+              <q-separator horizontal />
+              <q-card-actions align="right">
+                <q-btn
+                  flat
+                  class="handler"
+                >
+                  Handle
+                </q-btn>
+              </q-card-actions>
+            </q-card>
+          </q-item>
+        </draggable>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col">
+        <pre>{{ listString }}</pre>
+      </div>
+      <div class="col">
+        <pre>{{ list2String }}</pre>
+      </div>
+    </div>
+  </q-page-container>
 </template>
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
+// import sortableList from './sortableList.vue';
+import draggable from 'vuedraggable';
 
 export default {
   name: 'BackLogList',
+  components: {
+    // sortableList,
+    draggable,
+  },
   data() {
     return {
       loaded: false,
       model1: [],
       model2: [],
+      sprintList: [],
       bklgList: [
         {
+          _id: '5e4d982360b45418a87cbaf3',
           projectID: 'firstproject24rrwaefpj',
-          issueID: 'ASDFASDFA232323SDF',
           issueNumber: 1,
           created: '2020-02-14T17:52:12.652Z',
           lastEdit: '2020-02-14T18:20:07.537Z',
-          githubLink: '',
-          assigendTo: 'user2',
-          title: 'login page',
-          creator: 'user1',
-          desc: 'Create Login Page for users to enter credentials',
-        },
-        {
-          projectID: 'firstproject24rrwaefpj',
-          issueID: 'ASDFASDh3SDF',
-          issueNumber: 2,
-          created: '2020-02-14T17:52:12.652Z',
-          lastEdit: '2020-02-14T18:20:07.537Z',
-          githubLink: '',
+          githubLink: null,
           assigendTo: 'user2',
           title: 'Set Up API',
           creator: 'user1',
           desc: 'Create API for backend and frontend communication',
         },
         {
+          _id: '5e4d992f4281b818a8c2988d',
           projectID: 'firstproject24rrwaefpj',
-          issueID: 'ASDhklSDF',
+          issueNumber: 2,
+          created: '2020-02-14T17:52:12.652Z',
+          lastEdit: '2020-02-14T18:20:07.537Z',
+          githubLink: {
+            label: '2-loginpage-feat',
+            lastCommit: '2020-02-10T20:10:42Z',
+            oid: 'c1818eb49ee131f70caec9d90370f7ead9febdb4',
+            branchUrl: 'https://github.com/studyTim/test/tree/2-loginpage-feat',
+          },
+          assigendTo: 'user2',
+          title: 'login page',
+          creator: 'user1',
+          desc: 'Create Login Page for users to enter credentials',
+        },
+        {
+          _id: '5e4d99314281b818a8c2988e',
+          projectID: 'firstproject24rrwaefpj',
           issueNumber: 3,
           created: '2020-02-14T17:52:12.652Z',
           lastEdit: '2020-02-14T18:20:07.537Z',
-          githubLink: '',
+          githubLink: {
+            label: 'master',
+            lastCommit: '28-11-2019 13:30',
+            lastCommitFullDate: '2019-11-28T13:30:31.000Z',
+            oid: 'fadf5df57f43ace60d15353157531838b45adc9c',
+            branchUrl: 'https://github.com/studyTim/QM_Client/tree/master',
+          },
           assigendTo: 'user2',
           title: 'Landing page',
           creator: 'user1',
           desc: 'Create landing page for user',
         },
-
       ],
     };
   },
-  async mounted() {
-    await this.fetchIssues();
-    this.loaded = true;
-  },
   computed: {
+    dragOptions() {
+      return {
+        animation: 0,
+        group: 'description',
+        disabled: false,
+        ghostClass: 'ghost',
+      };
+    },
     ...mapState([
       'issueType',
     ]),
     ...mapGetters([
       'getIssues',
     ]),
+    listString() {
+      return JSON.stringify(this.bklgList, null, 2);
+    },
+    list2String() {
+      return JSON.stringify(this.sprintList, null, 2);
+    },
   },
+  // async mounted() {
+  //   await this.fetchIssues();
+  //   this.loaded = true;
+  //   // console.log(this.getIssues);
+  // },
   methods: {
     ...mapActions([
       'fetchIssues',
@@ -105,4 +189,11 @@ export default {
 /*  display: flex;*/
 /*  justify-content: center;*/
 /*}*/
+  .issue-card{
+    width: 100%;
+  }
+.ghost {
+  opacity: 0.5;
+  background: #c8ebfb;
+}
 </style>

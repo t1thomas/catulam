@@ -1,77 +1,136 @@
 <template>
-  <q-dialog class="dialog-card" v-model="show">
+  <q-dialog
+    v-model="show"
+    class="dialog-card"
+  >
     <q-card>
-        <q-stepper v-model="step" ref="stepper" color="primary" animated>
-          <q-step :name="1" prefix="1" title="Choose Operation" style="min-height: 200px;">
-            <div class="row">
-              <div class="col">
-                  Create New Branch
-                  <q-btn color="primary" @click="proceedWithNewBranch" label="Create New Branch" />
-              </div>
-              <div class="col">
-                Link To Existing Branch
-                <q-btn color="primary" @click="linkExistingBranch"
-                       label="Link To Existing Branch" />
-              </div>
-            </div>
-          </q-step>
-          <q-step :name="2" prefix="2" title="Select Branch" style="min-height: 200px;">
-            <div v-if="stepperConfig.operation === 'exist'">
-              Existing Branch
-                <ebs @sendBranchData="proceedWithBranchData" selector-opertation="exist"/>
-            </div>
-            <div v-if="stepperConfig.operation === 'new'">
-              New Branch
-<!--              <nbs @sendBranchData="proceedWithBranchData"/>-->
-              <ebs @sendBranchData="proceedWithBranchData" selector-opertation="new"/>
-            </div>
-          </q-step>
-          <q-step :name="3" prefix="3" title="Confirm changes" style="min-height: 200px;">
-            <div v-if="stepperConfig.operation === 'exist'">
-              Confirm attachemnt of githubbranch to ticket
-              <q-btn color="primary"
-                     @click="attachBranchToTicket" label="Confirm" class="q-ml-sm" />
-            </div>
-            <div v-else-if="stepperConfig.operation === 'new'">
-              Confirm New Branch name
-              <q-input
-                clearable
-                clear-icon="close"
-                filled
-                color="green-8"
-                v-model="newBranchName"
-                label="Label"
+      <q-stepper
+        ref="stepper"
+        v-model="step"
+        color="primary"
+        animated
+      >
+        <q-step
+          :name="1"
+          prefix="1"
+          title="Choose Operation"
+          style="min-height: 200px;"
+        >
+          <div class="row">
+            <div class="col">
+              Create New Branch
+              <q-btn
+                color="primary"
+                label="Create New Branch"
+                @click="proceedWithNewBranch"
               />
-              <q-btn color="primary"
-                     @click="createNewBranch" label="Confirm" class="q-ml-sm" />
             </div>
-          </q-step>
-          <template v-slot:navigation>
-            <q-stepper-navigation>
-              <q-btn v-if="step > 1" flat color="primary"
-                     @click="$refs.stepper.previous()" label="Back" class="q-ml-sm"
-                     align="right"
+            <div class="col">
+              Link To Existing Branch
+              <q-btn
+                color="primary"
+                label="Link To Existing Branch"
+                @click="linkExistingBranch"
               />
-            </q-stepper-navigation>
-          </template>
+            </div>
+          </div>
+        </q-step>
+        <q-step
+          :name="2"
+          prefix="2"
+          title="Select Branch"
+          style="min-height: 200px;"
+        >
+          <div v-if="stepperConfig.operation === 'exist'">
+            Existing Branch
+            <ebs
+              selector-opertation="exist"
+              @sendBranchData="proceedWithBranchData"
+            />
+          </div>
+          <div v-if="stepperConfig.operation === 'new'">
+            New Branch
+            <!--              <nbs @sendBranchData="proceedWithBranchData"/>-->
+            <ebs
+              selector-opertation="new"
+              @sendBranchData="proceedWithBranchData"
+            />
+          </div>
+        </q-step>
+        <q-step
+          :name="3"
+          prefix="3"
+          title="Confirm changes"
+          style="min-height: 200px;"
+        >
+          <div v-if="stepperConfig.operation === 'exist'">
+            Confirm attachemnt of githubbranch to ticket
+            <q-btn
+              color="primary"
+              label="Confirm"
+              class="q-ml-sm"
+              @click="attachBranchToTicket"
+            />
+          </div>
+          <div v-else-if="stepperConfig.operation === 'new'">
+            Confirm New Branch name
+            <q-input
+              v-model="newBranchName"
+              clearable
+              clear-icon="close"
+              filled
+              color="green-8"
+              label="Label"
+            />
+            <q-btn
+              color="primary"
+              label="Confirm"
+              class="q-ml-sm"
+              @click="createNewBranch"
+            />
+          </div>
+        </q-step>
+        <template v-slot:navigation>
+          <q-stepper-navigation>
+            <q-btn
+              v-if="step > 1"
+              flat
+              color="primary"
+              label="Back"
+              class="q-ml-sm"
+              align="right"
+              @click="$refs.stepper.previous()"
+            />
+          </q-stepper-navigation>
+        </template>
 
-          <template v-slot:message>
-            <q-banner v-if="step === 1" class="bg-purple-8 text-white q-px-lg">
-              Campaign settings are important...
-            </q-banner>
-            <q-banner v-else-if="step === 2 && stepperConfig.operation === 'exist'"
-                      class="bg-orange-8 text-white q-px-lg">
-              Select Repo and branch to branch from
-            </q-banner>
-            <q-banner v-else-if="step === 2 && stepperConfig.operation === 'new'"
-                      class="bg-orange-8 text-white q-px-lg">
-              Select Repo and branch to create new branch
-            </q-banner>
-            <q-banner v-else-if="step === 3" class="bg-green-8 text-white q-px-lg">
-              Confirm branch selection..
-            </q-banner>
-          </template>
-        </q-stepper>
+        <template v-slot:message>
+          <q-banner
+            v-if="step === 1"
+            class="bg-purple-8 text-white q-px-lg"
+          >
+            Campaign settings are important...
+          </q-banner>
+          <q-banner
+            v-else-if="step === 2 && stepperConfig.operation === 'exist'"
+            class="bg-orange-8 text-white q-px-lg"
+          >
+            Select Repo and branch to branch from
+          </q-banner>
+          <q-banner
+            v-else-if="step === 2 && stepperConfig.operation === 'new'"
+            class="bg-orange-8 text-white q-px-lg"
+          >
+            Select Repo and branch to create new branch
+          </q-banner>
+          <q-banner
+            v-else-if="step === 3"
+            class="bg-green-8 text-white q-px-lg"
+          >
+            Confirm branch selection..
+          </q-banner>
+        </template>
+      </q-stepper>
     </q-card>
   </q-dialog>
 </template>
@@ -84,6 +143,10 @@ import Ebranchselector from './Ebranchselector.vue';
 
 export default {
   name: 'BranchSelector',
+  components: {
+    ebs: Ebranchselector,
+    // nbs: Nbranchselector,
+  },
   data() {
     return {
       show: false,
@@ -93,10 +156,6 @@ export default {
       stepperConfig: { operation: '' },
       newBranchName: null,
     };
-  },
-  components: {
-    ebs: Ebranchselector,
-    // nbs: Nbranchselector,
   },
   computed: {
     ...mapGetters([

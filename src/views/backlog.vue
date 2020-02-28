@@ -1,20 +1,32 @@
 <template>
-<q-page>
-  <div class="crt-btn-container">
-    <q-btn class="crt-btn" color="primary" icon="add" rounded  label="Create Issue" />
-  </div>
-  <div class="bklg-list">
-    <BackLogList ref="bkList" @toggleBranchSelector="toggleBranchSelector"/>
-  </div>
-  <BranchSelector ref="brnSlct" @updateTickets="$refs.bkList.fetchIssues()"/>
-</q-page>
+  <q-page>
+    <div class="crt-btn-container">
+      <q-btn
+        class="crt-btn"
+        color="primary"
+        icon="add"
+        rounded
+        label="Create Issue"
+      />
+    </div>
+    <div class="bklg-list">
+      <BackLogList
+        ref="bkList"
+        @toggleBranchSelector="toggleBranchSelector"
+      />
+    </div>
+    <BranchSelector
+      ref="brnSlct"
+      @updateTickets="$refs.bkList.fetchIssues()"
+    />
+  </q-page>
 </template>
 <script>
 import BackLogList from '../components/BackLogList.vue';
 import BranchSelector from '../components/GitHubLinkStepper.vue';
 
 export default {
-  name: 'backlog',
+  name: 'Backlog',
   components: { BackLogList, BranchSelector },
   data() {
     return {
