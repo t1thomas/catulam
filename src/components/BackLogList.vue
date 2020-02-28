@@ -7,7 +7,7 @@
           tag="div"
           v-bind="dragOptions"
           class="rounded-borders q-list q-list--bordered"
-          style="height: 100%; min-width: 600px; background: cadetblue"
+          style="height: 100%; max-width: 600px; background: #a09095"
         >
           <q-item
             v-for="issue in bklgList"
@@ -19,24 +19,24 @@
           </q-item>
         </draggable>
       </div>
-      <div class="col">
-        <draggable
-          v-model="sprintList"
-          tag="div"
-          v-bind="dragOptions"
-          class="rounded-borders q-list q-list--bordered"
-          style="height: 100%; min-width: 600px; background: darkgray"
-        >
-          <q-item
-            v-for="issue in sprintList"
-            :key="issue._id"
-            class="issue-items"
-            clickable
-          >
-            <ticketCard :ticket="issue"/>
-          </q-item>
-        </draggable>
-      </div>
+<!--      <div class="col">-->
+<!--        <draggable-->
+<!--          v-model="sprintList"-->
+<!--          tag="div"-->
+<!--          v-bind="dragOptions"-->
+<!--          class="rounded-borders q-list q-list&#45;&#45;bordered"-->
+<!--          style="height: 100%; min-width: 600px; background: darkgray"-->
+<!--        >-->
+<!--          <q-item-->
+<!--            v-for="issue in sprintList"-->
+<!--            :key="issue._id"-->
+<!--            class="issue-items"-->
+<!--            clickable-->
+<!--          >-->
+<!--            <ticketCard :ticket="issue"/>-->
+<!--          </q-item>-->
+<!--        </draggable>-->
+<!--      </div>-->
     </div>
     <!--    <div class="row">-->
     <!--      <div class="col">-->

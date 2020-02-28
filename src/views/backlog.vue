@@ -1,14 +1,15 @@
 <template>
   <q-page>
-    <div class="crt-btn-container">
-      <q-btn
-        class="crt-btn"
-        color="primary"
-        icon="add"
-        rounded
-        label="Create Issue"
-      />
-    </div>
+    <sprint-column />
+    <!--    <div class="crt-btn-container">-->
+    <!--      <q-btn-->
+    <!--        class="crt-btn"-->
+    <!--        color="primary"-->
+    <!--        icon="add"-->
+    <!--        rounded-->
+    <!--        label="Create Issue"-->
+    <!--      />-->
+    <!--    </div>-->
     <div class="bklg-list">
       <BackLogList
         ref="bkList"
@@ -24,10 +25,15 @@
 <script>
 import BackLogList from '../components/BackLogList.vue';
 import BranchSelector from '../components/GitHubLinkStepper.vue';
+import SprintListColumn from '../components/backlog/SprintListColumn.vue';
 
 export default {
   name: 'Backlog',
-  components: { BackLogList, BranchSelector },
+  components: {
+    BackLogList,
+    BranchSelector,
+    'sprint-column': SprintListColumn,
+  },
   data() {
     return {
       showBranchSelector: false,
@@ -42,7 +48,7 @@ export default {
 </script>
 
 <style scoped>
-  .crt-btn-container {
+    .crt-btn-container {
     display: flex;
     align-items: center;
     position: absolute;
