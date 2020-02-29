@@ -1,6 +1,6 @@
 <template>
   <q-card
-    style="width: 29rem; height: 4.5rem;"
+    style="height: 4.5rem;"
   >
     <q-card-section
       horizontal

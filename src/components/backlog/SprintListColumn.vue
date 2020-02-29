@@ -1,29 +1,32 @@
 <template>
   <q-scroll-area
-    style="height: 93vh; max-width: 23%;"
+    class="rounded-borders"
   >
-    <template
+    <div
       v-for="(sprint, index) in sprintList"
+      :key="index"
     >
+      <span>
+        Sprint {{ index }}
+        issues: {{ sprint.length }}
+      </span>
       <draggable
-        :key="index"
         v-model="sprintList[index]"
         tag="div"
         v-bind="dragOptions"
         class="rounded-borders q-list q-list--bordered"
-        style="background: cadetblue; min-height: 6vh;"
+        style="background: cadetblue; min-height: 9vh"
       >
         <q-item
           v-for="issue in sprintList[index]"
           :key="issue._id"
           v-ripple
           clickable
-          class="issue-items"
         >
           <ticketCard :ticket="issue" />
         </q-item>
       </draggable>
-    </template>
+    </div>
   </q-scroll-area>
 </template>
 
@@ -40,7 +43,7 @@ export default {
   },
   data() {
     return {
-      sprintList: [[], [
+      sprintList: [[
         {
           _id: '34trfwaergaerger',
           projectID: 'firstproject24rrwaefpj',
@@ -223,7 +226,7 @@ export default {
           desc: 'Create Login Page for users to enter credentials blajds Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim.  ',
         },
         {
-          _id: 'w35wgegs3w5ysdgsdfgsth',
+          _id: 'w35wgegsrthgdrfghsth',
           projectID: 'firstproject24rrwaefpj',
           issueNumber: 3,
           hourEstimate: 3,

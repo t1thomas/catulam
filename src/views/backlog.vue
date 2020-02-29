@@ -1,20 +1,18 @@
 <template>
   <q-page>
-    <sprint-column />
-    <!--    <div class="crt-btn-container">-->
-    <!--      <q-btn-->
-    <!--        class="crt-btn"-->
-    <!--        color="primary"-->
-    <!--        icon="add"-->
-    <!--        rounded-->
-    <!--        label="Create Issue"-->
-    <!--      />-->
-    <!--    </div>-->
-    <div class="bklg-list">
-      <BackLogList
-        ref="bkList"
-        @toggleBranchSelector="toggleBranchSelector"
-      />
+    <div class="row">
+      <div
+        class="col-9"
+        style="background: #c784e3"
+      >
+        <BackLogList
+          ref="bkList"
+          @toggleBranchSelector="toggleBranchSelector"
+        />
+      </div>
+      <div class="col-3">
+        <sprint-column class="sprint-col" />
+      </div>
     </div>
     <BranchSelector
       ref="brnSlct"
@@ -23,7 +21,7 @@
   </q-page>
 </template>
 <script>
-import BackLogList from '../components/BackLogList.vue';
+import BackLogList from '../components/backlog/BackLogList.vue';
 import BranchSelector from '../components/GitHubLinkStepper.vue';
 import SprintListColumn from '../components/backlog/SprintListColumn.vue';
 
@@ -48,6 +46,9 @@ export default {
 </script>
 
 <style scoped>
+  .sprint-col{
+   height: 93vh;
+  }
     .crt-btn-container {
     display: flex;
     align-items: center;
@@ -62,12 +63,12 @@ export default {
   .crt-btn {
     left: 3%;
   }
-  .bklg-list {
-    display: flex;
-    position: absolute;
-    top: 23%;
-    left: 8%;
-    width: 84vw;
-    justify-content: center;
-  }
+  /*.bklg-list {*/
+  /*  display: flex;*/
+  /*  position: absolute;*/
+  /*  top: 23%;*/
+  /*  left: 8%;*/
+  /*  width: 84vw;*/
+  /*  justify-content: center;*/
+  /*}*/
 </style>
