@@ -7,7 +7,7 @@
       bordered
     >
       <q-card-section horizontal>
-        <q-card-section class="col-4 card-text">
+        <q-card-section class="col-3 card-text">
           {{ lorem }}
         </q-card-section>
         <q-separator vertical />
@@ -35,7 +35,7 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import draggable from 'vuedraggable';
-import backlogTicketQcard from '../backlogTicketQcard.vue';
+import backlogTicketQcard from '../QItemTicketQcard.vue';
 
 export default {
   name: 'BackLogList',
@@ -148,14 +148,14 @@ export default {
   opacity: 0.5;
   background: #c8ebfb;
 }
-@media (min-width: 1024px) {
-  .card {
-    /* 364px @ 1024px increasing to 454px @ 1880px */
-    max-width: calc(22.75rem + ((1vw - 10.24px) * 10.514));
-    /* Where: * 10.514 = 100 * Size_Difference / viewport_Width_Difference */
-   }
-  .card-text {
-    font-size: calc(0.625rem + ((1vw - 10.24px) * 0.1947));
-  }
- }
+/*@media (min-width: 1024px) {*/
+/*  .card {*/
+/*    !* 364px @ 1024px increasing to 454px @ 1880px *!*/
+/*    max-width: calc(22.75rem + ((1vw - 10.24px) * 10.514));*/
+/*    !* Where: * 10.514 = 100 * Size_Difference / viewport_Width_Difference *!*/
+/*   }*/
+/*  .card-text {*/
+/*    font-size: calc(0.625rem + ((1vw - 10.24px) * 0.1947));*/
+/*  }*/
+/* }*/
 </style>

@@ -32,7 +32,7 @@
 
 <script>
 import draggable from 'vuedraggable';
-import backlogTicketQcard from '../backlogTicketQcard.vue';
+import backlogTicketQcard from '../QItemTicketQcard.vue';
 
 export default {
   name: 'SprintListColumn',

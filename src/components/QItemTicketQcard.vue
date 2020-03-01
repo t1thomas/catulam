@@ -39,8 +39,9 @@
 </template>
 
 <script>
+
 export default {
-  name: 'BacklogTicketQcard',
+  name: 'QItemTicketQcard',
   props: {
     ticket: {
       type: Object,

@@ -1,40 +1,59 @@
 <template>
   <q-page>
     <div class="row">
+      <div class="col-5">
+        <start-column :user-stories="userStories" />
+      </div>
       <div
-        class="col-9"
+        class="col-4"
         style="background: #c784e3"
-      >
-        <BackLogList
-          ref="bkList"
-          @toggleBranchSelector="toggleBranchSelector"
+      />
+      <div class="col-3">
+        <PortalTarget
+          name="destination"
+          multiple
         />
       </div>
-      <div class="col-3">
-        <sprint-column class="sprint-col" />
-      </div>
     </div>
-    <BranchSelector
-      ref="brnSlct"
-      @updateTickets="$refs.bkList.fetchIssues()"
-    />
   </q-page>
 </template>
 <script>
-import BackLogList from '../components/backlog/BackLogList.vue';
-import BranchSelector from '../components/GitHubLinkStepper.vue';
-import SprintListColumn from '../components/backlog/SprintListColumn.vue';
+import { PortalTarget } from 'portal-vue';
+import USColumnStart from '../components/backlog/Columns/USColumnStart.vue';
+// import USColumnEnd from '../components/backlog/Columns/USColumnEnd.vue';
 
 export default {
   name: 'Backlog',
   components: {
-    BackLogList,
-    BranchSelector,
-    'sprint-column': SprintListColumn,
+    PortalTarget,
+    'start-column': USColumnStart,
+    // 'end-column': USColumnEnd,
   },
   data() {
     return {
       showBranchSelector: false,
+      userStories: [{
+        id: 'q3ofgqehg9h',
+        storyText: 'As a driver, I want to block badly behaved passengers so they are never shown me again.',
+        subTasks: true,
+        attachedTics: ['5e4d982360b4segsergaf3', '5e4d992f4w3tg3werg2988d'],
+      }, {
+        id: 'ergsegw45q34',
+        storyText: 'As a passenger, I want to link the credit card to my profile so that I can pay for a ride faster, easier and without cash.',
+        subTasks: true,
+        attachedTics: [],
+      }, {
+        id: 'r34qr34twq3t',
+        storyText: 'As a driver, I want to add photos of my car in my profile so that I can attract more users.',
+        subTasks: true,
+        attachedTics: ['5e4d993w35gwergsdfg988e'],
+      },
+      {
+        id: '34twertw35yw54yg',
+        storyText: 'As a passenger, I want several available drivers to be displayed so that I can choose the most suitable option for me.',
+        subTasks: true,
+        attachedTics: [],
+      }],
     };
   },
   methods: {
