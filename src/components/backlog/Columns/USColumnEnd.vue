@@ -1,23 +1,27 @@
 <template>
-  <div class="q-px-xs q-py-md row q-gutter-sm">
-    <draggable
-      v-for="(story) in userStories"
-      :key="story.id"
-      tag="div"
-      v-bind="dragOptions"
-      class="rounded-borders q-list q-list--bordered"
-      style="background: cadetblue; width: 100%"
+  <q-card
+    bordered
+    style="height: 100%;"
+  >
+    <q-card-section
+      horizontal
+      class="q-pa-xs"
+      style="height: 100%;"
     >
-      <q-item
-        v-for="ticket in ComTicksById(story.attachedTics)"
-        :key="ticket._id"
-        v-ripple
-        clickable
+      <draggable
+        tag="div"
+        v-bind="dragOptions"
+        class="rounded-borders q-list q-list--bordered"
+        style="background: cadetblue; width: 100%"
       >
-        <ticketCard :ticket="ticket" />
-      </q-item>
-    </draggable>
-  </div>
+        <QItemticketCard
+          v-for="ticketID in CompletedTickIds(attachedTics)"
+          :key="ticketID"
+          :ticket-id="ticketID"
+        />
+      </draggable>
+    </q-card-section>
+  </q-card>
 </template>
 
 <script>
@@ -29,17 +33,18 @@ export default {
   name: 'USColumnEnd',
   components: {
     draggable,
-    ticketCard: backlogTicketQcard,
+    // eslint-disable-next-line vue/no-unused-components
+    QItemticketCard: backlogTicketQcard,
   },
   props: {
-    userStories: {
+    attachedTics: {
       type: Array,
       required: true,
     },
   },
   computed: {
     ...mapGetters({
-      ComTicksById: 'getCompletedTicksByIds',
+      CompletedTickIds: 'getCompletedTickIds',
     }),
     dragOptions() {
       return {

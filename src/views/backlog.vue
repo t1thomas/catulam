@@ -1,33 +1,37 @@
 <template>
   <q-page>
-    <div class="row">
-      <div class="col-5">
-        <start-column :user-stories="userStories" />
-      </div>
+    <div class="q-px-sm q-py-md q-gutter-sm">
       <div
-        class="col-4"
-        style="background: #c784e3"
-      />
-      <div class="col-3">
-        <PortalTarget
-          name="destination"
-          multiple
-        />
+        v-for="(story) in userStories"
+        :key="story.id"
+        class="row col-auto thendi"
+      >
+        <div class="col-4">
+          <start-column :user-story="story" />
+        </div>
+        <div class="col-5">
+          <sprints-column :attached-tics="story.attachedTics"/>
+        </div>
+        <div class="col-3">
+          <end-column :attached-tics="story.attachedTics" />
+        </div>
       </div>
     </div>
   </q-page>
 </template>
 <script>
-import { PortalTarget } from 'portal-vue';
+// import { PortalTarget } from 'portal-vue';
 import USColumnStart from '../components/backlog/Columns/USColumnStart.vue';
-// import USColumnEnd from '../components/backlog/Columns/USColumnEnd.vue';
+import USColumnEnd from '../components/backlog/Columns/USColumnEnd.vue';
+import SPColumnMiddle from '../components/backlog/Columns/SPColumnMiddle.vue';
 
 export default {
   name: 'Backlog',
   components: {
-    PortalTarget,
+    'sprints-column': SPColumnMiddle,
+    // PortalTarget,
     'start-column': USColumnStart,
-    // 'end-column': USColumnEnd,
+    'end-column': USColumnEnd,
   },
   data() {
     return {
@@ -65,23 +69,23 @@ export default {
 </script>
 
 <style scoped>
-  .sprint-col{
-   height: 93vh;
-  }
-    .crt-btn-container {
-    display: flex;
-    align-items: center;
-    position: absolute;
-    left: 8%;
-    top: 13%;
-    width: 84vw;
-    background: darkgray;
-    height: 56px; /* needs to be responsive */
-    border-radius: 25px;
-  }
-  .crt-btn {
-    left: 3%;
-  }
+  /*.sprint-col{*/
+  /* height: 93vh;*/
+  /*}*/
+  /*  .crt-btn-container {*/
+  /*  display: flex;*/
+  /*  align-items: center;*/
+  /*  position: absolute;*/
+  /*  left: 8%;*/
+  /*  top: 13%;*/
+  /*  width: 84vw;*/
+  /*  background: darkgray;*/
+  /*  height: 56px; !* needs to be responsive *!*/
+  /*  border-radius: 25px;*/
+  /*}*/
+  /*.crt-btn {*/
+  /*  left: 3%;*/
+  /*}*/
   /*.bklg-list {*/
   /*  display: flex;*/
   /*  position: absolute;*/
