@@ -35,7 +35,7 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
 import draggable from 'vuedraggable';
-import backlogTicketQcard from '../QItemTicketQcard.vue';
+import backlogTicketQcard from '../DraggableTickList.vue';
 
 export default {
   name: 'BackLogList',

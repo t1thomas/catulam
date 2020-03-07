@@ -11,6 +11,7 @@ module.exports = {
           preventFullImport: true,
         },
       },
-    ],
+    ], [
+      'graphql-tag'],
   ],
 };

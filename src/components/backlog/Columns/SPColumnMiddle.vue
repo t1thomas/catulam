@@ -1,6 +1,6 @@
 <template>
   <q-carousel
-    v-model="slide"
+    v-model="carouselModel"
     transition-prev="slide-right"
     transition-next="slide-left"
     swipeable
@@ -18,45 +18,31 @@
     >
       <span>{{ index + 1 }}</span>
       <div class="row fit justify-start items-center q-gutter-xs q-col-gutter no-wrap">
-        <draggable
-          tag="div"
-          v-bind="dragOptions"
-          class="rounded-borders q-list q-list--bordered"
-          style="background: cadetblue; height: 100%;"
-        >
-          <QItemticketCard
-            v-for="ticketID in ticIdsPerSprint(index, attachedTics)"
-            :key="ticketID"
-            :ticket-id="ticketID"
-          />
-        </draggable>
+        <draggable-tick-list :ticket-ids="ticIdsPerSprint(index, attachedTics)" />
       </div>
     </q-carousel-slide>
   </q-carousel>
 </template>
 
 <script>
-import draggable from 'vuedraggable';
-
 import { mapGetters, mapState } from 'vuex';
-import backlogTicketQcard from '../../QItemTicketQcard.vue';
+import DraggableTickList from '../../DraggableTickList.vue';
+
 
 export default {
   name: 'SPColumnMiddle',
   components: {
-    draggable,
-    QItemticketCard: backlogTicketQcard,
+    DraggableTickList,
   },
   props: {
     attachedTics: {
       type: Array,
       required: true,
     },
-  },
-  data() {
-    return {
-      slide: 0,
-    };
+    carouselModelParent: {
+      type: Number,
+      required: true,
+    },
   },
   computed: {
     // mix this into the outer object with the object spread operator
@@ -67,13 +53,16 @@ export default {
     ...mapGetters({
       ticIdsPerSprint: 'getUSTicIdsPerSprint',
     }),
-    dragOptions() {
-      return {
-        animation: 0,
-        group: 'ticket',
-        disabled: false,
-        ghostClass: 'ghost',
-      };
+
+    carouselModel: {
+      // getter
+      get() {
+        return this.carouselModelParent;
+      },
+      // setter
+      set(newValue) {
+        this.$emit('update-model', newValue);
+      },
     },
   },
 };

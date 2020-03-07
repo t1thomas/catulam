@@ -1,0 +1,9 @@
+query UsWithTickIds{
+    UserStory {
+        id
+        storyText
+        tickets {
+            id
+        }
+    }
+}

@@ -4,16 +4,20 @@
       <div
         v-for="(story) in userStories"
         :key="story.id"
-        class="row col-auto thendi"
+        class="row col-auto "
       >
         <div class="col-4">
           <start-column :user-story="story" />
         </div>
         <div class="col-5">
-          <sprints-column :attached-tics="story.attachedTics"/>
+          <!--          <sprints-column-->
+          <!--            :carousel-model-parent="carouselModelParent"-->
+          <!--            :attached-tics="story.attachedTics"-->
+          <!--            @update-model="updateModel"-->
+          <!--          />-->
         </div>
         <div class="col-3">
-          <end-column :attached-tics="story.attachedTics" />
+          <!--          <done-column :attached-tics="story.attachedTics" />-->
         </div>
       </div>
     </div>
@@ -21,6 +25,7 @@
 </template>
 <script>
 // import { PortalTarget } from 'portal-vue';
+import { mapActions } from 'vuex';
 import USColumnStart from '../components/backlog/Columns/USColumnStart.vue';
 import USColumnEnd from '../components/backlog/Columns/USColumnEnd.vue';
 import SPColumnMiddle from '../components/backlog/Columns/SPColumnMiddle.vue';
@@ -28,13 +33,15 @@ import SPColumnMiddle from '../components/backlog/Columns/SPColumnMiddle.vue';
 export default {
   name: 'Backlog',
   components: {
+    // eslint-disable-next-line vue/no-unused-components
     'sprints-column': SPColumnMiddle,
-    // PortalTarget,
     'start-column': USColumnStart,
-    'end-column': USColumnEnd,
+    // eslint-disable-next-line vue/no-unused-components
+    'done-column': USColumnEnd,
   },
   data() {
     return {
+      carouselModelParent: 0,
       showBranchSelector: false,
       userStories: [{
         id: 'q3ofgqehg9h',
@@ -60,9 +67,19 @@ export default {
       }],
     };
   },
+  async mounted() {
+    await this.fetchUserStories();
+  },
+
   methods: {
+    ...mapActions([
+      'fetchUserStories',
+    ]),
     toggleBranchSelector(id) {
       this.$refs.brnSlct.toggleShow(id);
+    },
+    updateModel(newValue) {
+      this.carouselModelParent = newValue;
     },
   },
 };

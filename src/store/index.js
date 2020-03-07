@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import gql from 'graphql-tag';
 
 Vue.use(Vuex);
 
@@ -51,6 +52,7 @@ export default new Vuex.Store({
         created: '2020-02-14T17:52:12.652Z',
         lastEdit: '2020-02-14T18:20:07.537Z',
         githubLink: null,
+        sprintPos: 1,
         userStoryId: 'q3ofgqehg9h',
         assigendTo: 'user2',
         title: 'Set Up API',
@@ -62,6 +64,7 @@ export default new Vuex.Store({
         projectID: 'firstproject24rrwaefpj',
         issueNumber: 2,
         hourEstimate: 3,
+        sprintPos: null,
         created: '2020-02-14T17:52:12.652Z',
         lastEdit: '2020-02-14T18:20:07.537Z',
         githubLink: {
@@ -81,6 +84,7 @@ export default new Vuex.Store({
         projectID: 'firstproject24rrwaefpj',
         issueNumber: 3,
         hourEstimate: 3,
+        sprintPos: 2,
         created: '2020-02-14T17:52:12.652Z',
         lastEdit: '2020-02-14T18:20:07.537Z',
         githubLink: {
@@ -114,6 +118,9 @@ export default new Vuex.Store({
     set_issues(state, obj) {
       state.issues = obj;
     },
+    set_userStories(state, obj) {
+      state.userStories = obj;
+    },
   },
   actions: {
     async fetchRepoAndBranch({ commit }) {
@@ -134,6 +141,25 @@ export default new Vuex.Store({
           console.error(error);
         });
     },
+    async fetchUserStories({ commit }) {
+      const response = await Vue.$apolloClient.query({
+        query: gql`
+          query{
+            UserStory {
+              id
+              storyText
+              tickets {
+                id
+              }
+            }
+          }`,
+      });
+
+      console.log(response.data);
+
+      console.log(commit); // commit('SET_LANGUAGES', { languages });
+    },
+
   },
   getters: {
     getUSTicIdsPerSprint: state => (sprintIndex, arrTicketIds) => arrTicketIds
@@ -143,7 +169,6 @@ export default new Vuex.Store({
     getTicketById: state => tickId => state.tickList[tickId],
     /* eslint-disable no-underscore-dangle */
     getIssueById: state => issueId => state.issues.filter(issue => issueId === issue._id),
-
     getCompletedTickIds: state => ArrTicketIds => ArrTicketIds
       .filter(tickId => state.tickList[tickId].done === true),
     getUnCompleteTickIds: state => ArrTicketIds => ArrTicketIds

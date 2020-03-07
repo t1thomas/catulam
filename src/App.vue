@@ -123,17 +123,16 @@
 <script>
 // import HelloWorld from './components/HelloWorld.vue';
 
+
 export default {
   name: 'LayoutDefault',
-
-  components: {
-  },
-
   data() {
     return {
       leftDrawerOpen: false,
     };
   },
+
+
 };
 </script>
 

@@ -1,16 +1,21 @@
 import Vue from 'vue';
+import VueApollo from 'vue-apollo';
 import App from './App.vue';
 import router from './router';
 import store from './store';
 import './plugins/axios';
-import { createProvider } from './vue-apollo';
 import './quasar';
 
-Vue.config.productionTip = false;
+import apolloClient from './apolloClient';
 
+Vue.$apolloClient = apolloClient;
+
+
+const apolloProvider = new VueApollo({ apolloClient });
+Vue.use(VueApollo);
 new Vue({
   router,
   store,
-  apolloProvider: createProvider(),
+  apolloProvider,
   render: h => h(App),
 }).$mount('#app');
