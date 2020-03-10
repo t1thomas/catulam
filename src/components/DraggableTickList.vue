@@ -6,8 +6,8 @@
     style="background: cadetblue; width: 100%; height: 100%;"
   >
     <q-item
-      v-for="ticketID in ticketIds"
-      :key="ticketID"
+      v-for="ticket in tickets"
+      :key="ticket.id"
       v-ripple
       class="q-pa-none q-ma-sm"
       clickable
@@ -19,8 +19,8 @@
           horizontal
           class="q-pl-sm q-pr-xs"
         >
-          <span class="text-weight-medium">{{ getTicketById(ticketID).title }}</span>
-          <span class="text-grey-8 q-ml-auto">#{{ getTicketById(ticketID).issueNumber }}</span>
+          <span class="text-weight-medium">{{ getTicketById(ticket.id).title }}</span>
+          <span class="text-grey-8 q-ml-auto">#{{ getTicketById(ticket.id).issueNumber }}</span>
         </q-card-section>
         <q-card-section
           horizontal
@@ -30,7 +30,7 @@
             caption
             lines="2"
           >
-            {{ getTicketById(ticketID).desc }}
+            {{ getTicketById(ticket.id).desc }}
           </q-item-label>
         </q-card-section>
         <q-card-section
@@ -42,7 +42,7 @@
             dense
             icon="mdi-progress-clock"
           >
-            {{ getTicketById(ticketID).hourEstimate }}hr
+            {{ getTicketById(ticket.id).hourEstimate }}hr
           </q-chip>
           <q-avatar size="21px">
             <img src="@/assets/avatar/scientist.svg">
@@ -67,7 +67,7 @@ export default {
 
   },
   props: {
-    ticketIds: {
+    tickets: {
       type: Array,
       required: true,
     },

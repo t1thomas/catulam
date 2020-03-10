@@ -11,21 +11,21 @@
     class="bg-grey-1 shadow-2 rounded-borders"
   >
     <q-carousel-slide
-      v-for="(sprint, index) in sprintList"
-      :key="index"
-      :name="index"
+      v-for="(sprint) in sprintList"
+      :key="sprint.id"
+      :name="sprint.sprintNo"
       class="column no-wrap"
     >
-      <span>{{ index + 1 }}</span>
+      <span>Sprint {{ sprint.sprintNo }}</span>
       <div class="row fit justify-start items-center q-gutter-xs q-col-gutter no-wrap">
-        <draggable-tick-list :ticket-ids="ticIdsPerSprint(index, attachedTics)" />
+        <draggable-tick-list :tickets="ticsPerSprint(sprint.id, tickets)" />
       </div>
     </q-carousel-slide>
   </q-carousel>
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapState } from 'vuex';
 import DraggableTickList from '../../DraggableTickList.vue';
 
 
@@ -35,7 +35,7 @@ export default {
     DraggableTickList,
   },
   props: {
-    attachedTics: {
+    tickets: {
       type: Array,
       required: true,
     },
@@ -47,11 +47,7 @@ export default {
   computed: {
     // mix this into the outer object with the object spread operator
     ...mapState({
-      noOfSprints: state => state.sprintList.length,
       sprintList: 'sprintList',
-    }),
-    ...mapGetters({
-      ticIdsPerSprint: 'getUSTicIdsPerSprint',
     }),
 
     carouselModel: {
@@ -63,6 +59,12 @@ export default {
       set(newValue) {
         this.$emit('update-model', newValue);
       },
+    },
+  },
+  methods: {
+    ticsPerSprint(sprintId, tickets) {
+      return tickets
+        .filter(tick => tick.sprint.id === sprintId);
     },
   },
 };

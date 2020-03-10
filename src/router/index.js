@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
-import GitAuth from '../views/GitAuthentication.vue';
+// import GitAuth from '../views/GitAuthentication.vue';
 // import repoandbranchselector from '../views/Ebranchselector.vue';
 // import repoandbranchselector from '../components/Ebranchselector.vue';
 import backlog from '../views/backlog.vue';
@@ -22,11 +22,11 @@ const routes = [
   //   // which is lazy-loaded when the route is visited.
   //   component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
   // },
-  {
-    path: '/gitauth/callback',
-    name: 'GitAuth',
-    component: GitAuth,
-  },
+  // {
+  //   path: '/gitauth/callback',
+  //   name: 'GitAuth',
+  //   component: GitAuth,
+  // },
   // {
   //   path: '/repoandbranch',
   //   name: 'repoandbranchselector',

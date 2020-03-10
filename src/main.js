@@ -6,7 +6,7 @@ import store from './store';
 import './plugins/axios';
 import './quasar';
 
-import apolloClient from './apolloClient';
+import apolloClient from './plugins/apolloClient';
 
 Vue.$apolloClient = apolloClient;
 

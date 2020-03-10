@@ -10,18 +10,17 @@
       <q-card-section
         class="col-3 card-text"
       >
-        {{ userStory.storyText }}
+        {{ storyText }}
       </q-card-section>
       <q-separator vertical />
       <q-card-section class="col q-pa-xs">
-        <draggable-tick-list :ticket-ids="UnCompleteTickIds(userStory.attachedTics)" />
+        <draggable-tick-list :tickets="tickets" />
       </q-card-section>
     </q-card-section>
   </q-card>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 
 import DraggableTickList from '../../DraggableTickList.vue';
 
@@ -31,22 +30,13 @@ export default {
     DraggableTickList,
   },
   props: {
-    userStory: {
-      type: Object,
+    storyText: {
+      type: String,
       required: true,
     },
-  },
-  computed: {
-    ...mapGetters({
-      UnCompleteTickIds: 'getUnCompleteTickIds',
-    }),
-    dragOptions() {
-      return {
-        animation: 0,
-        group: 'ticket',
-        disabled: false,
-        ghostClass: 'ghost',
-      };
+    tickets: {
+      type: Array,
+      required: true,
     },
   },
 };

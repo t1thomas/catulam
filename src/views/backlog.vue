@@ -1,31 +1,36 @@
 <template>
   <q-page>
-    <div class="q-px-sm q-py-md q-gutter-sm">
+    <div
+      v-if="loaded"
+      class="q-px-sm q-py-md q-gutter-sm"
+    >
       <div
-        v-for="(story) in userStories"
+        v-for="(story) in backLogData"
         :key="story.id"
         class="row col-auto "
       >
         <div class="col-4">
-          <start-column :user-story="story" />
+          <start-column
+            :story-text="story.storyText"
+            :tickets="UnStagedTicks(story.tickets)"
+          />
         </div>
         <div class="col-5">
-          <!--          <sprints-column-->
-          <!--            :carousel-model-parent="carouselModelParent"-->
-          <!--            :attached-tics="story.attachedTics"-->
-          <!--            @update-model="updateModel"-->
-          <!--          />-->
+          <sprints-column
+            :carousel-model-parent="carouselModelParent"
+            :tickets="SprintTicks(story.tickets)"
+            @update-model="updateModel"
+          />
         </div>
         <div class="col-3">
-          <!--          <done-column :attached-tics="story.attachedTics" />-->
+          <done-column :tickets="CompletedTicks(story.tickets)" />
         </div>
       </div>
     </div>
   </q-page>
 </template>
 <script>
-// import { PortalTarget } from 'portal-vue';
-import { mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import USColumnStart from '../components/backlog/Columns/USColumnStart.vue';
 import USColumnEnd from '../components/backlog/Columns/USColumnEnd.vue';
 import SPColumnMiddle from '../components/backlog/Columns/SPColumnMiddle.vue';
@@ -33,54 +38,67 @@ import SPColumnMiddle from '../components/backlog/Columns/SPColumnMiddle.vue';
 export default {
   name: 'Backlog',
   components: {
-    // eslint-disable-next-line vue/no-unused-components
     'sprints-column': SPColumnMiddle,
     'start-column': USColumnStart,
-    // eslint-disable-next-line vue/no-unused-components
     'done-column': USColumnEnd,
   },
   data() {
     return {
-      carouselModelParent: 0,
+      carouselModelParent: 1,
       showBranchSelector: false,
-      userStories: [{
-        id: 'q3ofgqehg9h',
-        storyText: 'As a driver, I want to block badly behaved passengers so they are never shown me again.',
-        subTasks: true,
-        attachedTics: ['5e4d982360b4segsergaf3', '5e4d992f4w3tg3werg2988d'],
-      }, {
-        id: 'ergsegw45q34',
-        storyText: 'As a passenger, I want to link the credit card to my profile so that I can pay for a ride faster, easier and without cash.',
-        subTasks: true,
-        attachedTics: [],
-      }, {
-        id: 'r34qr34twq3t',
-        storyText: 'As a driver, I want to add photos of my car in my profile so that I can attract more users.',
-        subTasks: true,
-        attachedTics: ['5e4d993w35gwergsdfg988e'],
-      },
-      {
-        id: '34twertw35yw54yg',
-        storyText: 'As a passenger, I want several available drivers to be displayed so that I can choose the most suitable option for me.',
-        subTasks: true,
-        attachedTics: [],
-      }],
+      loaded: false,
     };
+  },
+  computed: {
+    ...mapState([
+      'userStories',
+      'backLogData',
+    ]),
   },
   async mounted() {
     await this.fetchUserStories();
+    await this.fetchTickets();
+    await this.fetchSprints();
+    await this.fetchBackLogData();
+    this.loaded = true;
   },
-
   methods: {
+    UnStagedTicks(tickets) {
+      return tickets
+        .filter(tick => tick.done === false
+          && (tick.sprint === null));
+    },
+    SprintTicks(tickets) {
+      return tickets
+        .filter(tick => tick.done === false
+          && tick.sprint != null);
+    },
+    CompletedTicks(tickets) {
+      return tickets
+        .filter(tick => tick.done === true);
+    },
     ...mapActions([
       'fetchUserStories',
+      'fetchTickets',
+      'fetchSprints',
+      'fetchBackLogData',
     ]),
-    toggleBranchSelector(id) {
-      this.$refs.brnSlct.toggleShow(id);
-    },
+    // toggleBranchSelector(id) {
+    //   this.$refs.brnSlct.toggleShow(id);
+    // },
     updateModel(newValue) {
       this.carouselModelParent = newValue;
     },
+
+    // sprintCheck(tickId) {
+    //   let tickInSprint = false;
+    //   this.$store.state.sprintList.forEach((sprint) => {
+    //     if (sprint.ticketIds.includes(tickId)) {
+    //       tickInSprint = true;
+    //     }
+    //   });
+    //   return tickInSprint;
+    // },
   },
 };
 </script>

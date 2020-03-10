@@ -8,13 +8,12 @@
       class="q-pa-xs"
       style="height: 100%;"
     >
-      <draggable-tick-list :ticket-ids="CompletedTickIds(attachedTics)" />
+      <draggable-tick-list :tickets="tickets" />
     </q-card-section>
   </q-card>
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
 import DraggableTickList from '../../DraggableTickList.vue';
 
 export default {
@@ -23,15 +22,10 @@ export default {
     DraggableTickList,
   },
   props: {
-    attachedTics: {
+    tickets: {
       type: Array,
       required: true,
     },
-  },
-  computed: {
-    ...mapGetters({
-      CompletedTickIds: 'getCompletedTickIds',
-    }),
   },
 };
 </script>
