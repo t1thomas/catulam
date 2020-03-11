@@ -1,14 +1,21 @@
 <template>
   <draggable
+    ref="thendi"
+    v-model="tickList"
     tag="div"
     v-bind="dragOptions"
     class="rounded-borders q-list q-list--bordered"
     style="background: cadetblue; width: 100%; height: 100%;"
+    :move="checkMove"
+    @remove="removed(listConfig)"
+    @add="added(listConfig)"
+    @end="ended"
   >
     <q-item
-      v-for="ticket in tickets"
+      v-for="ticket in tickList"
       :key="ticket.id"
       v-ripple
+      :item-id="ticket.id"
       class="q-pa-none q-ma-sm"
       clickable
     >
@@ -55,7 +62,7 @@
 
 <script>
 
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions, mapState } from 'vuex';
 import draggable from 'vuedraggable';
 
 export default {
@@ -63,20 +70,29 @@ export default {
   components: {
     draggable,
   },
-  apollo: {
-
-  },
   props: {
     tickets: {
       type: Array,
       required: true,
     },
+    listConfig: {
+      type: Object,
+      required: true,
+    },
+  },
+  data() {
+    return {
+      tickList: this.tickets,
+      isDragging: false,
+      from: null,
+      to: null,
+    };
   },
   computed: {
     dragOptions() {
       return {
-        animation: 0,
-        group: 'ticket',
+        animation: 200,
+        group: 'ticketList',
         disabled: false,
         ghostClass: 'ghost',
       };
@@ -84,6 +100,46 @@ export default {
     ...mapGetters([
       'getTicketById',
     ]),
+    ...mapState([
+      'cardMoved',
+    ]),
+  },
+  methods: {
+    ...mapActions([
+      'setCardRemoved',
+      'setCardAdded',
+      'clearCardRemNAdd',
+    ]),
+    checkMove() {
+      return this.listConfig.columnType !== 'end';
+    },
+    removed(listConfig) {
+      this.setCardRemoved(listConfig);
+    },
+    added(listConfig) {
+      this.setCardAdded(listConfig);
+    },
+    ended(evt) {
+      const tickId = evt.item.getAttribute('item-id');
+      const expr = 'Papayas';
+      switch (true) {
+        case this.cardMoved.removedFrom.columnType === 'start' && this.cardMoved.removedFrom.columnType === 'sprint':
+          this.fromStartToSprint(tickId);
+          break;
+        case 'Mangoes':
+        case 'Papayas':
+          console.log('Mangoes and papayas are $2.79 a pound.');
+          // expected output: "Mangoes and papayas are $2.79 a pound."
+          break;
+        default:
+          console.log(`Sorry, we are out of ${expr}.`);
+      }
+    },
+    fromStartToSprint(tickId) {
+        //get network changes working first then worry about vuex mutation
+    },
+
+
   },
 };
 </script>

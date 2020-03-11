@@ -3,7 +3,6 @@
     v-model="carouselModel"
     transition-prev="slide-right"
     transition-next="slide-left"
-    swipeable
     animated
     control-color="primary"
     arrows
@@ -17,8 +16,13 @@
       class="column no-wrap"
     >
       <span>Sprint {{ sprint.sprintNo }}</span>
-      <div class="row fit justify-start items-center q-gutter-xs q-col-gutter no-wrap">
-        <draggable-tick-list :tickets="ticsPerSprint(sprint.id, tickets)" />
+      <div
+        class="row fit justify-start items-center q-gutter-xs q-col-gutter no-wrap"
+      >
+        <draggable-tick-list
+          :tickets="ticsPerSprint(sprint.id, tickets)"
+          :list-config="tickListConfig(sprint.id)"
+        />
       </div>
     </q-carousel-slide>
   </q-carousel>
@@ -39,13 +43,16 @@ export default {
       type: Array,
       required: true,
     },
+    userStoryId: {
+      type: String,
+      required: true,
+    },
     carouselModelParent: {
       type: Number,
       required: true,
     },
   },
   computed: {
-    // mix this into the outer object with the object spread operator
     ...mapState({
       sprintList: 'sprintList',
     }),
@@ -62,6 +69,9 @@ export default {
     },
   },
   methods: {
+    tickListConfig(id) {
+      return { userStoryId: this.userStoryId, columnType: 'sprint', sprintId: id };
+    },
     ticsPerSprint(sprintId, tickets) {
       return tickets
         .filter(tick => tick.sprint.id === sprintId);

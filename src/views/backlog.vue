@@ -10,20 +10,21 @@
         class="row col-auto "
       >
         <div class="col-4">
-          <start-column
-            :story-text="story.storyText"
-            :tickets="UnStagedTicks(story.tickets)"
-          />
+          <start-column :story="story" />
         </div>
         <div class="col-5">
           <sprints-column
             :carousel-model-parent="carouselModelParent"
-            :tickets="SprintTicks(story.tickets)"
+            :tickets="sprintTicks(story.tickets)"
+            :user-story-id="story.id"
             @update-model="updateModel"
           />
         </div>
         <div class="col-3">
-          <done-column :tickets="CompletedTicks(story.tickets)" />
+          <done-column
+            :tickets="completedTicks(story.tickets)"
+            :user-story-id="story.id"
+          />
         </div>
       </div>
     </div>
@@ -63,17 +64,12 @@ export default {
     this.loaded = true;
   },
   methods: {
-    UnStagedTicks(tickets) {
-      return tickets
-        .filter(tick => tick.done === false
-          && (tick.sprint === null));
-    },
-    SprintTicks(tickets) {
+    sprintTicks(tickets) {
       return tickets
         .filter(tick => tick.done === false
           && tick.sprint != null);
     },
-    CompletedTicks(tickets) {
+    completedTicks(tickets) {
       return tickets
         .filter(tick => tick.done === true);
     },

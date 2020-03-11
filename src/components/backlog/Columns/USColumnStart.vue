@@ -10,11 +10,14 @@
       <q-card-section
         class="col-3 card-text"
       >
-        {{ storyText }}
+        {{ story.storyText }}
       </q-card-section>
       <q-separator vertical />
       <q-card-section class="col q-pa-xs">
-        <draggable-tick-list :tickets="tickets" />
+        <draggable-tick-list
+          :list-config="tickListConfig"
+          :tickets="UnStagedTicks(story.tickets)"
+        />
       </q-card-section>
     </q-card-section>
   </q-card>
@@ -30,13 +33,21 @@ export default {
     DraggableTickList,
   },
   props: {
-    storyText: {
-      type: String,
+    story: {
+      type: Object,
       required: true,
     },
-    tickets: {
-      type: Array,
-      required: true,
+  },
+  computed: {
+    tickListConfig() {
+      return { userStoryId: this.userStoryId, columnType: 'start' };
+    },
+  },
+  methods: {
+    UnStagedTicks(tickets) {
+      return tickets
+        .filter(tick => tick.done === false
+          && (tick.sprint === null));
     },
   },
 };

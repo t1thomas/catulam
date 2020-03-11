@@ -11,6 +11,7 @@ export default new Vuex.Store({
     sprintList: [],
     tickets: {},
     repoAndBranch: {},
+    cardMoved: { removedFrom: undefined, addedTo: undefined },
   },
   mutations: {
     set_repoAndBranch(state, obj) {
@@ -31,6 +32,21 @@ export default new Vuex.Store({
     set_backLogData(state, obj) {
       state.backLogData = obj;
     },
+    set_cardRemoved(state, obj) {
+      state.cardMoved.removedFrom = obj;
+    },
+    set_cardAdded(state, obj) {
+      state.cardMoved.addedTo = obj;
+    },
+    clear_CardRemNAdd(state) {
+      state.cardMoved.cardRemovedFrom = undefined;
+      state.cardMoved.cardAddedTo = undefined;
+    },
+    // moveCard_StartToSprint(state) {
+    //   state.backLogData.forEach((userStory) =>{
+    //     userStory.tickets
+    //   })
+    // }
   },
   actions: {
     async fetchRepoAndBranch({ commit }) {
@@ -80,7 +96,18 @@ export default new Vuex.Store({
       commit('set_backLogData', UserStory);
       // console.log(UserStory);
     },
-
+    setCardRemoved({ commit }, listConfig) {
+      commit('set_cardRemoved', listConfig);
+    },
+    setCardAdded({ commit }, listConfig) {
+      commit('set_cardAdded', listConfig);
+    },
+    clearCardRemNAdd({ commit }) {
+      commit('clear_CardRemNAdd');
+    },
+    // cardMoveStartToSprint({commit}) {
+    //
+    // }
   },
   getters: {
     // getTicIdsPerSprint: state => (sprintNo, arrTicketIds) => arrTicketIds

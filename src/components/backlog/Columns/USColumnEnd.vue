@@ -8,7 +8,10 @@
       class="q-pa-xs"
       style="height: 100%;"
     >
-      <draggable-tick-list :tickets="tickets" />
+      <draggable-tick-list
+        :list-config="tickListConfig"
+        :tickets="tickets"
+      />
     </q-card-section>
   </q-card>
 </template>
@@ -22,9 +25,18 @@ export default {
     DraggableTickList,
   },
   props: {
+    userStoryId: {
+      type: String,
+      required: true,
+    },
     tickets: {
       type: Array,
       required: true,
+    },
+  },
+  computed: {
+    tickListConfig() {
+      return { userStoryId: this.userStoryId, columnType: 'end' };
     },
   },
 };
