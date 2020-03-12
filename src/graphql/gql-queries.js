@@ -31,5 +31,17 @@ const gqlQueries = {
       }
     }
   }`,
+  StartToSprint: gql`mutation AddTicketSprint($ticket: _TicketInput! $sprint: _SprintInput!){
+    AddTicketSprint(from: $ticket to: $sprint){
+      from{id}
+      to{id}
+    }
+  }`,
+  SprintToStart: gql`mutation RemoveTicketSprint($ticket: _TicketInput! $sprint: _SprintInput!){
+    RemoveTicketSprint(from: $ticket to:$sprint){
+      from{id}
+      to{id}
+    }
+  }`,
 };
 export default gqlQueries;

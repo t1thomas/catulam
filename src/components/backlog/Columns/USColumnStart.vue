@@ -15,7 +15,7 @@
       <q-separator vertical />
       <q-card-section class="col q-pa-xs">
         <draggable-tick-list
-          :list-config="tickListConfig"
+          :list-properties="tickListConfig"
           :tickets="UnStagedTicks(story.tickets)"
         />
       </q-card-section>

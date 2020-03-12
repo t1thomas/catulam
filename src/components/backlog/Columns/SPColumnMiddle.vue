@@ -21,7 +21,7 @@
       >
         <draggable-tick-list
           :tickets="ticsPerSprint(sprint.id, tickets)"
-          :list-config="tickListConfig(sprint.id)"
+          :list-properties="tickListConfig(sprint.id)"
         />
       </div>
     </q-carousel-slide>

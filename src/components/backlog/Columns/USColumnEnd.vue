@@ -9,7 +9,7 @@
       style="height: 100%;"
     >
       <draggable-tick-list
-        :list-config="tickListConfig"
+        :list-properties="tickListConfig"
         :tickets="tickets"
       />
     </q-card-section>

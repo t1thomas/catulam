@@ -20,10 +20,17 @@
             @update-model="updateModel"
           />
         </div>
-        <div class="col-3">
+        <div class="col-2">
           <done-column
             :tickets="completedTicks(story.tickets)"
             :user-story-id="story.id"
+          />
+        </div>
+        <div class="col-2">
+          <q-btn
+            label="Overlay"
+            color="primary"
+            @click="small = true"
           />
         </div>
       </div>
