@@ -3,56 +3,25 @@
     <div
       v-if="loaded"
       class="q-px-sm q-py-md q-gutter-sm"
-    >
-      <div
-        v-for="(story) in backLogData"
-        :key="story.id"
-        class="row col-auto "
-      >
-        <div class="col-4">
-          <start-column :story="story" />
-        </div>
-        <div class="col-5">
-          <sprints-column
-            :carousel-model-parent="carouselModelParent"
-            :tickets="sprintTicks(story.tickets)"
-            :user-story-id="story.id"
-            @update-model="updateModel"
-          />
-        </div>
-        <div class="col-2">
-          <done-column
-            :tickets="completedTicks(story.tickets)"
-            :user-story-id="story.id"
-          />
-        </div>
-        <div class="col-2">
-          <q-btn
-            label="Overlay"
-            color="primary"
-            @click="small = true"
-          />
-        </div>
-      </div>
-    </div>
+    />
+    <UserStoryRows
+      v-for="(story) in backLogData"
+      :key="story.id"
+      :story="story"
+    />
   </q-page>
 </template>
 <script>
 import { mapActions, mapState } from 'vuex';
-import USColumnStart from '../components/backlog/Columns/USColumnStart.vue';
-import USColumnEnd from '../components/backlog/Columns/USColumnEnd.vue';
-import SPColumnMiddle from '../components/backlog/Columns/SPColumnMiddle.vue';
+import UserStoryRows from '../components/backlog/UserStoryRows.vue';
 
 export default {
   name: 'Backlog',
   components: {
-    'sprints-column': SPColumnMiddle,
-    'start-column': USColumnStart,
-    'done-column': USColumnEnd,
+    UserStoryRows,
   },
   data() {
     return {
-      carouselModelParent: 1,
       showBranchSelector: false,
       loaded: false,
     };
@@ -71,15 +40,7 @@ export default {
     this.loaded = true;
   },
   methods: {
-    sprintTicks(tickets) {
-      return tickets
-        .filter(tick => tick.done === false
-          && tick.sprint != null);
-    },
-    completedTicks(tickets) {
-      return tickets
-        .filter(tick => tick.done === true);
-    },
+
     ...mapActions([
       'fetchUserStories',
       'fetchTickets',
@@ -89,9 +50,6 @@ export default {
     // toggleBranchSelector(id) {
     //   this.$refs.brnSlct.toggleShow(id);
     // },
-    updateModel(newValue) {
-      this.carouselModelParent = newValue;
-    },
 
     // sprintCheck(tickId) {
     //   let tickInSprint = false;

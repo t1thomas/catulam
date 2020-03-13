@@ -115,12 +115,6 @@ export default {
     checkMove() {
       return this.listProperties.columnType !== 'end';
     },
-    // removed(listConfig) {
-    //   this.setCardRemoved(listConfig);
-    // },
-    // added(listConfig) {
-    //   this.setCardAdded(listConfig);
-    // },
     ended(evt) {
       const tickId = evt.item.id;
       const from = JSON.parse(evt.from.getAttribute('data-prop'));
@@ -156,11 +150,6 @@ export default {
       await this.fetchBackLogData();
       console.log(response);
     },
-
-  //   mutation {
-  //     AddTicketSprint(from: {id: "t8"} to:{id:"sp9"}){
-  // from{id}
-  // to{id}
   },
 };
 </script>

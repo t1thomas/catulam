@@ -6,6 +6,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    carouselModelParent: 1,
     backLogData: [],
     userStories: [],
     sprintList: [],
@@ -41,6 +42,9 @@ export default new Vuex.Store({
     clear_CardRemNAdd(state) {
       state.cardMoved.cardRemovedFrom = undefined;
       state.cardMoved.cardAddedTo = undefined;
+    },
+    set_carouselModel(state, obj) {
+      state.carouselModelParent = obj;
     },
     // moveCard_StartToSprint(state) {
     //   state.backLogData.forEach((userStory) =>{
@@ -104,6 +108,9 @@ export default new Vuex.Store({
     },
     clearCardRemNAdd({ commit }) {
       commit('clear_CardRemNAdd');
+    },
+    setCarouselModel({ commit }, value) {
+      commit('set_carouselModel', value);
     },
     // cardMoveStartToSprint({commit}) {
     //

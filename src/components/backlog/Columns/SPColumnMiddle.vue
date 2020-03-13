@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import DraggableTickList from '../../DraggableTickList.vue';
 
 
@@ -47,28 +47,27 @@ export default {
       type: String,
       required: true,
     },
-    carouselModelParent: {
-      type: Number,
-      required: true,
-    },
   },
   computed: {
     ...mapState({
       sprintList: 'sprintList',
+      carModP: 'carouselModelParent',
     }),
-
     carouselModel: {
       // getter
       get() {
-        return this.carouselModelParent;
+        return this.carModP;
       },
       // setter
       set(newValue) {
-        this.$emit('update-model', newValue);
+        this.setCarouselModel(newValue);
       },
     },
   },
   methods: {
+    ...mapActions([
+      'setCarouselModel',
+    ]),
     tickListConfig(id) {
       return { userStoryId: this.userStoryId, columnType: 'sprint', sprintId: id };
     },
