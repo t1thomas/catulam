@@ -16,7 +16,7 @@
       <q-card-section class="col q-pa-xs">
         <draggable-tick-list
           :list-properties="tickListConfig"
-          :tickets="UnStagedTicks(story.tickets)"
+          :tickets="getUnStagedTicks(story.id)"
         />
       </q-card-section>
     </q-card-section>
@@ -25,6 +25,7 @@
 
 <script>
 
+import { mapGetters } from 'vuex';
 import DraggableTickList from '../../DraggableTickList.vue';
 
 export default {
@@ -42,6 +43,9 @@ export default {
     tickListConfig() {
       return { userStoryId: this.userStoryId, columnType: 'start' };
     },
+    ...mapGetters([
+      'getUnStagedTicks',
+    ]),
   },
   methods: {
     UnStagedTicks(tickets) {

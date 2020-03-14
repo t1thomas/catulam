@@ -6,6 +6,7 @@
     animated
     control-color="primary"
     arrows
+    :keep-alive="false"
     style="height: 100%;"
     class="bg-grey-1 shadow-2 rounded-borders"
   >
@@ -20,7 +21,7 @@
         class="row fit justify-start items-center q-gutter-xs q-col-gutter no-wrap"
       >
         <draggable-tick-list
-          :tickets="ticsPerSprint(sprint.id, tickets)"
+          :tickets="ticsPerSprint(sprint.id, userStoryId)"
           :list-properties="tickListConfig(sprint.id)"
         />
       </div>
@@ -29,7 +30,7 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import DraggableTickList from '../../DraggableTickList.vue';
 
 
@@ -39,10 +40,6 @@ export default {
     DraggableTickList,
   },
   props: {
-    tickets: {
-      type: Array,
-      required: true,
-    },
     userStoryId: {
       type: String,
       required: true,
@@ -52,6 +49,9 @@ export default {
     ...mapState({
       sprintList: 'sprintList',
       carModP: 'carouselModelParent',
+    }),
+    ...mapGetters({
+      ticsPerSprint: 'getTicsPerSprint',
     }),
     carouselModel: {
       // getter
@@ -71,10 +71,10 @@ export default {
     tickListConfig(id) {
       return { userStoryId: this.userStoryId, columnType: 'sprint', sprintId: id };
     },
-    ticsPerSprint(sprintId, tickets) {
-      return tickets
-        .filter(tick => tick.sprint.id === sprintId);
-    },
+    // ticsPerSprint(tickets) {
+    //   return tickets
+    //     .filter(tick => tick.userStory.id === this.userStoryId);
+    // },
   },
 };
 </script>

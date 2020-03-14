@@ -10,13 +10,14 @@
     >
       <draggable-tick-list
         :list-properties="tickListConfig"
-        :tickets="tickets"
+        :tickets="getCompletedTicks(userStoryId)"
       />
     </q-card-section>
   </q-card>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
 import DraggableTickList from '../../DraggableTickList.vue';
 
 export default {
@@ -35,6 +36,9 @@ export default {
     },
   },
   computed: {
+    ...mapGetters([
+      'getCompletedTicks',
+    ]),
     tickListConfig() {
       return { userStoryId: this.userStoryId, columnType: 'end' };
     },

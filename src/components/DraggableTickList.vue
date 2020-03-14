@@ -1,7 +1,6 @@
 <template>
   <draggable
     ref="thendi"
-    v-model="tickList"
     tag="div"
     v-bind="dragOptions"
     :data-prop="listData"
@@ -11,9 +10,9 @@
     @end="ended"
   >
     <q-item
-      v-for="ticket in tickList"
-      :id="ticket.id"
-      :key="ticket.id"
+      v-for="ticketId in tickList"
+      :id="ticketId"
+      :key="ticketId"
       v-ripple
       class="q-pa-none q-ma-sm"
       clickable
@@ -25,8 +24,8 @@
           horizontal
           class="q-pl-sm q-pr-xs"
         >
-          <span class="text-weight-medium">{{ getTicketById(ticket.id).title }}</span>
-          <span class="text-grey-8 q-ml-auto">#{{ getTicketById(ticket.id).issueNumber }}</span>
+          <span class="text-weight-medium">{{ getTicketById(ticketId).title }}</span>
+          <span class="text-grey-8 q-ml-auto">#{{ getTicketById(ticketId).issueNumber }}</span>
         </q-card-section>
         <q-card-section
           horizontal
@@ -36,7 +35,7 @@
             caption
             lines="2"
           >
-            {{ getTicketById(ticket.id).desc }}
+            {{ getTicketById(ticketId).desc }}
           </q-item-label>
         </q-card-section>
         <q-card-section
@@ -48,7 +47,7 @@
             dense
             icon="mdi-progress-clock"
           >
-            {{ getTicketById(ticket.id).hourEstimate }}hr
+            {{ getTicketById(ticketId).hourEstimate }}hr
           </q-chip>
           <q-avatar size="21px">
             <img src="@/assets/avatar/scientist.svg">
@@ -111,6 +110,7 @@ export default {
       'setCardAdded',
       'clearCardRemNAdd',
       'fetchBackLogData',
+      'fetchSprints',
     ]),
     checkMove() {
       return this.listProperties.columnType !== 'end';
@@ -135,20 +135,31 @@ export default {
       }
     },
     async startToSprint(tickId, sprintId) {
-      const response = await Vue.$apolloClient.mutate({
+      await Vue.$apolloClient.mutate({
         mutation: gqlQueries.StartToSprint,
         variables: { ticket: { id: tickId }, sprint: { id: sprintId } },
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
       });
-      await this.fetchBackLogData();
-      console.log(response);
+    },
+    updateStore() {
+      this.fetchSprints();
+      this.fetchBackLogData();
     },
     async sprintToStart(tickId, sprintId) {
-      const response = await Vue.$apolloClient.mutate({
+      await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SprintToStart,
+        fetchPolicy: 'no-cache',
         variables: { ticket: { id: tickId }, sprint: { id: sprintId } },
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
       });
-      await this.fetchBackLogData();
-      console.log(response);
     },
   },
 };

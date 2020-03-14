@@ -24,7 +24,6 @@
       </div>
       <div class="col-5">
         <sprints-column
-          :tickets="sprintTicks(story.tickets)"
           :user-story-id="story.id"
         />
       </div>
@@ -111,7 +110,7 @@ export default {
   }
   .rect{
     height: 43%;
-    margin: auto;
+    margin: 4% auto auto;
     width: 42%;
     border-style: dashed;
   }

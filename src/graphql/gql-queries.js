@@ -16,6 +16,12 @@ const gqlQueries = {
     Sprint{
       id
       sprintNo
+      tickets{
+        id
+        userStory{
+          id
+        }
+      }
     }
   }`,
   BackLogData: gql`query{

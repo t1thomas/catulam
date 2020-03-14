@@ -9,6 +9,11 @@
       :key="story.id"
       :story="story"
     />
+    <q-btn
+      label="Thendi"
+      color="primary"
+      @click="handle"
+    />
   </q-page>
 </template>
 <script>
@@ -33,20 +38,23 @@ export default {
     ]),
   },
   async mounted() {
-    await this.fetchUserStories();
+    // await this.fetchUserStories();
     await this.fetchTickets();
     await this.fetchSprints();
     await this.fetchBackLogData();
     this.loaded = true;
   },
   methods: {
-
     ...mapActions([
       'fetchUserStories',
       'fetchTickets',
       'fetchSprints',
       'fetchBackLogData',
     ]),
+    handle() {
+      this.fetchSprints();
+      this.fetchBackLogData();
+    },
     // toggleBranchSelector(id) {
     //   this.$refs.brnSlct.toggleShow(id);
     // },

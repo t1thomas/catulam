@@ -8,11 +8,11 @@ export default new Vuex.Store({
   state: {
     carouselModelParent: 1,
     backLogData: [],
-    userStories: [],
+    // userStories: [],
     sprintList: [],
     tickets: {},
-    repoAndBranch: {},
-    cardMoved: { removedFrom: undefined, addedTo: undefined },
+    // repoAndBranch: {},
+    // cardMoved: { removedFrom: undefined, addedTo: undefined },
   },
   mutations: {
     set_repoAndBranch(state, obj) {
@@ -28,10 +28,10 @@ export default new Vuex.Store({
       Object.assign(state.tickets, obj);
     },
     set_sprintList(state, obj) {
-      state.sprintList = obj;
+      Vue.set(state, 'sprintList', [...obj]);
     },
     set_backLogData(state, obj) {
-      state.backLogData = obj;
+      Vue.set(state, 'backLogData', [...obj]);
     },
     set_cardRemoved(state, obj) {
       state.cardMoved.removedFrom = obj;
@@ -74,31 +74,43 @@ export default new Vuex.Store({
     async fetchUserStories({ commit }) {
       const response = await Vue.$apolloClient.query({
         query: gqlQueries.USWithTickIds,
+        fetchPolicy: 'no-cache',
       });
       const { UserStory } = response.data;
       commit('set_userStories', UserStory);
     },
     async fetchTickets({ commit }) {
-      const response = await Vue.$apolloClient.query({
+      await Vue.$apolloClient.query({
         query: gqlQueries.Tickets,
+        fetchPolicy: 'no-cache',
+      }).then((response) => {
+        const { ticketsAsMap } = response.data;
+        commit('set_tickets', ticketsAsMap);
+      }).catch((error) => {
+        console.error(error);
       });
-      const { ticketsAsMap } = response.data;
-      commit('set_tickets', ticketsAsMap);
     },
     async fetchSprints({ commit }) {
-      const response = await Vue.$apolloClient.query({
+      await Vue.$apolloClient.query({
         query: gqlQueries.Sprints,
+        fetchPolicy: 'no-cache',
+      }).then((response) => {
+        const { Sprint } = response.data;
+        commit('set_sprintList', Sprint);
+      }).catch((error) => {
+        console.error(error);
       });
-      const { Sprint } = response.data;
-      commit('set_sprintList', Sprint);
     },
     async fetchBackLogData({ commit }) {
-      const response = await Vue.$apolloClient.query({
+      await Vue.$apolloClient.query({
         query: gqlQueries.BackLogData,
+        fetchPolicy: 'no-cache',
+      }).then((response) => {
+        const { UserStory } = response.data;
+        commit('set_backLogData', UserStory);
+      }).catch((error) => {
+        console.error(error);
       });
-      const { UserStory } = response.data;
-      commit('set_backLogData', UserStory);
-      // console.log(UserStory);
     },
     setCardRemoved({ commit }, listConfig) {
       commit('set_cardRemoved', listConfig);
@@ -124,10 +136,34 @@ export default new Vuex.Store({
     getTicketById: state => tickId => state.tickets[tickId],
     /* eslint-disable no-underscore-dangle */
     getIssueById: state => issueId => state.issues.filter(issue => issueId === issue._id),
-    getCompletedTickIds: state => ArrTicketIds => ArrTicketIds
-      .filter(tickId => state.tickets[tickId].done === true),
-    getUnCompleteTickIds: state => ArrTicketIds => ArrTicketIds
-      .filter(tickId => state.tickets[tickId].done === false),
+    // getCompletedTickIds: state => ArrTicketIds => ArrTicketIds
+    //   .filter(tickId => state.tickets[tickId].done === true),
+    // getUnCompleteTickIds: state => ArrTicketIds => ArrTicketIds
+    //   .filter(tickId => state.tickets[tickId].done === false),
+    getTicsPerSprint: state => (sprintId, userStoryId) => state.sprintList
+      .find(sprint => sprint.id === sprintId).tickets
+      .reduce((arr, currTicket) => {
+        if (currTicket.userStory.id === userStoryId) {
+          arr.push(currTicket.id);
+        }
+        return arr;
+      }, []),
+    getUnStagedTicks: state => userStoryId => state.backLogData
+      .find(userStory => userStory.id === userStoryId).tickets
+      .reduce((arr, currTicket) => {
+        if (currTicket.done === false && currTicket.sprint === null) {
+          arr.push(currTicket.id);
+        }
+        return arr;
+      }, []),
+    getCompletedTicks: state => userStoryId => state.backLogData
+      .find(userStory => userStory.id === userStoryId).tickets
+      .reduce((arr, currTicket) => {
+        if (currTicket.done === true && currTicket.sprint === null) {
+          arr.push(currTicket.id);
+        }
+        return arr;
+      }, []),
     /* Retrieve tickets in done vs un-complete state based on array of tick Ids passed in */
     // getRepoNames: state => state.repoAndBranch.reduce((arr, repo) => {
     //   arr.push(repo.name);
