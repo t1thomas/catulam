@@ -3,17 +3,13 @@
     <div
       v-if="loaded"
       class="q-px-sm q-py-md q-gutter-sm"
-    />
-    <UserStoryRows
-      v-for="(story) in backLogData"
-      :key="story.id"
-      :story="story"
-    />
-    <q-btn
-      label="Thendi"
-      color="primary"
-      @click="handle"
-    />
+    >
+      <UserStoryRows
+        v-for="(story) in backLogData"
+        :key="story.id"
+        :story="story"
+      />
+    </div>
   </q-page>
 </template>
 <script>

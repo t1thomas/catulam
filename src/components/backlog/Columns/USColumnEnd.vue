@@ -10,7 +10,7 @@
     >
       <draggable-tick-list
         :list-properties="tickListConfig"
-        :tickets="getCompletedTicks(userStoryId)"
+        :ticket-ids="getCompletedTicks(userStoryId)"
       />
     </q-card-section>
   </q-card>
@@ -30,17 +30,13 @@ export default {
       type: String,
       required: true,
     },
-    tickets: {
-      type: Array,
-      required: true,
-    },
   },
   computed: {
     ...mapGetters([
       'getCompletedTicks',
     ]),
     tickListConfig() {
-      return { userStoryId: this.userStoryId, columnType: 'end' };
+      return { userStoryId: this.userStoryId, columnType: 'end', disabled: true };
     },
   },
 };

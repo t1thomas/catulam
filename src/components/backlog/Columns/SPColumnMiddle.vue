@@ -21,7 +21,7 @@
         class="row fit justify-start items-center q-gutter-xs q-col-gutter no-wrap"
       >
         <draggable-tick-list
-          :tickets="ticsPerSprint(sprint.id, userStoryId)"
+          :ticket-ids="ticsPerSprint(sprint.id, userStoryId)"
           :list-properties="tickListConfig(sprint.id)"
         />
       </div>
@@ -69,7 +69,9 @@ export default {
       'setCarouselModel',
     ]),
     tickListConfig(id) {
-      return { userStoryId: this.userStoryId, columnType: 'sprint', sprintId: id };
+      return {
+        userStoryId: this.userStoryId, columnType: 'sprint', sprintId: id, disabled: false,
+      };
     },
     // ticsPerSprint(tickets) {
     //   return tickets

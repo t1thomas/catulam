@@ -164,6 +164,14 @@ export default new Vuex.Store({
         }
         return arr;
       }, []),
+    getUserStoryText: state => userStoryId => state.backLogData
+      .find(userStory => userStory.id === userStoryId)
+      .storyText,
+    getSprintValues: state => state.sprintList
+      .reduce((arr, currSprint) => {
+        arr.push({ id: currSprint.id, label: `Sprint ${currSprint.sprintNo}` });
+        return arr;
+      }, []),
     /* Retrieve tickets in done vs un-complete state based on array of tick Ids passed in */
     // getRepoNames: state => state.repoAndBranch.reduce((arr, repo) => {
     //   arr.push(repo.name);

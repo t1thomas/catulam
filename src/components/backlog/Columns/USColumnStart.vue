@@ -10,13 +10,13 @@
       <q-card-section
         class="col-3 card-text"
       >
-        {{ story.storyText }}
+        {{ getUserStoryText(userStoryId) }}
       </q-card-section>
       <q-separator vertical />
       <q-card-section class="col q-pa-xs">
         <draggable-tick-list
           :list-properties="tickListConfig"
-          :tickets="getUnStagedTicks(story.id)"
+          :ticket-ids="getUnStagedTicks(userStoryId)"
         />
       </q-card-section>
     </q-card-section>
@@ -34,25 +34,19 @@ export default {
     DraggableTickList,
   },
   props: {
-    story: {
-      type: Object,
+    userStoryId: {
+      type: String,
       required: true,
     },
   },
   computed: {
     tickListConfig() {
-      return { userStoryId: this.userStoryId, columnType: 'start' };
+      return { userStoryId: this.userStoryId, columnType: 'start', disabled: false };
     },
     ...mapGetters([
       'getUnStagedTicks',
+      'getUserStoryText',
     ]),
-  },
-  methods: {
-    UnStagedTicks(tickets) {
-      return tickets
-        .filter(tick => tick.done === false
-          && (tick.sprint === null));
-    },
   },
 };
 </script>

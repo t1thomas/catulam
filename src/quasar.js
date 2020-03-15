@@ -7,12 +7,13 @@ import '@quasar/extras/mdi-v4/mdi-v4.css';
 import '@quasar/extras/fontawesome-v5/fontawesome-v5.css';
 
 
-import { Quasar } from 'quasar';
+import { Quasar, Dialog } from 'quasar';
 
 Vue.use(Quasar, {
   config: {},
   components: { /* not needed if importStrategy is not 'manual' */ },
   directives: { /* not needed if importStrategy is not 'manual' */ },
   plugins: {
+    Dialog,
   },
 });

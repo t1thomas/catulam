@@ -20,7 +20,7 @@
         </q-card-section>
       </q-card>
       <div class="col-4">
-        <start-column :story="story" />
+        <start-column :user-story-id="story.id" />
       </div>
       <div class="col-5">
         <sprints-column
@@ -29,15 +29,7 @@
       </div>
       <div class="col-3">
         <done-column
-          :tickets="completedTicks(story.tickets)"
           :user-story-id="story.id"
-        />
-      </div>
-      <div class="col-2">
-        <q-btn
-          label="Overlay"
-          color="primary"
-          @click="handleClick"
         />
       </div>
     </div>
@@ -66,9 +58,9 @@ export default {
       small: false,
     };
   },
-  computed: {
-
-  },
+  // computed: {
+  //
+  // },
   methods: {
     sprintTicks(tickets) {
       return tickets

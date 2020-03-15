@@ -1,16 +1,16 @@
 <template>
   <draggable
+    :id="listProperties.userStoryId"
     ref="thendi"
     tag="div"
     v-bind="dragOptions"
     :data-prop="listData"
     class="rounded-borders q-list q-list--bordered"
     style="background: cadetblue; width: 100%; height: 100%;"
-    :move="checkMove"
     @end="ended"
   >
     <q-item
-      v-for="ticketId in tickList"
+      v-for="ticketId in ticketIdList"
       :id="ticketId"
       :key="ticketId"
       v-ripple
@@ -64,6 +64,8 @@ import { mapGetters, mapActions, mapState } from 'vuex';
 import draggable from 'vuedraggable';
 import Vue from 'vue';
 import gqlQueries from '../graphql/gql-queries';
+// eslint-disable-next-line no-unused-vars
+import UserStorySwitchDialog from './backlog/Columns/UserStorySwitchDialog.vue';
 
 export default {
   name: 'DraggableTickList',
@@ -71,7 +73,7 @@ export default {
     draggable,
   },
   props: {
-    tickets: {
+    ticketIds: {
       type: Array,
       required: true,
     },
@@ -82,7 +84,7 @@ export default {
   },
   data() {
     return {
-      tickList: this.tickets,
+      ticketIdList: this.ticketIds,
     };
   },
   computed: {
@@ -90,7 +92,7 @@ export default {
       return {
         animation: 200,
         group: 'ticketList',
-        disabled: false,
+        disabled: this.listProperties.disabled,
         ghostClass: 'ghost',
       };
     },
@@ -99,6 +101,8 @@ export default {
     },
     ...mapGetters([
       'getTicketById',
+      'getUserStoryText',
+      'getSprintValues',
     ]),
     ...mapState([
       'cardMoved',
@@ -112,27 +116,40 @@ export default {
       'fetchBackLogData',
       'fetchSprints',
     ]),
-    checkMove() {
-      return this.listProperties.columnType !== 'end';
-    },
     ended(evt) {
       const tickId = evt.item.id;
-      const from = JSON.parse(evt.from.getAttribute('data-prop'));
-      const to = JSON.parse(evt.to.getAttribute('data-prop'));
+      const fromData = JSON.parse(evt.from.getAttribute('data-prop'));
+      const toData = JSON.parse(evt.to.getAttribute('data-prop'));
       switch (true) {
-        case from.columnType === 'start' && to.columnType === 'sprint':
-          this.startToSprint(tickId, to.sprintId);
+        case fromData.userStoryId !== toData.userStoryId:
+          this.$q.dialog({
+            component: UserStorySwitchDialog,
+            ticketTitle: this.getTicketById(tickId).title,
+            sprintList: this.getSprintValues.length > 0 ? this.getSprintValues : undefined,
+            uSText: this.getUserStoryText(toData.userStoryId),
+            sprintId: fromData.sprintId ? fromData.sprintId : undefined,
+          }).onOk(() => {
+            // some shit
+          }).onDismiss((msg) => {
+            if (msg.action !== 'okay') {
+              this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
+            }
+            console.log('Dismissed');
+          });
           break;
-        case from.columnType === 'sprint' && to.columnType === 'start':
-          this.sprintToStart(tickId, from.sprintId);
+        case fromData.columnType === 'start' && toData.columnType === 'sprint':
+          this.startToSprint(tickId, toData.sprintId);
           break;
-        case 'Papayas':
-          console.log('Mangoes and papayas are $2.79 a pound.');
-          // expected output: "Mangoes and papayas are $2.79 a pound."
+        case fromData.columnType === 'sprint' && toData.columnType === 'start':
+          this.sprintToStart(tickId, fromData.sprintId);
           break;
         default:
           console.log('Sorry.');
       }
+    },
+    switchBack(from, oldIndex, to, newIndex) {
+      from.insertBefore(to.childNodes[newIndex], from.childNodes[oldIndex]);
+      // to.removeChild(to.childNodes[newIndex]);
     },
     async startToSprint(tickId, sprintId) {
       await Vue.$apolloClient.mutate({
@@ -175,8 +192,4 @@ export default {
     color: none;
     background: none;
   }
-  /*.ghost {*/
-  /*  opacity: 0.5;*/
-  /*  background: #7678fb;*/
-  /*}*/
 </style>
