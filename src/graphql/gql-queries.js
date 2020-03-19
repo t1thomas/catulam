@@ -10,7 +10,22 @@ const gqlQueries = {
     }
   }`,
   Tickets: gql`query{
-    ticketsAsMap
+    Ticket {
+      id
+      issueNumber
+      hourEstimate
+      userStory {
+        id
+      }
+      assigendTo
+      title
+      creator
+      desc
+      done
+      sprint {
+        id
+      }
+    }
   }`,
   Sprints: gql`query{
     Sprint{
@@ -49,5 +64,9 @@ const gqlQueries = {
       to{id}
     }
   }`,
+  SwitchUserStory: gql`mutation TicSwitchSprint($ticket: String! $usFrom: String! $usTo: String!){
+    TicSwitchUStory(tickId: $ticket UStoryIdFrom: $usFrom UStoryIdTo: $usTo)
+  }
+  `,
 };
 export default gqlQueries;

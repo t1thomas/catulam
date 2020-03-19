@@ -10,11 +10,19 @@ export default new Vuex.Store({
     backLogData: [],
     // userStories: [],
     sprintList: [],
-    tickets: {},
+    tickets: [],
+    removedFrom: {},
+    addedTo: {},
     // repoAndBranch: {},
     // cardMoved: { removedFrom: undefined, addedTo: undefined },
   },
   mutations: {
+    set_removedFrom(state, obj) {
+      state.removedFrom = obj;
+    },
+    set_addedTo(state, obj) {
+      state.addedTo = obj;
+    },
     set_repoAndBranch(state, obj) {
       state.repoAndBranch = obj;
     },
@@ -84,8 +92,8 @@ export default new Vuex.Store({
         query: gqlQueries.Tickets,
         fetchPolicy: 'no-cache',
       }).then((response) => {
-        const { ticketsAsMap } = response.data;
-        commit('set_tickets', ticketsAsMap);
+        const { Ticket } = response.data;
+        commit('set_tickets', Ticket);
       }).catch((error) => {
         console.error(error);
       });
@@ -124,6 +132,12 @@ export default new Vuex.Store({
     setCarouselModel({ commit }, value) {
       commit('set_carouselModel', value);
     },
+    setRemovedFrom({ commit }, value) {
+      commit('set_removedFrom', value);
+    },
+    setAddedTo({ commit }, value) {
+      commit('set_addedTo', value);
+    },
     // cardMoveStartToSprint({commit}) {
     //
     // }
@@ -133,7 +147,7 @@ export default new Vuex.Store({
     //   .filter(tickId => state.sprintList[sprintNo - 1].ticketIds.includes(tickId)),
     getIssueType: state => state.issueType,
     getIssues: state => state.issues,
-    getTicketById: state => tickId => state.tickets[tickId],
+    getTicketById: state => tickId => state.tickets.find(ticket => ticket.id === tickId),
     /* eslint-disable no-underscore-dangle */
     getIssueById: state => issueId => state.issues.filter(issue => issueId === issue._id),
     // getCompletedTickIds: state => ArrTicketIds => ArrTicketIds

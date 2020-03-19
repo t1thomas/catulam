@@ -9,7 +9,7 @@
         class="bg-red text-white"
       >
         <div class="text-h6">
-          Confirm Change
+          Switch User Story
         </div>
         <q-space />
         <q-btn
@@ -21,21 +21,31 @@
           <q-tooltip>Close</q-tooltip>
         </q-btn>
       </q-bar>
-      <q-card-section>
+      <q-card-section
+        v-if="loading"
+      >
+        <q-spinner
+          color="primary"
+          size="3em"
+        />
+      </q-card-section>
+      <q-card-section
+        v-else
+      >
         <div class="text-subtitle2">
           Move
           ticket
           <span
             class="text-subtitle3"
             :style="{background: 'grey'}"
-          > {{ ticketTitle }}</span>
+          > {{ ticket.title }} #{{ ticket.issueNumber }}</span>
           To
         </div>
         <div class="text-subtitle3">
           UserStory
         </div>
         <div class="text-subtitle4">
-          <span :style="{background: 'grey'}">{{ uSText }}</span>
+          <span :style="{background: 'grey'}">{{ uSToText }}</span>
         </div>
         <div
           class="q-pa-md"
@@ -50,16 +60,8 @@
               filled
               :options="options"
               label="Select Sprint"
-              :display-value="model ? model.label:null"
-            >
-              <template v-slot:no-option>
-                <q-item>
-                  <q-item-section class="text-italic text-grey">
-                    No Sprint Defined
-                  </q-item-section>
-                </q-item>
-              </template>
-            </q-select>
+              :display-value="model ? model.label : null"
+            />
           </div>
         </div>
       </q-card-section>
@@ -85,55 +87,62 @@
 </template>
 
 <script>
-
+import { mapGetters, mapState } from 'vuex';
+import Vue from 'vue';
+import gqlQueries from '../../../graphql/gql-queries';
 
 export default {
   name: 'UserStorySwitchDialog',
   props: {
-    ticketTitle: {
+    ticketId: {
       type: String,
       required: true,
     },
-    uSText: {
-      type: String,
-      required: true,
-    },
-    sprintList: {
-      type: Array,
-      required: true,
-      default: undefined,
-    },
-    sprintId: {
-      type: String,
-      default: undefined,
-    },
+
   },
   data() {
     return {
-      model: this.startingValue(),
+      model: null,
+      loading: false,
+      optionUnchanged: true,
     };
   },
   computed: {
-    options() {
-      if (this.sprintList === undefined) {
-        return null;
+    ...mapState([
+      'removedFrom',
+      'addedTo',
+    ]),
+    ticket() {
+      return this.getTicketById(this.ticketId);
+    },
+    uSToText() {
+      return this.getUserStoryText(this.addedTo.userStoryId);
+    },
+    startingOption() {
+      if (this.addedTo.sprintId === undefined) {
+        return this.options[0];
       }
+      return this.getSprintValues.find(sprint => sprint.id === this.addedTo.sprintId);
+    },
+    ...mapGetters([
+      'getUserStoryText',
+      'getTicketById',
+      'getSprintValues',
+    ]),
+    options() {
       const sprints = [{ id: '0', label: 'Add to Todo (no sprint)' }];
-      return sprints.concat(this.sprintList);
+      return sprints.concat(this.getSprintValues);
     },
 
   },
+  mounted() {
+    this.model = this.startingOption;
+  },
   methods: {
-    startingValue() {
-      if (this.sprintList === undefined) {
-        return null;
-      }
-      if (this.sprintId === undefined) {
-        return { id: '0', label: 'Add to Todo (no sprint)' };
-      }
-      return this.sprintList.find(sprint => sprint.id === this.sprintId);
-    },
 
+    print() {
+      console.log(this.model);
+    },
     // following method is REQUIRED
     // (don't change its name --> "show")
     show() {
@@ -142,8 +151,8 @@ export default {
 
     // following method is REQUIRED
     // (don't change its name --> "hide")
-    hide(int) {
-      this.$refs.dialog.hide(int);
+    hide() {
+      this.$refs.dialog.hide();
     },
 
     onDialogHide() {
@@ -152,22 +161,42 @@ export default {
       this.$emit('hide');
     },
     onOKClick() {
-      if (this.sprintList === undefined) {
-          // no sprints
+      // if (this.sprintList === undefined) {
+      //   // no sprints
+      // }
+      if (this.removedFrom.sprintId === undefined && this.model.id === '0') {
+        console.log('no sprints');
+      } else if (this.removedFrom.sprintId === undefined && this.model.id !== '0') {
+        console.log('undefined to changed sprints');
+      } else if (this.removedFrom.sprintId === this.model.id) {
+        console.log('no changed sprints');
+      } else if (this.removedFrom.sprintId !== this.model.id) {
+        console.log('sprint to changed sprints');
       }
-      if (this.sprintId === undefined && this.model.id === '0') {
-        // Sprint hasn't been chanegd
-      }
+
       // on OK, it is REQUIRED to
       // emit "ok" event (with optional payload)
       // before hiding the QDialog
-      this.$emit('ok', { action: 'okay' });
+      this.$emit('ok', 'okay');
       // or with payload: this.$emit('ok', { ... })
       // then hiding dialog
       this.hide();
     },
-    print() {
-      console.log(this.model);
+    async uStorySwitch() {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SwitchUserStory,
+        fetchPolicy: 'no-cache',
+        variables: {
+          ticket: 't6',
+          usFrom: 'us2',
+          usTo: 'us1',
+        },
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+      });
     },
     onCancelClick() {
       // we just need to hide dialog

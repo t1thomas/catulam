@@ -1,16 +1,15 @@
 <template>
   <draggable
-    :id="listProperties.userStoryId"
-    ref="thendi"
     tag="div"
     v-bind="dragOptions"
-    :data-prop="listData"
     class="rounded-borders q-list q-list--bordered"
     style="background: cadetblue; width: 100%; height: 100%;"
     @end="ended"
+    @add="onAdd"
+    @remove="onRemove"
   >
     <q-item
-      v-for="ticketId in ticketIdList"
+      v-for="ticketId in ticketIds"
       :id="ticketId"
       :key="ticketId"
       v-ripple
@@ -82,12 +81,10 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      ticketIdList: this.ticketIds,
-    };
-  },
   computed: {
+    listData() {
+      return this.listProperties;
+    },
     dragOptions() {
       return {
         animation: 200,
@@ -96,45 +93,54 @@ export default {
         ghostClass: 'ghost',
       };
     },
-    listData() {
-      return JSON.stringify(this.listProperties);
-    },
     ...mapGetters([
       'getTicketById',
-      'getUserStoryText',
-      'getSprintValues',
     ]),
     ...mapState([
-      'cardMoved',
+      'removedFrom',
+      'addedTo',
     ]),
   },
   methods: {
     ...mapActions([
-      'setCardRemoved',
-      'setCardAdded',
-      'clearCardRemNAdd',
       'fetchBackLogData',
       'fetchSprints',
+      'setRemovedFrom',
+      'setAddedTo',
     ]),
+    onRemove() {
+      // mutate store
+      this.setRemovedFrom(this.listProperties);
+    },
+    onAdd() {
+      // mutate store
+      this.setAddedTo(this.listProperties);
+    },
     ended(evt) {
+      console.log(evt);
+      // eslint-disable-next-line no-underscore-dangle
+      const fromData = this.removedFrom;
+      // eslint-disable-next-line no-underscore-dangle
+      const toData = this.addedTo;
       const tickId = evt.item.id;
-      const fromData = JSON.parse(evt.from.getAttribute('data-prop'));
-      const toData = JSON.parse(evt.to.getAttribute('data-prop'));
+      console.log(fromData);
+      console.log(toData);
+      // const fromData = JSON.parse(evt.from.getAttribute('data-prop'));
+      // const toData = JSON.parse(evt.to.getAttribute('data-prop'));
       switch (true) {
         case fromData.userStoryId !== toData.userStoryId:
           this.$q.dialog({
             component: UserStorySwitchDialog,
-            ticketTitle: this.getTicketById(tickId).title,
-            sprintList: this.getSprintValues.length > 0 ? this.getSprintValues : undefined,
-            uSText: this.getUserStoryText(toData.userStoryId),
-            sprintId: fromData.sprintId ? fromData.sprintId : undefined,
+            parent: this,
+            ticketId: tickId,
           }).onOk(() => {
             // some shit
           }).onDismiss((msg) => {
-            if (msg.action !== 'okay') {
+            if (msg === 'okay') {
+              console.log('okay');
+            } else {
               this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
             }
-            console.log('Dismissed');
           });
           break;
         case fromData.columnType === 'start' && toData.columnType === 'sprint':
