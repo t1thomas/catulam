@@ -82,9 +82,6 @@ export default {
     },
   },
   computed: {
-    listData() {
-      return this.listProperties;
-    },
     dragOptions() {
       return {
         animation: 200,
@@ -107,6 +104,8 @@ export default {
       'fetchSprints',
       'setRemovedFrom',
       'setAddedTo',
+      'clearRemAdd',
+      'showDialogSwitcher',
     ]),
     onRemove() {
       // mutate store
@@ -117,60 +116,144 @@ export default {
       this.setAddedTo(this.listProperties);
     },
     ended(evt) {
-      console.log(evt);
-      // eslint-disable-next-line no-underscore-dangle
-      const fromData = this.removedFrom;
-      // eslint-disable-next-line no-underscore-dangle
-      const toData = this.addedTo;
+      this.ticketMoveResolve(evt);
+    },
+    ticketMoveResolve(evt) {
       const tickId = evt.item.id;
+      const fromData = this.removedFrom;
+      const toData = this.addedTo;
       console.log(fromData);
       console.log(toData);
-      // const fromData = JSON.parse(evt.from.getAttribute('data-prop'));
-      // const toData = JSON.parse(evt.to.getAttribute('data-prop'));
-      switch (true) {
-        case fromData.userStoryId !== toData.userStoryId:
-          this.$q.dialog({
-            component: UserStorySwitchDialog,
-            parent: this,
-            ticketId: tickId,
-          }).onOk(() => {
-            // some shit
-          }).onDismiss((msg) => {
-            if (msg === 'okay') {
-              console.log('okay');
-            } else {
-              this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
-            }
-          });
-          break;
-        case fromData.columnType === 'start' && toData.columnType === 'sprint':
-          this.startToSprint(tickId, toData.sprintId);
-          break;
-        case fromData.columnType === 'sprint' && toData.columnType === 'start':
-          this.sprintToStart(tickId, fromData.sprintId);
-          break;
-        default:
-          console.log('Sorry.');
+      // fromData and toData remains undefined if ticket is not moved between diff lists
+      if (fromData !== undefined || toData !== undefined) {
+        switch (true) {
+          case fromData.userStoryId !== toData.userStoryId:
+            this.switchUserStoryDialog(evt);
+            break;
+          case fromData.columnType === 'start' && toData.columnType === 'sprint':
+            this.startToSprint(tickId, toData.sprintId);
+            break;
+          case fromData.columnType === 'sprint' && toData.columnType === 'start':
+            this.sprintToStart(tickId, fromData.sprintId);
+            break;
+          default:
+            console.log('Sorry.');
+        }
       }
     },
-    switchBack(from, oldIndex, to, newIndex) {
-      from.insertBefore(to.childNodes[newIndex], from.childNodes[oldIndex]);
-      // to.removeChild(to.childNodes[newIndex]);
+    switchUserStoryDialog(evt) {
+      const tickId = evt.item.id;
+      this.showDialogSwitcher();
+      // Launch dialog
+      this.$q.dialog({
+        component: UserStorySwitchDialog,
+        parent: this,
+        ticketId: tickId,
+      })
+        .onOk((args) => {
+          switch (args.action) {
+            case 1:
+              this.uStorySwitchOnly(tickId, evt);
+              break;
+            case 2:
+              this.uStorySwitchAddNewSprint(tickId, evt, args.sprintId);
+              break;
+            case 3:
+              this.uStorySwitchRemoveSprint(tickId, evt);
+              break;
+            case 4:
+              this.uStorySwitchChangeSprint(tickId, evt, args.sprintId);
+              break;
+            default:
+              this.uStorySwitchOnly(tickId, evt);
+              break;
+          }
+          console.log(args.action);
+        })
+        .onDismiss((args) => {
+          if (args === undefined) {
+            this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
+          }
+          this.showDialogSwitcher();
+        });
     },
-    async startToSprint(tickId, sprintId) {
+    async uStorySwitchOnly(tickId, evt) {
       await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.StartToSprint,
-        variables: { ticket: { id: tickId }, sprint: { id: sprintId } },
+        mutation: gqlQueries.SwitchUserStory.storySwitch,
+        fetchPolicy: 'no-cache',
+        variables: {
+          ticket: tickId,
+          usFrom: this.removedFrom.userStoryId,
+          usTo: this.addedTo.userStoryId,
+        },
       }).then((response) => {
         console.log(response);
         this.updateStore();
       }).catch((error) => {
         console.error(error);
+        this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
       });
+      this.clearRemAdd();
     },
-    updateStore() {
-      this.fetchSprints();
-      this.fetchBackLogData();
+    async uStorySwitchAddNewSprint(tickId, evt, sprintAddId) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SwitchUserStory.AddNewSprint,
+        fetchPolicy: 'no-cache',
+        variables: {
+          ticket: { id: tickId },
+          sprintAdd: { id: sprintAddId },
+          uStoryRemove: { id: this.removedFrom.userStoryId },
+          uStoryAdd: { id: this.addedTo.userStoryId },
+        },
+
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+        this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
+      });
+      this.clearRemAdd();
+    },
+    async uStorySwitchRemoveSprint(tickId, evt) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SwitchUserStory.RemoveSprint,
+        fetchPolicy: 'no-cache',
+        variables: {
+          ticket: { id: tickId },
+          $sprintRemove: { id: this.removedFrom.sprintId },
+          uStoryRemove: { id: this.removedFrom.userStoryId },
+          uStoryAdd: { id: this.addedTo.userStoryId },
+        },
+
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+        this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
+      });
+      this.clearRemAdd();
+    },
+    async uStorySwitchChangeSprint(tickId, evt, sprintAddId) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SwitchUserStory.ChangeSprint,
+        fetchPolicy: 'no-cache',
+        variables: {
+          ticket: { id: tickId },
+          sprintRemove: { id: this.removedFrom.sprintId },
+          sprintAdd: { id: sprintAddId },
+          uStoryRemove: { id: this.removedFrom.userStoryId },
+          uStoryAdd: { id: this.addedTo.userStoryId },
+        },
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+        this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
+      });
+      this.clearRemAdd();
     },
     async sprintToStart(tickId, sprintId) {
       await Vue.$apolloClient.mutate({
@@ -183,6 +266,27 @@ export default {
       }).catch((error) => {
         console.error(error);
       });
+      this.clearRemAdd();
+    },
+    switchBack(from, oldIndex, to, newIndex) {
+      // remove ticket from new list and put back in old list
+      from.insertBefore(to.childNodes[newIndex], from.childNodes[oldIndex]);
+    },
+    async startToSprint(tickId, sprintId) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.StartToSprint,
+        variables: { ticket: { id: tickId }, sprint: { id: sprintId } },
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+      });
+      this.clearRemAdd();
+    },
+    updateStore() {
+      this.fetchSprints();
+      this.fetchBackLogData();
     },
   },
 };

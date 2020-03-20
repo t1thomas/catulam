@@ -6,6 +6,7 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    showDialog: false,
     carouselModelParent: 1,
     backLogData: [],
     // userStories: [],
@@ -47,12 +48,15 @@ export default new Vuex.Store({
     set_cardAdded(state, obj) {
       state.cardMoved.addedTo = obj;
     },
-    clear_CardRemNAdd(state) {
-      state.cardMoved.cardRemovedFrom = undefined;
-      state.cardMoved.cardAddedTo = undefined;
+    clear_Rem_Add(state) {
+      state.removedFrom = undefined;
+      state.addedTo = undefined;
     },
     set_carouselModel(state, obj) {
       state.carouselModelParent = obj;
+    },
+    set_showDialog(state) {
+      state.showDialog = !state.showDialog;
     },
     // moveCard_StartToSprint(state) {
     //   state.backLogData.forEach((userStory) =>{
@@ -126,8 +130,8 @@ export default new Vuex.Store({
     setCardAdded({ commit }, listConfig) {
       commit('set_cardAdded', listConfig);
     },
-    clearCardRemNAdd({ commit }) {
-      commit('clear_CardRemNAdd');
+    clearRemAdd({ commit }) {
+      commit('clear_Rem_Add');
     },
     setCarouselModel({ commit }, value) {
       commit('set_carouselModel', value);
@@ -137,6 +141,9 @@ export default new Vuex.Store({
     },
     setAddedTo({ commit }, value) {
       commit('set_addedTo', value);
+    },
+    showDialogSwitcher({ commit }) {
+      commit('set_showDialog');
     },
     // cardMoveStartToSprint({commit}) {
     //

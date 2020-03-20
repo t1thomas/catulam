@@ -1,5 +1,6 @@
 <template>
   <q-dialog
+    v-if="showDialog"
     ref="dialog"
     @hide="onDialogHide"
   >
@@ -88,8 +89,6 @@
 
 <script>
 import { mapGetters, mapState } from 'vuex';
-import Vue from 'vue';
-import gqlQueries from '../../../graphql/gql-queries';
 
 export default {
   name: 'UserStorySwitchDialog',
@@ -98,7 +97,6 @@ export default {
       type: String,
       required: true,
     },
-
   },
   data() {
     return {
@@ -111,6 +109,7 @@ export default {
     ...mapState([
       'removedFrom',
       'addedTo',
+      'showDialog',
     ]),
     ticket() {
       return this.getTicketById(this.ticketId);
@@ -161,42 +160,37 @@ export default {
       this.$emit('hide');
     },
     onOKClick() {
-      // if (this.sprintList === undefined) {
-      //   // no sprints
-      // }
-      if (this.removedFrom.sprintId === undefined && this.model.id === '0') {
-        console.log('no sprints');
-      } else if (this.removedFrom.sprintId === undefined && this.model.id !== '0') {
-        console.log('undefined to changed sprints');
-      } else if (this.removedFrom.sprintId === this.model.id) {
-        console.log('no changed sprints');
-      } else if (this.removedFrom.sprintId !== this.model.id) {
-        console.log('sprint to changed sprints');
+      switch (true) {
+        case this.removedFrom.sprintId === undefined && this.model.id === '0':
+          console.log('no sprints, ticket moved to Todo in new userStory');
+          this.$emit('ok', { action: 1 });
+          break;
+        case this.removedFrom.sprintId === undefined && this.model.id !== '0':
+          console.log('undefined sprint to changed sprints, ticket with no sprint moved to a sprint in new userStory');
+          this.$emit('ok', { action: 2, sprintId: this.model.id });
+          break;
+        case this.removedFrom.sprintId !== undefined && this.model.id === '0':
+          console.log('defined sprint to no sprints, ticket with sprint moved to Todo in new userStory (removed sprint)');
+          this.$emit('ok', { action: 3 });
+          break;
+        case this.removedFrom.sprintId !== this.model.id:
+          console.log('sprint to changed sprints');
+          this.$emit('ok', { action: 4, sprintId: this.model.id });
+          break;
+        default:
+          console.log('no changed sprints');
+          this.$emit('ok', 5);
+          break;
       }
+      // this.removedFrom.sprintId === this.model.id
+
 
       // on OK, it is REQUIRED to
       // emit "ok" event (with optional payload)
       // before hiding the QDialog
-      this.$emit('ok', 'okay');
       // or with payload: this.$emit('ok', { ... })
       // then hiding dialog
       this.hide();
-    },
-    async uStorySwitch() {
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SwitchUserStory,
-        fetchPolicy: 'no-cache',
-        variables: {
-          ticket: 't6',
-          usFrom: 'us2',
-          usTo: 'us1',
-        },
-      }).then((response) => {
-        console.log(response);
-        this.updateStore();
-      }).catch((error) => {
-        console.error(error);
-      });
     },
     onCancelClick() {
       // we just need to hide dialog

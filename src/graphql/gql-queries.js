@@ -64,9 +64,113 @@ const gqlQueries = {
       to{id}
     }
   }`,
-  SwitchUserStory: gql`mutation TicSwitchSprint($ticket: String! $usFrom: String! $usTo: String!){
+  SwitchUserStory: {
+    storySwitch: gql`mutation TicSwitchSprint($ticket: String! $usFrom: String! $usTo: String!){
     TicSwitchUStory(tickId: $ticket UStoryIdFrom: $usFrom UStoryIdTo: $usTo)
   }
   `,
+    AddNewSprint: gql`mutation(
+      $ticket: _TicketInput!
+      $sprintAdd: _SprintInput!
+      $uStoryRemove: _UserStoryInput!
+      $uStoryAdd: _UserStoryInput!
+    ) {
+      RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+      AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+      AddTicketSprint(from: $ticket, to: $sprintAdd) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+    }`,
+    RemoveSprint: gql`mutation(
+      $ticket: _TicketInput!
+      $sprintRemove: _SprintInput!
+      $uStoryRemove: _UserStoryInput!
+      $uStoryAdd: _UserStoryInput!
+    ) {
+      RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+      AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+      RemoveTicketSprint(from: $ticket, to: $sprintRemove) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+    }`,
+    ChangeSprint: gql`mutation(
+      $ticket: _TicketInput!
+      $sprintRemove: _SprintInput!
+      $sprintAdd: _SprintInput!
+      $uStoryRemove: _UserStoryInput!
+      $uStoryAdd: _UserStoryInput!
+    ) {
+      RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+      AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+      RemoveTicketSprint(from: $ticket, to: $sprintRemove) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+      AddTicketSprint(from: $ticket, to: $sprintAdd) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+    }`,
+  },
 };
 export default gqlQueries;
