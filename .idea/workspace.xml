@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="7392c08f-c877-4304-8e8a-a6c2de7a4a78" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.browserslistrc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.editorconfig" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.eslintrc.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/babel.config.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/cypress.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package-lock.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/favicon.ico" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/public/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/App.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assets/avatar/scientist.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/assets/logo.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/DraggableTickList.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Ebranchselector.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/GitHubLinkStepper.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/HelloWorld.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/Nbranchselector.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/backlog/BackLogList.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/backlog/Columns/SPColumnMiddle.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/backlog/Columns/USColumnEnd.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/backlog/Columns/USColumnStart.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/backlog/Columns/UserStorySwitchDialog.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/backlog/Columns/UserStorySwitchDialog2.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/backlog/SprintListColumn.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/components/backlog/UserStoryRows.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/graphql/gql-queries.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/graphql/queries.graphql" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/apolloClient.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/axios.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/quasar.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/router/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/store/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/styles/quasar.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/styles/quasar.variables.scss" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/views/About.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/views/GitAuthentication.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/views/Home.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/views/backlog.vue" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/e2e/.eslintrc.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/e2e/plugins/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/e2e/specs/test.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/e2e/support/commands.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/e2e/support/index.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/.eslintrc.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/tests/unit/example.spec.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/vue.config.js" beforeDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectId" id="1ZSCbiwvcjVybOc0bchtzLamhKK" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/api" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="nodejs_package_manager_path" value="npm" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\t_n_p\Documents\GitHub\catulam\api" />
+      <recent name="C:\Users\t_n_p\Documents\GitHub\catulam\frontend\src" />
+    </key>
+  </component>
+  <component name="RunManager" selected="npm.nodemon">
+    <configuration name="lint" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/frontend/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="lint" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="nodemon" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/api/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="nodemon" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="serve" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/frontend/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="serve" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.nodemon" />
+        <item itemvalue="npm.lint" />
+        <item itemvalue="npm.serve" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="7392c08f-c877-4304-8e8a-a6c2de7a4a78" name="Default Changelist" comment="" />
+      <created>1584823181622</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1584823181622</updated>
+      <workItem from="1584823184983" duration="8185000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog" timestamp="1584824790658">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1584824790658" />
+    <state x="739" y="262" key="FileChooserDialogImpl" timestamp="1584826260843">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state x="739" y="262" key="FileChooserDialogImpl/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1584826260843" />
+    <state width="1899" height="282" key="GridCell.Tab.0.bottom" timestamp="1584827535564">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="282" key="GridCell.Tab.0.bottom/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1584827535564" />
+    <state width="1899" height="282" key="GridCell.Tab.0.center" timestamp="1584827535563">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="282" key="GridCell.Tab.0.center/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1584827535563" />
+    <state width="1899" height="282" key="GridCell.Tab.0.left" timestamp="1584827535563">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="282" key="GridCell.Tab.0.left/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1584827535563" />
+    <state width="1899" height="282" key="GridCell.Tab.0.right" timestamp="1584827535563">
+      <screen x="0" y="0" width="1920" height="1040" />
+    </state>
+    <state width="1899" height="282" key="GridCell.Tab.0.right/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1584827535563" />
+  </component>
+</project>
