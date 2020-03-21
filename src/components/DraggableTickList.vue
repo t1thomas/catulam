@@ -221,7 +221,7 @@ export default {
         fetchPolicy: 'no-cache',
         variables: {
           ticket: { id: tickId },
-          $sprintRemove: { id: this.removedFrom.sprintId },
+          sprintRemove: { id: this.removedFrom.sprintId },
           uStoryRemove: { id: this.removedFrom.userStoryId },
           uStoryAdd: { id: this.addedTo.userStoryId },
         },
@@ -235,6 +235,7 @@ export default {
       });
       this.clearRemAdd();
     },
+    // yet to be tested
     async uStorySwitchChangeSprint(tickId, evt, sprintAddId) {
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SwitchUserStory.ChangeSprint,
