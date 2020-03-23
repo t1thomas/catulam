@@ -63,14 +63,6 @@ const typeDefs = `
            RETURN apoc.map.fromPairs(collect([key, value]))
         """ )
     }
-        type Query {
-        ticketsAsMap: JSON
-          @cypher (statement: """
-           Match (n:Ticket)
-           WITH n.id as key, apoc.map.removeKey(n {.*}, 'id')  as value 
-           RETURN apoc.map.fromPairs(collect([key, value]))
-        """ )
-    }
     type Mutation {
           TicSwitchSprint(tickId: String!, sprintIdFrom: String!, sprintIdTo: String!): JSON
             @cypher(statement:"""
