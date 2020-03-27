@@ -27,11 +27,17 @@ const driver = neo4j.driver(
 
 const port = process.env.GRAPHQL_LISTEN_PORT;
 
+const corsOptions = {
+  origin: 'http://localhost:8080',
+  credentials: true
+};
+
 const server = new ApolloServer({
   schema,
   context: { driver },
   introspection: true,
   playground: true,
+  cors: corsOptions,
 });
 
 console.log(process.env.NEO4J_URI);

@@ -1,10 +1,12 @@
-FROM node:10
+FROM node:lts-alpine
+
 WORKDIR /catulam-backend-api
 
 COPY package.json /catulam-backend-api
-RUN npm install
-ADD src /catulam-backend-api/src
 
+RUN npm install
+
+ADD src /catulam-backend-api/src
 
 EXPOSE 7000
 

@@ -129,8 +129,10 @@ export default {
       leftDrawerOpen: false,
     };
   },
-
-
+  mounted() {
+    console.log(process.env.VUE_APP_GRAPHQL_URI);
+    console.log(process.env.NODE_ENV);
+  },
 };
 </script>
 

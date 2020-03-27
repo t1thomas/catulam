@@ -40,6 +40,7 @@ export default {
     await this.fetchBackLogData();
     this.loaded = true;
   },
+
   methods: {
     ...mapActions([
       'fetchUserStories',

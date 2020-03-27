@@ -7,23 +7,23 @@ networks:
 services:
 
   neo4j:
-      image: neo4j:latest
-      ports:
-        - 7474:7474
-        - 7473:7473
-        - 7687:7687
-      volumes:
-        - $HOME/neo4j/data:/data
-        - $HOME/neo4j/logs:/logs
-        - $HOME/neo4j/import:/var/lib/neo4j/import
-        - $HOME/neo4j/conf:/conf
-        - $HOME/neo4j/plugins:/plugins
-      environment:
-        - NEO4J_AUTH=neo4j/changeme
-        - NEO4J_dbms_security_procedures_unrestricted=apoc.*
-        - NEO4JLABS_PLUGINS=["apoc"]
-      networks:
-        - catLink
+    image: neo4j:latest
+    ports:
+      - 7474:7474
+      - 7473:7473
+      - 7687:7687
+    volumes:
+      - $HOME/neo4j/data:/data
+      - $HOME/neo4j/logs:/logs
+      - $HOME/neo4j/import:/var/lib/neo4j/import
+      - $HOME/neo4j/conf:/conf
+      - $HOME/neo4j/plugins:/plugins
+    environment:
+      - NEO4J_AUTH=neo4j/test
+      - NEO4J_dbms_security_procedures_unrestricted=apoc.*
+      - NEO4JLABS_PLUGINS=["apoc"]
+    networks:
+      - catLink
 
   api:
     build: ./api
@@ -34,7 +34,6 @@ services:
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=test
       - GRAPHQL_LISTEN_PORT=7000
-      - GRAPHQL_URI=http://localhost:7000/graphql
     links:
       - neo4j
     depends_on:
@@ -42,3 +41,16 @@ services:
     networks:
       - catLink
 
+  frontend:
+    build: ./frontend
+    ports:
+      - 8080:8080
+    environment:
+      - VUE_APP_GRAPHQL_URI=http://0.0.0.0:7000/graphql
+    links:
+      - api
+    depends_on:
+      - neo4j
+      - api
+    networks:
+      - catLink
