@@ -1,12 +1,16 @@
 const { GraphQLJSON } = require('graphql-type-json');
 const { GraphQLObjectType, GraphQLString, GraphQLList } = require('graphql');
 const { makeAugmentedSchema } = require('neo4j-graphql-js');
+// const driver = require('./neo4jDriver');
+// const session = driver.session();
+const neode = require('./neode');
+const bcrypt = require('bcrypt');
 
 const idListScalar = new GraphQLObjectType({
-  name: 'ids',
-  fields: () => ({
-    ids: { type: new GraphQLList(GraphQLString) },
-  }),
+    name: 'ids',
+    fields: () => ({
+        ids: { type: new GraphQLList(GraphQLString) },
+    }),
 });
 const typeDefs = `
     scalar JSON
@@ -28,6 +32,16 @@ const typeDefs = `
               RETURN collect(rec.id) AS ids
          """)    
     }
+    
+    type User {
+        id: ID!
+        firstName: String!
+        lastName: String
+        username: String!
+        email: String!
+        password: String!
+    }
+    
     type Ticket {
         id: ID!
         issueNumber: Int!
@@ -40,6 +54,7 @@ const typeDefs = `
         done: Boolean!
         sprint: Sprint @relation(name: "SPRINT_TASK", direction: OUT)
     }
+    
     type Sprint {
         id: ID!
         sprintNo: Int!
@@ -55,6 +70,7 @@ const typeDefs = `
               RETURN collect(rec.id) AS ids
          """)    
     }
+    
     type Query {
         ticketsAsMap: JSON
           @cypher (statement: """
@@ -63,7 +79,8 @@ const typeDefs = `
            RETURN apoc.map.fromPairs(collect([key, value]))
         """ )
     }
-        type Query {
+    
+    type Query {
         ticketsAsMap: JSON
           @cypher (statement: """
            Match (n:Ticket)
@@ -71,7 +88,10 @@ const typeDefs = `
            RETURN apoc.map.fromPairs(collect([key, value]))
         """ )
     }
+      
     type Mutation {
+          loginUser(username: String!, password: String!): User!
+          
           TicSwitchSprint(tickId: String!, sprintIdFrom: String!, sprintIdTo: String!): JSON
             @cypher(statement:"""
             MATCH (a:Ticket{id:tickId})-[rel:SPRINT_TASK]->(b:Sprint {id:sprintIdFrom})
@@ -99,12 +119,46 @@ const typeDefs = `
             """)
     }
 `;
-
 const resolveFunctions = {
-  JSON: GraphQLJSON,
-  idList: idListScalar,
+    JSON: GraphQLJSON,
+    idList: idListScalar,
+    Mutation: {
+        loginUser: (_, {username, password}) => {
+            return neode.cypher('MATCH (u:User {username: $username}) RETURN u', {username})
+                .then(async (result) => {
+                    const user = result.records[0].get('u').properties;
+                    const passValid = await bcrypt.compare(password, user.password);
+                    if (passValid) {
+                        console.log(user);
+                        return user;
+                    }
+                    else {
+                        throw 'pass';
+                    }
+                })
+                .catch(e => {
+                    if(e === 'pass'){
+                        throw new Error('Password invalid');
+                    }
+                    throw new Error('Username invalid');
+                });
+        },
+    },
 };
 const schema = makeAugmentedSchema({ typeDefs, resolvers: resolveFunctions });
 
-
+// Mutation: {
+//     loginUser:  async (_, {username}) => {
+//         try {
+//             const result = await session.run('MATCH (u1:User {username: $username}) RETURN u1', {username});
+//             const user  = result.records[0].get('u1');
+//             return user.properties;
+//         } catch (error) {
+//             throw new Error('User not found');
+//         } finally {
+//             await session.close();
+//             await driver.close();
+//         }
+//     },
+// },
 module.exports = schema;
