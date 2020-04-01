@@ -5,14 +5,20 @@ import Home from '../views/Home.vue';
 // import repoandbranchselector from '../views/Ebranchselector.vue';
 // import repoandbranchselector from '../components/Ebranchselector.vue';
 import backlog from '../views/backlog.vue';
+import login from '../views/login.vue';
 
 Vue.use(VueRouter);
 
 const routes = [
   {
-    path: '/',
+    path: '/home',
     name: 'home',
     component: Home,
+  },
+  {
+    path: '/',
+    name: 'login',
+    component: login,
   },
   // {
   //   path: '/gitauth/callback',

@@ -13,10 +13,17 @@
           icon="menu"
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
-
         <q-toolbar-title>
           Caṭulam
         </q-toolbar-title>
+        <q-btn
+          v-if="currentUser"
+          flat
+          dense
+          icon="mdi-logout-variant"
+          label="Sign-out"
+          @click="logOutHandler"
+        />
       </q-toolbar>
     </q-header>
 
@@ -26,87 +33,18 @@
       content-class="bg-grey-2"
     >
       <q-list>
-        <q-item-label header>
-          Essential Links
-        </q-item-label>
         <q-item
+          v-for="(item, index) in drawerItems"
+          :key="index"
           clickable
           tag="a"
-          target="_blank"
-          href="https://quasar.dev"
+          :to="item.link"
         >
           <q-item-section avatar>
-            <q-icon name="school" />
+            <q-icon :name="item.icon" />
           </q-item-section>
           <q-item-section>
-            <q-item-label>Docs</q-item-label>
-            <q-item-label caption>
-              quasar.dev
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item
-          clickable
-          tag="a"
-          target="_blank"
-          href="https://github.com/quasarframework/"
-        >
-          <q-item-section avatar>
-            <q-icon name="code" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Github</q-item-label>
-            <q-item-label caption>
-              github.com/quasarframework
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item
-          clickable
-          tag="a"
-          target="_blank"
-          href="https://chat.quasar.dev"
-        >
-          <q-item-section avatar>
-            <q-icon name="chat" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Discord Chat Channel</q-item-label>
-            <q-item-label caption>
-              chat.quasar.dev
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item
-          clickable
-          tag="a"
-          target="_blank"
-          href="https://forum.quasar.dev"
-        >
-          <q-item-section avatar>
-            <q-icon name="forum" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Forum</q-item-label>
-            <q-item-label caption>
-              forum.quasar.dev
-            </q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item
-          clickable
-          tag="a"
-          target="_blank"
-          href="https://twitter.com/quasarframework"
-        >
-          <q-item-section avatar>
-            <q-icon name="rss_feed" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Twitter</q-item-label>
-            <q-item-label caption>
-              @quasarframework
-            </q-item-label>
+            <q-item-label>{{ item.label }}</q-item-label>
           </q-item-section>
         </q-item>
       </q-list>
@@ -122,12 +60,34 @@
 // import HelloWorld from './components/HelloWorld.vue';
 
 
+import { mapState } from 'vuex';
+
 export default {
   name: 'LayoutDefault',
   data() {
     return {
       leftDrawerOpen: false,
     };
+  },
+  computed: {
+    ...mapState([
+      'currentUser',
+    ]),
+    drawerItems() {
+      if (this.currentUser) {
+        return [
+          { icon: 'mdi-logout-variant', label: 'Sign-out', link: '/' },
+        ];
+      }
+      return [
+        { icon: 'mdi-login-variant', label: 'Sign-in', link: '/' },
+      ];
+    },
+  },
+  methods: {
+    logOutHandler() {
+      this.$store.dispatch('logoutUser');
+    },
   },
 
 

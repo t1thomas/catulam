@@ -1,12 +1,25 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
-  USWithTickIds: gql`
-  query{
+  SignInUser: gql`mutation($username: String!, $password: String!) {
+      loginUser(username: $username, password: $password) {
+        token
+      }
+    }`,
+  USWithTickIds: gql`query{
     UserStory {
       id
       storyText
       ticketIds
+    }
+  }`,
+  CurrentUser: gql`query {
+    getCurrentUser {
+      id
+      firstName
+      lastName
+      username
+      email
     }
   }`,
   Tickets: gql`query{

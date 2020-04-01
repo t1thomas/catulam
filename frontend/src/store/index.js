@@ -1,11 +1,13 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import gqlQueries from '../graphql/gql-queries';
+import router from '../router';
 
 Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    currentUser: null,
     showDialog: false,
     carouselModelParent: 1,
     backLogData: [],
@@ -58,6 +60,9 @@ export default new Vuex.Store({
     set_showDialog(state) {
       state.showDialog = !state.showDialog;
     },
+    set_currentUser(state, obj) {
+      state.currentUser = obj;
+    },
     // moveCard_StartToSprint(state) {
     //   state.backLogData.forEach((userStory) =>{
     //     userStory.tickets
@@ -82,6 +87,14 @@ export default new Vuex.Store({
         }, (error) => {
           console.error(error);
         });
+    },
+    async fetchCurrentUser({ commit }) {
+      const response = await Vue.$apolloClient.query({
+        query: gqlQueries.CurrentUser,
+        fetchPolicy: 'no-cache',
+      });
+      const { getCurrentUser } = response.data;
+      commit('set_currentUser', getCurrentUser);
     },
     async fetchUserStories({ commit }) {
       const response = await Vue.$apolloClient.query({
@@ -124,6 +137,28 @@ export default new Vuex.Store({
         console.error(error);
       });
     },
+    async logoutUser({ commit }) {
+      // localStorage.setItem('catulam_token', '');
+      console.log(commit);
+      await Vue.$apolloClient.resetStore();
+      console.dir(Vue.$apolloClient);
+      // commit('set_currentUser', null);
+      // await router.push('/');
+    },
+    async loginUser({ commit }, payload) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SignInUser,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        console.log(commit);
+        const { loginUser } = response.data;
+        localStorage.setItem('catulam_token', loginUser.token);
+        router.go();
+      }).catch((error) => {
+        console.error(error);
+      });
+    },
     setCardRemoved({ commit }, listConfig) {
       commit('set_cardRemoved', listConfig);
     },
@@ -150,6 +185,7 @@ export default new Vuex.Store({
     // }
   },
   getters: {
+    // getCurrentUser: (state) => state.currentUser,
     // getTicIdsPerSprint: state => (sprintNo, arrTicketIds) => arrTicketIds
     //   .filter(tickId => state.sprintList[sprintNo - 1].ticketIds.includes(tickId)),
     getIssueType: (state) => state.issueType,
