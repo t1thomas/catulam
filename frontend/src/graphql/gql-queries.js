@@ -3,9 +3,15 @@ import gql from 'graphql-tag';
 const gqlQueries = {
   SignInUser: gql`mutation($username: String!, $password: String!) {
       loginUser(username: $username, password: $password) {
-        token
+        id
       }
     }`,
+  DeleteToken: gql`mutation($id: String!) {
+    DeleteToken(id: $id){
+      id
+    }
+  }
+  `,
   USWithTickIds: gql`query{
     UserStory {
       id
@@ -65,20 +71,20 @@ const gqlQueries = {
       }
     }
   }`,
-  StartToSprint: gql`mutation AddTicketSprint($ticket: _TicketInput! $sprint: _SprintInput!){
+  StartToSprint: gql`mutation($ticket: _TicketInput! $sprint: _SprintInput!){
     AddTicketSprint(from: $ticket to: $sprint){
       from{id}
       to{id}
     }
   }`,
-  SprintToStart: gql`mutation RemoveTicketSprint($ticket: _TicketInput! $sprint: _SprintInput!){
+  SprintToStart: gql`mutation($ticket: _TicketInput! $sprint: _SprintInput!){
     RemoveTicketSprint(from: $ticket to:$sprint){
       from{id}
       to{id}
     }
   }`,
   SwitchUserStory: {
-    storySwitch: gql`mutation TicSwitchSprint($ticket: String! $usFrom: String! $usTo: String!){
+    storySwitch: gql`mutation($ticket: String! $usFrom: String! $usTo: String!){
     TicSwitchUStory(tickId: $ticket UStoryIdFrom: $usFrom UStoryIdTo: $usTo)
   }
   `,

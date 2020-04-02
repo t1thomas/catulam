@@ -9,16 +9,37 @@ import login from '../views/login.vue';
 
 Vue.use(VueRouter);
 
+const AuthAccess = (to, from, next) => {
+  if (!Vue.$store.state.currentUser) {
+    next({
+      path: '/login',
+    });
+  } else {
+    console.log('thendi');
+    next();
+  }
+};
 const routes = [
   {
     path: '/home',
     name: 'home',
     component: Home,
+    beforeEnter: AuthAccess,
   },
   {
     path: '/',
+    redirect: '/login',
+  },
+  {
+    path: '/login',
     name: 'login',
     component: login,
+  },
+  {
+    path: '/backlog',
+    name: 'backlog',
+    component: backlog,
+    beforeEnter: AuthAccess,
   },
   // {
   //   path: '/gitauth/callback',
@@ -38,11 +59,6 @@ const routes = [
   //   name: 'repoandbranchselector',
   //   component: repoandbranchselector,
   // },
-  {
-    path: '/backlog',
-    name: 'backlog',
-    component: backlog,
-  },
 ];
 
 const router = new VueRouter({

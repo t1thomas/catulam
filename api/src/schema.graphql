@@ -8,7 +8,7 @@
     }
 
     type Token {
-        token: String!
+        id: String!
     }
 
     type UserStory {
@@ -29,6 +29,7 @@
         username: String!
         email: String!
         password: String!
+        tokens: [Token] @relation(name: "JWT", direction: OUT)
     }
 
     type Ticket {
@@ -73,9 +74,9 @@
     }
 
     type Mutation {
-          loginUser(username: String!, password: String!): Token!
+        loginUser(username: String!, password: String!): Token!
 
-          TicSwitchSprint(tickId: String!, sprintIdFrom: String!, sprintIdTo: String!): JSON
+        TicSwitchSprint(tickId: String!, sprintIdFrom: String!, sprintIdTo: String!): JSON
             @cypher(statement:"""
             MATCH (a:Ticket{id:tickId})-[rel:SPRINT_TASK]->(b:Sprint {id:sprintIdFrom})
             MATCH (c:Sprint {id:sprintIdTo})

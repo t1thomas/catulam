@@ -1,6 +1,7 @@
 const { GraphQLJSON } = require('graphql-type-json');
 const { GraphQLObjectType, GraphQLString, GraphQLList } = require('graphql');
 const { makeAugmentedSchema } = require('neo4j-graphql-js');
+const neode = require('./neode');
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
@@ -16,17 +17,24 @@ const idListScalar = new GraphQLObjectType({
     }),
 });
 
-function createToken(user, expiresIn) {
-    const {username, email} = user;
-    const token = jwt.sign({username, email}, process.env.JWTSECRET, {expiresIn});
-    return token
+async function createToken(user, expiresIn) {
+    const {username} = user;
+    const token = jwt.sign({username}, process.env.JWTSECRET, {expiresIn});
+    return await neode.cypher("MATCH (u:User { username: $username}) CREATE (u)-[rel:JWT]->(t: Token {id:$token}) RETURN t.id",
+        {username:username, token: token})
+        .then((resultToken) => {
+            return resultToken.records[0].get(0);
+        })
+        .catch(e => {
+            throw new Error(e);
+        });
 }
 
 const resolveFunctions = {
     JSON: GraphQLJSON,
     idList: idListScalar,
     Query:{
-        getCurrentUser: async (_, args, {currentUser, neode}) =>{
+        getCurrentUser: async (_, args, {currentUser}) =>{
             if(!currentUser) {
                 return null;
             }
@@ -40,14 +48,14 @@ const resolveFunctions = {
         }
     },
     Mutation: {
-        loginUser: (_, {username, password}, { neode }) => {
+        loginUser: (_, {username, password}) => {
             return neode.cypher('MATCH (u:User {username: $username}) RETURN u', {username})
                 .then(async (result) => {
                     const user = result.records[0].get('u').properties;
                     const passValid = await bcrypt.compare(password, user.password);
                     if (passValid) {
-                        // console.log(user);
-                        return {token: createToken(user,'1hr')};
+                        const token = await createToken(user,'1hr');
+                        return {id: token};
                     }
                     else {
                         // throw invalid password error
@@ -58,6 +66,9 @@ const resolveFunctions = {
                     if(e === 'pass'){
                         throw new Error('Password invalid');
                     }
+                    // if(e === 'cypher'){
+                    //     throw new Error('INTERNAL_ERROR: DATABASE STORAGE FAILED')
+                    // }
                     throw new Error('Username invalid');
                 });
         },

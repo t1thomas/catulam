@@ -138,14 +138,25 @@ export default new Vuex.Store({
       });
     },
     async logoutUser({ commit }) {
-      // localStorage.setItem('catulam_token', '');
-      console.log(commit);
-      await Vue.$apolloClient.resetStore();
-      console.dir(Vue.$apolloClient);
-      // commit('set_currentUser', null);
-      // await router.push('/');
+      /* remove token right away, s even if the database
+      operation fails the client no longer has a token
+       */
+      const id = localStorage.getItem('catulam_token');
+      localStorage.setItem('catulam_token', '');
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.DeleteToken,
+        fetchPolicy: 'no-cache',
+        variables: { id },
+      }).then(() => {
+        Vue.$apolloClient.resetStore();
+        commit('set_currentUser', null);
+        router.push('/');
+      }).catch((error) => {
+        console.error(error);
+      });
     },
     async loginUser({ commit }, payload) {
+      localStorage.setItem('catulam_token', '');
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SignInUser,
         fetchPolicy: 'no-cache',
@@ -153,7 +164,7 @@ export default new Vuex.Store({
       }).then((response) => {
         console.log(commit);
         const { loginUser } = response.data;
-        localStorage.setItem('catulam_token', loginUser.token);
+        localStorage.setItem('catulam_token', loginUser.id);
         router.go();
       }).catch((error) => {
         console.error(error);

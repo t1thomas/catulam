@@ -3,17 +3,20 @@
   <component name="ChangeListManager">
     <list default="true" id="7392c08f-c877-4304-8e8a-a6c2de7a4a78" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/.env" beforeDir="false" afterPath="$PROJECT_DIR$/api/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/node_modules/jsonwebtoken/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/api/node_modules/jsonwebtoken/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/api/package.json" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/src/graphQL-schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/graphQL-schema.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/api/src/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/schema.graphql" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/schema.graphql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/public/favicon.ico" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/public/favicon.ico" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/App.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.vue" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/graphql/gql-queries.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/graphql/gql-queries.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/main.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/main.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/plugins/apolloClient.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/plugins/apolloClient.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/router/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/router/index.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/store/index.js" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/store/index.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/Home.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/Home.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/backlog.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/backlog.vue" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/views/login.vue" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/views/login.vue" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -87,9 +90,20 @@
       <envs />
       <method v="2" />
     </configuration>
+    <configuration name="test:unit" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/frontend/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="test:unit" />
+      </scripts>
+      <node-interpreter value="project" />
+      <envs />
+      <method v="2" />
+    </configuration>
     <recent_temporary>
       <list>
         <item itemvalue="npm.serve" />
+        <item itemvalue="npm.test:unit" />
         <item itemvalue="npm.nodemon" />
       </list>
     </recent_temporary>
@@ -106,7 +120,8 @@
       <updated>1584823181622</updated>
       <workItem from="1584823184983" duration="8471000" />
       <workItem from="1585417635004" duration="32847000" />
-      <workItem from="1585662700846" duration="23998000" />
+      <workItem from="1585662700846" duration="24766000" />
+      <workItem from="1585765977813" duration="17570000" />
     </task>
     <servers />
   </component>
@@ -122,30 +137,30 @@
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="690" y="267" key="#com.intellij.refactoring.safeDelete.UnsafeUsagesDialog/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1584824790658" />
-    <state x="92" y="92" width="1736" height="856" key="DiffContextDialog" timestamp="1585677920376">
+    <state x="153" y="46" width="1736" height="856" key="DiffContextDialog" timestamp="1585766973128">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state x="92" y="92" width="1736" height="856" key="DiffContextDialog/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1585677920376" />
+    <state x="153" y="46" width="1736" height="856" key="DiffContextDialog/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1585766973128" />
     <state x="739" y="262" key="FileChooserDialogImpl" timestamp="1584826260843">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
     <state x="739" y="262" key="FileChooserDialogImpl/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1584826260843" />
-    <state width="1899" height="234" key="GridCell.Tab.0.bottom" timestamp="1585694685611">
+    <state width="1899" height="234" key="GridCell.Tab.0.bottom" timestamp="1585773489092">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="234" key="GridCell.Tab.0.bottom/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1585694685611" />
-    <state width="1899" height="234" key="GridCell.Tab.0.center" timestamp="1585694685611">
+    <state width="1899" height="234" key="GridCell.Tab.0.bottom/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1585773489092" />
+    <state width="1899" height="234" key="GridCell.Tab.0.center" timestamp="1585773489092">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="234" key="GridCell.Tab.0.center/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1585694685611" />
-    <state width="1899" height="234" key="GridCell.Tab.0.left" timestamp="1585694685611">
+    <state width="1899" height="234" key="GridCell.Tab.0.center/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1585773489092" />
+    <state width="1899" height="234" key="GridCell.Tab.0.left" timestamp="1585773489092">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="234" key="GridCell.Tab.0.left/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1585694685611" />
-    <state width="1899" height="234" key="GridCell.Tab.0.right" timestamp="1585694685611">
+    <state width="1899" height="234" key="GridCell.Tab.0.left/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1585773489092" />
+    <state width="1899" height="234" key="GridCell.Tab.0.right" timestamp="1585773489092">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>
-    <state width="1899" height="234" key="GridCell.Tab.0.right/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1585694685611" />
+    <state width="1899" height="234" key="GridCell.Tab.0.right/0.0.1920.1040/-1440.178.1440.860/1920.175.1440.860@0.0.1920.1040" timestamp="1585773489092" />
     <state width="1899" height="348" key="GridCell.Tab.1.bottom" timestamp="1585456631607">
       <screen x="0" y="0" width="1920" height="1040" />
     </state>

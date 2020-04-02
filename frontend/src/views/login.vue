@@ -23,7 +23,6 @@
           :type="isPwd ? 'password' : 'text'"
           lazy-rules
           :rules="[ val => val && val.length > 0 || 'Enter Password']"
-          hint="Password with toggle"
         >
           <template v-slot:append>
             <q-icon

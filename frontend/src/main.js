@@ -8,6 +8,8 @@ import './quasar';
 import apolloClient from './plugins/apolloClient';
 
 Vue.$apolloClient = apolloClient;
+Vue.$store = store;
+
 
 const apolloProvider = new VueApollo({ apolloClient });
 Vue.use(VueApollo);

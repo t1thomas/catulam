@@ -77,6 +77,7 @@ export default {
       if (this.currentUser) {
         return [
           { icon: 'mdi-logout-variant', label: 'Sign-out', link: '/' },
+          { icon: 'mdi-home', label: 'home', link: '/home' },
         ];
       }
       return [
@@ -85,8 +86,8 @@ export default {
     },
   },
   methods: {
-    logOutHandler() {
-      this.$store.dispatch('logoutUser');
+    async logOutHandler() {
+      await this.$store.dispatch('logoutUser');
     },
   },
 

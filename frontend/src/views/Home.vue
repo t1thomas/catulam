@@ -13,5 +13,8 @@ export default {
   name: 'Home',
   components: {
   },
+  mounted() {
+    console.log('er');
+  },
 };
 </script>

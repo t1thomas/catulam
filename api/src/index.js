@@ -4,7 +4,6 @@ const schema = require('./graphQL-schema');
 const driver = require('./neo4jDriver');
 const jwt = require('jsonwebtoken');
 // set environment variables from ../.env
-const neode = require('./neode');
 
 require('dotenv').config();
 
@@ -35,7 +34,7 @@ const server = new ApolloServer({
     schema,
     context: async ({req}) => {
         const jwtToken = req.headers['authorization'];
-        return {driver, currentUser: await verifyToken(jwtToken), neode};
+        return {driver, currentUser: await verifyToken(jwtToken)};
     },
     introspection: true,
     playground: true,
