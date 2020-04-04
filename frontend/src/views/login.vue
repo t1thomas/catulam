@@ -66,6 +66,9 @@ export default {
     ...mapState([
       'currentUser',
     ]),
+    // ...mapGetters([
+    //   'getCurrentUser'
+    // ])
   },
   watch: {
     currentUser() {
@@ -74,12 +77,17 @@ export default {
       }
     },
   },
+  async mounted() {
+    await this.fetchCurrentUser();
+  },
   methods: {
     ...mapActions([
       'loginUser',
+      'fetchCurrentUser',
     ]),
-    onSubmit() {
-      this.loginUser({ username: this.username, password: this.password });
+    async onSubmit() {
+      await this.loginUser({ username: this.username, password: this.password });
+      await this.fetchCurrentUser();
     },
     onRegister() {
       console.log('Register page');

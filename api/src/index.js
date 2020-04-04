@@ -34,7 +34,7 @@ const server = new ApolloServer({
     schema,
     context: async ({req}) => {
         const jwtToken = req.headers['authorization'];
-        return {driver, currentUser: await verifyToken(jwtToken)};
+        return {driver, currentUser: await verifyToken(jwtToken), jwtToken};
     },
     introspection: true,
     playground: true,

@@ -18,7 +18,7 @@ new Vue({
   store,
   apolloProvider,
   created() {
-    this.$store.dispatch('fetchCurrentUser');
+    // this.$store.dispatch('fetchCurrentUser');
   },
   render: (h) => h(App),
 }).$mount('#app');

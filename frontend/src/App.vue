@@ -47,6 +47,19 @@
             <q-item-label>{{ item.label }}</q-item-label>
           </q-item-section>
         </q-item>
+        <q-item
+          v-if="currentUser"
+          clickable
+          tag="a"
+          @click="logOutHandler"
+        >
+          <q-item-section avatar>
+            <q-icon name="mdi-logout-variant" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label>Sign-out</q-item-label>
+          </q-item-section>
+        </q-item>
       </q-list>
     </q-drawer>
 
@@ -76,8 +89,8 @@ export default {
     drawerItems() {
       if (this.currentUser) {
         return [
-          { icon: 'mdi-logout-variant', label: 'Sign-out', link: '/' },
           { icon: 'mdi-home', label: 'home', link: '/home' },
+          { icon: 'mdi-math-log', label: 'Backlog', link: '/backlog' },
         ];
       }
       return [

@@ -63,11 +63,6 @@ export default new Vuex.Store({
     set_currentUser(state, obj) {
       state.currentUser = obj;
     },
-    // moveCard_StartToSprint(state) {
-    //   state.backLogData.forEach((userStory) =>{
-    //     userStory.tickets
-    //   })
-    // }
   },
   actions: {
     async fetchRepoAndBranch({ commit }) {
@@ -87,14 +82,6 @@ export default new Vuex.Store({
         }, (error) => {
           console.error(error);
         });
-    },
-    async fetchCurrentUser({ commit }) {
-      const response = await Vue.$apolloClient.query({
-        query: gqlQueries.CurrentUser,
-        fetchPolicy: 'no-cache',
-      });
-      const { getCurrentUser } = response.data;
-      commit('set_currentUser', getCurrentUser);
     },
     async fetchUserStories({ commit }) {
       const response = await Vue.$apolloClient.query({
@@ -137,16 +124,28 @@ export default new Vuex.Store({
         console.error(error);
       });
     },
+    async fetchCurrentUser({ commit }) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.CurrentUser,
+        fetchPolicy: 'no-cache',
+      }).then((response) => {
+        const { getCurrentUser } = response.data;
+        commit('set_currentUser', getCurrentUser);
+        // eslint-disable-next-line no-unused-vars
+      }).catch((error) => {
+        commit('set_currentUser', null);
+      });
+    },
     async logoutUser({ commit }) {
       /* remove token right away, s even if the database
       operation fails the client no longer has a token
        */
-      const id = localStorage.getItem('catulam_token');
+      const tokenq = localStorage.getItem('catulam_token');
       localStorage.setItem('catulam_token', '');
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.DeleteToken,
         fetchPolicy: 'no-cache',
-        variables: { id },
+        variables: { token: tokenq },
       }).then(() => {
         Vue.$apolloClient.resetStore();
         commit('set_currentUser', null);
@@ -163,9 +162,14 @@ export default new Vuex.Store({
         variables: payload,
       }).then((response) => {
         console.log(commit);
+        console.log(response.data);
         const { loginUser } = response.data;
-        localStorage.setItem('catulam_token', loginUser.id);
-        router.go();
+        localStorage.setItem('catulam_token', loginUser.token);
+        // router.push('/backlog');
+        // router.go();
+        /* reloads the vue instance causing the created hook at main.js to
+           run which in turn sets the current user state
+        */
       }).catch((error) => {
         console.error(error);
       });
@@ -190,6 +194,9 @@ export default new Vuex.Store({
     },
     showDialogSwitcher({ commit }) {
       commit('set_showDialog');
+    },
+    setUser({ commit }, value) {
+      commit('set_currentUser', value);
     },
     // cardMoveStartToSprint({commit}) {
     //

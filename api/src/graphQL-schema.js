@@ -17,11 +17,12 @@ const idListScalar = new GraphQLObjectType({
     }),
 });
 
-async function createToken(user, expiresIn) {
-    const {username} = user;
-    const token = jwt.sign({username}, process.env.JWTSECRET, {expiresIn});
-    return await neode.cypher("MATCH (u:User { username: $username}) CREATE (u)-[rel:JWT]->(t: Token {id:$token}) RETURN t.id",
-        {username:username, token: token})
+async function createToken(user, exp) {
+    const {username, id} = user;
+    const token = jwt.sign({exp, username, id}, process.env.JWTSECRET);
+    return await neode.cypher("MATCH (u:User { username: $username}) CREATE (u)-[rel:JWT]->(t: Token {token:$token}) WITH u, rel, t" +
+        " CALL apoc.ttl.expire(t, $ttl, 's') RETURN t.token",
+        {username, token, ttl: exp})
         .then((resultToken) => {
             return resultToken.records[0].get(0);
         })
@@ -34,18 +35,20 @@ const resolveFunctions = {
     JSON: GraphQLJSON,
     idList: idListScalar,
     Query:{
-        getCurrentUser: async (_, args, {currentUser}) =>{
+        getCurrentUser: async (_, args, {currentUser, jwtToken}) =>{
             if(!currentUser) {
-                return null;
+                throw new Error('Verification Error');
             }
-            return neode.cypher('MATCH (u:User {username: $username}) RETURN u', {username:currentUser.username})
+            return neode.cypher('MATCH (u:User {username: $username})-[rel:JWT]->(t: Token {token:$token}) RETURN u',
+                {username:currentUser.username, token: jwtToken})
                 .then((result) => {
                     return result.records[0].get('u').properties;
                 })
                 .catch(e => {
-                    throw new Error(e);
+                    console.log(e);
+                    throw new Error('Using redundant token, Sign in again ');
                 });
-        }
+        },
     },
     Mutation: {
         loginUser: (_, {username, password}) => {
@@ -54,11 +57,12 @@ const resolveFunctions = {
                     const user = result.records[0].get('u').properties;
                     const passValid = await bcrypt.compare(password, user.password);
                     if (passValid) {
-                        const token = await createToken(user,'1hr');
-                        return {id: token};
+                        // one hour from current time
+                        const exp = Math.floor(Date.now() / 1000) + (60 * 60);
+                        const token = await createToken(user, exp);
+                        return {token: token};
                     }
                     else {
-                        // throw invalid password error
                         throw 'pass';
                     }
                 })
@@ -66,6 +70,7 @@ const resolveFunctions = {
                     if(e === 'pass'){
                         throw new Error('Password invalid');
                     }
+                    console.log(e);
                     // if(e === 'cypher'){
                     //     throw new Error('INTERNAL_ERROR: DATABASE STORAGE FAILED')
                     // }

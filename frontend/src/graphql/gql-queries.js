@@ -2,16 +2,21 @@ import gql from 'graphql-tag';
 
 const gqlQueries = {
   SignInUser: gql`mutation($username: String!, $password: String!) {
-      loginUser(username: $username, password: $password) {
-        id
+      loginUser(username: $username, password: $password){
+        token
       }
     }`,
-  DeleteToken: gql`mutation($id: String!) {
-    DeleteToken(id: $id){
-      id
+  DeleteToken: gql`mutation($token: String!) {
+    DeleteToken(token: $token){
+      token
     }
   }
   `,
+  VerifyToken: gql`query {
+    verifyUserToken {
+      token
+    }
+  }`,
   USWithTickIds: gql`query{
     UserStory {
       id

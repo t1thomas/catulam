@@ -6,18 +6,25 @@ import Home from '../views/Home.vue';
 // import repoandbranchselector from '../components/Ebranchselector.vue';
 import backlog from '../views/backlog.vue';
 import login from '../views/login.vue';
+import gqlQueries from '../graphql/gql-queries';
 
 Vue.use(VueRouter);
 
-const AuthAccess = (to, from, next) => {
-  if (!Vue.$store.state.currentUser) {
+const AuthAccess = async (to, from, next) => {
+  await Vue.$apolloClient.query({
+    query: gqlQueries.CurrentUser,
+    fetchPolicy: 'no-cache',
+  }).then((response) => {
+    next();
+    const { getCurrentUser } = response.data;
+    Vue.$store.dispatch('setUser', getCurrentUser);
+  }).catch((error) => {
+    Vue.$store.dispatch('setUser', null);
+    console.error(error);
     next({
       path: '/login',
     });
-  } else {
-    console.log('thendi');
-    next();
-  }
+  });
 };
 const routes = [
   {

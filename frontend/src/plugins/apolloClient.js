@@ -8,13 +8,15 @@ export default new ApolloClient({
   },
   request: (operation) => {
     // if !'catulam_token' in localStorage, add it
-    if (!localStorage.catulam_token) {
-      localStorage.setItem('catulam_token', '');
-    }
+    // if (!localStorage.catulam_token) {
+    //   localStorage.setItem('catulam_token', '');
+    // }
+    const token = localStorage.getItem('catulam_token');
+
     // adds token to auth header, which is sent to backend
     operation.setContext({
       headers: {
-        authorization: localStorage.getItem('catulam_token'),
+        authorization: token || '',
       },
     });
   },
