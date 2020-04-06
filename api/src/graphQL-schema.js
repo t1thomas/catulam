@@ -39,6 +39,7 @@ const resolveFunctions = {
             if(!currentUser) {
                 throw new Error('Verification Error');
             }
+            console.log(currentUser);
             return neode.cypher('MATCH (u:User {username: $username})-[rel:JWT]->(t: Token {token:$token}) RETURN u',
                 {username:currentUser.username, token: jwtToken})
                 .then((result) => {
@@ -55,9 +56,11 @@ const resolveFunctions = {
             return neode.cypher('MATCH (u:User {username: $username}) RETURN u', {username})
                 .then(async (result) => {
                     const user = result.records[0].get('u').properties;
+                    console.log(password);
+                    console.log(user.password);
                     const passValid = await bcrypt.compare(password, user.password);
                     if (passValid) {
-                        // one hour from current time
+                        //  token expiration, one hour from current time
                         const exp = Math.floor(Date.now() / 1000) + (60 * 60);
                         const token = await createToken(user, exp);
                         return {token: token};

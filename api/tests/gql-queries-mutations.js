@@ -177,5 +177,11 @@ const gqlQueries = {
                 }
             }
         }`,
+    LOGIN_USER: gql`
+        mutation($username: String!, $password: String!) {
+            loginUser(username: $username, password: $password) {
+                token
+            }
+        }`,
 };
 module.exports = gqlQueries;

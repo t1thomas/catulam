@@ -3,10 +3,10 @@
   <component name="ChangeListManager">
     <list default="true" id="7392c08f-c877-4304-8e8a-a6c2de7a4a78" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/.env" beforeDir="false" afterPath="$PROJECT_DIR$/api/.env" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/node_modules/graphql-tag/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/api/node_modules/graphql-tag/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/package-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/api/package-lock.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/api/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/api/package.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/src/graphQL-schema.js" beforeDir="false" afterPath="$PROJECT_DIR$/api/src/graphQL-schema.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/tests/__snapshots__/mutations.test.js.snap" beforeDir="false" afterPath="$PROJECT_DIR$/api/tests/__snapshots__/mutations.test.js.snap" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/tests/gql-queries-mutations.js" beforeDir="false" afterPath="$PROJECT_DIR$/api/tests/gql-queries-mutations.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/api/tests/mutations.test.js" beforeDir="false" afterPath="$PROJECT_DIR$/api/tests/mutations.test.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -112,7 +112,8 @@
       <workItem from="1585417635004" duration="32847000" />
       <workItem from="1585662700846" duration="24766000" />
       <workItem from="1585765977813" duration="41003000" />
-      <workItem from="1586037864711" duration="6534000" />
+      <workItem from="1586037864711" duration="6690000" />
+      <workItem from="1586123396351" duration="1252000" />
     </task>
     <servers />
   </component>

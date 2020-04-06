@@ -2,6 +2,18 @@ const { query, mutate } = require('./testingServer');
 
 const gqlQueries = require('./gql-queries-mutations');
 
+const jwt = require('jsonwebtoken');
+
+async function verifyToken(token) {
+    if(token){
+        try {
+            return await jwt.verify(token, process.env.JWTSECRET);
+        }
+        catch (e) {
+            throw new Error('Please sign in again');
+        }
+    }
+}
 describe('Mutations', () => {
     it('Create a user', async () => {
         const res = await mutate({
@@ -12,7 +24,7 @@ describe('Mutations', () => {
                 lastName : "Bloggz",
                 username : "user1",
                 email : "test@gmail.com",
-                password: "$2y$12$cIYpwlV1vWG01L.q6uAmb.Cf2Z/3tD7jlgZTP9HTjbGFQe7LyADkW" // hashed password : 'test'
+                password: "$2b$12$h6BlNYjDx8r2Uug3crDs8OhT6EME94TmBojovXCLsnbiun9EH6SbS" // hashed string 'test'
             },
         });
         expect(res.data.CreateUser).toMatchSnapshot();
@@ -50,5 +62,18 @@ describe('Mutations', () => {
             mutation: gqlQueries.ADD_SPRINT_TICKETS,
         });
         expect(res.data).toMatchSnapshot();
+    });
+    it('Login test user', async () => {
+        const res = await mutate({
+            mutation: gqlQueries.LOGIN_USER,
+            variables: {username:"user1", password:"test"}
+        });
+        expect(await verifyToken(res.data.loginUser.token)).toEqual(expect.objectContaining({
+                exp: expect.any(Number),
+                username: 'user1',
+                id: 'user1test',
+                iat: expect.any(Number),
+            })
+        );
     });
 });

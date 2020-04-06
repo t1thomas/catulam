@@ -63,13 +63,42 @@ Object {
 }
 `;
 
+exports[`Mutations Create 3 tickets 1`] = `
+Object {
+  "tick1": Object {
+    "desc": "Create API for backend and frontend",
+    "done": false,
+    "hourEstimate": 5,
+    "id": "t1test",
+    "issueNumber": 1,
+    "title": "Set Up API",
+  },
+  "tick2": Object {
+    "desc": "Create Login Page for users to enter credentials",
+    "done": false,
+    "hourEstimate": 5,
+    "id": "t2test",
+    "issueNumber": 2,
+    "title": "login page",
+  },
+  "tick3": Object {
+    "desc": "Create landing page for client side SPA",
+    "done": false,
+    "hourEstimate": 5,
+    "id": "t3test",
+    "issueNumber": 3,
+    "title": "Landing page",
+  },
+}
+`;
+
 exports[`Mutations Create a user 1`] = `
 Object {
   "email": "test@gmail.com",
   "firstName": "Joe",
   "id": "user1test",
   "lastName": "Bloggz",
-  "password": "$2y$12$cIYpwlV1vWG01L.q6uAmb.Cf2Z/3tD7jlgZTP9HTjbGFQe7LyADkW",
+  "password": "$2b$12$h6BlNYjDx8r2Uug3crDs8OhT6EME94TmBojovXCLsnbiun9EH6SbS",
   "username": "user1",
 }
 `;
