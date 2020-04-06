@@ -20,6 +20,7 @@ const idListScalar = new GraphQLObjectType({
 async function createToken(user, exp) {
     const {username, id} = user;
     const token = jwt.sign({exp, username, id}, process.env.JWTSECRET);
+    // add jwt token to db, with a 'time to live' configuration that deletes the token at exp time
     return await neode.cypher("MATCH (u:User { username: $username}) CREATE (u)-[rel:JWT]->(t: Token {token:$token}) WITH u, rel, t" +
         " CALL apoc.ttl.expire(t, $ttl, 's') RETURN t.token",
         {username, token, ttl: exp})
@@ -39,14 +40,15 @@ const resolveFunctions = {
             if(!currentUser) {
                 throw new Error('Verification Error');
             }
-            console.log(currentUser);
             return neode.cypher('MATCH (u:User {username: $username})-[rel:JWT]->(t: Token {token:$token}) RETURN u',
                 {username:currentUser.username, token: jwtToken})
                 .then((result) => {
-                    return result.records[0].get('u').properties;
+                    const user = result.records[0].get('u').properties;
+                    // set password field to empty string, to prevent mutation returning password value
+                    user.password = '';
+                    return user;
                 })
                 .catch(e => {
-                    console.log(e);
                     throw new Error('Using redundant token, Sign in again ');
                 });
         },
@@ -56,8 +58,6 @@ const resolveFunctions = {
             return neode.cypher('MATCH (u:User {username: $username}) RETURN u', {username})
                 .then(async (result) => {
                     const user = result.records[0].get('u').properties;
-                    console.log(password);
-                    console.log(user.password);
                     const passValid = await bcrypt.compare(password, user.password);
                     if (passValid) {
                         //  token expiration, one hour from current time
@@ -73,7 +73,6 @@ const resolveFunctions = {
                     if(e === 'pass'){
                         throw new Error('Password invalid');
                     }
-                    console.log(e);
                     // if(e === 'cypher'){
                     //     throw new Error('INTERNAL_ERROR: DATABASE STORAGE FAILED')
                     // }

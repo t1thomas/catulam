@@ -1,6 +1,22 @@
 const gql = require('graphql-tag');
 
 const gqlQueries = {
+    DELETE_TOKEN: gql`mutation($token: String!) {
+        DeleteToken(token: $token){
+            token
+        }
+    }
+    `,
+    CURRENT_USER: gql`query {
+        getCurrentUser {
+            id
+            firstName
+            lastName
+            username
+            email
+            password
+        }
+    }`,
     CREATE_USER: gql`
         mutation(
             $id: ID

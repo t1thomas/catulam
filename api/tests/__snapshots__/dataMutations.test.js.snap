@@ -92,17 +92,6 @@ Object {
 }
 `;
 
-exports[`Mutations Create a user 1`] = `
-Object {
-  "email": "test@gmail.com",
-  "firstName": "Joe",
-  "id": "user1test",
-  "lastName": "Bloggz",
-  "password": "$2b$12$h6BlNYjDx8r2Uug3crDs8OhT6EME94TmBojovXCLsnbiun9EH6SbS",
-  "username": "user1",
-}
-`;
-
 exports[`Mutations Link 3 Tickets to Sprints 1`] = `
 Object {
   "SprintTic1": Object {
