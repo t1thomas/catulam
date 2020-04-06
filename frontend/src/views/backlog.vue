@@ -34,7 +34,6 @@ export default {
     ]),
   },
   async mounted() {
-    // await this.fetchUserStories();
     await this.fetchTickets();
     await this.fetchSprints();
     await this.fetchBackLogData();

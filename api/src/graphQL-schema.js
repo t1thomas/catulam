@@ -1,108 +1,85 @@
 const { GraphQLJSON } = require('graphql-type-json');
 const { GraphQLObjectType, GraphQLString, GraphQLList } = require('graphql');
 const { makeAugmentedSchema } = require('neo4j-graphql-js');
+const neode = require('./neode');
+const fs = require('fs');
+const path = require('path');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
+const typeDefs = fs.readFileSync(path.join(__dirname, 'schema.graphql')).toString('utf-8');
+
 
 const idListScalar = new GraphQLObjectType({
-  name: 'ids',
-  fields: () => ({
-    ids: { type: new GraphQLList(GraphQLString) },
-  }),
+    name: 'ids',
+    fields: () => ({
+        ids: { type: new GraphQLList(GraphQLString) },
+    }),
 });
-const typeDefs = `
-    scalar JSON
-    scalar idList
 
-    type Project {
-        id: ID!
-        title: String!
-        desc: String
-    }
-
-    type UserStory {
-        id: ID!
-        storyText: String!
-        tickets: [Ticket] @relation(name: "SUB_TASK", direction: IN)
-        ticketIds: idList
-          @cypher(statement: """
-              MATCH (this)<-[:SUB_TASK]-(rec:Ticket)
-              RETURN collect(rec.id) AS ids
-         """)    
-    }
-    type Ticket {
-        id: ID!
-        issueNumber: Int!
-        hourEstimate: Int
-        userStory: UserStory @relation(name: "SUB_TASK", direction: OUT)
-        assigendTo: ID
-        title: String!
-        creator: String
-        desc: String
-        done: Boolean!
-        sprint: Sprint @relation(name: "SPRINT_TASK", direction: OUT)
-    }
-    type Sprint {
-        id: ID!
-        sprintNo: Int!
-        tickets: [Ticket] @relation(name: "SPRINT_TASK", direction: IN)
-        userStories: [UserStory] @cypher(statement: """
-            MATCH (this)<-[:SPRINT_TASK]-(:Ticket)-[r1:SUB_TASK]->(rec:UserStory)
-            WITH rec, COUNT(r1) AS num ORDER BY num DESC
-            RETURN rec
-         """)
-        ticketIds: idList
-          @cypher(statement: """
-              MATCH (this)<-[:SPRINT_TASK]-(rec:Ticket)
-              RETURN collect(rec.id) AS ids
-         """)    
-    }
-    type Query {
-        ticketsAsMap: JSON
-          @cypher (statement: """
-           Match (n:Ticket)
-           WITH n.id as key, apoc.map.removeKey(n {.*}, 'id')  as value 
-           RETURN apoc.map.fromPairs(collect([key, value]))
-        """ )
-    }
-        type Query {
-        ticketsAsMap: JSON
-          @cypher (statement: """
-           Match (n:Ticket)
-           WITH n.id as key, apoc.map.removeKey(n {.*}, 'id')  as value 
-           RETURN apoc.map.fromPairs(collect([key, value]))
-        """ )
-    }
-    type Mutation {
-          TicSwitchSprint(tickId: String!, sprintIdFrom: String!, sprintIdTo: String!): JSON
-            @cypher(statement:"""
-            MATCH (a:Ticket{id:tickId})-[rel:SPRINT_TASK]->(b:Sprint {id:sprintIdFrom})
-            MATCH (c:Sprint {id:sprintIdTo})
-            CALL apoc.refactor.to(rel, c)
-            YIELD input, output, error
-            RETURN input, output, error
-            """)
-              
-          TicSwitchUStory(tickId: String!, UStoryIdFrom: String!, UStoryIdTo: String!): JSON
-            @cypher(statement:"""
-            MATCH (a:Ticket { id:tickId })-[rel:SUB_TASK]->(b:UserStory { id:UStoryIdFrom })
-            MATCH (c:UserStory { id:UStoryIdTo })
-            CALL apoc.refactor.to(rel, c)
-            YIELD input, output, error
-            RETURN input, output, error
-            """)    
-                      
-          TicSprintToDone(tickId: String!, sprintId: String!): JSON
-            @cypher(statement:"""
-            MATCH (a:Ticket{id:tickId})-[rel:SPRINT_TASK]->(b:Sprint)
-            DELETE rel
-            SET a.done = true
-            RETURN a.id, a.done
-            """)
-    }
-`;
+async function createToken(user, exp) {
+    const {username, id} = user;
+    const token = jwt.sign({exp, username, id}, process.env.JWTSECRET);
+    // add jwt token to db, with a 'time to live' configuration that deletes the token at exp time
+    return await neode.cypher("MATCH (u:User { username: $username}) CREATE (u)-[rel:JWT]->(t: Token {token:$token}) WITH u, rel, t" +
+        " CALL apoc.ttl.expire(t, $ttl, 's') RETURN t.token",
+        {username, token, ttl: exp})
+        .then((resultToken) => {
+            return resultToken.records[0].get(0);
+        })
+        .catch(e => {
+            throw new Error(e);
+        });
+}
 
 const resolveFunctions = {
-  JSON: GraphQLJSON,
-  idList: idListScalar,
+    JSON: GraphQLJSON,
+    idList: idListScalar,
+    Query:{
+        getCurrentUser: async (_, args, {currentUser, jwtToken}) =>{
+            if(!currentUser) {
+                throw new Error('Verification Error');
+            }
+            return neode.cypher('MATCH (u:User {username: $username})-[rel:JWT]->(t: Token {token:$token}) RETURN u',
+                {username:currentUser.username, token: jwtToken})
+                .then((result) => {
+                    const user = result.records[0].get('u').properties;
+                    // set password field to empty string, to prevent mutation returning password value
+                    user.password = '';
+                    return user;
+                })
+                .catch(e => {
+                    throw new Error('Using redundant token, Sign in again ');
+                });
+        },
+    },
+    Mutation: {
+        loginUser: (_, {username, password}) => {
+            return neode.cypher('MATCH (u:User {username: $username}) RETURN u', {username})
+                .then(async (result) => {
+                    const user = result.records[0].get('u').properties;
+                    const passValid = await bcrypt.compare(password, user.password);
+                    if (passValid) {
+                        //  token expiration, one hour from current time
+                        const exp = Math.floor(Date.now() / 1000) + (60 * 60);
+                        const token = await createToken(user, exp);
+                        return {token: token};
+                    }
+                    else {
+                        throw 'pass';
+                    }
+                })
+                .catch(e => {
+                    if(e === 'pass'){
+                        throw new Error('Password invalid');
+                    }
+                    // if(e === 'cypher'){
+                    //     throw new Error('INTERNAL_ERROR: DATABASE STORAGE FAILED')
+                    // }
+                    throw new Error('Username invalid');
+                });
+        },
+    },
 };
 const schema = makeAugmentedSchema({ typeDefs, resolvers: resolveFunctions });
 

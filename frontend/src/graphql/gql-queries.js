@@ -1,12 +1,36 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
-  USWithTickIds: gql`
-  query{
+  SignInUser: gql`mutation($username: String!, $password: String!) {
+      loginUser(username: $username, password: $password){
+        token
+      }
+    }`,
+  DeleteToken: gql`mutation($token: String!) {
+    DeleteToken(token: $token){
+      token
+    }
+  }
+  `,
+  VerifyToken: gql`query {
+    verifyUserToken {
+      token
+    }
+  }`,
+  USWithTickIds: gql`query{
     UserStory {
       id
       storyText
       ticketIds
+    }
+  }`,
+  CurrentUser: gql`query {
+    getCurrentUser {
+      id
+      firstName
+      lastName
+      username
+      email
     }
   }`,
   Tickets: gql`query{
@@ -52,20 +76,20 @@ const gqlQueries = {
       }
     }
   }`,
-  StartToSprint: gql`mutation AddTicketSprint($ticket: _TicketInput! $sprint: _SprintInput!){
+  StartToSprint: gql`mutation($ticket: _TicketInput! $sprint: _SprintInput!){
     AddTicketSprint(from: $ticket to: $sprint){
       from{id}
       to{id}
     }
   }`,
-  SprintToStart: gql`mutation RemoveTicketSprint($ticket: _TicketInput! $sprint: _SprintInput!){
+  SprintToStart: gql`mutation($ticket: _TicketInput! $sprint: _SprintInput!){
     RemoveTicketSprint(from: $ticket to:$sprint){
       from{id}
       to{id}
     }
   }`,
   SwitchUserStory: {
-    storySwitch: gql`mutation TicSwitchSprint($ticket: String! $usFrom: String! $usTo: String!){
+    storySwitch: gql`mutation($ticket: String! $usFrom: String! $usTo: String!){
     TicSwitchUStory(tickId: $ticket UStoryIdFrom: $usFrom UStoryIdTo: $usTo)
   }
   `,

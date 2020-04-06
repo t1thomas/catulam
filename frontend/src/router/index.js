@@ -5,14 +5,48 @@ import Home from '../views/Home.vue';
 // import repoandbranchselector from '../views/Ebranchselector.vue';
 // import repoandbranchselector from '../components/Ebranchselector.vue';
 import backlog from '../views/backlog.vue';
+import login from '../views/login.vue';
+import gqlQueries from '../graphql/gql-queries';
 
 Vue.use(VueRouter);
 
+const AuthAccess = async (to, from, next) => {
+  await Vue.$apolloClient.query({
+    query: gqlQueries.CurrentUser,
+    fetchPolicy: 'no-cache',
+  }).then((response) => {
+    next();
+    const { getCurrentUser } = response.data;
+    Vue.$store.dispatch('setUser', getCurrentUser);
+  }).catch((error) => {
+    Vue.$store.dispatch('setUser', null);
+    console.error(error);
+    next({
+      path: '/login',
+    });
+  });
+};
 const routes = [
   {
-    path: '/',
+    path: '/home',
     name: 'home',
     component: Home,
+    beforeEnter: AuthAccess,
+  },
+  {
+    path: '/',
+    redirect: '/login',
+  },
+  {
+    path: '/login',
+    name: 'login',
+    component: login,
+  },
+  {
+    path: '/backlog',
+    name: 'backlog',
+    component: backlog,
+    beforeEnter: AuthAccess,
   },
   // {
   //   path: '/gitauth/callback',
@@ -32,11 +66,6 @@ const routes = [
   //   name: 'repoandbranchselector',
   //   component: repoandbranchselector,
   // },
-  {
-    path: '/backlog',
-    name: 'backlog',
-    component: backlog,
-  },
 ];
 
 const router = new VueRouter({

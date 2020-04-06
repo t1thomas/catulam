@@ -8,6 +8,7 @@ import './quasar';
 import apolloClient from './plugins/apolloClient';
 
 Vue.$apolloClient = apolloClient;
+Vue.$store = store;
 
 
 const apolloProvider = new VueApollo({ apolloClient });
@@ -16,5 +17,8 @@ new Vue({
   router,
   store,
   apolloProvider,
+  created() {
+    // this.$store.dispatch('fetchCurrentUser');
+  },
   render: (h) => h(App),
 }).$mount('#app');
