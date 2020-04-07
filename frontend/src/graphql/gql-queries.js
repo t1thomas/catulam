@@ -31,6 +31,7 @@ const gqlQueries = {
       lastName
       username
       email
+      passwordUpdate
     }
   }`,
   Tickets: gql`query{

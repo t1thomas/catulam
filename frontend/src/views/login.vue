@@ -6,7 +6,6 @@
       <q-form
         class="q-gutter-md"
         @submit="onSubmit"
-        @reset="onRegister"
       >
         <q-input
           v-model="username"
@@ -38,12 +37,6 @@
             type="submit"
             color="primary"
           />
-          <q-btn
-            label="Register"
-            color="primary"
-            flat
-            class="q-ml-sm"
-          />
         </div>
       </q-form>
     </div>
@@ -66,9 +59,6 @@ export default {
     ...mapState([
       'currentUser',
     ]),
-    // ...mapGetters([
-    //   'getCurrentUser'
-    // ])
   },
   watch: {
     currentUser() {
@@ -88,9 +78,6 @@ export default {
     async onSubmit() {
       await this.loginUser({ username: this.username, password: this.password });
       await this.fetchCurrentUser();
-    },
-    onRegister() {
-      console.log('Register page');
     },
   },
 };

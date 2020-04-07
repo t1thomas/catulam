@@ -30,6 +30,7 @@
         username: String!
         email: String!
         password: String!
+        passwordUpdate: Boolean!
         tokens: [Token] @relation(name: "JWT", direction: OUT)
     }
 

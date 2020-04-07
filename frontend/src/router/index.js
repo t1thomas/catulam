@@ -6,6 +6,7 @@ import Home from '../views/Home.vue';
 // import repoandbranchselector from '../components/Ebranchselector.vue';
 import backlog from '../views/backlog.vue';
 import login from '../views/login.vue';
+import PassReset from '../views/PassReset.vue';
 import gqlQueries from '../graphql/gql-queries';
 
 Vue.use(VueRouter);
@@ -47,6 +48,11 @@ const routes = [
     name: 'backlog',
     component: backlog,
     beforeEnter: AuthAccess,
+  },
+  {
+    path: '/resetPass',
+    name: 'ResetPass',
+    component: PassReset,
   },
   // {
   //   path: '/gitauth/callback',
