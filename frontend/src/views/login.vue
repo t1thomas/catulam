@@ -45,6 +45,8 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
+import Vue from 'vue';
+import gqlQueries from '../graphql/gql-queries';
 
 export default {
   name: 'Login',
@@ -61,23 +63,36 @@ export default {
     ]),
   },
   watch: {
-    currentUser() {
-      if (this.currentUser) {
-        this.$router.push('/backlog');
-      }
-    },
+    // currentUser() {
+    //   if (this.currentUser) {
+    //     this.$router.push('/home');
+    //   }
+    // },
   },
   async mounted() {
-    await this.fetchCurrentUser();
+    // await this.fetchCurrentUser();
   },
   methods: {
     ...mapActions([
-      'loginUser',
       'fetchCurrentUser',
     ]),
     async onSubmit() {
-      await this.loginUser({ username: this.username, password: this.password });
-      await this.fetchCurrentUser();
+      await this.loginUser();
+      // await this.fetchCurrentUser();
+    },
+    async loginUser() {
+      localStorage.setItem('catulam_token', '');
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SignInUser,
+        fetchPolicy: 'no-cache',
+        variables: { username: this.username, password: this.password },
+      }).then((response) => {
+        console.log(response.data);
+        const { loginUser } = response.data;
+        localStorage.setItem('catulam_token', loginUser.token);
+      }).catch((error) => {
+        console.error(error);
+      });
     },
   },
 };

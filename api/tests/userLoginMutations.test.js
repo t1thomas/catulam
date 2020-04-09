@@ -35,7 +35,8 @@ const testUser = {
     lastName : "Bloggz",
     username : "user1",
     email : "test@gmail.com",
-    password: "$2b$12$h6BlNYjDx8r2Uug3crDs8OhT6EME94TmBojovXCLsnbiun9EH6SbS" // hashed string 'test'
+    password: "$2b$12$h6BlNYjDx8r2Uug3crDs8OhT6EME94TmBojovXCLsnbiun9EH6SbS", // hashed string 'test'
+    passwordUpdate: true,
 };
 
 describe('User Login Mutations', () => {

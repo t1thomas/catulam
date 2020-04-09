@@ -10,9 +10,12 @@
         class="q-gutter-md"
         @submit="onSubmit"
       >
+        <div class="text-h6">
+          Change Password..
+        </div>
         <q-input
           ref="pass"
-          v-model="password"
+          v-model="newPassword"
           filled
           :type="isPwd ? 'password' : 'text'"
           :rules="[passwordMessage]"
@@ -58,23 +61,45 @@
 
 <script>
 
+import { mapActions, mapState } from 'vuex';
+
 export default {
   name: 'PassReset',
   data() {
     return {
       confirmPass: '',
-      password: '',
+      newPassword: '',
       passError: '',
       conPassError: '',
       isPwd: true,
     };
   },
   computed: {
+    ...mapState([
+      'currentUser',
+    ]),
     passMatch() {
-      return this.confirmPass === this.password;
+      return this.confirmPass === this.newPassword;
     },
   },
+  watch: {
+    currentUser() {
+      if (!this.currentUser) {
+        this.$router.push('/login');
+      }
+      if (this.currentUser && this.currentUser.passwordUpdate === false) {
+        this.$router.push('/home');
+      }
+    },
+  },
+  async mounted() {
+    await this.fetchCurrentUser();
+  },
   methods: {
+    ...mapActions([
+      'fetchCurrentUser',
+      'resetPass',
+    ]),
     passwordMessage(val) {
       if (!val > 0) {
         return 'Field is Required';
@@ -84,14 +109,15 @@ export default {
       }
       return true;
     },
-
     validate() {
       setTimeout(() => {
         this.$refs.pass.validate();
         this.$refs.conPass.validate();
       }, 500);
     },
-    onSubmit() {
+    async onSubmit() {
+      await this.resetPass({ username: this.currentUser.username, newPassword: this.newPassword });
+      await this.fetchCurrentUser();
       console.log('Pass change Submit');
     },
   },
