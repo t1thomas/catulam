@@ -38,7 +38,7 @@ const resolveFunctions = {
     Query:{
         getCurrentUser: async (_, args, {currentUser, jwtToken}) =>{
             if(!currentUser) {
-                throw new Error('Verification Error');
+                return null;
             }
             return neode.cypher('MATCH (u:User {username: $username})-[rel:JWT]->(t: Token {token:$token}) RETURN u',
                 {username:currentUser.username, token: jwtToken})
@@ -60,7 +60,12 @@ const resolveFunctions = {
                     const user = result.records[0].get('u').properties;
                     const passValid = await bcrypt.compare(password, user.password);
                     if (passValid) {
-                        //  token expiration, one hour from current time
+                        // if password reset is required give user a short lived token (5mins.)
+                        if(user.passwordUpdate === true){
+                            const exp = Math.floor(Date.now() / 1000) + (5 * 60);
+                            const token = await createToken(user, exp);
+                            return {token: token};
+                        }
                         const exp = Math.floor(Date.now() / 1000) + (60 * 60);
                         const token = await createToken(user, exp);
                         return {token: token};
@@ -79,6 +84,36 @@ const resolveFunctions = {
                     throw new Error('Username invalid');
                 });
         },
+        resetPassword:(_, {username, newPassword}) => {
+            return neode.cypher('MATCH (u:User {username: $username}) RETURN u', {username})
+                .then(async (result) => {
+                    const user = result.records[0].get('u').properties;
+                    if(user.passwordUpdate === true){
+                        try {
+                            const salt = bcrypt.genSaltSync(Number(process.env.BCRYPTHASHCOST));
+                            const hash = bcrypt.hashSync(newPassword, salt);
+                            await neode.cypher('MATCH (u:User {username: $username}) SET u.password = $hash SET u.passwordUpdate = false RETURN u', {username, hash});
+
+                            //  token expiration, one hour from current time
+                            const exp = Math.floor(Date.now() / 1000) + (60 * 60);
+                            const token = await createToken(user, exp);
+                            return {token: token};
+                        }catch (e) {
+                            throw new Error(e);
+                        }
+                    }
+                    else {
+                        throw 'passReset';
+                    }
+                })
+                .catch(e => {
+                    console.log(e);
+                    if(e === 'passReset'){
+                        throw new Error('Invalid Reset attempt, contact admin');
+                    }
+                    throw new Error('Password reset Failed, try again later');
+                });
+        }
     },
 };
 const schema = makeAugmentedSchema({ typeDefs, resolvers: resolveFunctions });

@@ -6,7 +6,6 @@
       <q-form
         class="q-gutter-md"
         @submit="onSubmit"
-        @reset="onRegister"
       >
         <q-input
           v-model="username"
@@ -38,12 +37,6 @@
             type="submit"
             color="primary"
           />
-          <q-btn
-            label="Register"
-            color="primary"
-            flat
-            class="q-ml-sm"
-          />
         </div>
       </q-form>
     </div>
@@ -52,6 +45,8 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
+import Vue from 'vue';
+import gqlQueries from '../graphql/gql-queries';
 
 export default {
   name: 'Login',
@@ -66,31 +61,28 @@ export default {
     ...mapState([
       'currentUser',
     ]),
-    // ...mapGetters([
-    //   'getCurrentUser'
-    // ])
-  },
-  watch: {
-    currentUser() {
-      if (this.currentUser) {
-        this.$router.push('/backlog');
-      }
-    },
-  },
-  async mounted() {
-    await this.fetchCurrentUser();
   },
   methods: {
     ...mapActions([
-      'loginUser',
       'fetchCurrentUser',
     ]),
-    async onSubmit() {
-      await this.loginUser({ username: this.username, password: this.password });
-      await this.fetchCurrentUser();
+    onSubmit() {
+      this.loginUser();
     },
-    onRegister() {
-      console.log('Register page');
+    async loginUser() {
+      localStorage.setItem('catulam_token', '');
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SignInUser,
+        fetchPolicy: 'no-cache',
+        variables: { username: this.username, password: this.password },
+      }).then((response) => {
+        const { loginUser } = response.data;
+        localStorage.setItem('catulam_token', loginUser.token);
+        this.$router.go();
+      }).catch((error) => {
+        console.log('here login');
+        console.error(error);
+      });
     },
   },
 };

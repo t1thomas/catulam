@@ -6,26 +6,49 @@ import Home from '../views/Home.vue';
 // import repoandbranchselector from '../components/Ebranchselector.vue';
 import backlog from '../views/backlog.vue';
 import login from '../views/login.vue';
+import PassReset from '../views/PassReset.vue';
 import gqlQueries from '../graphql/gql-queries';
 
 Vue.use(VueRouter);
-
 const AuthAccess = async (to, from, next) => {
   await Vue.$apolloClient.query({
     query: gqlQueries.CurrentUser,
     fetchPolicy: 'no-cache',
   }).then((response) => {
-    next();
     const { getCurrentUser } = response.data;
+    if (getCurrentUser === null) {
+      next({
+        path: '/',
+      });
+    } else if (getCurrentUser.passwordUpdate === true) {
+      // if a reset password is required, send user to reset page
+      next({
+        path: '/resetPass',
+      });
+    } else {
+      next();
+    }
     Vue.$store.dispatch('setUser', getCurrentUser);
   }).catch((error) => {
     Vue.$store.dispatch('setUser', null);
     console.error(error);
     next({
-      path: '/login',
+      path: '/',
     });
   });
 };
+const ForbiddenAccess = async (to, from, next) => {
+  const user = await Vue.$store.getters.getCurrentUser;
+  if (user === null) {
+    next({
+      path: '/',
+    });
+  } else if (user.passwordUpdate === true) {
+    // if a reset password is required, send user to reset page
+    next();
+  }
+};
+
 const routes = [
   {
     path: '/home',
@@ -47,6 +70,13 @@ const routes = [
     name: 'backlog',
     component: backlog,
     beforeEnter: AuthAccess,
+  },
+  {
+    path: '/resetPass',
+    name: 'ResetPass',
+    component: PassReset,
+    beforeEnter: ForbiddenAccess,
+
   },
   // {
   //   path: '/gitauth/callback',

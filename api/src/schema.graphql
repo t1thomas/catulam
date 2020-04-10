@@ -30,6 +30,7 @@
         username: String!
         email: String!
         password: String!
+        passwordUpdate: Boolean!
         tokens: [Token] @relation(name: "JWT", direction: OUT)
     }
 
@@ -76,6 +77,8 @@
 
     type Mutation {
         loginUser(username: String!, password: String!): Token!
+        resetPassword(username: String!, newPassword: String!): Token!
+
 
         TicSwitchSprint(tickId: String!, sprintIdFrom: String!, sprintIdTo: String!): JSON
             @cypher(statement:"""

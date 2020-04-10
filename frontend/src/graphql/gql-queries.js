@@ -1,6 +1,11 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
+  RESET_PASS: gql`mutation($username: String!, $newPassword: String!) {
+    resetPassword(username: $username, newPassword: $newPassword) {
+      token
+    }
+  }`,
   SignInUser: gql`mutation($username: String!, $password: String!) {
       loginUser(username: $username, password: $password){
         token
@@ -31,6 +36,7 @@ const gqlQueries = {
       lastName
       username
       email
+      passwordUpdate
     }
   }`,
   Tickets: gql`query{

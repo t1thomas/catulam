@@ -15,6 +15,7 @@ const gqlQueries = {
             username
             email
             password
+            passwordUpdate
         }
     }`,
     CREATE_USER: gql`
@@ -25,6 +26,7 @@ const gqlQueries = {
             $username: String!
             $email: String!
             $password: String!
+            $passwordUpdate: Boolean!
         ) {
             CreateUser(
                 id: $id
@@ -33,14 +35,15 @@ const gqlQueries = {
                 username: $username
                 email: $email
                 password: $password
+                passwordUpdate: $passwordUpdate
             ){
-                id
                 id
                 firstName
                 lastName
                 username
                 email
                 password
+                passwordUpdate
             }
         }`,
     CREATE_TICKETS: gql`

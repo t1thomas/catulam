@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import gqlQueries from '../graphql/gql-queries';
-import router from '../router';
+import router from '../router/index';
 
 Vue.use(Vuex);
 
@@ -16,6 +16,7 @@ export default new Vuex.Store({
     tickets: [],
     removedFrom: {},
     addedTo: {},
+    routeAuth: false,
     // repoAndBranch: {},
     // cardMoved: { removedFrom: undefined, addedTo: undefined },
   },
@@ -125,17 +126,20 @@ export default new Vuex.Store({
       });
     },
     async fetchCurrentUser({ commit }) {
-      await Vue.$apolloClient.query({
+      return Vue.$apolloClient.query({
         query: gqlQueries.CurrentUser,
         fetchPolicy: 'no-cache',
       }).then((response) => {
         const { getCurrentUser } = response.data;
         commit('set_currentUser', getCurrentUser);
+        return getCurrentUser;
         // eslint-disable-next-line no-unused-vars
       }).catch((error) => {
         commit('set_currentUser', null);
+        throw new Error(error);
       });
     },
+
     async logoutUser({ commit }) {
       /* remove token right away, s even if the database
       operation fails the client no longer has a token
@@ -154,23 +158,21 @@ export default new Vuex.Store({
         console.error(error);
       });
     },
-    async loginUser({ commit }, payload) {
-      localStorage.setItem('catulam_token', '');
+    async resetPass({ commit }, payload) {
       await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SignInUser,
+        mutation: gqlQueries.RESET_PASS,
         fetchPolicy: 'no-cache',
         variables: payload,
       }).then((response) => {
         console.log(commit);
-        console.log(response.data);
-        const { loginUser } = response.data;
-        localStorage.setItem('catulam_token', loginUser.token);
+        const { resetPassword } = response.data;
+        localStorage.setItem('catulam_token', resetPassword.token);
         // router.push('/backlog');
-        // router.go();
         /* reloads the vue instance causing the created hook at main.js to
            run which in turn sets the current user state
         */
       }).catch((error) => {
+        localStorage.setItem('catulam_token', '');
         console.error(error);
       });
     },
@@ -203,7 +205,7 @@ export default new Vuex.Store({
     // }
   },
   getters: {
-    // getCurrentUser: (state) => state.currentUser,
+    getCurrentUser: (state) => state.currentUser,
     // getTicIdsPerSprint: state => (sprintNo, arrTicketIds) => arrTicketIds
     //   .filter(tickId => state.sprintList[sprintNo - 1].ticketIds.includes(tickId)),
     getIssueType: (state) => state.issueType,

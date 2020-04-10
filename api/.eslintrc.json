@@ -1,5 +1,6 @@
 {
     "env": {
+        "commonjs": true,
         "es6": true,
         "node": true
     },
@@ -9,15 +10,17 @@
         "SharedArrayBuffer": "readonly"
     },
     "parserOptions": {
-        "ecmaVersion": 2018,
-        "sourceType": "module"
+        "ecmaVersion": 2018
     },
     "rules": {
         "indent": [
             "error",
             4
         ],
-        "linebreak-style": "off",
+        "linebreak-style": [
+            "error",
+            "windows"
+        ],
         "quotes": [
             "error",
             "single"
