@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import gqlQueries from '../graphql/gql-queries';
-// import router from '../router';
+import router from '../router/index';
 
 Vue.use(Vuex);
 
@@ -16,6 +16,7 @@ export default new Vuex.Store({
     tickets: [],
     removedFrom: {},
     addedTo: {},
+    routeAuth: false,
     // repoAndBranch: {},
     // cardMoved: { removedFrom: undefined, addedTo: undefined },
   },
@@ -125,18 +126,17 @@ export default new Vuex.Store({
       });
     },
     async fetchCurrentUser({ commit }) {
-      await Vue.$apolloClient.query({
+      return Vue.$apolloClient.query({
         query: gqlQueries.CurrentUser,
         fetchPolicy: 'no-cache',
       }).then((response) => {
         const { getCurrentUser } = response.data;
         commit('set_currentUser', getCurrentUser);
+        return getCurrentUser;
         // eslint-disable-next-line no-unused-vars
       }).catch((error) => {
-        console.log('here');
         commit('set_currentUser', null);
         throw new Error(error);
-        // console.error(error);
       });
     },
 
@@ -153,7 +153,7 @@ export default new Vuex.Store({
       }).then(() => {
         Vue.$apolloClient.resetStore();
         commit('set_currentUser', null);
-        // router.push('/');
+        router.push('/');
       }).catch((error) => {
         console.error(error);
       });
@@ -205,7 +205,7 @@ export default new Vuex.Store({
     // }
   },
   getters: {
-    // getCurrentUser: (state) => state.currentUser,
+    getCurrentUser: (state) => state.currentUser,
     // getTicIdsPerSprint: state => (sprintNo, arrTicketIds) => arrTicketIds
     //   .filter(tickId => state.sprintList[sprintNo - 1].ticketIds.includes(tickId)),
     getIssueType: (state) => state.issueType,

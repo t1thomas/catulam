@@ -62,23 +62,12 @@ export default {
       'currentUser',
     ]),
   },
-  watch: {
-    // currentUser() {
-    //   if (this.currentUser) {
-    //     this.$router.push('/home');
-    //   }
-    // },
-  },
-  async mounted() {
-    // await this.fetchCurrentUser();
-  },
   methods: {
     ...mapActions([
       'fetchCurrentUser',
     ]),
-    async onSubmit() {
-      await this.loginUser();
-      // await this.fetchCurrentUser();
+    onSubmit() {
+      this.loginUser();
     },
     async loginUser() {
       localStorage.setItem('catulam_token', '');
@@ -87,10 +76,11 @@ export default {
         fetchPolicy: 'no-cache',
         variables: { username: this.username, password: this.password },
       }).then((response) => {
-        console.log(response.data);
         const { loginUser } = response.data;
         localStorage.setItem('catulam_token', loginUser.token);
+        this.$router.go();
       }).catch((error) => {
+        console.log('here login');
         console.error(error);
       });
     },

@@ -38,7 +38,7 @@ const resolveFunctions = {
     Query:{
         getCurrentUser: async (_, args, {currentUser, jwtToken}) =>{
             if(!currentUser) {
-                throw new Error('Verification Error');
+                return null;
             }
             return neode.cypher('MATCH (u:User {username: $username})-[rel:JWT]->(t: Token {token:$token}) RETURN u',
                 {username:currentUser.username, token: jwtToken})

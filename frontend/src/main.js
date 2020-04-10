@@ -18,7 +18,10 @@ new Vue({
   store,
   apolloProvider,
   created() {
-    // this.$store.dispatch('fetchCurrentUser');
+    this.$store.dispatch('fetchCurrentUser')
+      .catch((e) => {
+        console.error(e);
+      });
   },
   render: (h) => h(App),
 }).$mount('#app');

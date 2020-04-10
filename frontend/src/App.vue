@@ -98,12 +98,20 @@ export default {
       ];
     },
   },
+  watch: {
+    currentUser() {
+      if (this.currentUser) {
+        if (this.$router.currentRoute.path === '/login') {
+          this.$router.push('/home');
+        }
+      }
+    },
+  },
   methods: {
     async logOutHandler() {
       await this.$store.dispatch('logoutUser');
     },
   },
-
 
 };
 </script>
