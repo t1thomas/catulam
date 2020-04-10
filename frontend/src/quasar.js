@@ -10,7 +10,9 @@ import '@quasar/extras/mdi-v4/mdi-v4.css';
 import { Quasar, Dialog } from 'quasar';
 
 Vue.use(Quasar, {
-  config: {},
+  config: {
+    dark: true,
+  },
   components: { /* not needed if importStrategy is not 'manual' */ },
   directives: { /* not needed if importStrategy is not 'manual' */ },
   plugins: {

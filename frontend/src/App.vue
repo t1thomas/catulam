@@ -1,8 +1,8 @@
 <template>
-  <q-layout view="lHh lpR lFf">
+  <q-layout view="hHh Lpr lff">
     <q-header
       elevated
-      class="glossy"
+      class="bg-dark"
     >
       <q-toolbar>
         <q-btn
@@ -13,9 +13,13 @@
           icon="menu"
           @click="leftDrawerOpen = !leftDrawerOpen"
         />
-        <q-toolbar-title>
-          Caṭulam
-        </q-toolbar-title>
+        <q-space />
+        <q-avatar v-if="currentUser">
+          <img
+            src="./assets/avatar/scientist.svg"
+            alt="avatar"
+          >
+        </q-avatar>
         <q-btn
           v-if="currentUser"
           flat
@@ -29,8 +33,14 @@
 
     <q-drawer
       v-model="leftDrawerOpen"
+      :mini="slimDrawer"
+      mini-to-overlay
       bordered
-      content-class="bg-grey-2"
+      content-class="dark2"
+      :width="200"
+      :breakpoint="500"
+      @mouseover="slimDrawer = false"
+      @mouseout="slimDrawer = true"
     >
       <q-list>
         <q-item
@@ -79,13 +89,17 @@ export default {
   name: 'LayoutDefault',
   data() {
     return {
-      leftDrawerOpen: false,
+      leftDrawerOpen: true,
+      slimDrawer: true,
     };
   },
   computed: {
     ...mapState([
       'currentUser',
     ]),
+    fullName() {
+      return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
+    },
     drawerItems() {
       if (this.currentUser) {
         return [
@@ -117,6 +131,9 @@ export default {
 </script>
 
 <style>
+  .dark2{
+    background: #1a2034;
+  }
   .unselectable {
     -moz-user-select: none;
     -khtml-user-select: none;
