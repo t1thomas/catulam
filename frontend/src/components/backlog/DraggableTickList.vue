@@ -159,7 +159,7 @@ export default {
             this.sprintToStart(tickId, fromData.sprintId);
             break;
           default:
-            console.log('Sorry.');
+            break;
         }
       }
     },

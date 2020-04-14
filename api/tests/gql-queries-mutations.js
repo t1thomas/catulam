@@ -7,6 +7,80 @@ const gqlQueries = {
         }
     }
     `,
+    ADD_USER_PROJECT: gql`
+        mutation {
+            AddUserProjects(from: { id: "user1test" }, to: { id: "p1test" }) {
+                from {
+                    id
+                }
+                to {
+                    id
+                }
+            }
+        }`,
+    ADD_PROJECT_DATA: gql`
+        mutation {
+            AddSprintProject(from: { id: "sp1test" }, to: { id: "p1test" }) {
+                from {
+                    id
+                }
+                to {
+                    id
+                }
+            }
+            AddTicketProject(from: { id: "t1test" }, to: { id: "p1test" }) {
+                from {
+                    id
+                }
+                to {
+                    id
+                }
+            }
+            AddUserStoryProject(from: { id: "us1test" }, to: { id: "p1test" }) {
+                from {
+                    id
+                }
+                to {
+                    id
+                }
+            }
+        }`,
+    CREATE_PROJECTS: gql`
+        mutation {
+            prog1: CreateProject(
+                id: "p1test"
+                desc: "First test project"
+                title: "Test Project 1"
+                label: "TP1"
+            ) {
+                id
+                desc
+                title
+                label
+            }
+            prog2: CreateProject(
+                id: "p2test"
+                desc: "Second test project"
+                title: "Test Project 2"
+                label: "TP2"
+            ) {
+                id
+                desc
+                title
+                label
+            }
+            prog3: CreateProject(
+                id: "p3test"
+                desc: "Third test project"
+                title: "Test Project 3"
+                label: "TP3"
+            ) {
+                id
+                desc
+                title
+                label
+            }
+        }`,
     CURRENT_USER: gql`query {
         getCurrentUser {
             id
@@ -96,17 +170,20 @@ const gqlQueries = {
         }`,
     CREATE_USER_STORY: gql`
         mutation {
-            uStory1: CreateUserStory(storyText: "Example User Story 1", id: "us1test") {
+            uStory1: CreateUserStory(storyText: "As a User I want to be able to first see a dashboard on my landing page", id: "us1test", issueNumber: 4) {
                 storyText
                 id
+                issueNumber
             }
-            uStory2: CreateUserStory(storyText: "Example User Story 2", id: "us2test") {
+            uStory2: CreateUserStory(storyText: "As a user I want to securely login to the app using my credentials", id: "us2test", issueNumber: 5) {
                 storyText
                 id
+                issueNumber
             }
-            uStory3: CreateUserStory(storyText: "Example User Story 3", id: "us3test") {
+            uStory3: CreateUserStory(storyText: "As a user I my profile data to be shown in my dashboard", id: "us3test", issueNumber: 6) {
                 storyText
                 id
+                issueNumber
             }
         }`,
     CREATE_SPRINTS: gql`
