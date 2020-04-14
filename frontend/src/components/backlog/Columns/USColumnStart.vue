@@ -1,32 +1,32 @@
 <template>
-  <q-card
-    bordered
-    style="height: 100%;"
-  >
-    <q-card-section
-      horizontal
-      style="height: 100%;"
+  <v-card height="100%">
+    <div
+      class="d-flex flex-no-wrap"
+      style="height: 100%"
     >
-      <q-card-section
-        class="col-3 card-text"
+      <v-col
+        cols="4"
       >
-        {{ getUserStoryText(userStoryId) }}
-      </q-card-section>
-      <q-separator vertical />
-      <q-card-section class="col q-pa-xs">
+        <v-card-subtitle class="pa-0">
+          {{ getUserStoryText(userStoryId) }}
+        </v-card-subtitle>
+      </v-col>
+      <v-divider vertical />
+      <v-col class="pa-0">
+        <!-- Pass ids of unstaged tickets of current userStory -->
         <draggable-tick-list
           :list-properties="tickListConfig"
           :ticket-ids="getUnStagedTicks(userStoryId)"
         />
-      </q-card-section>
-    </q-card-section>
-  </q-card>
+      </v-col>
+    </div>
+  </v-card>
 </template>
 
 <script>
 
 import { mapGetters } from 'vuex';
-import DraggableTickList from '../../DraggableTickList.vue';
+import DraggableTickList from '../DraggableTickList.vue';
 
 export default {
   name: 'USColumnStart',
@@ -52,7 +52,5 @@ export default {
 </script>
 
 <style scoped>
-.thendi {
-  flex-wrap: nowrap;
-}
+
 </style>

@@ -1,6 +1,7 @@
+import Vue from 'vue';
 import ApolloClient from 'apollo-boost';
 
-export default new ApolloClient({
+const apolloClient = new ApolloClient({
   uri: 'http://localhost:7000/graphql',
   // include auth token with requests made TO backend
   fetchOptions: {
@@ -33,3 +34,4 @@ export default new ApolloClient({
   },
 
 });
+Vue.$apolloClient = apolloClient;

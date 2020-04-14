@@ -1,17 +1,29 @@
 <template>
-  <q-page class="flex flex-center">
-    <img
-      alt="Vue logo"
-      src="../assets/logo.png"
+  <v-container
+    class="fill-height"
+    fluid
+  >
+    <v-row
+      align="center"
+      justify="center"
     >
-  </q-page>
+      <v-col class="shrink">
+        <v-img
+          alt="Caṭulam logo"
+          src="../assets/logo.png"
+        />
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
+// @ is an alias to /src
 
 export default {
   name: 'Home',
-  components: {
+  props: {
+    source: String,
   },
 };
 </script>

@@ -2,58 +2,71 @@
   <draggable
     tag="div"
     v-bind="dragOptions"
-    class="rounded-borders q-list q-list--bordered"
-    style="background: cadetblue; width: 100%; height: 100%;"
+    class="v-list"
+    style="background: rgb(39, 54, 102); width: 100%; height: 100%;"
     @end="ended"
     @add="onAdd"
     @remove="onRemove"
   >
-    <q-item
+    <v-list-item
       v-for="ticketId in ticketIds"
       :id="ticketId"
       :key="ticketId"
       v-ripple
-      class="q-pa-none q-ma-sm"
+      class="pa-0 ma-sm-2"
       clickable
     >
-      <q-card
-        style="height: 4.5rem;"
+      <v-card
+        height="5.5rem"
+        width="100%"
       >
-        <q-card-section
-          horizontal
-          class="q-pl-sm q-pr-xs"
+        <v-list-item
+          three-line
+          class="px-2"
         >
-          <span class="text-weight-medium">{{ getTicketById(ticketId).title }}</span>
-          <span class="text-grey-8 q-ml-auto">#{{ getTicketById(ticketId).issueNumber }}</span>
-        </q-card-section>
-        <q-card-section
-          horizontal
-          class="q-px-sm"
-        >
-          <q-item-label
-            caption
-            lines="2"
-          >
-            {{ getTicketById(ticketId).desc }}
-          </q-item-label>
-        </q-card-section>
-        <q-card-section
-          class="q-px-xs q-pb-xs q-gutter-xs"
-          horizontal
-          style="place-content: flex-end;"
-        >
-          <q-chip
-            dense
-            icon="mdi-progress-clock"
-          >
-            {{ getTicketById(ticketId).hourEstimate }}hr
-          </q-chip>
-          <q-avatar size="21px">
-            <img src="@/assets/avatar/scientist.svg">
-          </q-avatar>
-        </q-card-section>
-      </q-card>
-    </q-item>
+          <v-list-item-content class="py-0 d-inline-block">
+            <v-list-item-title class="d-flex mb-0">
+              <span class="font-weight-medium body-2">
+                {{ getTicketById(ticketId).title }}
+              </span>
+              <span class="font-weight-thin ml-auto body-2">
+                #{{ getTicketById(ticketId).issueNumber }}
+              </span>
+            </v-list-item-title>
+            <v-list-item-subtitle class="pa-0">
+              <span class="font-weight-light caption">
+                {{ getTicketById(ticketId).desc }}
+              </span>
+            </v-list-item-subtitle>
+            <div class="card-bottom">
+              <v-chip
+                small
+                color="dark-grey"
+                text-color="white"
+              >
+                <v-avatar left>
+                  <v-icon>mdi-progress-clock</v-icon>
+                </v-avatar>
+                {{ getTicketById(ticketId).hourEstimate }}hr
+              </v-chip>
+              <v-avatar
+                size="24"
+                class="ml-2"
+              >
+                <img
+                  src="@/assets/avatar/scientist.svg"
+                  alt="John"
+                >
+              </v-avatar>
+            </div>
+          </v-list-item-content>
+        </v-list-item>
+      </v-card>
+    </v-list-item>
+    <USSwitchDialog
+      v-if="showDialog"
+      @confirm="confirmStorySwitch"
+    />
   </draggable>
 </template>
 
@@ -62,14 +75,14 @@
 import { mapGetters, mapActions, mapState } from 'vuex';
 import draggable from 'vuedraggable';
 import Vue from 'vue';
-import gqlQueries from '../graphql/gql-queries';
-// eslint-disable-next-line no-unused-vars
-import UserStorySwitchDialog from './backlog/Columns/UserStorySwitchDialog.vue';
+import gqlQueries from '../../graphql/gql-queries';
+import USSwitchDialog from './Columns/Dialog.vue';
 
 export default {
   name: 'DraggableTickList',
   components: {
     draggable,
+    USSwitchDialog,
   },
   props: {
     ticketIds: {
@@ -94,26 +107,37 @@ export default {
       'getTicketById',
     ]),
     ...mapState([
-      'removedFrom',
-      'addedTo',
+      'uSChangeDialog',
     ]),
+    showDialog() {
+      return this.uSChangeDialog.showDialog;
+    },
+    removedFrom() {
+      return this.uSChangeDialog.removedFrom;
+    },
+    addedTo() {
+      return this.uSChangeDialog.addedTo;
+    },
   },
   methods: {
     ...mapActions([
       'fetchBackLogData',
       'fetchSprints',
-      'setRemovedFrom',
-      'setAddedTo',
-      'clearRemAdd',
-      'showDialogSwitcher',
+      'uSCDRemovedFrom',
+      'uSCDAddedTo',
+      'uSCDTicketId',
+      'uSCDEvt',
+      'showDialogUSSwitcher',
     ]),
     onRemove() {
       // mutate store
-      this.setRemovedFrom(this.listProperties);
+      this.uSCDRemovedFrom(this.listProperties);
+
+      // this.setRemovedFrom(this.listProperties);
     },
     onAdd() {
       // mutate store
-      this.setAddedTo(this.listProperties);
+      this.uSCDAddedTo(this.listProperties);
     },
     ended(evt) {
       this.ticketMoveResolve(evt);
@@ -122,8 +146,6 @@ export default {
       const tickId = evt.item.id;
       const fromData = this.removedFrom;
       const toData = this.addedTo;
-      console.log(fromData);
-      console.log(toData);
       // fromData and toData remains undefined if ticket is not moved between diff lists
       if (fromData !== undefined || toData !== undefined) {
         switch (true) {
@@ -141,48 +163,41 @@ export default {
         }
       }
     },
+    // eslint-disable-next-line no-unused-vars
     switchUserStoryDialog(evt) {
       const tickId = evt.item.id;
-      this.showDialogSwitcher();
-      // Launch dialog
-      this.$q.dialog({
-        component: UserStorySwitchDialog,
-        parent: this,
-        ticketId: tickId,
-      })
-        .onOk((args) => {
-          switch (args.action) {
-            case 1:
-              this.uStorySwitchOnly(tickId, evt);
-              break;
-            case 2:
-              this.uStorySwitchAddNewSprint(tickId, evt, args.sprintId);
-              break;
-            case 3:
-              this.uStorySwitchRemoveSprint(tickId, evt);
-              break;
-            case 4:
-              this.uStorySwitchChangeSprint(tickId, evt, args.sprintId);
-              break;
-            default:
-              this.uStorySwitchOnly(tickId, evt);
-              break;
-          }
-          console.log(args.action);
-        })
-        .onDismiss((args) => {
-          if (args === undefined) {
-            this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
-          }
-          this.showDialogSwitcher();
-        });
+      this.uSCDTicketId(tickId);
+      this.uSCDEvt(evt);
+      this.showDialogUSSwitcher();
     },
-    async uStorySwitchOnly(tickId, evt) {
+    confirmStorySwitch(args) {
+      const { ticketId } = this.uSChangeDialog;
+      const { evt } = this.uSChangeDialog;
+
+      switch (args.action) {
+        case 1:
+          this.uStorySwitchOnly(ticketId, evt);
+          break;
+        case 2:
+          this.uStorySwitchAddNewSprint(ticketId, evt, args.sprintId);
+          break;
+        case 3:
+          this.uStorySwitchRemoveSprint(ticketId, evt);
+          break;
+        case 4:
+          this.uStorySwitchChangeSprint(ticketId, evt, args.sprintId);
+          break;
+        default:
+          this.uStorySwitchOnly(ticketId, evt);
+          break;
+      }
+    },
+    async uStorySwitchOnly(ticketId, evt) {
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SwitchUserStory.storySwitch,
         fetchPolicy: 'no-cache',
         variables: {
-          ticket: tickId,
+          ticket: ticketId,
           usFrom: this.removedFrom.userStoryId,
           usTo: this.addedTo.userStoryId,
         },
@@ -193,14 +208,13 @@ export default {
         console.error(error);
         this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
       });
-      this.clearRemAdd();
     },
-    async uStorySwitchAddNewSprint(tickId, evt, sprintAddId) {
+    async uStorySwitchAddNewSprint(ticketId, evt, sprintAddId) {
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SwitchUserStory.AddNewSprint,
         fetchPolicy: 'no-cache',
         variables: {
-          ticket: { id: tickId },
+          ticket: { id: ticketId },
           sprintAdd: { id: sprintAddId },
           uStoryRemove: { id: this.removedFrom.userStoryId },
           uStoryAdd: { id: this.addedTo.userStoryId },
@@ -213,14 +227,13 @@ export default {
         console.error(error);
         this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
       });
-      this.clearRemAdd();
     },
-    async uStorySwitchRemoveSprint(tickId, evt) {
+    async uStorySwitchRemoveSprint(ticketId, evt) {
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SwitchUserStory.RemoveSprint,
         fetchPolicy: 'no-cache',
         variables: {
-          ticket: { id: tickId },
+          ticket: { id: ticketId },
           sprintRemove: { id: this.removedFrom.sprintId },
           uStoryRemove: { id: this.removedFrom.userStoryId },
           uStoryAdd: { id: this.addedTo.userStoryId },
@@ -233,15 +246,14 @@ export default {
         console.error(error);
         this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
       });
-      this.clearRemAdd();
     },
     // yet to be tested
-    async uStorySwitchChangeSprint(tickId, evt, sprintAddId) {
+    async uStorySwitchChangeSprint(ticketId, evt, sprintAddId) {
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SwitchUserStory.ChangeSprint,
         fetchPolicy: 'no-cache',
         variables: {
-          ticket: { id: tickId },
+          ticket: { id: ticketId },
           sprintRemove: { id: this.removedFrom.sprintId },
           sprintAdd: { id: sprintAddId },
           uStoryRemove: { id: this.removedFrom.userStoryId },
@@ -254,20 +266,18 @@ export default {
         console.error(error);
         this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
       });
-      this.clearRemAdd();
     },
-    async sprintToStart(tickId, sprintId) {
+    async sprintToStart(ticketId, sprintId) {
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SprintToStart,
         fetchPolicy: 'no-cache',
-        variables: { ticket: { id: tickId }, sprint: { id: sprintId } },
+        variables: { ticket: { id: ticketId }, sprint: { id: sprintId } },
       }).then((response) => {
         console.log(response);
         this.updateStore();
       }).catch((error) => {
         console.error(error);
       });
-      this.clearRemAdd();
     },
     switchBack(from, oldIndex, to, newIndex) {
       // remove ticket from new list and put back in old list
@@ -283,7 +293,6 @@ export default {
       }).catch((error) => {
         console.error(error);
       });
-      this.clearRemAdd();
     },
     updateStore() {
       this.fetchSprints();
@@ -294,6 +303,11 @@ export default {
 </script>
 
 <style scoped>
+  .card-bottom {
+    position:absolute;
+    bottom:1px;
+    right:1px;
+  }
   ::selection {
     color: none;
     background: none;

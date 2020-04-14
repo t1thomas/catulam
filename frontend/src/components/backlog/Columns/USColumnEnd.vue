@@ -1,24 +1,15 @@
 <template>
-  <q-card
-    bordered
-    style="height: 100%;"
-  >
-    <q-card-section
-      horizontal
-      class="q-pa-xs"
-      style="height: 100%;"
-    >
-      <draggable-tick-list
-        :list-properties="tickListConfig"
-        :ticket-ids="getCompletedTicks(userStoryId)"
-      />
-    </q-card-section>
-  </q-card>
+  <v-card height="100%">
+    <draggable-tick-list
+      :list-properties="tickListConfig"
+      :ticket-ids="getCompletedTicks(userStoryId)"
+    />
+  </v-card>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import DraggableTickList from '../../DraggableTickList.vue';
+import DraggableTickList from '../DraggableTickList.vue';
 
 export default {
   name: 'USColumnEnd',
