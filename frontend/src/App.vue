@@ -1,77 +1,49 @@
 <template>
-  <q-layout view="lHh lpR lFf">
-    <q-header
-      elevated
-      class="glossy"
+  <v-app id="inspire">
+    <v-navigation-drawer
+      v-model="drawer"
+      app
+      clipped
     >
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          aria-label="Menu"
-          icon="menu"
-          @click="leftDrawerOpen = !leftDrawerOpen"
-        />
-        <q-toolbar-title>
-          Caṭulam
-        </q-toolbar-title>
-        <q-btn
-          v-if="currentUser"
-          flat
-          dense
-          icon="mdi-logout-variant"
-          label="Sign-out"
-          @click="logOutHandler"
-        />
-      </q-toolbar>
-    </q-header>
+      <v-list dense>
+        <v-list-item link>
+          <v-list-item-action>
+            <v-icon>mdi-view-dashboard</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Dashboard</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item link>
+          <v-list-item-action>
+            <v-icon>mdi-settings</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Settings</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+      </v-list>
+    </v-navigation-drawer>
 
-    <q-drawer
-      v-model="leftDrawerOpen"
-      bordered
-      content-class="bg-grey-2"
+    <v-app-bar
+      app
+      clipped-left
     >
-      <q-list>
-        <q-item
-          v-for="(item, index) in drawerItems"
-          :key="index"
-          clickable
-          tag="a"
-          :to="item.link"
-        >
-          <q-item-section avatar>
-            <q-icon :name="item.icon" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>{{ item.label }}</q-item-label>
-          </q-item-section>
-        </q-item>
-        <q-item
-          v-if="currentUser"
-          clickable
-          tag="a"
-          @click="logOutHandler"
-        >
-          <q-item-section avatar>
-            <q-icon name="mdi-logout-variant" />
-          </q-item-section>
-          <q-item-section>
-            <q-item-label>Sign-out</q-item-label>
-          </q-item-section>
-        </q-item>
-      </q-list>
-    </q-drawer>
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
+      <v-toolbar-title>Application</v-toolbar-title>
+    </v-app-bar>
 
-    <q-page-container>
+    <v-content>
       <router-view />
-    </q-page-container>
-  </q-layout>
+    </v-content>
+
+    <v-footer app>
+      <span>&copy; 2019</span>
+    </v-footer>
+  </v-app>
 </template>
 
 <script>
-// import HelloWorld from './components/HelloWorld.vue';
-
 
 import { mapState } from 'vuex';
 
@@ -79,13 +51,16 @@ export default {
   name: 'LayoutDefault',
   data() {
     return {
-      leftDrawerOpen: false,
+      drawer: null,
     };
   },
   computed: {
     ...mapState([
       'currentUser',
     ]),
+    fullName() {
+      return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
+    },
     drawerItems() {
       if (this.currentUser) {
         return [
@@ -98,35 +73,16 @@ export default {
       ];
     },
   },
-  watch: {
-    currentUser() {
-      if (this.currentUser) {
-        if (this.$router.currentRoute.path === '/login') {
-          this.$router.push('/home');
-        }
-      }
-    },
+  created() {
+    this.$store.dispatch('fetchCurrentUser')
+      .catch((e) => {
+        console.error(e);
+      });
+    this.$vuetify.theme.dark = true;
   },
-  methods: {
-    async logOutHandler() {
-      await this.$store.dispatch('logoutUser');
-    },
-  },
-
 };
 </script>
 
 <style>
-  .unselectable {
-    -moz-user-select: none;
-    -khtml-user-select: none;
-    -webkit-user-select: none;
 
-    /*
-      Introduced in Internet Explorer 10.
-      See http://ie.microsoft.com/testdrive/HTML5/msUserSelect/
-    */
-    -ms-user-select: none;
-    user-select: none;
-  }
 </style>

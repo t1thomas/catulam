@@ -7,9 +7,16 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
+    uSChangeDialog: {
+      showDialog: false,
+      ticketId: null,
+      removedFrom: {},
+      addedTo: {},
+      evt: null,
+    },
     currentUser: null,
     showDialog: false,
-    carouselModelParent: 1,
+    carouselModelParent: 0,
     backLogData: [],
     // userStories: [],
     sprintList: [],
@@ -17,6 +24,7 @@ export default new Vuex.Store({
     removedFrom: {},
     addedTo: {},
     routeAuth: false,
+    projects: null,
     // repoAndBranch: {},
     // cardMoved: { removedFrom: undefined, addedTo: undefined },
   },
@@ -36,6 +44,9 @@ export default new Vuex.Store({
     set_userStories(state, obj) {
       state.userStories = obj;
     },
+    set_projects(state, obj) {
+      state.projects = obj;
+    },
     set_tickets(state, obj) {
       Object.assign(state.tickets, obj);
     },
@@ -45,45 +56,47 @@ export default new Vuex.Store({
     set_backLogData(state, obj) {
       Vue.set(state, 'backLogData', [...obj]);
     },
-    set_cardRemoved(state, obj) {
-      state.cardMoved.removedFrom = obj;
+    /* mutations to manipulate data for uSChangeDialog */
+    uSCDSet_evt(state, obj) {
+      state.uSChangeDialog.evt = obj;
     },
-    set_cardAdded(state, obj) {
-      state.cardMoved.addedTo = obj;
+    uSCDSet_ticketId(state, obj) {
+      state.uSChangeDialog.ticketId = obj;
     },
-    clear_Rem_Add(state) {
-      state.removedFrom = undefined;
-      state.addedTo = undefined;
+    uSCDSet_removedFrom(state, obj) {
+      state.uSChangeDialog.removedFrom = obj;
     },
+    uSCDSet_addedTo(state, obj) {
+      state.uSChangeDialog.addedTo = obj;
+    },
+    set_uSChangeDialog(state) {
+      if (state.uSChangeDialog.showDialog === false) {
+        state.uSChangeDialog.showDialog = true;
+      } else {
+        state.uSChangeDialog.showDialog = false;
+        state.uSChangeDialog.removedFrom = undefined;
+        state.uSChangeDialog.addedTo = undefined;
+        state.uSChangeDialog.addedTo = null;
+      }
+    },
+    /* ------------------------------------------------*/
     set_carouselModel(state, obj) {
       state.carouselModelParent = obj;
     },
-    set_showDialog(state) {
-      state.showDialog = !state.showDialog;
-    },
     set_currentUser(state, obj) {
-      state.currentUser = obj;
+      if (obj === null) {
+        state.currentUser = null;
+      } else {
+        state.currentUser = { ...obj };
+
+        // Object.keys(obj)
+        //   .forEach((key) => {
+        //     Vue.set(state.currentUser, key, obj[key]);
+        //   });
+      }
     },
   },
   actions: {
-    async fetchRepoAndBranch({ commit }) {
-      await Vue.$axios.get('/getRepoInfo')
-        .then((response) => {
-          commit('set_repoAndBranch', response.data);
-          console.log(response.data);
-        }, (error) => {
-          console.error(`frontend error ${error}`);
-        });
-    },
-    async fetchIssues({ commit }) {
-      await Vue.$axios.get('/getIssues')
-        .then((response) => {
-          commit('set_issues', response.data);
-          console.log(response.data);
-        }, (error) => {
-          console.error(error);
-        });
-    },
     async fetchUserStories({ commit }) {
       const response = await Vue.$apolloClient.query({
         query: gqlQueries.USWithTickIds,
@@ -121,6 +134,17 @@ export default new Vuex.Store({
       }).then((response) => {
         const { UserStory } = response.data;
         commit('set_backLogData', UserStory);
+      }).catch((error) => {
+        console.error(error);
+      });
+    },
+    async fetchProjects({ commit }) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.PROJECTS,
+        fetchPolicy: 'no-cache',
+      }).then((response) => {
+        const { Project } = response.data;
+        commit('set_projects', Project);
       }).catch((error) => {
         console.error(error);
       });
@@ -174,6 +198,8 @@ export default new Vuex.Store({
       }).catch((error) => {
         localStorage.setItem('catulam_token', '');
         console.error(error);
+        // don't know if it makes a diffrence
+        commit('set_currentUser', null);
       });
     },
     setCardRemoved({ commit }, listConfig) {
@@ -191,12 +217,27 @@ export default new Vuex.Store({
     setRemovedFrom({ commit }, value) {
       commit('set_removedFrom', value);
     },
+    /* actions to set data for uSChangeDialog */
+    uSCDEvt({ commit }, value) {
+      commit('uSCDSet_evt', value);
+    },
+    uSCDTicketId({ commit }, value) {
+      commit('uSCDSet_ticketId', value);
+    },
+    uSCDRemovedFrom({ commit }, value) {
+      commit('uSCDSet_removedFrom', value);
+    },
+    uSCDAddedTo({ commit }, value) {
+      commit('uSCDSet_addedTo', value);
+    },
     setAddedTo({ commit }, value) {
       commit('set_addedTo', value);
     },
-    showDialogSwitcher({ commit }) {
-      commit('set_showDialog');
+    showDialogUSSwitcher({ commit }) {
+      commit('set_uSChangeDialog');
     },
+    /* -------------------------------------- */
+
     setUser({ commit }, value) {
       commit('set_currentUser', value);
     },
@@ -245,8 +286,25 @@ export default new Vuex.Store({
       .find((userStory) => userStory.id === userStoryId)
       .storyText,
     getSprintValues: (state) => state.sprintList
-      .reduce((arr, currSprint) => {
-        arr.push({ id: currSprint.id, label: `Sprint ${currSprint.sprintNo}` });
+      .reduce((arr, currSprint, index) => {
+        if (index === 0) {
+          arr.push({
+            value: index,
+            id: 'noId',
+            text: 'Add to Todo (no sprint)',
+          });
+          arr.push({
+            value: index + 1,
+            id: currSprint.id,
+            text: `Sprint ${currSprint.sprintNo}`,
+          });
+        } else {
+          arr.push({
+            value: index + 1,
+            id: currSprint.id,
+            text: `Sprint ${currSprint.sprintNo}`,
+          });
+        }
         return arr;
       }, []),
     /* Retrieve tickets in done vs un-complete state based on array of tick Ids passed in */

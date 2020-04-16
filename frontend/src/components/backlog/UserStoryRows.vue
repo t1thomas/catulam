@@ -1,39 +1,34 @@
 <template>
-  <div>
-    <div
-      ref="storyRow"
-      class="row col-auto "
+  <v-row
+    class="mb-2"
+    no-gutters
+    style="max-height: 100%"
+  >
+    <v-col
+      class="columns"
+      cols="4"
     >
-      <q-card
-        v-if="small"
-        class="overlay"
-        :style="{ 'z-index': 10,
-                  top: style().top,
-                  height: style().height,
-                  width: style().width,
-                  position: 'fixed'
-        }"
-      >
-        <q-card-section class="overlay-content">
-          <span> Drag ticket to user story </span>
-          <div class="rect" />
-        </q-card-section>
-      </q-card>
-      <div class="col-4">
-        <start-column :user-story-id="story.id" />
-      </div>
-      <div class="col-5">
-        <sprints-column
-          :user-story-id="story.id"
-        />
-      </div>
-      <div class="col-3">
-        <done-column
-          :user-story-id="story.id"
-        />
-      </div>
-    </div>
-  </div>
+      <start-column :user-story-id="story.id" />
+    </v-col>
+    <v-col
+      class="columns"
+
+      cols="5"
+    >
+      <sprints-column
+        :user-story-id="story.id"
+      />
+    </v-col>
+    <v-col
+      class="columns"
+
+      cols="3"
+    >
+      <done-column
+        :user-story-id="story.id"
+      />
+    </v-col>
+  </v-row>
 </template>
 <script>
 import USColumnStart from './Columns/USColumnStart.vue';
@@ -53,57 +48,12 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      small: false,
-    };
-  },
-  // computed: {
-  //
-  // },
-  methods: {
-    sprintTicks(tickets) {
-      return tickets
-        .filter((tick) => tick.done === false
-          && tick.sprint != null);
-    },
-    completedTicks(tickets) {
-      return tickets
-        .filter((tick) => tick.done === true);
-    },
-    handleClick() {
-      this.small = true;
-      const rect = this.$refs.storyRow.getBoundingClientRect();
-      console.log(rect);
-    },
-    style() {
-      const rect = this.$refs.storyRow.getBoundingClientRect();
-      return {
-        top: `${rect.top}px`,
-        width: `${rect.width}px`,
-        height: `${rect.height}px`,
-      };
-    },
-  },
+
 };
 </script>
 
 <style scoped>
-
-  .overlay {
-    background: rgba(61, 61, 61, 0.33);
-    place-content: center;
-    display: flex;
-  }
-  .overlay-content {
-    color: #ffffff;
-    place-self: center;
-    height: 40%;
-  }
-  .rect{
-    height: 43%;
-    margin: 4% auto auto;
-    width: 42%;
-    border-style: dashed;
-  }
+.columns {
+  /*height: 100%;*/
+}
 </style>

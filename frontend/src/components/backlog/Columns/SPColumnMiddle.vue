@@ -1,42 +1,33 @@
 <template>
-  <q-carousel
+  <v-carousel
     v-model="carouselModel"
-    transition-prev="slide-right"
-    transition-next="slide-left"
-    animated
-    control-color="primary"
-    arrows
-    :keep-alive="false"
-    style="height: 100%;"
-    class="bg-grey-1 shadow-2 rounded-borders"
+    class="px-2"
+    hide-delimiters
+    height="100%"
   >
-    <q-carousel-slide
+    <v-carousel-item
       v-for="(sprint) in sprintList"
       :key="sprint.id"
       :name="sprint.sprintNo"
-      class="column no-wrap"
     >
       <span>Sprint {{ sprint.sprintNo }}</span>
-      <div
-        class="row fit justify-start items-center q-gutter-xs q-col-gutter no-wrap"
-      >
-        <draggable-tick-list
-          :ticket-ids="ticsPerSprint(sprint.id, userStoryId)"
-          :list-properties="tickListConfig(sprint.id)"
-        />
-      </div>
-    </q-carousel-slide>
-  </q-carousel>
+      <draggable-tick-list
+        :ticket-ids="ticsPerSprint(sprint.id, userStoryId)"
+        :list-properties="tickListConfig(sprint.id)"
+      />
+    </v-carousel-item>
+  </v-carousel>
 </template>
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import DraggableTickList from '../../DraggableTickList.vue';
+import DraggableTickList from '../DraggableTickList.vue';
 
 
 export default {
   name: 'SPColumnMiddle',
   components: {
+    // eslint-disable-next-line vue/no-unused-components
     DraggableTickList,
   },
   props: {
@@ -73,10 +64,6 @@ export default {
         userStoryId: this.userStoryId, columnType: 'sprint', sprintId: id, disabled: false,
       };
     },
-    // ticsPerSprint(tickets) {
-    //   return tickets
-    //     .filter(tick => tick.userStory.id === this.userStoryId);
-    // },
   },
 };
 </script>

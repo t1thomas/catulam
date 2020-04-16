@@ -1,6 +1,46 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
+  USER_TASKS: gql`
+    query($username: String!) {
+      User(filter: { username: $username }) {
+        projects {
+          id
+          label
+          tickets(filter: { assignee: { username: $username } }) {
+            id
+            issueNumber
+            title
+          }
+          userStories(filter: { assignee: { username: $username } }) {
+            id
+            issueNumber
+            storyText
+          }
+        }
+      }
+    }`,
+  PROJECTS: gql`
+    query {
+      Project {
+        id
+        title
+        desc
+        label
+        members {
+          id
+        }
+        userStories {
+          id
+        }
+        tickets {
+          id
+        }
+        sprints {
+          id
+        }
+      }
+    }`,
   RESET_PASS: gql`mutation($username: String!, $newPassword: String!) {
     resetPassword(username: $username, newPassword: $newPassword) {
       token
@@ -17,11 +57,6 @@ const gqlQueries = {
     }
   }
   `,
-  VerifyToken: gql`query {
-    verifyUserToken {
-      token
-    }
-  }`,
   USWithTickIds: gql`query{
     UserStory {
       id
@@ -47,7 +82,6 @@ const gqlQueries = {
       userStory {
         id
       }
-      assigendTo
       title
       creator
       desc

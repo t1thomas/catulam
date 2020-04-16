@@ -39,7 +39,7 @@ const testUser = {
     passwordUpdate: true,
 };
 
-describe('User Login Mutations', () => {
+module.exports = () => describe('User Login Mutations', () => {
     it('Create a user', async () => {
         const { mutate } = createTestClient(server);
 
@@ -105,6 +105,15 @@ describe('User Login Mutations', () => {
 
         expect(res.data.getCurrentUser).toEqual(testUserCopy);
 
+    });
+
+    it('Add user to project',async () => {
+        const { mutate } = createTestClient(server);
+
+        const res = await mutate({
+            mutation: gqlQueries.ADD_USER_PROJECT,
+        });
+        expect(res.data).toMatchSnapshot();
     });
 
     it('Logout User (Delete token from db)', async () => {

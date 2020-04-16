@@ -5,6 +5,11 @@
         id: ID!
         title: String!
         desc: String
+        label: String!
+        members: [User] @relation(name: "TEAM_MEMBER", direction: IN)
+        userStories: [UserStory] @relation(name: "USER_STORY", direction: IN)
+        tickets: [Ticket] @relation(name: "TICKET", direction: IN)
+        sprints: [Sprint] @relation(name: "SPRINT", direction: IN)
     }
 
     type Token {
@@ -15,12 +20,15 @@
     type UserStory {
         id: ID!
         storyText: String!
+        issueNumber: Int!
         tickets: [Ticket] @relation(name: "SUB_TASK", direction: IN)
         ticketIds: idList
           @cypher(statement: """
               MATCH (this)<-[:SUB_TASK]-(rec:Ticket)
               RETURN collect(rec.id) AS ids
          """)
+        project: Project @relation(name: "USER_STORY", direction: OUT)
+        assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
     }
 
     type User {
@@ -32,6 +40,9 @@
         password: String!
         passwordUpdate: Boolean!
         tokens: [Token] @relation(name: "JWT", direction: OUT)
+        projects: [Project] @relation(name: "TEAM_MEMBER", direction: OUT)
+        userStories: [UserStory] @relation(name: "ASSIGNED_TASK", direction: OUT)
+        tickets: [Ticket] @relation(name: "ASSIGNED_TASK", direction: OUT)
     }
 
     type Ticket {
@@ -39,12 +50,13 @@
         issueNumber: Int!
         hourEstimate: Int
         userStory: UserStory @relation(name: "SUB_TASK", direction: OUT)
-        assigendTo: ID
         title: String!
         creator: String
         desc: String
         done: Boolean!
         sprint: Sprint @relation(name: "SPRINT_TASK", direction: OUT)
+        project: Project @relation(name: "TICKET", direction: OUT)
+        assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
     }
 
     type Sprint {
@@ -61,6 +73,8 @@
               MATCH (this)<-[:SPRINT_TASK]-(rec:Ticket)
               RETURN collect(rec.id) AS ids
          """)
+        project: Project @relation(name: "SPRINT", direction: OUT)
+
     }
 
     type Query {

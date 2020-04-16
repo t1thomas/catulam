@@ -17,7 +17,14 @@ const { mutate } = createTestClient(server);
 
 
 
-describe('Mutations', () => {
+module.exports = () => describe('Mutations', () => {
+
+    it('Create 3 projects', async () => {
+        const res = await mutate({
+            mutation: gqlQueries.CREATE_PROJECTS,
+        });
+        expect(res.data).toMatchSnapshot();
+    });
 
     it('Create 3 tickets', async () => {
         const res = await mutate({
@@ -54,4 +61,10 @@ describe('Mutations', () => {
         expect(res.data).toMatchSnapshot();
     });
 
+    it('Add project data',async () => {
+        const res = await mutate({
+            mutation: gqlQueries.ADD_PROJECT_DATA,
+        });
+        expect(res.data).toMatchSnapshot();
+    });
 });
