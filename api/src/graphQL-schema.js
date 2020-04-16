@@ -44,6 +44,7 @@ const resolveFunctions = {
                 {username:currentUser.username, token: jwtToken})
                 .then((result) => {
                     const user = result.records[0].get('u').properties;
+                    console.log(user);
                     // set password field to empty string, to prevent mutation returning password value
                     user.password = '';
                     return user;

@@ -24,6 +24,7 @@ export default new Vuex.Store({
     removedFrom: {},
     addedTo: {},
     routeAuth: false,
+    projects: null,
     // repoAndBranch: {},
     // cardMoved: { removedFrom: undefined, addedTo: undefined },
   },
@@ -42,6 +43,9 @@ export default new Vuex.Store({
     },
     set_userStories(state, obj) {
       state.userStories = obj;
+    },
+    set_projects(state, obj) {
+      state.projects = obj;
     },
     set_tickets(state, obj) {
       Object.assign(state.tickets, obj);
@@ -130,6 +134,17 @@ export default new Vuex.Store({
       }).then((response) => {
         const { UserStory } = response.data;
         commit('set_backLogData', UserStory);
+      }).catch((error) => {
+        console.error(error);
+      });
+    },
+    async fetchProjects({ commit }) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.PROJECTS,
+        fetchPolicy: 'no-cache',
+      }).then((response) => {
+        const { Project } = response.data;
+        commit('set_projects', Project);
       }).catch((error) => {
         console.error(error);
       });
