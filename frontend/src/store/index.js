@@ -25,10 +25,14 @@ export default new Vuex.Store({
     addedTo: {},
     routeAuth: false,
     projects: null,
+    currentTicket: null,
     // repoAndBranch: {},
     // cardMoved: { removedFrom: undefined, addedTo: undefined },
   },
   mutations: {
+    set_currTickDesc(state, obj) {
+      state.currentTicket.desc = obj;
+    },
     set_removedFrom(state, obj) {
       state.removedFrom = obj;
     },
@@ -82,6 +86,9 @@ export default new Vuex.Store({
     /* ------------------------------------------------*/
     set_carouselModel(state, obj) {
       state.carouselModelParent = obj;
+    },
+    set_currTicket(state, obj) {
+      state.currentTicket = { ...obj };
     },
     set_currentUser(state, obj) {
       if (obj === null) {
@@ -201,6 +208,28 @@ export default new Vuex.Store({
         // don't know if it makes a diffrence
         commit('set_currentUser', null);
       });
+    },
+    async fetchCurrTicket({ commit }, id) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.TICKET_INFO,
+        fetchPolicy: 'no-cache',
+        variables: { id },
+      })
+        .then((response) => {
+          const { Ticket } = response.data;
+          if (Ticket === null) {
+            throw new Error();
+          } else {
+            commit('set_currTicket', Ticket[0]);
+          }
+        })
+        .catch((error) => {
+          console.log('Unable to fetch Ticket');
+          console.error(error);
+        });
+    },
+    setCurrTickDesc({ commit }, value) {
+      commit('set_currTickDesc', value);
     },
     setCardRemoved({ commit }, listConfig) {
       commit('set_cardRemoved', listConfig);

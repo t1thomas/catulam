@@ -1,6 +1,14 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
+  UPDATE_TICKET_DESC: gql`
+    mutation($id: ID!, $desc: String!) {
+      UpdateTicket(id: $id, desc: $desc) {
+        id
+        desc
+      }
+    }
+  `,
   TICKET_INFO: gql`
     query($id: ID!) {
       Ticket(filter: { id: $id }) {

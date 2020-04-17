@@ -4,7 +4,11 @@
       cols="4"
     >
       <span class="headline">
-        {{ title }} # {{ issueNo }}
+        {{ title }}
+      </span>
+      <span class="horiz-line" />
+      <span class="headline">
+        #{{ issueNo }}
       </span>
     </v-col>
     <v-divider
@@ -49,5 +53,10 @@ export default {
 </script>
 
 <style scoped>
-
+.horiz-line {
+  display: inline-block;
+  vertical-align: super;
+  border-bottom: 2px solid #fafafa;
+  padding: 0 30px;
+}
 </style>

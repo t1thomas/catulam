@@ -3,8 +3,9 @@
     <v-col
       cols="12"
       md="6"
+      class="px-1"
     >
-      <v-card>
+      <v-card class="fill-height">
         <v-list dense>
           <v-list-item>
             <v-list-item-content>Current Sprint:</v-list-item-content>
@@ -26,47 +27,46 @@
           </v-list-item>
 
           <v-list-item>
-            <v-list-item-content>Status</v-list-item-content>
-            <v-list-item-content class="align-end" v-if="status">
+            <v-list-item-content>Status:</v-list-item-content>
+            <v-list-item-content
+              v-if="status"
+              class="align-end"
+            >
               Completed
             </v-list-item-content>
-            <v-list-item-content class="align-end" v-else>
+            <v-list-item-content
+              v-else
+              class="align-end"
+            >
               Uncompleted
             </v-list-item-content>
           </v-list-item>
 
           <v-list-item>
-            <v-list-item-content>Carbs:</v-list-item-content>
-            <v-list-item-content class="align-end">
-              defgsdf
+            <v-list-item-content>Time Estimate:</v-list-item-content>
+            <v-list-item-content
+              v-if="hourEstimate"
+              class="align-end"
+            >
+              <v-chip
+                small
+                color="dark-grey"
+                text-color="white"
+                style="max-width: fit-content"
+              >
+                <v-avatar
+                  left
+                >
+                  <v-icon>mdi-progress-clock</v-icon>
+                </v-avatar>
+                {{ hourEstimate }}hr
+              </v-chip>
             </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-content>Protein:</v-list-item-content>
-            <v-list-item-content class="align-end">
-              defgsdf
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-content>Sodium:</v-list-item-content>
-            <v-list-item-content class="align-end">
-              defgsdf
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-content>Calcium:</v-list-item-content>
-            <v-list-item-content class="align-end">
-              defgsdf
-            </v-list-item-content>
-          </v-list-item>
-
-          <v-list-item>
-            <v-list-item-content>Iron:</v-list-item-content>
-            <v-list-item-content class="align-end">
-              defgsdf
+            <v-list-item-content
+              v-else
+              class="align-end"
+            >
+              Set estimate
             </v-list-item-content>
           </v-list-item>
         </v-list>
@@ -76,8 +76,34 @@
     <v-col
       cols="12"
       md="6"
+      class="px-1"
     >
-      rht
+      <v-card class="fill-height">
+        <v-list dense>
+          <v-list-item>
+            <v-list-item-content>Created:</v-list-item-content>
+            <v-list-item-content class="align-end">
+              19/04/2020 14:50pm by User name
+            </v-list-item-content>
+          </v-list-item>
+
+          <v-list-item>
+            <v-list-item-content>UserStory:</v-list-item-content>
+            <v-list-item-content
+              v-if="userStory"
+              class="align-end"
+            >
+              {{ userStory.text }}
+            </v-list-item-content>
+            <v-list-item-content
+              v-else
+              class="align-end"
+            >
+              Add UserStory
+            </v-list-item-content>
+          </v-list-item>
+        </v-list>
+      </v-card>
     </v-col>
   </v-row>
 </template>
@@ -105,9 +131,19 @@ export default {
     status() {
       return this.ticket.done;
     },
-    // ticketInfo1() {
-    //   return [{ label: 'Current Sprint', data: this.ticket.sprint }];
-    // },
+    hourEstimate() {
+      return this.ticket.hourEstimate;
+    },
+    userStory() {
+      const { userStory } = this.ticket;
+      if (userStory !== null) {
+        return {
+          text: `# ${userStory.issueNumber}`,
+          to: { path: '/uStory', query: { id: userStory.id } },
+        };
+      }
+      return false;
+    },
   },
 };
 </script>
