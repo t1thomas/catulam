@@ -7,6 +7,9 @@ import Home from '../views/Home.vue';
 import backlog from '../views/Backlog.vue';
 import login from '../views/Login.vue';
 import PassReset from '../views/PassReset.vue';
+import TicketPage from '../components/TicketPage.vue';
+import UserStoryPage from '../components/UserStoryPage.vue';
+import SprintBoard from '../views/SprintBoard.vue';
 // eslint-disable-next-line no-unused-vars
 import gqlQueries from '../graphql/gql-queries';
 
@@ -50,6 +53,24 @@ const AuthAccess = async (to, from, next) => {
 // };
 
 const routes = [
+  {
+    path: '/sprint',
+    name: 'sprint',
+    component: SprintBoard,
+    beforeEnter: AuthAccess,
+  },
+  {
+    path: '/uStory',
+    name: 'uStory',
+    component: UserStoryPage,
+    beforeEnter: AuthAccess,
+  },
+  {
+    path: '/ticket',
+    name: 'ticket',
+    component: TicketPage,
+    beforeEnter: AuthAccess,
+  },
   {
     path: '/home',
     name: 'home',

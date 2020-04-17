@@ -40,6 +40,8 @@
               <tr
                 v-for="task in projectTasks(project.id)"
                 :key="task.issueNo"
+                style="cursor: pointer"
+                @click="navigation(task)"
               >
                 <td>
                   <v-icon
@@ -98,6 +100,7 @@ export default {
 
       currProject.tickets.forEach((tick) => {
         tasks.push({
+          id: tick.id,
           issueNo: tick.issueNumber,
           title: tick.title,
           type: 'ticket',
@@ -105,6 +108,7 @@ export default {
       });
       currProject.userStories.forEach((story) => {
         tasks.push({
+          id: story.id,
           issueNo: story.issueNumber,
           title: story.storyText,
           type: 'story',
@@ -128,6 +132,19 @@ export default {
           console.log('User not found');
           console.error(error);
         });
+    },
+    navigation(task) {
+      if (task.type === 'ticket') {
+        this.$router.push({
+          path: '/ticket',
+          query: { id: task.id },
+        });
+      } else if (task.type === 'story') {
+        this.$router.push({
+          path: '/uStory',
+          query: { id: task.id },
+        });
+      }
     },
   },
 };

@@ -1,6 +1,37 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
+  TICKET_INFO: gql`
+    query($id: ID!) {
+      Ticket(filter: { id: $id }) {
+        id
+        issueNumber
+        hourEstimate
+        userStory {
+          id
+          issueNumber
+          storyText
+        }
+        title
+        desc
+        done
+        sprint {
+          id
+          sprintNo
+        }
+        project {
+          id
+          label
+        }
+        assignee {
+          id
+        }
+        creator {
+          id
+        }
+      }
+    }
+  `,
   USER_TASKS: gql`
     query($username: String!) {
       User(filter: { username: $username }) {

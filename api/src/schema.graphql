@@ -29,6 +29,7 @@
          """)
         project: Project @relation(name: "USER_STORY", direction: OUT)
         assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
+        creator: User @relation(name: "CREATOR", direction: OUT)
     }
 
     type User {
@@ -51,12 +52,12 @@
         hourEstimate: Int
         userStory: UserStory @relation(name: "SUB_TASK", direction: OUT)
         title: String!
-        creator: String
         desc: String
         done: Boolean!
         sprint: Sprint @relation(name: "SPRINT_TASK", direction: OUT)
         project: Project @relation(name: "TICKET", direction: OUT)
         assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
+        creator: User @relation(name: "CREATOR", direction: OUT)
     }
 
     type Sprint {
