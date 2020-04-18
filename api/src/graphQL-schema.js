@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const md5 = require('md5');
 
 const typeDefs = fs.readFileSync(path.join(__dirname, 'schema.graphql')).toString('utf-8');
 
@@ -55,6 +56,32 @@ const resolveFunctions = {
         },
     },
     Mutation: {
+        CreateUser: async (_, {id, firstName, lastName, username, email, password, passwordUpdate}) => {
+            try {
+                const salt = bcrypt.genSaltSync(Number(process.env.BCRYPTHASHCOST));
+                const passHash = bcrypt.hashSync(password, salt);
+                const avatarHash = await md5(username);
+                return neode.cypher('CREATE (u:User{' +
+                    ' id : $id,' +
+                    ' firstName : $firstName,' +
+                    ' lastName : $lastName,' +
+                    ' username : $username,' +
+                    ' email : $email,' +
+                    ' password: $passHash,' +
+                    ' passwordUpdate: $passwordUpdate,' +
+                    ' avatar: $avatarHash' +
+                    ' }) RETURN u',
+                    {id, firstName, lastName, username, email, passHash, passwordUpdate, avatarHash})
+                    .then((result) => {
+                        return result.records[0].get('u').properties;
+                    })
+                    .catch(e => {
+                        throw e;
+                    });
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
         loginUser: (_, {username, password}) => {
             return neode.cypher('MATCH (u:User {username: $username}) RETURN u', {username})
                 .then(async (result) => {

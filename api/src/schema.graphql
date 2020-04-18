@@ -44,6 +44,7 @@
         projects: [Project] @relation(name: "TEAM_MEMBER", direction: OUT)
         userStories: [UserStory] @relation(name: "ASSIGNED_TASK", direction: OUT)
         tickets: [Ticket] @relation(name: "ASSIGNED_TASK", direction: OUT)
+        avatar: String
     }
 
     type Ticket {
@@ -93,7 +94,7 @@
     type Mutation {
         loginUser(username: String!, password: String!): Token!
         resetPassword(username: String!, newPassword: String!): Token!
-
+        CreateUser(id: ID!, firstName: String!, lastName: String, username: String!, email: String!, password: String!, passwordUpdate: Boolean!): User
 
         TicSwitchSprint(tickId: String!, sprintIdFrom: String!, sprintIdTo: String!): JSON
             @cypher(statement:"""

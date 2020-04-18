@@ -73,23 +73,17 @@ import gqlQueries from '../../graphql/gql-queries';
 
 export default {
   name: 'DescSection',
-  props: {
-    ticketId: {
-      type: String,
-      required: true,
-    },
-  },
   data: () => ({
     text: null,
     disabled: true,
     saving: false,
   }),
   computed: {
-    ...mapState([
-      'currentTicket',
-    ]),
+    ...mapState({
+      ticket: 'currentTicket',
+    }),
     desc() {
-      const { desc } = this.currentTicket;
+      const { desc } = this.ticket;
       if (desc !== null) {
         return desc;
       }
@@ -107,7 +101,6 @@ export default {
   },
   mounted() {
     this.setOriginalText();
-    // console.log(this.getTicketById(this.ticketId));
   },
   methods: {
     ...mapActions([
@@ -128,7 +121,7 @@ export default {
       await Vue.$apolloClient.query({
         query: gqlQueries.UPDATE_TICKET_DESC,
         fetchPolicy: 'no-cache',
-        variables: { id: this.currentTicket.id, desc: this.text },
+        variables: { id: this.ticket.id, desc: this.text },
       })
         .then((response) => {
           const { UpdateTicket } = response.data;

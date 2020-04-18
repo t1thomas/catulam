@@ -109,15 +109,14 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   name: 'DetailsSection',
-  props: {
-    ticket: {
-      type: Object,
-      required: true,
-    },
-  },
   computed: {
+    ...mapState({
+      ticket: 'currentTicket',
+    }),
     sprintInfo() {
       const { sprint } = this.ticket;
       if (sprint !== null) {

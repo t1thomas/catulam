@@ -31,6 +31,33 @@
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-toolbar-title>Application</v-toolbar-title>
+      <v-spacer />
+      <v-btn
+        v-if="currentUser"
+        class="ma-2"
+        text
+        icon
+        color="red lighten-2"
+      >
+        <v-avatar
+          size="30"
+        >
+          <img
+            :src="gravatar"
+            alt="John"
+          >
+        </v-avatar>
+      </v-btn>
+      <v-btn
+        v-if="currentUser"
+        dark
+        color="secondary"
+      >
+        Logout
+        <v-icon right>
+          mdi-logout-variant
+        </v-icon>
+      </v-btn>
     </v-app-bar>
 
     <v-content>
@@ -55,6 +82,9 @@ export default {
     };
   },
   computed: {
+    gravatar() {
+      return `https://gravatar.com/avatar/${this.currentUser.avatar}?d=identicon`;
+    },
     ...mapState([
       'currentUser',
     ]),

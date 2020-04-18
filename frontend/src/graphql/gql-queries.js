@@ -111,6 +111,7 @@ const gqlQueries = {
       username
       email
       passwordUpdate
+      avatar
     }
   }`,
   Tickets: gql`query{
