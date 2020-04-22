@@ -1,36 +1,43 @@
 <template>
-  <v-row
-    class="mb-2"
-    no-gutters
-    style="max-height: 100%"
+  <div
+    class="containers"
   >
-    <v-col
-      class="columns"
-      cols="4"
+    <v-row
+      v-for="story in stories"
+      :key="story.id"
+      class="mb-2"
+      no-gutters
+      style="max-height: 100%"
     >
-      <start-column :user-story-id="story.id" />
-    </v-col>
-    <v-col
-      class="columns"
+      <v-col
+        class="columns"
+        cols="4"
+      >
+        <start-column :user-story-id="story.id" />
+      </v-col>
+      <v-col
+        class="columns"
 
-      cols="5"
-    >
-      <sprints-column
-        :user-story-id="story.id"
-      />
-    </v-col>
-    <v-col
-      class="columns"
+        cols="5"
+      >
+        <sprints-column
+          :user-story-id="story.id"
+        />
+      </v-col>
+      <v-col
+        class="columns"
 
-      cols="3"
-    >
-      <done-column
-        :user-story-id="story.id"
-      />
-    </v-col>
-  </v-row>
+        cols="3"
+      >
+        <done-column
+          :user-story-id="story.id"
+        />
+      </v-col>
+    </v-row>
+  </div>
 </template>
 <script>
+import { mapState } from 'vuex';
 import USColumnStart from './Columns/USColumnStart.vue';
 import USColumnEnd from './Columns/USColumnEnd.vue';
 import SPColumnMiddle from './Columns/SPColumnMiddle.vue';
@@ -38,22 +45,24 @@ import SPColumnMiddle from './Columns/SPColumnMiddle.vue';
 export default {
   name: 'UserStoryRows',
   components: {
+    // eslint-disable-next-line vue/no-unused-components
     'sprints-column': SPColumnMiddle,
     'start-column': USColumnStart,
+    // eslint-disable-next-line vue/no-unused-components
     'done-column': USColumnEnd,
   },
-  props: {
-    story: {
-      type: Object,
-      required: true,
-    },
+  computed: {
+    ...mapState({
+      stories: (state) => state.backLogData.userStories,
+    }),
   },
-
 };
 </script>
 
 <style scoped>
-.columns {
-  /*height: 100%;*/
-}
+  .containers {
+    height: 100%;
+    display: grid;
+    grid-template-rows: auto;
+  }
 </style>

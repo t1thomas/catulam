@@ -1,12 +1,9 @@
 <template>
   <v-container
-    v-if="ticket !== null"
+    v-if="dataLoaded"
     class="fill-height d-inline-block"
   >
-    <topSection
-      :issue-no="ticket.issueNumber"
-      :title="ticket.title"
-    />
+    <topSection />
     <v-divider />
     <details-section />
     <v-divider />
@@ -28,20 +25,30 @@ export default {
     descSection,
   },
   computed: {
-    id() {
-      return this.$route.query.id;
+    dataLoaded() {
+      return this.ticket !== null && this.project !== null;
+    },
+    tickId() {
+      return this.$route.query.tickId;
+    },
+    proId() {
+      return this.$route.query.proId;
     },
     ...mapState({
       ticket: 'currentTicket',
+      project: 'currentProject',
     }),
   },
   async mounted() {
-    await this.fetchCurrTicket(this.id);
+    await this.fetchCurrTicket(this.tickId);
+    await this.fetchCurrProject(this.proId);
     console.log(this.ticket);
+    console.log(this.project);
   },
   methods: {
     ...mapActions([
       'fetchCurrTicket',
+      'fetchCurrProject',
     ]),
   },
 };

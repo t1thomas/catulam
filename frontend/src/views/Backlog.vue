@@ -2,17 +2,8 @@
   <v-container
     class="fill-height d-inline-block"
   >
-    <div
-      v-if="loaded"
-      class="containers"
-    >
-      <UserStoryRows
-        v-for="(story) in backLogData"
-        :key="story.id"
-        :story="story"
-      />
-    </div>
-<!--    <USSwitchDialog v-if="showDialog" />-->
+    <UserStoryRows v-if="loaded" />
+    <!--    <USSwitchDialog v-if="showDialog" />-->
   </v-container>
 </template>
 
@@ -36,32 +27,29 @@ export default {
       'userStories',
       'backLogData',
       'uSChangeDialog',
+      'currProElements',
     ]),
     showDialog() {
       return this.uSChangeDialog.showDialog;
     },
+    proId() {
+      return this.$route.query.proId;
+    },
   },
   async mounted() {
-    await this.fetchTickets();
-    await this.fetchSprints();
-    await this.fetchBackLogData();
+    await this.fetchBackLogData(this.proId);
+    await this.fetchCurrProElements(this.proId);
     this.loaded = true;
   },
   methods: {
     ...mapActions([
-      'fetchUserStories',
-      'fetchTickets',
-      'fetchSprints',
       'fetchBackLogData',
+      'fetchCurrProElements',
     ]),
   },
 };
 </script>
 
 <style scoped>
-.containers {
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto;
-}
+
 </style>

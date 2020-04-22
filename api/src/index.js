@@ -16,7 +16,7 @@ const app = express();
 async function verifyToken(token) {
     if(token){
         try {
-            return await jwt.verify(token, process.env.JWTSECRET);
+            return await jwt.verify(token, process.env.JWT_SECRET);
         }
         catch (e) {
             throw new AuthenticationError('Please sign in again');
@@ -27,8 +27,7 @@ async function verifyToken(token) {
 const server = new ApolloServer({
     schema,
     context: async ({req}) => {
-        const jwtToken = req.headers['authorization'];
-        return {driver, currentUser: await verifyToken(jwtToken), jwtToken};
+        return {driver, currentUser: await verifyToken(req.headers['authorization']), req};
     },
     introspection: true,
     playground: true,

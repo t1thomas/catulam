@@ -1,6 +1,6 @@
 const { GraphQLJSON } = require('graphql-type-json');
 const { GraphQLObjectType, GraphQLString, GraphQLList } = require('graphql');
-const { makeAugmentedSchema } = require('neo4j-graphql-js');
+const { makeAugmentedSchema, auth } = require('neo4j-graphql-js');
 const neode = require('./neode');
 const fs = require('fs');
 const path = require('path');
@@ -18,9 +18,9 @@ const idListScalar = new GraphQLObjectType({
     }),
 });
 
-async function createToken(user, exp) {
+async function createUserToken(user, exp) {
     const {username, id} = user;
-    const token = jwt.sign({exp, username, id}, process.env.JWTSECRET);
+    const token = jwt.sign({exp, username, id, role: "user"}, process.env.JWT_SECRET);
     // add jwt token to db, with a 'time to live' configuration that deletes the token at exp time
     return await neode.cypher("MATCH (u:User { username: $username}) CREATE (u)-[rel:JWT]->(t: Token {token:$token}) WITH u, rel, t" +
         " CALL apoc.ttl.expire(t, $ttl, 's') RETURN t.token",
@@ -37,23 +37,25 @@ const resolveFunctions = {
     JSON: GraphQLJSON,
     idList: idListScalar,
     Query:{
-        getCurrentUser: async (_, args, {currentUser, jwtToken}) =>{
+        getCurrentUser: async (_, args, {currentUser, req}) =>{
             if(!currentUser) {
                 return null;
             }
+            const jwtToken = req.headers['authorization'];
             return neode.cypher('MATCH (u:User {username: $username})-[rel:JWT]->(t: Token {token:$token}) RETURN u',
                 {username:currentUser.username, token: jwtToken})
                 .then((result) => {
-                    const user = result.records[0].get('u').properties;
-                    console.log(user);
                     // set password field to empty string, to prevent mutation returning password value
-                    user.password = '';
-                    return user;
+                    // user.password = '';
+                    console.log(result.records[0].get('u').properties);
+
+                    return result.records[0].get('u').properties;
                 })
                 .catch(e => {
                     throw new Error('Using redundant token, Sign in again ');
                 });
         },
+
     },
     Mutation: {
         CreateUser: async (_, {id, firstName, lastName, username, email, password, passwordUpdate}) => {
@@ -91,11 +93,11 @@ const resolveFunctions = {
                         // if password reset is required give user a short lived token (5mins.)
                         if(user.passwordUpdate === true){
                             const exp = Math.floor(Date.now() / 1000) + (5 * 60);
-                            const token = await createToken(user, exp);
+                            const token = await createUserToken(user, exp);
                             return {token: token};
                         }
                         const exp = Math.floor(Date.now() / 1000) + (60 * 60);
-                        const token = await createToken(user, exp);
+                        const token = await createUserToken(user, exp);
                         return {token: token};
                     }
                     else {
@@ -124,7 +126,7 @@ const resolveFunctions = {
 
                             //  token expiration, one hour from current time
                             const exp = Math.floor(Date.now() / 1000) + (60 * 60);
-                            const token = await createToken(user, exp);
+                            const token = await createUserToken(user, exp);
                             return {token: token};
                         }catch (e) {
                             throw new Error(e);
@@ -144,7 +146,15 @@ const resolveFunctions = {
         }
     },
 };
-const schema = makeAugmentedSchema({ typeDefs, resolvers: resolveFunctions });
-
+const schema = makeAugmentedSchema({
+    typeDefs,
+    resolvers: resolveFunctions,
+    config: {
+        auth: {
+            isAuthenticated: true,
+            hasRole: true
+        }
+    }
+});
 
 module.exports = schema;

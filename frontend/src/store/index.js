@@ -14,11 +14,16 @@ export default new Vuex.Store({
       addedTo: {},
       evt: null,
     },
+    snackBar: {
+      show: false,
+      message: '',
+      type: '',
+    },
     currentUser: null,
+    currentUserTasks: null,
     showDialog: false,
-    carouselModelParent: 0,
+    carouselModelParent: 1,
     backLogData: [],
-    // userStories: [],
     sprintList: [],
     tickets: [],
     removedFrom: {},
@@ -26,12 +31,42 @@ export default new Vuex.Store({
     routeAuth: false,
     projects: null,
     currentTicket: null,
-    // repoAndBranch: {},
-    // cardMoved: { removedFrom: undefined, addedTo: undefined },
+    currentProject: null,
+    currProElements: null,
+    allUserList: null,
   },
   mutations: {
+    set_backLogData(state, obj) {
+      if (obj === null) {
+        state.backLogData = null;
+      } else {
+        state.backLogData = { ...obj };
+      }
+      // Vue.set(state, 'backLogData', [...obj]);
+    },
+    set_currProElements(state, obj) {
+      if (obj === null) {
+        state.currProElements = null;
+      } else {
+        state.currProElements = { ...obj };
+      }
+      // Vue.set(state, 'backLogData', [...obj]);
+    },
+    set_currentUserTasks(state, obj) {
+      if (obj === null) {
+        state.currentUserTasks = null;
+      } else {
+        state.currentUserTasks = { ...obj };
+      }
+    },
+    set_allUserList(state, obj) {
+      state.allUserList = obj;
+    },
     set_currTickDesc(state, obj) {
       state.currentTicket.desc = obj;
+    },
+    set_currTickHours(state, obj) {
+      state.currentTicket.hourEstimate = obj;
     },
     set_removedFrom(state, obj) {
       state.removedFrom = obj;
@@ -56,9 +91,6 @@ export default new Vuex.Store({
     },
     set_sprintList(state, obj) {
       Vue.set(state, 'sprintList', [...obj]);
-    },
-    set_backLogData(state, obj) {
-      Vue.set(state, 'backLogData', [...obj]);
     },
     /* mutations to manipulate data for uSChangeDialog */
     uSCDSet_evt(state, obj) {
@@ -90,20 +122,42 @@ export default new Vuex.Store({
     set_currTicket(state, obj) {
       state.currentTicket = { ...obj };
     },
+    set_currTicket_assignee(state, obj) {
+      if (obj === null) {
+        state.currentTicket.assignee = null;
+      } else {
+        state.currentTicket.assignee = { ...obj };
+      }
+    },
+    set_currProject(state, obj) {
+      state.currentProject = { ...obj };
+    },
     set_currentUser(state, obj) {
       if (obj === null) {
         state.currentUser = null;
       } else {
         state.currentUser = { ...obj };
-
-        // Object.keys(obj)
-        //   .forEach((key) => {
-        //     Vue.set(state.currentUser, key, obj[key]);
-        //   });
       }
     },
+    set_snackBarShow_false(state) {
+      state.snackBar.show = false;
+    },
+    set_snackBarShow(state, obj) {
+      state.snackBar.message = obj.message;
+      state.snackBar.type = obj.type;
+      state.snackBar.show = true;
+    },
+    // set_snackBarType(state, obj) {
+    //   state.snackBar.type = obj;
+    // },
   },
   actions: {
+    snackBarOff({ commit }) {
+      commit('set_snackBarShow_false');
+    },
+    snackBarOn({ commit }, payload) {
+      commit('set_snackBarShow', payload);
+    },
     async fetchUserStories({ commit }) {
       const response = await Vue.$apolloClient.query({
         query: gqlQueries.USWithTickIds,
@@ -134,16 +188,44 @@ export default new Vuex.Store({
         console.error(error);
       });
     },
-    async fetchBackLogData({ commit }) {
+
+    async fetchCurrProElements({ commit }, id) {
       await Vue.$apolloClient.query({
-        query: gqlQueries.BackLogData,
+        query: gqlQueries.CURR_PROJECT_ELEMENTS,
         fetchPolicy: 'no-cache',
-      }).then((response) => {
-        const { UserStory } = response.data;
-        commit('set_backLogData', UserStory);
-      }).catch((error) => {
-        console.error(error);
-      });
+        variables: { id },
+      })
+        .then((response) => {
+          const { Project } = response.data;
+          if (Project === null) {
+            throw new Error();
+          } else {
+            commit('set_currProElements', Project[0]);
+          }
+        })
+        .catch((error) => {
+          console.log('Unable to fetch Project');
+          console.error(error);
+        });
+    },
+    async fetchBackLogData({ commit }, id) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.BACKLOG_DATA,
+        fetchPolicy: 'no-cache',
+        variables: { id },
+      })
+        .then((response) => {
+          const { Project } = response.data;
+          if (Project === null) {
+            throw new Error();
+          } else {
+            commit('set_backLogData', Project[0]);
+          }
+        })
+        .catch((error) => {
+          console.log('Unable to fetch Backlog for project');
+          console.error(error);
+        });
     },
     async fetchProjects({ commit }) {
       await Vue.$apolloClient.query({
@@ -170,7 +252,25 @@ export default new Vuex.Store({
         throw new Error(error);
       });
     },
-
+    async fetchCurrentUserTasks({ commit }, payload) {
+      return Vue.$apolloClient.query({
+        query: gqlQueries.USER_TASKS,
+        variables: payload,
+        fetchPolicy: 'no-cache',
+      })
+        .then((response) => {
+          const { User } = response.data;
+          if (User === null) {
+            throw new Error();
+          } else {
+            commit('set_currentUserTasks', User[0]);
+          }
+        })
+        .catch((error) => {
+          console.log('Unable to fetch User Tasks');
+          console.error(error);
+        });
+    },
     async logoutUser({ commit }) {
       /* remove token right away, s even if the database
       operation fails the client no longer has a token
@@ -211,7 +311,7 @@ export default new Vuex.Store({
     },
     async fetchCurrTicket({ commit }, id) {
       await Vue.$apolloClient.query({
-        query: gqlQueries.TICKET_INFO,
+        query: gqlQueries.CURRENT_TICKET,
         fetchPolicy: 'no-cache',
         variables: { id },
       })
@@ -227,6 +327,100 @@ export default new Vuex.Store({
           console.log('Unable to fetch Ticket');
           console.error(error);
         });
+    },
+    async fetchAllUserList({ commit }, id) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.ALL_USERS,
+        fetchPolicy: 'no-cache',
+        variables: { id },
+      })
+        .then((response) => {
+          const { User } = response.data;
+          if (User === null) {
+            throw new Error();
+          } else {
+            commit('set_allUserList', User);
+          }
+        })
+        .catch((error) => {
+          console.log('Unable to fetch Users');
+          console.error(error);
+        });
+    },
+    async fetchCurrProject({ commit }, id) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.CURRENT_PROJECT,
+        fetchPolicy: 'no-cache',
+        variables: { id },
+      })
+        .then((response) => {
+          const { Project } = response.data;
+          if (Project === null) {
+            throw new Error();
+          } else {
+            commit('set_currProject', Project[0]);
+          }
+        })
+        .catch((error) => {
+          console.log('Unable to fetch Ticket');
+          console.error(error);
+        });
+    },
+    async addUserTicket({ commit }, payload) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.ADD_USER_TICKET,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { AddUserTickets } = response.data;
+        commit('set_currTicket_assignee', AddUserTickets.from);
+      }).catch((error) => {
+        console.error(error);
+      });
+    },
+    async updateTicketHours({ commit }, payload) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.UPDATE_TICKET_ETIME,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { UpdateTicket } = response.data;
+        if (UpdateTicket === null) {
+          throw new Error('Unable to save changes');
+        } else {
+          commit('set_currTickHours', UpdateTicket.hourEstimate);
+        }
+      }).catch((error) => {
+        console.error(error);
+      });
+    },
+    async removeUserTicket({ commit }, payload) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.REM_USER_TICKET,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { RemoveUserTickets } = response.data;
+        if (RemoveUserTickets === null) {
+          throw new Error('Unable to update Assignee');
+        } else {
+          commit('set_currTicket_assignee', null);
+        }
+      }).catch((error) => {
+        console.error(error);
+      });
+    },
+    async updateUserTicket({ commit }, payload) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.UPDATE_USER_TICKET,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { AddUserTickets } = response.data;
+        commit('set_currTicket_assignee', AddUserTickets.from);
+      }).catch((error) => {
+        console.error(error);
+      });
     },
     setCurrTickDesc({ commit }, value) {
       commit('set_currTickDesc', value);
@@ -275,27 +469,32 @@ export default new Vuex.Store({
     // }
   },
   getters: {
+    getStoryById: (state) => (id) => state.currProElements.userStories
+      .find((story) => story.id === id),
     getCurrentUser: (state) => state.currentUser,
     // getTicIdsPerSprint: state => (sprintNo, arrTicketIds) => arrTicketIds
     //   .filter(tickId => state.sprintList[sprintNo - 1].ticketIds.includes(tickId)),
     getIssueType: (state) => state.issueType,
     getIssues: (state) => state.issues,
-    getTicketById: (state) => (tickId) => state.tickets.find((ticket) => ticket.id === tickId),
+    getTicketById: (state) => (id) => state.currProElements.tickets
+      .find((ticket) => ticket.id === id),
     /* eslint-disable no-underscore-dangle */
     getIssueById: (state) => (issueId) => state.issues.filter((issue) => issueId === issue._id),
     // getCompletedTickIds: state => ArrTicketIds => ArrTicketIds
     //   .filter(tickId => state.tickets[tickId].done === true),
     // getUnCompleteTickIds: state => ArrTicketIds => ArrTicketIds
     //   .filter(tickId => state.tickets[tickId].done === false),
-    getTicsPerSprint: (state) => (sprintId, userStoryId) => state.sprintList
-      .find((sprint) => sprint.id === sprintId).tickets
+    getTicsPerSprint: (state) => (sprintId, userStoryId) => state.backLogData.userStories
+      .find((story) => story.id === userStoryId).tickets
       .reduce((arr, currTicket) => {
-        if (currTicket.userStory.id === userStoryId) {
-          arr.push(currTicket.id);
+        if (currTicket.sprint !== null) {
+          if (currTicket.sprint.id === sprintId) {
+            arr.push(currTicket.id);
+          }
         }
         return arr;
       }, []),
-    getUnStagedTicks: (state) => (userStoryId) => state.backLogData
+    getUnStagedTicks: (state) => (userStoryId) => state.backLogData.userStories
       .find((userStory) => userStory.id === userStoryId).tickets
       .reduce((arr, currTicket) => {
         if (currTicket.done === false && currTicket.sprint === null) {
@@ -303,7 +502,7 @@ export default new Vuex.Store({
         }
         return arr;
       }, []),
-    getCompletedTicks: (state) => (userStoryId) => state.backLogData
+    getCompletedTicks: (state) => (userStoryId) => state.backLogData.userStories
       .find((userStory) => userStory.id === userStoryId).tickets
       .reduce((arr, currTicket) => {
         if (currTicket.done === true && currTicket.sprint === null) {
@@ -311,10 +510,9 @@ export default new Vuex.Store({
         }
         return arr;
       }, []),
-    getUserStoryText: (state) => (userStoryId) => state.backLogData
-      .find((userStory) => userStory.id === userStoryId)
-      .storyText,
-    getSprintValues: (state) => state.sprintList
+    getUserStoryText: (state) => (userStoryId) => state.currProElements.userStories
+      .find((userStory) => userStory.id === userStoryId).storyText,
+    getSprintValues: (state) => state.currProElements.sprints
       .reduce((arr, currSprint, index) => {
         if (index === 0) {
           arr.push({

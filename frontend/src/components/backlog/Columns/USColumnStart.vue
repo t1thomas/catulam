@@ -8,7 +8,7 @@
         cols="4"
       >
         <v-card-subtitle class="pa-0">
-          {{ getUserStoryText(userStoryId) }}
+          {{ story.storyText }}
         </v-card-subtitle>
       </v-col>
       <v-divider vertical />
@@ -16,7 +16,7 @@
         <!-- Pass ids of unstaged tickets of current userStory -->
         <draggable-tick-list
           :list-properties="tickListConfig"
-          :ticket-ids="getUnStagedTicks(userStoryId)"
+          :ticket-ids="unStagedTickIds()"
         />
       </v-col>
     </div>
@@ -40,13 +40,22 @@ export default {
     },
   },
   computed: {
+    story() {
+      return this.getStoryById(this.userStoryId);
+    },
     tickListConfig() {
       return { userStoryId: this.userStoryId, columnType: 'start', disabled: false };
     },
+    // tickets in 'to Do'
     ...mapGetters([
+      'getStoryById',
       'getUnStagedTicks',
-      'getUserStoryText',
     ]),
+  },
+  methods: {
+    unStagedTickIds() {
+      return this.getUnStagedTicks(this.userStoryId);
+    },
   },
 };
 </script>

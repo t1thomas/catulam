@@ -15,7 +15,12 @@
           color="warning"
           class="px-5 py-3"
         >
-          WIP
+          <v-btn
+            class="primary"
+            @click="print"
+          >
+            Print
+          </v-btn>
         </div>
       </v-col>
       <v-col
@@ -30,12 +35,27 @@
 
 <script>
 // @ is an alias to /src
+// import Vue from 'vue';
 import UserTasks from '../components/dashboard/UserTasks.vue';
+// import gqlQueries from '../graphql/gql-queries';
 
 export default {
   name: 'Home',
   components: {
     UserTasks,
+  },
+  methods: {
+    async print() {
+      // await Vue.$apolloClient.query({
+      //   query: gqlQueries.ALL_USERS,
+      //   fetchPolicy: 'no-cache',
+      // }).then((response) => {
+      //   const { User } = response.data;
+      //   console.log(User);
+      // }).catch((error) => {
+      //   console.error(error);
+      // });
+    },
   },
 };
 </script>

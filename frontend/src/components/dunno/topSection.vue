@@ -4,11 +4,11 @@
       cols="4"
     >
       <span class="headline">
-        {{ title }}
+        {{ ticket.title }}
       </span>
       <span class="horiz-line" />
       <span class="headline">
-        #{{ issueNo }}
+        #{{ ticket.issueNumber }}
       </span>
     </v-col>
     <v-divider
@@ -18,36 +18,27 @@
     <v-col
       cols="7"
     >
-      <span class="body-2">
+      <span class="body-2 mr-4">
         Assigned to:
       </span>
-
-      <v-avatar
-        size="24"
-        class="ml-2"
-      >
-        <img
-          src="@/assets/avatar/scientist.svg"
-          alt="John"
-        >
-      </v-avatar>
-      User Name
+      <user-select />
     </v-col>
   </v-row>
 </template>
 
 <script>
+import { mapState } from 'vuex';
+import userSelectChip from './userSelectChip.vue';
+
 export default {
   name: 'TopSection',
-  props: {
-    title: {
-      type: String,
-      required: true,
-    },
-    issueNo: {
-      type: Number,
-      required: true,
-    },
+  components: {
+    userSelect: userSelectChip,
+  },
+  computed: {
+    ...mapState({
+      ticket: 'currentTicket',
+    }),
   },
 };
 </script>

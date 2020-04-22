@@ -9,59 +9,14 @@
     @remove="onRemove"
   >
     <v-list-item
-      v-for="ticketId in ticketIds"
-      :id="ticketId"
-      :key="ticketId"
+      v-for="tickId in ticketIds"
+      :id="tickId"
+      :key="tickId"
       v-ripple
       class="pa-0 ma-sm-2"
       clickable
     >
-      <v-card
-        height="5.5rem"
-        width="100%"
-      >
-        <v-list-item
-          three-line
-          class="px-2"
-        >
-          <v-list-item-content class="py-0 d-inline-block">
-            <v-list-item-title class="d-flex mb-0">
-              <span class="font-weight-medium body-2">
-                {{ getTicketById(ticketId).title }}
-              </span>
-              <span class="font-weight-thin ml-auto body-2">
-                #{{ getTicketById(ticketId).issueNumber }}
-              </span>
-            </v-list-item-title>
-            <v-list-item-subtitle class="pa-0">
-              <span class="font-weight-light caption">
-                {{ getTicketById(ticketId).desc }}
-              </span>
-            </v-list-item-subtitle>
-            <div class="card-bottom">
-              <v-chip
-                small
-                color="dark-grey"
-                text-color="white"
-              >
-                <v-avatar left>
-                  <v-icon>mdi-progress-clock</v-icon>
-                </v-avatar>
-                {{ getTicketById(ticketId).hourEstimate }}hr
-              </v-chip>
-              <v-avatar
-                size="24"
-                class="ml-2"
-              >
-                <img
-                  src="@/assets/avatar/scientist.svg"
-                  alt="John"
-                >
-              </v-avatar>
-            </div>
-          </v-list-item-content>
-        </v-list-item>
-      </v-card>
+      <ticket-card :tick-id="tickId" />
     </v-list-item>
     <USSwitchDialog
       v-if="showDialog"
@@ -72,17 +27,19 @@
 
 <script>
 
-import { mapGetters, mapActions, mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import draggable from 'vuedraggable';
 import Vue from 'vue';
 import gqlQueries from '../../graphql/gql-queries';
 import USSwitchDialog from './Columns/Dialog.vue';
+import ticketCard from './ticketCard.vue';
 
 export default {
   name: 'DraggableTickList',
   components: {
     draggable,
     USSwitchDialog,
+    ticketCard,
   },
   props: {
     ticketIds: {
@@ -103,9 +60,6 @@ export default {
         ghostClass: 'ghost',
       };
     },
-    ...mapGetters([
-      'getTicketById',
-    ]),
     ...mapState([
       'uSChangeDialog',
     ]),
@@ -117,6 +71,9 @@ export default {
     },
     addedTo() {
       return this.uSChangeDialog.addedTo;
+    },
+    proId() {
+      return this.$route.query.proId;
     },
   },
   methods: {
@@ -295,19 +252,13 @@ export default {
       });
     },
     updateStore() {
-      this.fetchSprints();
-      this.fetchBackLogData();
+      this.fetchBackLogData(this.proId);
     },
   },
 };
 </script>
 
 <style scoped>
-  .card-bottom {
-    position:absolute;
-    bottom:1px;
-    right:1px;
-  }
   ::selection {
     color: none;
     background: none;

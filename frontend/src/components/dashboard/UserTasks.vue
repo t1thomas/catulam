@@ -100,7 +100,8 @@ export default {
 
       currProject.tickets.forEach((tick) => {
         tasks.push({
-          id: tick.id,
+          tickId: tick.id,
+          proId: id,
           issueNo: tick.issueNumber,
           title: tick.title,
           type: 'ticket',
@@ -135,9 +136,11 @@ export default {
     },
     navigation(task) {
       if (task.type === 'ticket') {
+        // tickId and proId passed as query in url link
+        const { tickId, proId } = task;
         this.$router.push({
           path: '/ticket',
-          query: { id: task.id },
+          query: { tickId, proId },
         });
       } else if (task.type === 'story') {
         this.$router.push({

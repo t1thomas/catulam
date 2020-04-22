@@ -1,13 +1,13 @@
 <template>
-  <div>Sprints {{id}}</div>
+  <div>Sprints {{sprintId}}</div>
 </template>
 
 <script>
 export default {
   name: 'SprintBoard',
   computed: {
-    id() {
-      return this.$route.query.id;
+    sprintId() {
+      return this.$route.query.sprintId;
     },
   },
 };

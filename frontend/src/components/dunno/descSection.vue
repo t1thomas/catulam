@@ -58,7 +58,7 @@
             indeterminate
             bottom
             absolute
-            color="success"
+            color="amber"
           />
         </template>
       </v-textarea>
@@ -118,8 +118,8 @@ export default {
       // starts saving animation
       this.savingProgress();
       this.disabled = true;
-      await Vue.$apolloClient.query({
-        query: gqlQueries.UPDATE_TICKET_DESC,
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.UPDATE_TICKET_DESC,
         fetchPolicy: 'no-cache',
         variables: { id: this.ticket.id, desc: this.text },
       })

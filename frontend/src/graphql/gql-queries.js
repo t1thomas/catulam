@@ -1,6 +1,87 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
+  BACKLOG_DATA: gql`
+    query($id: ID!) {
+      Project(filter: { id: $id }) {
+        id
+        title
+        desc
+        label
+        userStories {
+          id
+          tickets {
+            id
+            done
+            sprint {
+              id
+            }
+          }
+        }
+        tickets(filter: { userStory: null }) {
+          id
+          done
+          sprint {
+            id
+          }
+        }
+        sprints {
+          id
+          sprintNo
+        }
+      }
+    }`,
+  CURR_PROJECT_ELEMENTS: gql`
+    query($id: ID!) {
+      Project(filter: { id: $id }) {
+        userStories {
+          id
+          storyText
+        }
+        members {
+          id
+          avatar
+          firstName
+          lastName
+        }
+        tickets {
+          assignee {
+            id
+          }
+          id
+          title
+          issueNumber
+          desc
+          hourEstimate
+          sprint {
+            id
+          }
+        }
+        sprints {
+          id
+          sprintNo
+        }
+      }
+    }`,
+  ALL_USERS: gql`
+    query {
+      User {
+        id
+        firstName
+        lastName
+        email
+        projects {
+          id
+        }
+        userStories {
+          id
+        }
+        tickets {
+          id
+        }
+        avatar
+      }
+    }`,
   UPDATE_TICKET_DESC: gql`
     mutation($id: ID!, $desc: String!) {
       UpdateTicket(id: $id, desc: $desc) {
@@ -9,7 +90,59 @@ const gqlQueries = {
       }
     }
   `,
-  TICKET_INFO: gql`
+  UPDATE_TICKET_ETIME: gql`
+    mutation($id: ID!, $hrs: Int!) {
+      UpdateTicket(id: $id, hourEstimate: $hrs) {
+        id
+        hourEstimate
+      }
+    }
+  `,
+  UPDATE_USER_TICKET: gql`mutation(
+    $tickId: _TicketInput!
+    $remUserID: _UserInput!
+    $addUserID: _UserInput!
+  ) {
+    RemoveUserTickets(from: $remUserID, to: $tickId) {
+      from {
+        id
+      }
+      to {
+        id
+      }
+    }
+    AddUserTickets(from: $addUserID, to: $tickId) {
+      from {
+        id
+      }
+      to {
+        id
+      }
+    }
+  }`,
+  REM_USER_TICKET: gql`
+    mutation($userID: _UserInput!, $tickId: _TicketInput!) {
+      RemoveUserTickets(from: $userID, to: $tickId) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+    }`,
+  ADD_USER_TICKET: gql`
+    mutation($userID: _UserInput!, $tickId: _TicketInput!) {
+      AddUserTickets(from: $userID, to: $tickId) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+    }`,
+  CURRENT_TICKET: gql`
     query($id: ID!) {
       Ticket(filter: { id: $id }) {
         id
@@ -27,19 +160,17 @@ const gqlQueries = {
           id
           sprintNo
         }
-        project {
-          id
-          label
-        }
         assignee {
           id
         }
         creator {
-          id
+          User {
+            id
+          }
+          timestamp
         }
       }
-    }
-  `,
+    }`,
   USER_TASKS: gql`
     query($username: String!) {
       User(filter: { username: $username }) {
@@ -59,6 +190,34 @@ const gqlQueries = {
         }
       }
     }`,
+  CURRENT_PROJECT: gql`
+    query($id: ID!) {
+      Project(filter: { id: $id }) {
+        id
+        title
+        desc
+        label
+        members {
+          id
+          avatar
+          firstName
+          lastName
+        }
+        userStories {
+          id
+        }
+        tickets (filter: {userStory:null}){
+          id
+          assignee {
+            id
+          }
+        }
+        sprints {
+          id
+        }
+      }
+    }
+  `,
   PROJECTS: gql`
     query {
       Project {
@@ -170,9 +329,8 @@ const gqlQueries = {
   }`,
   SwitchUserStory: {
     storySwitch: gql`mutation($ticket: String! $usFrom: String! $usTo: String!){
-    TicSwitchUStory(tickId: $ticket UStoryIdFrom: $usFrom UStoryIdTo: $usTo)
-  }
-  `,
+     TicSwitchUStory(tickId: $ticket UStoryIdFrom: $usFrom UStoryIdTo: $usTo)
+    }`,
     AddNewSprint: gql`mutation(
       $ticket: _TicketInput!
       $sprintAdd: _SprintInput!

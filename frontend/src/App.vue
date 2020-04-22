@@ -5,26 +5,8 @@
       app
       clipped
     >
-      <v-list dense>
-        <v-list-item link>
-          <v-list-item-action>
-            <v-icon>mdi-view-dashboard</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Dashboard</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item link>
-          <v-list-item-action>
-            <v-icon>mdi-settings</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Settings</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
+      <nav-draw-items />
     </v-navigation-drawer>
-
     <v-app-bar
       app
       clipped-left
@@ -52,6 +34,7 @@
         v-if="currentUser"
         dark
         color="secondary"
+        @click="logout"
       >
         Logout
         <v-icon right>
@@ -61,6 +44,7 @@
     </v-app-bar>
 
     <v-content>
+      <snackbar />
       <router-view />
     </v-content>
 
@@ -72,15 +56,19 @@
 
 <script>
 
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
+import snackbar from './components/snackbar.vue';
+import navDrawItems from './components/appMain/navDrawItems.vue';
 
 export default {
   name: 'LayoutDefault',
-  data() {
-    return {
-      drawer: null,
-    };
+  components: {
+    snackbar,
+    navDrawItems,
   },
+  data: () => ({
+    drawer: false,
+  }),
   computed: {
     gravatar() {
       return `https://gravatar.com/avatar/${this.currentUser.avatar}?d=identicon`;
@@ -110,9 +98,27 @@ export default {
       });
     this.$vuetify.theme.dark = true;
   },
+  async beforeUpdate() {
+    if (this.currentUser) {
+      await this.fetchAllUserList();
+      await this.fetchCurrentUserTasks({ username: this.currentUser.username });
+    }
+  },
+  methods: {
+    ...mapActions([
+      'fetchAllUserList',
+      'fetchCurrentUserTasks',
+      'logoutUser',
+    ]),
+    async logout() {
+      await this.logoutUser();
+    },
+  },
 };
 </script>
 
 <style>
-
+  .v-snack__content {
+    padding: 0 !important;
+  }
 </style>

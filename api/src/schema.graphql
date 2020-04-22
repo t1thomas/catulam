@@ -1,6 +1,11 @@
     scalar JSON
     scalar idList
 
+    enum Role {
+        user
+        admin
+    }
+
     type Project {
         id: ID!
         title: String!
@@ -29,22 +34,27 @@
          """)
         project: Project @relation(name: "USER_STORY", direction: OUT)
         assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
-        creator: User @relation(name: "CREATOR", direction: OUT)
     }
 
-    type User {
+    type User @isAuthenticated{
         id: ID!
         firstName: String!
         lastName: String
         username: String!
         email: String!
-        password: String!
+        password: String! @hasRole(roles:[admin])
         passwordUpdate: Boolean!
         tokens: [Token] @relation(name: "JWT", direction: OUT)
         projects: [Project] @relation(name: "TEAM_MEMBER", direction: OUT)
         userStories: [UserStory] @relation(name: "ASSIGNED_TASK", direction: OUT)
         tickets: [Ticket] @relation(name: "ASSIGNED_TASK", direction: OUT)
+        created: [Created]
         avatar: String
+    }
+    type Created @relation(name: "CREATED") {
+        from: User
+        to: Ticket
+        timestamp: String!
     }
 
     type Ticket {
@@ -58,7 +68,7 @@
         sprint: Sprint @relation(name: "SPRINT_TASK", direction: OUT)
         project: Project @relation(name: "TICKET", direction: OUT)
         assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
-        creator: User @relation(name: "CREATOR", direction: OUT)
+        creator: [Created]
     }
 
     type Sprint {

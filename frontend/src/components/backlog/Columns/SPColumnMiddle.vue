@@ -12,7 +12,7 @@
     >
       <span>Sprint {{ sprint.sprintNo }}</span>
       <draggable-tick-list
-        :ticket-ids="ticsPerSprint(sprint.id, userStoryId)"
+        :ticket-ids="getTicsPerSprint(sprint.id, userStoryId)"
         :list-properties="tickListConfig(sprint.id)"
       />
     </v-carousel-item>
@@ -27,7 +27,6 @@ import DraggableTickList from '../DraggableTickList.vue';
 export default {
   name: 'SPColumnMiddle',
   components: {
-    // eslint-disable-next-line vue/no-unused-components
     DraggableTickList,
   },
   props: {
@@ -38,11 +37,8 @@ export default {
   },
   computed: {
     ...mapState({
-      sprintList: 'sprintList',
-      carModP: 'carouselModelParent',
-    }),
-    ...mapGetters({
-      ticsPerSprint: 'getTicsPerSprint',
+      sprintList: (state) => state.backLogData.sprints,
+      carModP: (state) => state.carouselModelParent,
     }),
     carouselModel: {
       // getter
@@ -54,8 +50,16 @@ export default {
         this.setCarouselModel(newValue);
       },
     },
+    ...mapGetters([
+      'getStoryById',
+      'getTicsPerSprint',
+    ]),
   },
   methods: {
+    // ticsPerSprint(id) {
+    //   const tickets = this.story.tickets.filter((tick) => tick.sprint.id === id);
+    //   return tickets.map((tick) => tick.id);
+    // },
     ...mapActions([
       'setCarouselModel',
     ]),
