@@ -70,6 +70,8 @@
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
+import Vue from 'vue';
+import gqlQueries from '../../../graphql/gql-queries';
 
 export default {
   name: 'Dialog',
@@ -79,25 +81,29 @@ export default {
     };
   },
   computed: {
-    ...mapState([
-      'changeDialog',
-    ]),
-    showDialog() {
-      return this.changeDialog.showUSDialog;
+    proId() {
+      return this.$route.query.proId;
     },
+    ...mapState({
+      evt: (state) => state.changeDialog.evt,
+      addedTo: (state) => state.changeDialog.addedTo,
+      removedFrom: (state) => state.changeDialog.removedFrom,
+      ticketId: (state) => state.changeDialog.ticketId,
+      showDialog: (state) => state.changeDialog.showUSDialog,
+    }),
     ticket() {
-      return this.getTicketById(this.changeDialog.ticketId);
+      return this.getTicketById(this.ticketId);
     },
     uSToText() {
-      return this.getUserStoryText(this.changeDialog.addedTo.userStoryId);
+      return this.getUserStoryText(this.addedTo.userStoryId);
     },
     startingOption() {
       // pre-set the value of the v-select to sprint selected by user
-      if (this.changeDialog.addedTo.sprintId === undefined) {
+      if (this.addedTo.sprintId === undefined) {
         return this.options[0].value;
       }
       const startSprint = this.getSprintValues
-        .find((sprint) => sprint.id === this.changeDialog.addedTo.sprintId);
+        .find((sprint) => sprint.id === this.addedTo.sprintId);
       return startSprint.value;
     },
     ...mapGetters([
@@ -119,6 +125,7 @@ export default {
   methods: {
     ...mapActions([
       'USDialogSwitcher', // opens/closes dialog
+      'fetchBackLogData',
     ]),
     print() {
       console.log(this.getSprintValues);
@@ -127,35 +134,144 @@ export default {
     },
     onConfirm() {
       switch (true) {
-        case this.changeDialog.removedFrom.sprintId === undefined
+        case this.removedFrom.sprintId === undefined
         && this.selectedOption.value === 0:
           console.log('no sprints, ticket moved to Todo in new userStory');
-          this.$emit('confirm', { action: 1 });
+          this.uStorySwitchOnly();
           break;
-        case this.changeDialog.removedFrom.sprintId === undefined
+        case this.removedFrom.sprintId === undefined
         && this.selectedOption.value !== 0:
           console.log('undefined sprint to changed sprints, ticket with no sprint moved to a sprint in new userStory');
-          this.$emit('confirm', { action: 2, sprintId: this.selectedOption.id });
+          this.uStorySwitchAddNewSprint(this.selectedOption.id);
           break;
-        case this.changeDialog.removedFrom.sprintId !== undefined
+        case this.removedFrom.sprintId !== undefined
         && this.selectedOption.value === 0:
           console.log('defined sprint to no sprints, ticket with sprint moved to Todo in new userStory (removed sprint)');
-          this.$emit('confirm', { action: 3 });
+          this.uStorySwitchRemoveSprint();
           break;
-        case this.changeDialog.removedFrom.sprintId !== this.selectedOption.id:
+        case this.removedFrom.sprintId !== this.selectedOption.id:
           console.log('sprint to changed sprints');
-          this.$emit('confirm', { action: 4, sprintId: this.selectedOption.id });
+          this.uStorySwitchChangeSprint(this.selectedOption.id);
           break;
         default:
           console.log('no changed sprints');
-          this.$emit('confirm', 5);
+          this.uStorySwitchOnly();
           break;
       }
       this.USDialogSwitcher();
     },
+    async uStorySwitchOnly() {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SwitchUserStory.storySwitch,
+        fetchPolicy: 'no-cache',
+        variables: {
+          ticket: this.ticketId,
+          usFrom: this.removedFrom.userStoryId,
+          usTo: this.addedTo.userStoryId,
+        },
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+        this.switchBack();
+      });
+    },
+    async uStorySwitchAddNewSprint(sprintAddId) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SwitchUserStory.AddNewSprint,
+        fetchPolicy: 'no-cache',
+        variables: {
+          ticket: { id: this.ticketId },
+          sprintAdd: { id: sprintAddId },
+          uStoryRemove: { id: this.removedFrom.userStoryId },
+          uStoryAdd: { id: this.addedTo.userStoryId },
+        },
+
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+        this.switchBack();
+      });
+    },
+    async uStorySwitchRemoveSprint() {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SwitchUserStory.RemoveSprint,
+        fetchPolicy: 'no-cache',
+        variables: {
+          ticket: { id: this.ticketId },
+          sprintRemove: { id: this.removedFrom.sprintId },
+          uStoryRemove: { id: this.removedFrom.userStoryId },
+          uStoryAdd: { id: this.addedTo.userStoryId },
+        },
+
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+        this.switchBack();
+      });
+    },
+    // yet to be tested
+    async uStorySwitchChangeSprint(sprintAddId) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SwitchUserStory.ChangeSprint,
+        fetchPolicy: 'no-cache',
+        variables: {
+          ticket: { id: this.ticketId },
+          sprintRemove: { id: this.removedFrom.sprintId },
+          sprintAdd: { id: sprintAddId },
+          uStoryRemove: { id: this.removedFrom.userStoryId },
+          uStoryAdd: { id: this.addedTo.userStoryId },
+        },
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+        this.switchBack();
+      });
+    },
+    async sprintToStart(sprintId) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SprintToStart,
+        fetchPolicy: 'no-cache',
+        variables: { ticket: { id: this.ticketId }, sprint: { id: sprintId } },
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+        this.switchBack();
+      });
+    },
+    async startToSprint(sprintId) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.StartToSprint,
+        variables: { ticket: { id: this.ticketId }, sprint: { id: sprintId } },
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+        this.switchBack();
+      });
+    },
     onCancel() {
-      this.$emit('cancel');
+      this.switchBack();
       this.USDialogSwitcher();
+    },
+    switchBack() {
+      const { evt } = this;
+      // remove ticket from new list and put back in old list
+      evt.from.insertBefore(evt.to.childNodes[evt.newDraggableIndex],
+        evt.from.childNodes[evt.oldDraggableIndex]);
+    },
+    updateStore() {
+      this.fetchBackLogData(this.proId);
     },
   },
 };

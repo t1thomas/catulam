@@ -95,29 +95,30 @@ export default {
     proId() {
       return this.$route.query.proId;
     },
-    ...mapState([
-      'changeDialog',
-    ]),
-    showDialog() {
-      return this.changeDialog.showUADialog;
-    },
+    ...mapState({
+      evt: (state) => state.changeDialog.evt,
+      addedTo: (state) => state.changeDialog.addedTo,
+      removedFrom: (state) => state.changeDialog.removedFrom,
+      ticketId: (state) => state.changeDialog.ticketId,
+      showDialog: (state) => state.changeDialog.showUADialog,
+    }),
     ticket() {
-      return this.getTicketById(this.changeDialog.ticketId);
+      return this.getTicketById(this.ticketId);
     },
     uSToText() {
-      return this.getUserStoryText(this.changeDialog.addedTo.userStoryId);
+      return this.getUserStoryText(this.addedTo.userStoryId);
     },
     toUS() {
       // ticket that wants to be moved into Unassigned tickets
-      return this.changeDialog.addedTo.columnType === 'Unassigned';
+      return this.addedTo.columnType === 'Unassigned';
     },
     startingOption() {
       // pre-set the value of the v-select to sprint selected by user
-      if (this.changeDialog.addedTo.sprintId === undefined) {
+      if (this.addedTo.sprintId === undefined) {
         return this.options[0].value;
       }
       const startSprint = this.getSprintValues
-        .find((sprint) => sprint.id === this.changeDialog.addedTo.sprintId);
+        .find((sprint) => sprint.id === this.addedTo.sprintId);
       return startSprint.value;
     },
     ...mapGetters([
@@ -131,12 +132,6 @@ export default {
     selectedOption() {
       return this.getSprintValues
         .find((sprint) => sprint.value === this.selectedSprint);
-    },
-    removedFrom() {
-      return this.changeDialog.removedFrom;
-    },
-    addedTo() {
-      return this.changeDialog.addedTo;
     },
   },
   mounted() {
@@ -154,17 +149,17 @@ export default {
     },
     onConfirm() {
       switch (true) {
-        case this.changeDialog.removedFrom.columnType === 'Unassigned'
+        case this.removedFrom.columnType === 'Unassigned'
         && this.selectedOption.value === 0:
           console.log('no sprints, ticket moved to Todo in new userStory');
           this.addNewUS(); // TESTED
           break;
-        case this.changeDialog.removedFrom.columnType === 'Unassigned'
+        case this.removedFrom.columnType === 'Unassigned'
         && this.selectedOption.value !== 0:
           console.log('undefined sprint to changed sprints, ticket with no sprint moved to a sprint in new userStory');
           this.addNewUSNewSp(this.selectedOption.id); // TESTED
           break;
-        case this.changeDialog.removedFrom.columnType === 'start':
+        case this.removedFrom.columnType === 'start':
           console.log('from todo of an user story to Unassigned tick list (removes userstory)');
           this.remUS();
           break;
@@ -181,12 +176,11 @@ export default {
     },
     async remUSRemSP() {
       console.log('remUSRemSP');
-      const { ticketId } = this.changeDialog;
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SwitchUnassigned.REMOVE_USERSTORY_REMOVE_SPRINT,
         fetchPolicy: 'no-cache',
         variables: {
-          ticket: { id: ticketId },
+          ticket: { id: this.ticketId },
           uStoryRemove: { id: this.removedFrom.userStoryId },
           sprintRemove: { id: this.removedFrom.sprintId },
         },
@@ -199,12 +193,11 @@ export default {
       });
     },
     async remUS() {
-      const { ticketId } = this.changeDialog;
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SwitchUnassigned.REMOVE_USERSTORY,
         fetchPolicy: 'no-cache',
         variables: {
-          ticket: { id: ticketId },
+          ticket: { id: this.ticketId },
           uStoryRemove: { id: this.removedFrom.userStoryId },
         },
       }).then((response) => {
@@ -216,12 +209,11 @@ export default {
       });
     },
     async addNewUSNewSp(sprintAddId) {
-      const { ticketId } = this.changeDialog;
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SwitchUnassigned.ADD_NEW_USERSTORY_ADD_NEW_SPRINT,
         fetchPolicy: 'no-cache',
         variables: {
-          ticket: { id: ticketId },
+          ticket: { id: this.ticketId },
           uStoryAdd: { id: this.addedTo.userStoryId },
           sprintAdd: { id: sprintAddId },
         },
@@ -234,12 +226,11 @@ export default {
       });
     },
     async addNewUS() {
-      const { ticketId } = this.changeDialog;
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SwitchUnassigned.ADD_NEW_USERSTORY,
         fetchPolicy: 'no-cache',
         variables: {
-          ticket: { id: ticketId },
+          ticket: { id: this.ticketId },
           uStoryAdd: { id: this.addedTo.userStoryId },
         },
       }).then((response) => {
@@ -251,7 +242,7 @@ export default {
       });
     },
     switchBack() {
-      const { evt } = this.changeDialog;
+      const { evt } = this;
       // remove ticket from new list and put back in old list
       evt.from.insertBefore(evt.to.childNodes[evt.newDraggableIndex],
         evt.from.childNodes[evt.oldDraggableIndex]);

@@ -3,8 +3,10 @@
     <UADialog
       v-if="showUADialog"
     />
+    <USDialog
+      v-if="showUSDialog"
+    />
     <UserStoryRows v-if="loaded" />
-    <!--    <USSwitchDialog v-if="showDialog" />-->
   </v-content>
 </template>
 
@@ -12,30 +14,23 @@
 import { mapActions, mapState } from 'vuex';
 import UserStoryRows from '../components/backlog/UserStoryRows.vue';
 import UADialog from '../components/backlog/Columns/UADialog.vue';
-
-// import USSwitchDialog from '../components/backlog/Columns/Dialog.vue';
+import USDialog from '../components/backlog/Columns/USDialog.vue';
 
 export default {
   name: 'Backlog',
   components: {
     UserStoryRows,
     UADialog,
-    // USSwitchDialog,
+    USDialog,
   },
   data: () => ({
     loaded: false,
-
   }),
   computed: {
-    ...mapState([
-      'userStories',
-      'backLogData',
-      'changeDialog',
-      'currProElements',
-    ]),
-    showUADialog() {
-      return this.changeDialog.showUADialog;
-    },
+    ...mapState({
+      showUADialog: (state) => state.changeDialog.showUADialog,
+      showUSDialog: (state) => state.changeDialog.showUSDialog,
+    }),
     proId() {
       return this.$route.query.proId;
     },
