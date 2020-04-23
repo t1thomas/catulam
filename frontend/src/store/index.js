@@ -7,8 +7,9 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    uSChangeDialog: {
-      showDialog: false,
+    changeDialog: {
+      showUSDialog: false,
+      showUADialog: false,
       ticketId: null,
       removedFrom: {},
       addedTo: {},
@@ -21,13 +22,10 @@ export default new Vuex.Store({
     },
     currentUser: null,
     currentUserTasks: null,
-    showDialog: false,
     carouselModelParent: 1,
     backLogData: [],
     sprintList: [],
     tickets: [],
-    removedFrom: {},
-    addedTo: {},
     routeAuth: false,
     projects: null,
     currentTicket: null,
@@ -92,27 +90,39 @@ export default new Vuex.Store({
     set_sprintList(state, obj) {
       Vue.set(state, 'sprintList', [...obj]);
     },
-    /* mutations to manipulate data for uSChangeDialog */
+    /* mutations to manipulate data for changeDialog */
     uSCDSet_evt(state, obj) {
-      state.uSChangeDialog.evt = obj;
+      state.changeDialog.evt = obj;
     },
     uSCDSet_ticketId(state, obj) {
-      state.uSChangeDialog.ticketId = obj;
+      state.changeDialog.ticketId = obj;
     },
     uSCDSet_removedFrom(state, obj) {
-      state.uSChangeDialog.removedFrom = obj;
+      state.changeDialog.removedFrom = obj;
     },
     uSCDSet_addedTo(state, obj) {
-      state.uSChangeDialog.addedTo = obj;
+      state.changeDialog.addedTo = obj;
     },
-    set_uSChangeDialog(state) {
-      if (state.uSChangeDialog.showDialog === false) {
-        state.uSChangeDialog.showDialog = true;
+    set_USChangeDialog(state) {
+      if (state.changeDialog.showUSDialog === false) {
+        state.changeDialog.showUSDialog = true;
       } else {
-        state.uSChangeDialog.showDialog = false;
-        state.uSChangeDialog.removedFrom = undefined;
-        state.uSChangeDialog.addedTo = undefined;
-        state.uSChangeDialog.addedTo = null;
+        state.changeDialog.showUSDialog = false;
+        state.changeDialog.removedFrom = undefined;
+        state.changeDialog.addedTo = undefined;
+        state.changeDialog.evt = null;
+        state.changeDialog.ticketId = null;
+      }
+    },
+    set_UAChangeDialog(state) {
+      if (state.changeDialog.showUADialog === false) {
+        state.changeDialog.showUADialog = true;
+      } else {
+        state.changeDialog.showUADialog = false;
+        state.changeDialog.removedFrom = undefined;
+        state.changeDialog.addedTo = undefined;
+        state.changeDialog.evt = null;
+        state.changeDialog.ticketId = null;
       }
     },
     /* ------------------------------------------------*/
@@ -440,7 +450,7 @@ export default new Vuex.Store({
     setRemovedFrom({ commit }, value) {
       commit('set_removedFrom', value);
     },
-    /* actions to set data for uSChangeDialog */
+    /* actions to set data for changeDialog */
     uSCDEvt({ commit }, value) {
       commit('uSCDSet_evt', value);
     },
@@ -456,11 +466,13 @@ export default new Vuex.Store({
     setAddedTo({ commit }, value) {
       commit('set_addedTo', value);
     },
-    showDialogUSSwitcher({ commit }) {
-      commit('set_uSChangeDialog');
+    USDialogSwitcher({ commit }) {
+      commit('set_USChangeDialog');
+    },
+    UADialogSwitcher({ commit }) {
+      commit('set_UAChangeDialog');
     },
     /* -------------------------------------- */
-
     setUser({ commit }, value) {
       commit('set_currentUser', value);
     },

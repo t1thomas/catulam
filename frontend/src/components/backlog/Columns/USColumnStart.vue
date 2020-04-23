@@ -11,7 +11,6 @@
           {{ story.storyText }}
         </v-card-subtitle>
       </v-col>
-      <v-divider vertical />
       <v-col class="pa-0">
         <!-- Pass ids of unstaged tickets of current userStory -->
         <draggable-tick-list

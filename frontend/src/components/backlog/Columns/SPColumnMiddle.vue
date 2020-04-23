@@ -1,6 +1,6 @@
 <template>
   <v-carousel
-    v-model="carouselModel"
+    v-model="carouselModelLocal"
     class="px-2"
     hide-delimiters
     height="100%"
@@ -10,10 +10,9 @@
       :key="sprint.id"
       :name="sprint.sprintNo"
     >
-      <span>Sprint {{ sprint.sprintNo }}</span>
       <draggable-tick-list
         :ticket-ids="getTicsPerSprint(sprint.id, userStoryId)"
-        :list-properties="tickListConfig(sprint.id)"
+        :list-properties="tickListConfig(sprint.id, sprint.sprintNo)"
       />
     </v-carousel-item>
   </v-carousel>
@@ -35,6 +34,9 @@ export default {
       required: true,
     },
   },
+  data: () => ({
+    carouselModelLocal: 0,
+  }),
   computed: {
     ...mapState({
       sprintList: (state) => state.backLogData.sprints,
@@ -63,9 +65,9 @@ export default {
     ...mapActions([
       'setCarouselModel',
     ]),
-    tickListConfig(id) {
+    tickListConfig(id, sprintNo) {
       return {
-        userStoryId: this.userStoryId, columnType: 'sprint', sprintId: id, disabled: false,
+        userStoryId: this.userStoryId, columnType: 'sprint', sprintId: id, disabled: false, sprintNo,
       };
     },
   },

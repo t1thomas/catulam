@@ -43,7 +43,7 @@
           <v-btn
             color="blue darken-1"
             text
-            @click="showDialogUSSwitcher"
+            @click="onCancel"
           >
             Cancel
           </v-btn>
@@ -80,24 +80,24 @@ export default {
   },
   computed: {
     ...mapState([
-      'uSChangeDialog',
+      'changeDialog',
     ]),
     showDialog() {
-      return this.uSChangeDialog.showDialog;
+      return this.changeDialog.showUSDialog;
     },
     ticket() {
-      return this.getTicketById(this.uSChangeDialog.ticketId);
+      return this.getTicketById(this.changeDialog.ticketId);
     },
     uSToText() {
-      return this.getUserStoryText(this.uSChangeDialog.addedTo.userStoryId);
+      return this.getUserStoryText(this.changeDialog.addedTo.userStoryId);
     },
     startingOption() {
       // pre-set the value of the v-select to sprint selected by user
-      if (this.uSChangeDialog.addedTo.sprintId === undefined) {
+      if (this.changeDialog.addedTo.sprintId === undefined) {
         return this.options[0].value;
       }
       const startSprint = this.getSprintValues
-        .find((sprint) => sprint.id === this.uSChangeDialog.addedTo.sprintId);
+        .find((sprint) => sprint.id === this.changeDialog.addedTo.sprintId);
       return startSprint.value;
     },
     ...mapGetters([
@@ -118,7 +118,7 @@ export default {
   },
   methods: {
     ...mapActions([
-      'showDialogUSSwitcher', // opens/closes dialog
+      'USDialogSwitcher', // opens/closes dialog
     ]),
     print() {
       console.log(this.getSprintValues);
@@ -127,22 +127,22 @@ export default {
     },
     onConfirm() {
       switch (true) {
-        case this.uSChangeDialog.removedFrom.sprintId === undefined
+        case this.changeDialog.removedFrom.sprintId === undefined
         && this.selectedOption.value === 0:
           console.log('no sprints, ticket moved to Todo in new userStory');
           this.$emit('confirm', { action: 1 });
           break;
-        case this.uSChangeDialog.removedFrom.sprintId === undefined
+        case this.changeDialog.removedFrom.sprintId === undefined
         && this.selectedOption.value !== 0:
           console.log('undefined sprint to changed sprints, ticket with no sprint moved to a sprint in new userStory');
           this.$emit('confirm', { action: 2, sprintId: this.selectedOption.id });
           break;
-        case this.uSChangeDialog.removedFrom.sprintId !== undefined
+        case this.changeDialog.removedFrom.sprintId !== undefined
         && this.selectedOption.value === 0:
           console.log('defined sprint to no sprints, ticket with sprint moved to Todo in new userStory (removed sprint)');
           this.$emit('confirm', { action: 3 });
           break;
-        case this.uSChangeDialog.removedFrom.sprintId !== this.selectedOption.id:
+        case this.changeDialog.removedFrom.sprintId !== this.selectedOption.id:
           console.log('sprint to changed sprints');
           this.$emit('confirm', { action: 4, sprintId: this.selectedOption.id });
           break;
@@ -151,7 +151,11 @@ export default {
           this.$emit('confirm', 5);
           break;
       }
-      this.showDialogUSSwitcher();
+      this.USDialogSwitcher();
+    },
+    onCancel() {
+      this.$emit('cancel');
+      this.USDialogSwitcher();
     },
   },
 };

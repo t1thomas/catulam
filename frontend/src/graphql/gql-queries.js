@@ -327,6 +327,78 @@ const gqlQueries = {
       to{id}
     }
   }`,
+  SwitchUnassigned: {
+    REMOVE_USERSTORY: gql`mutation(
+      $ticket: _TicketInput!
+      $uStoryRemove: _UserStoryInput!
+    ) {
+      RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+    }`,
+    REMOVE_USERSTORY_REMOVE_SPRINT: gql`mutation(
+      $ticket: _TicketInput!
+      $uStoryRemove: _UserStoryInput!
+      $sprintRemove: _SprintInput!
+    ) {
+      RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+      RemoveTicketSprint(from: $ticket, to: $sprintRemove) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+    }`,
+    ADD_NEW_USERSTORY: gql`mutation(
+      $ticket: _TicketInput!
+      $uStoryAdd: _UserStoryInput!
+    ) {
+      AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+    }`,
+    ADD_NEW_USERSTORY_ADD_NEW_SPRINT: gql`mutation(
+      $ticket: _TicketInput!
+      $uStoryAdd: _UserStoryInput!
+      $sprintAdd: _SprintInput!
+    ) {
+      AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+      AddTicketSprint(from: $ticket, to: $sprintAdd) {
+        from {
+          id
+        }
+        to {
+          id
+        }
+      }
+    }`,
+  },
   SwitchUserStory: {
     storySwitch: gql`mutation($ticket: String! $usFrom: String! $usTo: String!){
      TicSwitchUStory(tickId: $ticket UStoryIdFrom: $usFrom UStoryIdTo: $usTo)

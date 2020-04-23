@@ -1,0 +1,95 @@
+<template>
+  <v-card
+    width="100%"
+  >
+    <v-row no-gutters>
+      <v-col style="text-align: center">
+        <span class="font-weight-medium body-2">
+          {{ ticket.title }}    #{{ ticket.issueNumber }}
+        </span>
+        <v-chip
+          x-small
+          color="dark-grey"
+          text-color="white"
+        >
+          <v-avatar left>
+            <v-icon>mdi-progress-clock</v-icon>
+          </v-avatar>
+          {{ ticket.hourEstimate }}hr
+        </v-chip>
+        <v-chip
+          x-small
+          pill
+          class="ml-2"
+        >
+          <v-avatar
+            left
+            tile
+          >
+            <v-img
+              v-if="assignee"
+              :src="gravatar()"
+            />
+            <v-icon
+              v-else
+              dark
+            >
+              mdi-help-circle
+            </v-icon>
+          </v-avatar>
+          {{ fullName(assignee) }}
+        </v-chip>
+      </v-col>
+    </v-row>
+  </v-card>
+</template>
+
+<script>
+import { mapGetters, mapState } from 'vuex';
+
+export default {
+  name: 'TicketCard',
+  props: {
+    tickId: {
+      type: String,
+      required: true,
+    },
+  },
+  computed: {
+    ...mapState({
+      members: (state) => state.currProElements.members,
+    }),
+    ...mapGetters([
+      'getTicketById',
+    ]),
+    assignee() {
+      if (this.ticket.assignee === null) {
+        return null;
+      }
+      return this.members.find((member) => member.id === this.ticket.assignee.id);
+    },
+    ticket() {
+      return this.getTicketById(this.tickId);
+    },
+  },
+  methods: {
+    gravatar() {
+      return `https://gravatar.com/avatar/${this.assignee.avatar}?d=identicon`;
+    },
+    fullName() {
+      if (this.assignee === null) {
+        return 'n/a';
+      }
+      return `${this.assignee.firstName} ${this.assignee.lastName}`;
+    },
+  },
+};
+</script>
+
+<style scoped>
+  .card-bottom {
+    position:absolute;
+    bottom:1px;
+    right:1px;
+  }
+</style>

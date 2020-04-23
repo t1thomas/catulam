@@ -4,6 +4,8 @@
       v-model="drawer"
       app
       clipped
+      mini-variant
+      expand-on-hover
     >
       <nav-draw-items />
     </v-navigation-drawer>
@@ -42,15 +44,12 @@
         </v-icon>
       </v-btn>
     </v-app-bar>
+    <snackbar />
+    <v-container fluid>
 
-    <v-content>
-      <snackbar />
-      <router-view />
-    </v-content>
-
-    <v-footer app>
-      <span>&copy; 2019</span>
-    </v-footer>
+      <!-- If using vue-router -->
+      <router-view/>
+    </v-container>
   </v-app>
 </template>
 
@@ -67,7 +66,7 @@ export default {
     navDrawItems,
   },
   data: () => ({
-    drawer: false,
+    drawer: true,
   }),
   computed: {
     gravatar() {

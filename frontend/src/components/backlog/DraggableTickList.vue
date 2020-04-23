@@ -1,28 +1,31 @@
 <template>
-  <draggable
-    tag="div"
-    v-bind="dragOptions"
-    class="v-list"
-    style="background: rgb(39, 54, 102); width: 100%; height: 100%;"
-    @end="ended"
-    @add="onAdd"
-    @remove="onRemove"
-  >
-    <v-list-item
-      v-for="tickId in ticketIds"
-      :id="tickId"
-      :key="tickId"
-      v-ripple
-      class="pa-0 ma-sm-2"
-      clickable
-    >
-      <ticket-card :tick-id="tickId" />
-    </v-list-item>
-    <USSwitchDialog
-      v-if="showDialog"
-      @confirm="confirmStorySwitch"
+  <v-sheet style="height: 100%">
+    <USDialog
+      v-if="showUSDialog"
+      @confirm="confirmUSSwitch"
+      @cancel="cancelMove"
     />
-  </draggable>
+    <draggable
+      tag="div"
+      v-bind="dragOptions"
+      class="v-list"
+      style="background: rgb(39, 54, 102); width: 100%; height: 100%;"
+      @end="ended"
+      @add="onAdd"
+      @remove="onRemove"
+    >
+      <v-list-item
+        v-for="tickId in ticketIds"
+        :id="tickId"
+        :key="tickId"
+        v-ripple
+        class="pa-0 ma-sm-1"
+        clickable
+      >
+        <ticket-card-slim :tick-id="tickId" />
+      </v-list-item>
+    </draggable>
+  </v-sheet>
 </template>
 
 <script>
@@ -31,15 +34,15 @@ import { mapActions, mapState } from 'vuex';
 import draggable from 'vuedraggable';
 import Vue from 'vue';
 import gqlQueries from '../../graphql/gql-queries';
-import USSwitchDialog from './Columns/Dialog.vue';
-import ticketCard from './ticketCard.vue';
+import USDialog from './Columns/USDialog.vue';
+import ticketCardSlim from './ticketCardSlim.vue';
 
 export default {
   name: 'DraggableTickList',
   components: {
     draggable,
-    USSwitchDialog,
-    ticketCard,
+    USDialog,
+    ticketCardSlim,
   },
   props: {
     ticketIds: {
@@ -52,6 +55,9 @@ export default {
     },
   },
   computed: {
+    columnType() {
+      return this.listProperties.columnType;
+    },
     dragOptions() {
       return {
         animation: 200,
@@ -61,16 +67,16 @@ export default {
       };
     },
     ...mapState([
-      'uSChangeDialog',
+      'changeDialog',
     ]),
-    showDialog() {
-      return this.uSChangeDialog.showDialog;
+    showUSDialog() {
+      return this.changeDialog.showUSDialog;
     },
     removedFrom() {
-      return this.uSChangeDialog.removedFrom;
+      return this.changeDialog.removedFrom;
     },
     addedTo() {
-      return this.uSChangeDialog.addedTo;
+      return this.changeDialog.addedTo;
     },
     proId() {
       return this.$route.query.proId;
@@ -84,16 +90,17 @@ export default {
       'uSCDAddedTo',
       'uSCDTicketId',
       'uSCDEvt',
-      'showDialogUSSwitcher',
+      'USDialogSwitcher',
+      'UADialogSwitcher',
     ]),
     onRemove() {
       // mutate store
+      console.log('removed');
       this.uSCDRemovedFrom(this.listProperties);
-
-      // this.setRemovedFrom(this.listProperties);
     },
     onAdd() {
       // mutate store
+      console.log('added');
       this.uSCDAddedTo(this.listProperties);
     },
     ended(evt) {
@@ -105,31 +112,44 @@ export default {
       const toData = this.addedTo;
       // fromData and toData remains undefined if ticket is not moved between diff lists
       if (fromData !== undefined || toData !== undefined) {
-        switch (true) {
-          case fromData.userStoryId !== toData.userStoryId:
-            this.switchUserStoryDialog(evt);
-            break;
-          case fromData.columnType === 'start' && toData.columnType === 'sprint':
-            this.startToSprint(tickId, toData.sprintId);
-            break;
-          case fromData.columnType === 'sprint' && toData.columnType === 'start':
-            this.sprintToStart(tickId, fromData.sprintId);
-            break;
-          default:
-            break;
+        if (fromData.userStoryId === null || toData.userStoryId === null) {
+          /* if userStoryId === null for either toData or fromData the
+         ticket is being moved to/from unassigned ticket list */
+          this.switchUADialog(evt);
+        } else {
+          switch (true) {
+            case fromData.userStoryId !== toData.userStoryId:
+              this.switchUSDialog(evt);
+              break;
+            case fromData.columnType === 'start' && toData.columnType === 'sprint':
+              this.startToSprint(tickId, toData.sprintId);
+              break;
+            case fromData.columnType === 'sprint' && toData.columnType === 'start':
+              this.sprintToStart(tickId, fromData.sprintId);
+              break;
+            default:
+              break;
+          }
         }
       }
     },
-    // eslint-disable-next-line no-unused-vars
-    switchUserStoryDialog(evt) {
+    switchUADialog(evt) {
+      console.log(evt);
+      console.log('hr');
       const tickId = evt.item.id;
       this.uSCDTicketId(tickId);
       this.uSCDEvt(evt);
-      this.showDialogUSSwitcher();
+      this.UADialogSwitcher();
     },
-    confirmStorySwitch(args) {
-      const { ticketId } = this.uSChangeDialog;
-      const { evt } = this.uSChangeDialog;
+    switchUSDialog(evt) {
+      const tickId = evt.item.id;
+      this.uSCDTicketId(tickId);
+      this.uSCDEvt(evt);
+      this.USDialogSwitcher();
+    },
+    confirmUSSwitch(args) {
+      const { ticketId } = this.changeDialog;
+      const { evt } = this.changeDialog;
 
       switch (args.action) {
         case 1:
@@ -149,6 +169,26 @@ export default {
           break;
       }
     },
+    confirmUASwitch(args) {
+      switch (args.action) {
+        case 1:
+          this.addNewUS(); // TESTED
+          break;
+        case 2:
+          this.addNewUSNewSp(args.sprintId); // TESTED
+          break;
+        case 3:
+          this.remUS(); // TESTED
+          break;
+        default:
+          this.remUSRemSP(); // TESTED
+          break;
+      }
+    },
+    cancelMove() {
+      const { evt } = this.changeDialog;
+      this.switchBack(evt);
+    },
     async uStorySwitchOnly(ticketId, evt) {
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.SwitchUserStory.storySwitch,
@@ -163,7 +203,7 @@ export default {
         this.updateStore();
       }).catch((error) => {
         console.error(error);
-        this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
+        this.switchBack(evt);
       });
     },
     async uStorySwitchAddNewSprint(ticketId, evt, sprintAddId) {
@@ -182,7 +222,7 @@ export default {
         this.updateStore();
       }).catch((error) => {
         console.error(error);
-        this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
+        this.switchBack(evt);
       });
     },
     async uStorySwitchRemoveSprint(ticketId, evt) {
@@ -201,7 +241,7 @@ export default {
         this.updateStore();
       }).catch((error) => {
         console.error(error);
-        this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
+        this.switchBack(evt);
       });
     },
     // yet to be tested
@@ -221,7 +261,7 @@ export default {
         this.updateStore();
       }).catch((error) => {
         console.error(error);
-        this.switchBack(evt.from, evt.oldDraggableIndex, evt.to, evt.newDraggableIndex);
+        this.switchBack(evt);
       });
     },
     async sprintToStart(ticketId, sprintId) {
@@ -236,9 +276,10 @@ export default {
         console.error(error);
       });
     },
-    switchBack(from, oldIndex, to, newIndex) {
+    switchBack(evt) {
       // remove ticket from new list and put back in old list
-      from.insertBefore(to.childNodes[newIndex], from.childNodes[oldIndex]);
+      evt.from.insertBefore(evt.to.childNodes[evt.newDraggableIndex],
+        evt.from.childNodes[evt.oldDraggableIndex]);
     },
     async startToSprint(tickId, sprintId) {
       await Vue.$apolloClient.mutate({

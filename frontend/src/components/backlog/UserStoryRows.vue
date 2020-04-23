@@ -2,36 +2,49 @@
   <div
     class="containers"
   >
-    <v-row
-      v-for="story in stories"
-      :key="story.id"
-      class="mb-2"
-      no-gutters
-      style="max-height: 100%"
-    >
+    <v-row>
       <v-col
-        class="columns"
-        cols="4"
+        cols="2"
+        class="pb-0"
       >
-        <start-column :user-story-id="story.id" />
+        <unassigned-ticks />
       </v-col>
       <v-col
-        class="columns"
-
-        cols="5"
+        cols="10"
+        class="pl-0"
+        style="overflow-y: auto; max-height: 89vh"
       >
-        <sprints-column
-          :user-story-id="story.id"
-        />
-      </v-col>
-      <v-col
-        class="columns"
+        <v-row
+          v-for="story in stories"
+          :key="story.id"
+          class="mb-2"
+          no-gutters
+        >
+          <v-col
+            class="columns"
+            cols="5"
+          >
+            <start-column :user-story-id="story.id" />
+          </v-col>
+          <v-col
+            class="columns"
 
-        cols="3"
-      >
-        <done-column
-          :user-story-id="story.id"
-        />
+            cols="4"
+          >
+            <sprints-column
+              :user-story-id="story.id"
+            />
+          </v-col>
+          <v-col
+            class="columns"
+
+            cols="3"
+          >
+            <done-column
+              :user-story-id="story.id"
+            />
+          </v-col>
+        </v-row>
       </v-col>
     </v-row>
   </div>
@@ -41,15 +54,15 @@ import { mapState } from 'vuex';
 import USColumnStart from './Columns/USColumnStart.vue';
 import USColumnEnd from './Columns/USColumnEnd.vue';
 import SPColumnMiddle from './Columns/SPColumnMiddle.vue';
+import unassignedTicks from './Columns/unassignedTicks.vue';
 
 export default {
   name: 'UserStoryRows',
   components: {
-    // eslint-disable-next-line vue/no-unused-components
     'sprints-column': SPColumnMiddle,
     'start-column': USColumnStart,
-    // eslint-disable-next-line vue/no-unused-components
     'done-column': USColumnEnd,
+    unassignedTicks,
   },
   computed: {
     ...mapState({
@@ -61,7 +74,7 @@ export default {
 
 <style scoped>
   .containers {
-    height: 100%;
+    width: 100%;
     display: grid;
     grid-template-rows: auto;
   }
