@@ -1,6 +1,24 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
+  CREATE_TICKET: gql`
+    mutation(
+      $hourEstimate: Int
+      $title: String!
+      $desc: String
+      $project: _ProjectInput!
+      $user: _UserInput!
+    ) {
+      CreateTicket(
+        hourEstimate: $hourEstimate
+        title: $title
+        desc: $desc
+        project: $project
+        user: $user
+      ) {
+        id
+      }
+    }`,
   BACKLOG_DATA: gql`
     query($id: ID!) {
       Project(filter: { id: $id }) {
@@ -190,34 +208,6 @@ const gqlQueries = {
         }
       }
     }`,
-  CURRENT_PROJECT: gql`
-    query($id: ID!) {
-      Project(filter: { id: $id }) {
-        id
-        title
-        desc
-        label
-        members {
-          id
-          avatar
-          firstName
-          lastName
-        }
-        userStories {
-          id
-        }
-        tickets (filter: {userStory:null}){
-          id
-          assignee {
-            id
-          }
-        }
-        sprints {
-          id
-        }
-      }
-    }
-  `,
   PROJECTS: gql`
     query {
       Project {

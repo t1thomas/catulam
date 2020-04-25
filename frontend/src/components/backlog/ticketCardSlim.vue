@@ -70,6 +70,8 @@ export default {
     },
     ticket() {
       return this.getTicketById(this.tickId);
+      /* getTicketById: (state) => (id) => state.currProElements.tickets
+      .find((ticket) => ticket.id === id), */
     },
   },
   methods: {

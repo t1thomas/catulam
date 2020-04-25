@@ -5,9 +5,10 @@ const neode = require('./neode');
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
+const neo4j = require('neo4j-driver');
+
 const jwt = require('jsonwebtoken');
 const md5 = require('md5');
-
 const typeDefs = fs.readFileSync(path.join(__dirname, 'schema.graphql')).toString('utf-8');
 
 
@@ -58,6 +59,24 @@ const resolveFunctions = {
 
     },
     Mutation: {
+        CreateTicket: async (_, { hourEstimate, title, desc, project, user }) => {
+            try {
+                return neode.cypher('MATCH (p:Project{id:$proId})<-[r1:TICKET]-(:Ticket)' +
+                    ' MATCH (u:User{id:$userId})'+
+                    ' WITH u, COUNT(r1) AS issNo, p' +
+                    ' CREATE (p)<-[rel:TICKET]-(t: Ticket {id:apoc.create.uuid(), title:$title, hourEstimate:$hourEst, desc:$description, done:false, issueNumber: issNo + 1})<-[:CREATED {timestamp: apoc.date.currentTimestamp()}]-(u)' +
+                    ' RETURN t',
+                    {...(hourEstimate ? {hourEst: neo4j.int(hourEstimate)} : {hourEst: neo4j.int(0)}), title, ...(desc ? {description:desc} : {description:''}), proId: project.id, userId: user.id})
+                    .then((result) => {
+                        return result.records[0].get('t').properties;
+                    })
+                    .catch(e => {
+                        throw e;
+                    });
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
         CreateUser: async (_, {id, firstName, lastName, username, email, password, passwordUpdate}) => {
             try {
                 const salt = bcrypt.genSaltSync(Number(process.env.BCRYPTHASHCOST));

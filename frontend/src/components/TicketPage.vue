@@ -1,14 +1,13 @@
 <template>
-  <v-container
+  <v-content
     v-if="dataLoaded"
-    class="fill-height d-inline-block"
   >
     <topSection />
     <v-divider />
     <details-section />
     <v-divider />
     <desc-section />
-  </v-container>
+  </v-content>
 </template>
 
 <script>
@@ -36,19 +35,19 @@ export default {
     },
     ...mapState({
       ticket: 'currentTicket',
-      project: 'currentProject',
+      project: 'currProElements',
     }),
   },
   async mounted() {
     await this.fetchCurrTicket(this.tickId);
-    await this.fetchCurrProject(this.proId);
+    await this.fetchCurrProElements(this.proId);
     console.log(this.ticket);
     console.log(this.project);
   },
   methods: {
     ...mapActions([
       'fetchCurrTicket',
-      'fetchCurrProject',
+      'fetchCurrProElements',
     ]),
   },
 };

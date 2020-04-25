@@ -16,14 +16,15 @@
       @remove="onRemove"
     >
       <v-list-item
-        v-for="tickId in ticketIds"
-        :id="tickId"
-        :key="tickId"
+        v-for="ticketId in ticketIds"
+        :id="ticketId"
+        :key="ticketId"
         v-ripple
         class="pa-0 ma-sm-1"
         clickable
+        @dblclick="detailsDrawer(ticketId)"
       >
-        <ticket-card-slim :tick-id="tickId" />
+        <ticket-card-slim :tick-id="ticketId" />
       </v-list-item>
     </draggable>
   </v-sheet>
@@ -32,7 +33,9 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import draggable from 'vuedraggable';
+import Vue from 'vue';
 import ticketCardSlim from './ticketCardSlim.vue';
+import gqlQueries from '../../graphql/gql-queries';
 
 export default {
   name: 'DraggableTickList',
@@ -79,7 +82,11 @@ export default {
       'uSCDEvt',
       'USDialogSwitcher',
       'UADialogSwitcher',
+      'detDrawShow',
     ]),
+    detailsDrawer(ticketId) {
+      this.detDrawShow({ show: true, ticketId });
+    },
     onRemove() {
       // mutate store
       this.uSCDRemovedFrom(this.listProperties);
@@ -92,7 +99,7 @@ export default {
       this.ticketMoveResolve(evt);
     },
     ticketMoveResolve(evt) {
-      const tickId = evt.item.id;
+      const ticketId = evt.item.id;
       const fromData = this.removedFrom;
       const toData = this.addedTo;
       // fromData and toData remains undefined if ticket is not moved between diff lists
@@ -107,10 +114,10 @@ export default {
               this.switchUSDialog(evt);
               break;
             case fromData.columnType === 'start' && toData.columnType === 'sprint':
-              this.startToSprint(tickId, toData.sprintId);
+              this.startToSprint(ticketId, toData.sprintId, evt);
               break;
             case fromData.columnType === 'sprint' && toData.columnType === 'start':
-              this.sprintToStart(tickId, fromData.sprintId);
+              this.sprintToStart(ticketId, fromData.sprintId, evt);
               break;
             default:
               break;
@@ -129,6 +136,39 @@ export default {
       this.uSCDTicketId(tickId);
       this.uSCDEvt(evt);
       this.USDialogSwitcher();
+    },
+    async sprintToStart(ticketId, sprintId, evt) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SprintToStart,
+        fetchPolicy: 'no-cache',
+        variables: { ticket: { id: ticketId }, sprint: { id: sprintId } },
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+        this.switchBack(evt);
+      });
+    },
+    async startToSprint(ticketId, sprintId, evt) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.StartToSprint,
+        variables: { ticket: { id: ticketId }, sprint: { id: sprintId } },
+      }).then((response) => {
+        console.log(response);
+        this.updateStore();
+      }).catch((error) => {
+        console.error(error);
+        this.switchBack(evt);
+      });
+    },
+    switchBack(evt) {
+      // remove ticket from new list and put back in old list
+      evt.from.insertBefore(evt.to.childNodes[evt.newDraggableIndex],
+        evt.from.childNodes[evt.oldDraggableIndex]);
+    },
+    updateStore() {
+      this.fetchBackLogData(this.proId);
     },
   },
 };

@@ -92,7 +92,7 @@ export default {
   computed: {
     ...mapState({
       ticket: 'currentTicket',
-      project: 'currentProject',
+      project: 'currProElements',
     }),
     members() {
       return this.project.members;

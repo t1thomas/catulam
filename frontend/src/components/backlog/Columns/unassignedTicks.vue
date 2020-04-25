@@ -1,11 +1,18 @@
 <template>
   <v-card style="height: 81vh; max-height: 82vh">
     <v-list-item>
-      <v-list-item-content>
-        <v-list-item-title class="subtitle-2">
-          Unassigned Tickets
-        </v-list-item-title>
-      </v-list-item-content>
+      <v-list-item-title class="subtitle-2">
+        Unassigned Tickets
+      </v-list-item-title>
+
+      <v-list-item-icon>
+        <v-btn
+          icon
+          @click="nTicShow"
+        >
+          <v-icon>mdi-plus-box</v-icon>
+        </v-btn>
+      </v-list-item-icon>
     </v-list-item>
     <draggable-tick-list
       :ticket-ids="tickIds"
@@ -15,7 +22,7 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
 import DraggableTickList from '../DraggableTickList.vue';
 
 export default {
@@ -32,6 +39,14 @@ export default {
     },
     tickIds() {
       return this.unAsTicks.map((tick) => tick.id);
+    },
+  },
+  methods: {
+    ...mapActions([
+      'nTicDialogShow',
+    ]),
+    nTicShow() {
+      this.nTicDialogShow({ show: true });
     },
   },
 };

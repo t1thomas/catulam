@@ -15,10 +15,17 @@ export default new Vuex.Store({
       addedTo: {},
       evt: null,
     },
+    nTicketDialog: {
+      show: false,
+    },
     snackBar: {
       show: false,
       message: '',
       type: '',
+    },
+    detailsDrawer: {
+      show: false,
+      ticketId: null,
     },
     currentUser: null,
     currentUserTasks: null,
@@ -156,6 +163,26 @@ export default new Vuex.Store({
       state.snackBar.message = obj.message;
       state.snackBar.type = obj.type;
       state.snackBar.show = true;
+    },
+    set_DrawerShow(state, obj) {
+      if (obj.show === false) {
+        state.detailsDrawer.show = obj.show;
+        state.detailsDrawer.ticketId = null;
+        state.currentTicket = null;
+      } else {
+        state.detailsDrawer.show = obj.show;
+        state.detailsDrawer.ticketId = obj.ticketId;
+      }
+    },
+    set_nTicDialogShow(state, obj) {
+      if (obj.show === false) {
+        state.nTicketDialog.show = obj.show;
+        // state.detailsDrawer.ticketId = null;
+        // state.currentTicket = null;
+      } else {
+        state.nTicketDialog.show = obj.show;
+        // state.detailsDrawer.ticketId = obj.ticketId;
+      }
     },
     // set_snackBarType(state, obj) {
     //   state.snackBar.type = obj;
@@ -320,6 +347,7 @@ export default new Vuex.Store({
       });
     },
     async fetchCurrTicket({ commit }, id) {
+      console.log(id);
       await Vue.$apolloClient.query({
         query: gqlQueries.CURRENT_TICKET,
         fetchPolicy: 'no-cache',
@@ -473,6 +501,12 @@ export default new Vuex.Store({
       commit('set_UAChangeDialog');
     },
     /* -------------------------------------- */
+    detDrawShow({ commit }, val) {
+      commit('set_DrawerShow', val);
+    },
+    nTicDialogShow({ commit }, val) {
+      commit('set_nTicDialogShow', val);
+    },
     setUser({ commit }, value) {
       commit('set_currentUser', value);
     },

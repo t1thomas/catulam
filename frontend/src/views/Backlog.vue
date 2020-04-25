@@ -6,7 +6,9 @@
     <USDialog
       v-if="showUSDialog"
     />
+    <DetailsDrawer v-if="showDrawer"/>
     <UserStoryRows v-if="loaded" />
+    <NTicDialog v-if="showNTicDialog" />
   </v-content>
 </template>
 
@@ -15,6 +17,8 @@ import { mapActions, mapState } from 'vuex';
 import UserStoryRows from '../components/backlog/UserStoryRows.vue';
 import UADialog from '../components/backlog/Columns/UADialog.vue';
 import USDialog from '../components/backlog/Columns/USDialog.vue';
+import DetailsDrawer from '../components/backlog/DetailsDrawer.vue';
+import NTicDialog from '../components/backlog/NTicDialog.vue';
 
 export default {
   name: 'Backlog',
@@ -22,6 +26,9 @@ export default {
     UserStoryRows,
     UADialog,
     USDialog,
+    // eslint-disable-next-line vue/no-unused-components
+    DetailsDrawer,
+    NTicDialog,
   },
   data: () => ({
     loaded: false,
@@ -30,6 +37,8 @@ export default {
     ...mapState({
       showUADialog: (state) => state.changeDialog.showUADialog,
       showUSDialog: (state) => state.changeDialog.showUSDialog,
+      showNTicDialog: (state) => state.nTicketDialog.show,
+      showDrawer: (state) => state.detailsDrawer.show,
     }),
     proId() {
       return this.$route.query.proId;

@@ -175,7 +175,7 @@ export default {
       return this.ticket.done;
     },
     creatorObject() {
-      if (this.ticket.creator === null) {
+      if (this.ticket.creator.length === 0) {
         return null;
       }
       const { id } = this.ticket.creator[0].User;

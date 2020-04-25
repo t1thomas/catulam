@@ -59,12 +59,12 @@
 
     type Ticket {
         id: ID!
-        issueNumber: Int!
+        issueNumber: Int
         hourEstimate: Int
         userStory: UserStory @relation(name: "SUB_TASK", direction: OUT)
         title: String!
         desc: String
-        done: Boolean!
+        done: Boolean
         sprint: Sprint @relation(name: "SPRINT_TASK", direction: OUT)
         project: Project @relation(name: "TICKET", direction: OUT)
         assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
@@ -104,6 +104,7 @@
     type Mutation {
         loginUser(username: String!, password: String!): Token!
         resetPassword(username: String!, newPassword: String!): Token!
+        CreateTicket(hourEstimate: Int, title: String!, desc: String, project: _ProjectInput!, user: _UserInput!): Ticket
         CreateUser(id: ID!, firstName: String!, lastName: String, username: String!, email: String!, password: String!, passwordUpdate: Boolean!): User
 
         TicSwitchSprint(tickId: String!, sprintIdFrom: String!, sprintIdTo: String!): JSON

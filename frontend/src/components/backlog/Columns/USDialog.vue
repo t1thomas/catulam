@@ -235,31 +235,6 @@ export default {
         this.switchBack();
       });
     },
-    async sprintToStart(sprintId) {
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SprintToStart,
-        fetchPolicy: 'no-cache',
-        variables: { ticket: { id: this.ticketId }, sprint: { id: sprintId } },
-      }).then((response) => {
-        console.log(response);
-        this.updateStore();
-      }).catch((error) => {
-        console.error(error);
-        this.switchBack();
-      });
-    },
-    async startToSprint(sprintId) {
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.StartToSprint,
-        variables: { ticket: { id: this.ticketId }, sprint: { id: sprintId } },
-      }).then((response) => {
-        console.log(response);
-        this.updateStore();
-      }).catch((error) => {
-        console.error(error);
-        this.switchBack();
-      });
-    },
     onCancel() {
       this.switchBack();
       this.USDialogSwitcher();
