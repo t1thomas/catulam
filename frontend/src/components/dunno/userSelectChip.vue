@@ -94,6 +94,9 @@ export default {
       ticket: 'currentTicket',
       project: 'currProElements',
     }),
+    proId() {
+      return this.$route.query.proId;
+    },
     members() {
       return this.project.members;
     },
@@ -106,9 +109,7 @@ export default {
   },
   methods: {
     ...mapActions([
-      'addUserTicket',
-      'removeUserTicket',
-      'updateUserTicket',
+      'updateTicketAssignee',
     ]),
     gravatar(user) {
       return `https://gravatar.com/avatar/${user.avatar}?d=identicon`;
@@ -124,30 +125,36 @@ export default {
     },
     async removeAssignee(member) {
       this.saving = true;
+      // construct variable payload for graphQL mutation
       const payload = {
-        userID: { id: member.id },
-        tickId: { id: this.ticket.id },
+        remUser: { id: member.id },
+        tick: { id: this.ticket.id },
+        project: { id: this.proId },
       };
-      await this.removeUserTicket(payload);
+      // Fires a mutation to remove assignee of current ticket
+      await this.updateTicketAssignee(payload);
       this.saving = false;
     },
     async changeAssignee(member) {
       this.saving = true;
       // if no one is currently assigned
       if (this.assignee === null) {
-        // construct variables payload for graphQL mutation
+        // construct variable payload for graphQL mutation
         const payload = {
-          userID: { id: member.id },
-          tickId: { id: this.ticket.id },
+          addUser: { id: member.id },
+          tick: { id: this.ticket.id },
+          project: { id: this.proId },
         };
-        await this.addUserTicket(payload);
+        await this.updateTicketAssignee(payload);
       } else {
         const payload = {
-          remUserID: { id: this.assignee.id },
-          addUserID: { id: member.id },
-          tickId: { id: this.ticket.id },
+          remUser: { id: this.assignee.id },
+          addUser: { id: member.id },
+          tick: { id: this.ticket.id },
+          project: { id: this.proId },
         };
-        await this.updateUserTicket(payload);
+        // Fires a mutation to change assignee of current ticket
+        await this.updateTicketAssignee(payload);
       }
       this.saving = false;
       this.selector = false;

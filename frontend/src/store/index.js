@@ -405,18 +405,6 @@ export default new Vuex.Store({
           console.error(error);
         });
     },
-    async addUserTicket({ commit }, payload) {
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.ADD_USER_TICKET,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { AddUserTickets } = response.data;
-        commit('set_currTicket_assignee', AddUserTickets.from);
-      }).catch((error) => {
-        console.error(error);
-      });
-    },
     async updateTicketHours({ commit }, payload) {
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.UPDATE_TICKET_ETIME,
@@ -433,30 +421,20 @@ export default new Vuex.Store({
         console.error(error);
       });
     },
-    async removeUserTicket({ commit }, payload) {
+    async updateTicketAssignee({ commit }, payload) {
       await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.REM_USER_TICKET,
+        mutation: gqlQueries.UPDATE_TICKET_ASSIGNEE,
+        name: 'update',
         fetchPolicy: 'no-cache',
         variables: payload,
       }).then((response) => {
-        const { RemoveUserTickets } = response.data;
-        if (RemoveUserTickets === null) {
-          throw new Error('Unable to update Assignee');
-        } else {
+        const { UpdateTicketAssignee } = response.data;
+        // Updates the current ticket in DOM
+        if (UpdateTicketAssignee === null) {
           commit('set_currTicket_assignee', null);
+        } else {
+          commit('set_currTicket_assignee', UpdateTicketAssignee);
         }
-      }).catch((error) => {
-        console.error(error);
-      });
-    },
-    async updateUserTicket({ commit }, payload) {
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.UPDATE_USER_TICKET,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { AddUserTickets } = response.data;
-        commit('set_currTicket_assignee', AddUserTickets.from);
       }).catch((error) => {
         console.error(error);
       });

@@ -1,6 +1,6 @@
 const { GraphQLJSON } = require('graphql-type-json');
 const { GraphQLObjectType, GraphQLString, GraphQLList } = require('graphql');
-const { makeAugmentedSchema } = require('neo4j-graphql-js');
+const { makeAugmentedSchema, neo4jgraphql } = require('neo4j-graphql-js');
 const { withFilter } = require('apollo-server-express');
 const neode = require('./neode');
 const fs = require('fs');
@@ -47,10 +47,6 @@ const resolveFunctions = {
             return neode.cypher('MATCH (u:User {username: $username})-[rel:JWT]->(t: Token {token:$token}) RETURN u',
                 {username:currentUser.username, token: jwtToken})
                 .then((result) => {
-                    // set password field to empty string, to prevent mutation returning password value
-                    // user.password = '';
-                    // console.log(result.records[0].get('u').properties);
-
                     return result.records[0].get('u').properties;
                 })
                 .catch(e => {
@@ -59,6 +55,139 @@ const resolveFunctions = {
         },
     },
     Mutation: {
+        RemoveTicketUserStory:  async (object, params, ctx, resolveInfo) => {
+            const tickId = params.from.id;
+
+            return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+        },
+        UnassignedTicketSwitch: async (_, { project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd }, {pubSub}) => {
+            console.log(project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd);
+            try {
+                let query = '';
+                let params = undefined;
+                switch (true) {
+                    case uStoryRemove && !sprintRemove && !uStoryAdd && !sprintAdd:
+                        // UserStory Remove Only
+                        query = 'MATCH (t:Ticket {id:$tick.id})-[rel:SUB_TASK]->(u:UserStory {id:$uStoryRemove.id}) DELETE rel ';
+                        params = { tick, uStoryRemove };
+                        break;
+                    case uStoryRemove && sprintRemove && !uStoryAdd && !sprintAdd:
+                        // REMOVE_USERSTORY_REMOVE_SPRINT
+                        // console.log(project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd);
+                        console.log('here Mate');
+                        query = 'MATCH (s:Sprint {id:$sprintRemove.id})<-[rel1:SPRINT_TASK]-(t:Ticket {id:$tick.id})-[rel2:SUB_TASK]->(u:UserStory {id:$uStoryRemove.id})' +
+                            ' DELETE rel1, rel2 ';
+                        params = {tick, uStoryRemove, sprintRemove};
+                        break;
+                    case !uStoryRemove && !sprintRemove && uStoryAdd && !sprintAdd:
+                        // ADD_NEW_USERSTORY only
+                        query = 'MATCH (t:Ticket),(u:UserStory)' +
+                            ' WHERE t.id = $tick.id AND u.id = $uStoryAdd.id' +
+                            ' CREATE (t)-[rel:SUB_TASK]->(u)';
+                        params = { tick, uStoryAdd };
+                        break;
+                    case  uStoryAdd && sprintAdd && !uStoryRemove && !sprintRemove:
+                        // ADD_NEW_USERSTORY_ADD_NEW_SPRINT
+                        query = 'MATCH (t:Ticket), (u:UserStory), (s:Sprint)' +
+                            ' WHERE t.id = $tick.id AND u.id = $uStoryAdd.id AND s.id = $sprintAdd.id' +
+                            ' CREATE (s)<-[rel1:SPRINT_TASK]-(t)-[rel2:SUB_TASK]->(u)';
+                        params = {tick, uStoryAdd, sprintAdd};
+                        break;
+                    default:
+                        throw 'Query does not contain necessary params';
+                }
+                console.log(params);
+                return neode.cypher(query,params)
+                    .then(() => {
+                        // trigger DOM update for all subscribers
+                        pubSub.publish('project', {update: project.id});
+                        return tick.id;
+                    })
+                    .catch(e => {
+                        throw e;
+                    });
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
+        UpdateTicket:  async (object, params, ctx, resolveInfo) => {
+            // const alias = resolveInfo.fieldNodes[0].alias;
+            const tickId = params.id;
+            try {
+                // query for the project id linked to the current ticket
+                const proId = await neode.cypher('MATCH (a:Ticket { id:$tickId})-[rel:TICKET]->(b:Project)' +
+                    ' RETURN b.id',{tickId})
+                    .then((result) => {
+                        return result.records[0].get('b.id');
+                    })
+                    .catch(e => {
+                        throw e;
+                    });
+                // using project Id found,
+                ctx.pubSub.publish('project', {update: proId});
+                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
+        UpdateTicketAssignee: async (_, { tick, remUser, addUser, project }, {pubSub}) => {
+            if(remUser && !addUser){
+                try {
+                    return neode.cypher(
+                        'MATCH (t:Ticket { id: $tick.id })<-[rel:ASSIGNED_TASK]-(u:User { id: $remUser.id })' +
+                        ' DELETE rel' +
+                        ' RETURN u',
+                        {tick, remUser})
+                        .then(() => {
+                            pubSub.publish('project', {update: project.id});
+                            return null;
+                        })
+                        .catch(e => {
+                            throw e;
+                        });
+                }catch (e) {
+                    throw new Error(e);
+                }
+            }else if(!remUser && addUser) {
+                try {
+                    return neode.cypher('MATCH (t:Ticket),(u:User)' +
+                        ' WHERE t.id = $tick.id AND u.id = $addUser.id' +
+                        ' CREATE (u)-[rel:ASSIGNED_TASK]->(t)' +
+                        ' RETURN u',
+                        {tick, addUser})
+                        .then((result) => {
+                            pubSub.publish('project', {update: project.id});
+                            return result.records[0].get('u').properties;
+                        })
+                        .catch(e => {
+                            throw e;
+                        });
+                }catch (e) {
+                    throw new Error(e);
+                }
+            }else if(remUser && addUser){
+                // reassign ticket
+                try {
+                    return neode.cypher('MATCH (a:Ticket { id:$tick.id })<-[rel:ASSIGNED_TASK]-(b:User{ id:$remUser.id })' +
+                        ' MATCH (c:User { id:$addUser.id })' +
+                        ' CALL apoc.refactor.from(rel, c)' +
+                        ' YIELD input, output, error' +
+                        ' RETURN c',
+                        {tick, remUser, addUser })
+                        .then((result) => {
+                            pubSub.publish('project', {update: project.id});
+                            return result.records[0].get('c').properties;
+                        })
+                        .catch(e => {
+                            throw e;
+                        });
+                }catch (e) {
+                    throw new Error(e);
+                }
+            }else {
+                throw new Error('Query does not contain necessary params');
+            }
+        },
         CreateTicket: async (_, { hourEstimate, title, desc, project, user }, {pubSub}) => {
             try {
                 return neode.cypher('MATCH (p:Project),(u:User)'+
@@ -192,6 +321,9 @@ const schema = makeAugmentedSchema({
         auth: {
             isAuthenticated: true,
             hasRole: true
+        },
+        mutation: {
+            exclude: ["Mutation.RemoveUserTickets","RemoveUserTickets","MergeUserTickets"]
         }
     }
 });

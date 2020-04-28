@@ -120,48 +120,20 @@ const gqlQueries = {
       }
     }
   `,
-  UPDATE_USER_TICKET: gql`mutation(
-    $tickId: _TicketInput!
-    $remUserID: _UserInput!
-    $addUserID: _UserInput!
-  ) {
-    RemoveUserTickets(from: $remUserID, to: $tickId) {
-      from {
+  UPDATE_TICKET_ASSIGNEE: gql`
+    mutation(
+      $tick: _TicketInput!
+      $remUser: _UserInput
+      $addUser: _UserInput
+      $project: _ProjectInput!
+    ) {
+      UpdateTicketAssignee(
+        tick: $tick
+        remUser: $remUser
+        addUser: $addUser
+        project: $project
+      ) {
         id
-      }
-      to {
-        id
-      }
-    }
-    AddUserTickets(from: $addUserID, to: $tickId) {
-      from {
-        id
-      }
-      to {
-        id
-      }
-    }
-  }`,
-  REM_USER_TICKET: gql`
-    mutation($userID: _UserInput!, $tickId: _TicketInput!) {
-      RemoveUserTickets(from: $userID, to: $tickId) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-    }`,
-  ADD_USER_TICKET: gql`
-    mutation($userID: _UserInput!, $tickId: _TicketInput!) {
-      AddUserTickets(from: $userID, to: $tickId) {
-        from {
-          id
-        }
-        to {
-          id
-        }
       }
     }`,
   CURRENT_TICKET: gql`
@@ -322,11 +294,29 @@ const gqlQueries = {
     }
   }`,
   SwitchUnassigned: {
+    UNASSIGNED_TICK_SWITCH: gql`
+      mutation(
+        $project: _ProjectInput!
+        $tick: _TicketInput!
+        $uStoryRemove: _UserStoryInput
+        $sprintRemove: _SprintInput
+        $uStoryAdd: _UserStoryInput
+        $sprintAdd: _SprintInput
+      ) {
+        UnassignedTicketSwitch(
+          project: $project
+          tick: $tick
+          uStoryRemove: $uStoryRemove
+          sprintRemove: $sprintRemove
+          uStoryAdd: $uStoryAdd
+          sprintAdd: $sprintAdd
+        )
+      }`,
     REMOVE_USERSTORY: gql`mutation(
       $ticket: _TicketInput!
       $uStoryRemove: _UserStoryInput!
     ) {
-      RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
+      end:RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
         from {
           id
         }
@@ -340,7 +330,7 @@ const gqlQueries = {
       $uStoryRemove: _UserStoryInput!
       $sprintRemove: _SprintInput!
     ) {
-      RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
+      start:RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
         from {
           id
         }
@@ -348,7 +338,7 @@ const gqlQueries = {
           id
         }
       }
-      RemoveTicketSprint(from: $ticket, to: $sprintRemove) {
+      end:RemoveTicketSprint(from: $ticket, to: $sprintRemove) {
         from {
           id
         }
@@ -361,7 +351,7 @@ const gqlQueries = {
       $ticket: _TicketInput!
       $uStoryAdd: _UserStoryInput!
     ) {
-      AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
+      end:AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
         from {
           id
         }
@@ -375,7 +365,7 @@ const gqlQueries = {
       $uStoryAdd: _UserStoryInput!
       $sprintAdd: _SprintInput!
     ) {
-      AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
+      start:AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
         from {
           id
         }
@@ -383,7 +373,7 @@ const gqlQueries = {
           id
         }
       }
-      AddTicketSprint(from: $ticket, to: $sprintAdd) {
+      end:AddTicketSprint(from: $ticket, to: $sprintAdd) {
         from {
           id
         }

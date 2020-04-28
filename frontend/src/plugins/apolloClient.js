@@ -81,7 +81,6 @@ import { onError } from 'apollo-link-error';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 
-Vue.use(VueApollo);
 const httpLink = new HttpLink({
   uri: 'http://localhost:7000/graphql',
 });
@@ -142,6 +141,10 @@ const apolloClient = new ApolloClient({
   link: concat(authLink, link),
   cache: new InMemoryCache(),
 });
+
+Vue.use(VueApollo, { apolloClient });
+Vue.$apolloClient = apolloClient;
+
 const apolloProvider = new VueApollo({
   // Apollo 2.0 allows multiple clients to be enabled at once.
   // Here we select the default (and only) client.
@@ -149,4 +152,3 @@ const apolloProvider = new VueApollo({
 });
 
 export default apolloProvider;
-Vue.$apolloClient = apolloClient;

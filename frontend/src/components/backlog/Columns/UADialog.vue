@@ -147,25 +147,44 @@ export default {
       console.log(this.selectedSprint);
       console.log(this.selectedOption);
     },
-    onConfirm() {
+    async onConfirm() {
       switch (true) {
         case this.removedFrom.columnType === 'Unassigned'
         && this.selectedOption.value === 0:
-          console.log('no sprints, ticket moved to Todo in new userStory');
-          this.addNewUS(); // TESTED
+          // 'no sprints, ticket moved to To-do in new userStory')
+          await this.dataMutation({
+            project: { id: this.proId },
+            tick: { id: this.ticketId },
+            uStoryAdd: { id: this.addedTo.userStoryId },
+          });
           break;
         case this.removedFrom.columnType === 'Unassigned'
         && this.selectedOption.value !== 0:
-          console.log('undefined sprint to changed sprints, ticket with no sprint moved to a sprint in new userStory');
-          this.addNewUSNewSp(this.selectedOption.id); // TESTED
+          /* 'undefined sprint to changed sprints,
+           ticket with no sprint moved to a sprint in new userStory' */
+          await this.dataMutation({
+            project: { id: this.proId },
+            tick: { id: this.ticketId },
+            uStoryAdd: { id: this.addedTo.userStoryId },
+            sprintAdd: { id: this.selectedOption.id },
+          });
           break;
         case this.removedFrom.columnType === 'start':
-          console.log('from todo of an user story to Unassigned tick list (removes userstory)');
-          this.remUS();
+          // 'from to-do of an user story to Unassigned tick list (removes userstory)')
+          await this.dataMutation({
+            project: { id: this.proId },
+            tick: { id: this.ticketId },
+            uStoryRemove: { id: this.removedFrom.userStoryId },
+          });
           break;
         default:
-          console.log('from sprint of user story to Unassigned tick list (removes userstory and sprint)');
-          this.remUSRemSP(); // TESTED
+          // from sprint of user story to Unassigned tick list (removes userstory and sprint)')
+          await this.dataMutation({
+            project: { id: this.proId },
+            tick: { id: this.ticketId },
+            uStoryRemove: { id: this.removedFrom.userStoryId },
+            sprintRemove: { id: this.removedFrom.sprintId },
+          });
           break;
       }
       this.UADialogSwitcher();
@@ -174,68 +193,15 @@ export default {
       this.switchBack();
       this.UADialogSwitcher();
     },
-    async remUSRemSP() {
-      console.log('remUSRemSP');
+    async dataMutation(payload) {
       await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SwitchUnassigned.REMOVE_USERSTORY_REMOVE_SPRINT,
+        mutation: gqlQueries.SwitchUnassigned.UNASSIGNED_TICK_SWITCH,
         fetchPolicy: 'no-cache',
-        variables: {
-          ticket: { id: this.ticketId },
-          uStoryRemove: { id: this.removedFrom.userStoryId },
-          sprintRemove: { id: this.removedFrom.sprintId },
-        },
+        variables: payload,
       }).then((response) => {
         console.log(response);
-        this.updateStore();
-      }).catch((error) => {
-        console.error(error);
-        this.switchBack();
-      });
-    },
-    async remUS() {
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SwitchUnassigned.REMOVE_USERSTORY,
-        fetchPolicy: 'no-cache',
-        variables: {
-          ticket: { id: this.ticketId },
-          uStoryRemove: { id: this.removedFrom.userStoryId },
-        },
-      }).then((response) => {
-        console.log(response);
-        this.updateStore();
-      }).catch((error) => {
-        console.error(error);
-        this.switchBack();
-      });
-    },
-    async addNewUSNewSp(sprintAddId) {
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SwitchUnassigned.ADD_NEW_USERSTORY_ADD_NEW_SPRINT,
-        fetchPolicy: 'no-cache',
-        variables: {
-          ticket: { id: this.ticketId },
-          uStoryAdd: { id: this.addedTo.userStoryId },
-          sprintAdd: { id: sprintAddId },
-        },
-      }).then((response) => {
-        console.log(response);
-        this.updateStore();
-      }).catch((error) => {
-        console.error(error);
-        this.switchBack();
-      });
-    },
-    async addNewUS() {
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SwitchUnassigned.ADD_NEW_USERSTORY,
-        fetchPolicy: 'no-cache',
-        variables: {
-          ticket: { id: this.ticketId },
-          uStoryAdd: { id: this.addedTo.userStoryId },
-        },
-      }).then((response) => {
-        console.log(response);
-        this.updateStore();
+        // this.updateStore();
+        // DOM auto updates via API subscription
       }).catch((error) => {
         console.error(error);
         this.switchBack();
