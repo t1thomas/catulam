@@ -5,7 +5,6 @@
         user
         admin
     }
-
     type Project {
         id: ID!
         title: String!
@@ -100,7 +99,9 @@
         getCurrentUser: User
 
     }
-
+    type Subscription {
+        update(proId:String!): String
+    }
     type Mutation {
         loginUser(username: String!, password: String!): Token!
         resetPassword(username: String!, newPassword: String!): Token!

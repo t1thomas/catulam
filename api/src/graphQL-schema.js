@@ -1,6 +1,7 @@
 const { GraphQLJSON } = require('graphql-type-json');
 const { GraphQLObjectType, GraphQLString, GraphQLList } = require('graphql');
-const { makeAugmentedSchema, auth } = require('neo4j-graphql-js');
+const { makeAugmentedSchema } = require('neo4j-graphql-js');
+const { withFilter } = require('apollo-server-express');
 const neode = require('./neode');
 const fs = require('fs');
 const path = require('path');
@@ -48,7 +49,7 @@ const resolveFunctions = {
                 .then((result) => {
                     // set password field to empty string, to prevent mutation returning password value
                     // user.password = '';
-                    console.log(result.records[0].get('u').properties);
+                    // console.log(result.records[0].get('u').properties);
 
                     return result.records[0].get('u').properties;
                 })
@@ -56,18 +57,25 @@ const resolveFunctions = {
                     throw new Error('Using redundant token, Sign in again ');
                 });
         },
-
     },
     Mutation: {
-        CreateTicket: async (_, { hourEstimate, title, desc, project, user }) => {
+        CreateTicket: async (_, { hourEstimate, title, desc, project, user }, {pubSub}) => {
             try {
-                return neode.cypher('MATCH (p:Project{id:$proId})<-[r1:TICKET]-(:Ticket)' +
-                    ' MATCH (u:User{id:$userId})'+
-                    ' WITH u, COUNT(r1) AS issNo, p' +
-                    ' CREATE (p)<-[rel:TICKET]-(t: Ticket {id:apoc.create.uuid(), title:$title, hourEstimate:$hourEst, desc:$description, done:false, issueNumber: issNo + 1})<-[:CREATED {timestamp: apoc.date.currentTimestamp()}]-(u)' +
+                return neode.cypher('MATCH (p:Project),(u:User)'+
+                    ' WHERE p.id = $proId AND u.id = $userId' +
+                    ' CREATE (p)<-[:TICKET]-(t: Ticket {id:apoc.create.uuid(), title:$title, hourEstimate:$hourEst, desc:$description, done:false})<-[:CREATED {timestamp: apoc.date.currentTimestamp()}]-(u)'+
+                    ' WITH p, t' +
+                    ' MATCH (p)<-[r1:TICKET]-(:Ticket)' +
+                    ' WITH COUNT(r1) AS issNo, t' +
+                    ' SET t.issueNumber = issNo' +
                     ' RETURN t',
-                    {...(hourEstimate ? {hourEst: neo4j.int(hourEstimate)} : {hourEst: neo4j.int(0)}), title, ...(desc ? {description:desc} : {description:''}), proId: project.id, userId: user.id})
+                    {
+                        ...(hourEstimate ? {hourEst: neo4j.int(hourEstimate)} : {hourEst: neo4j.int(0)}),
+                        title, ...(desc ? {description:desc} : {description:''}),
+                        proId: project.id, userId: user.id
+                    })
                     .then((result) => {
+                        pubSub.publish('project', {update: project.id});
                         return result.records[0].get('t').properties;
                     })
                     .catch(e => {
@@ -162,6 +170,18 @@ const resolveFunctions = {
                     }
                     throw new Error('Password reset Failed, try again later');
                 });
+        }
+    },
+    Subscription: {
+        update: {
+            subscribe:
+                withFilter(
+                (_,__,{pubSub}) => pubSub.asyncIterator('project'),
+                (payload, variables) => {
+                    return payload.update === variables.proId;
+                    }
+            )
+            // subscribe: (_,__,{pubSub}) => pubSub.asyncIterator('project')
         }
     },
 };

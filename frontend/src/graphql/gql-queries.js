@@ -1,6 +1,10 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
+  SUB_BACKLOG_UPDATE: gql`
+    subscription($proId: String!) {
+      update(proId: $proId)
+    }`,
   CREATE_TICKET: gql`
     mutation(
       $hourEstimate: Int

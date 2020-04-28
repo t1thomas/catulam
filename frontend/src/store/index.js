@@ -286,6 +286,7 @@ export default new Vuex.Store({
         // eslint-disable-next-line no-unused-vars
       }).catch((error) => {
         commit('set_currentUser', null);
+        console.error(error);
         throw new Error(error);
       });
     },
