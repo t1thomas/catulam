@@ -18,6 +18,9 @@ export default new Vuex.Store({
     nTicketDialog: {
       show: false,
     },
+    nProDialog: {
+      show: false,
+    },
     snackBar: {
       show: false,
       message: '',
@@ -39,8 +42,13 @@ export default new Vuex.Store({
     currentProject: null,
     currProElements: null,
     allUserList: null,
+    currUserTasks: null,
+    currPmProjects: null,
   },
   mutations: {
+    set_currPmPros(state, obj) {
+      state.currPmProjects = obj;
+    },
     set_backLogData(state, obj) {
       if (obj === null) {
         state.backLogData = null;
@@ -181,6 +189,16 @@ export default new Vuex.Store({
         // state.currentTicket = null;
       } else {
         state.nTicketDialog.show = obj.show;
+        // state.detailsDrawer.ticketId = obj.ticketId;
+      }
+    },
+    set_nProDialog(state, obj) {
+      if (obj.show === false) {
+        state.nProDialog.show = obj.show;
+        // state.detailsDrawer.ticketId = null;
+        // state.currentTicket = null;
+      } else {
+        state.nProDialog.show = obj.show;
         // state.detailsDrawer.ticketId = obj.ticketId;
       }
     },
@@ -439,6 +457,23 @@ export default new Vuex.Store({
         console.error(error);
       });
     },
+    async fetchPmPros({ commit }, payload) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.PM_TASKS,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { projects } = response.data.User[0];
+        if (projects.length > 0) {
+          const data = projects.map((pro) => pro.Project);
+          commit('set_currPmPros', data);
+        }
+      })
+        .catch((error) => {
+          console.log('User not found');
+          console.error(error);
+        });
+    },
     setCurrTickDesc({ commit }, value) {
       commit('set_currTickDesc', value);
     },
@@ -486,14 +521,25 @@ export default new Vuex.Store({
     nTicDialogShow({ commit }, val) {
       commit('set_nTicDialogShow', val);
     },
+    nProDialogShow({ commit }, val) {
+      commit('set_nProDialog', val);
+    },
     setUser({ commit }, value) {
       commit('set_currentUser', value);
     },
-    // cardMoveStartToSprint({commit}) {
-    //
-    // }
   },
   getters: {
+    // gets users apart from currentUser logged in
+    getUserSelection: (state) => (id) => state.allUserList
+      .filter((user) => user.id !== id)
+      .reduce((arr, currUser) => {
+        arr.push({
+          id: currUser.id,
+          fullName: currUser.fullName,
+          avatar: currUser.avatar,
+        });
+        return arr;
+      }, []),
     getStoryById: (state) => (id) => state.currProElements.userStories
       .find((story) => story.id === id),
     getCurrentUser: (state) => state.currentUser,

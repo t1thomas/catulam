@@ -2,18 +2,9 @@
     scalar idList
 
     enum Role {
-        user
+        dev
         admin
-    }
-    type Project {
-        id: ID!
-        title: String!
-        desc: String
-        label: String!
-        members: [User] @relation(name: "TEAM_MEMBER", direction: IN)
-        userStories: [UserStory] @relation(name: "USER_STORY", direction: IN)
-        tickets: [Ticket] @relation(name: "TICKET", direction: IN)
-        sprints: [Sprint] @relation(name: "SPRINT", direction: IN)
+        pm
     }
 
     type Token {
@@ -38,22 +29,41 @@
     type User {
         id: ID!
         firstName: String!
-        lastName: String
+        lastName: String!
+        fullName: String
         username: String!
         email: String!
         password: String! @hasRole(roles:[admin])
         passwordUpdate: Boolean!
         tokens: [Token] @relation(name: "JWT", direction: OUT)
-        projects: [Project] @relation(name: "TEAM_MEMBER", direction: OUT)
+        projects: [Member]
         userStories: [UserStory] @relation(name: "ASSIGNED_TASK", direction: OUT)
         tickets: [Ticket] @relation(name: "ASSIGNED_TASK", direction: OUT)
         created: [Created]
         avatar: String
+        type: Role!
     }
     type Created @relation(name: "CREATED") {
         from: User
         to: Ticket
         timestamp: String!
+    }
+    type Member @relation(name: "TEAM_MEMBER") {
+        from: User
+        to: Project
+        type: Role!
+    }
+    type Project {
+        id: ID!
+        title: String!
+        desc: String
+        label: String!
+        startDate: String!
+        endDate: String!
+        members: [Member]
+        userStories: [UserStory] @relation(name: "USER_STORY", direction: IN)
+        tickets: [Ticket] @relation(name: "TICKET", direction: IN)
+        sprints: [Sprint] @relation(name: "SPRINT", direction: IN)
     }
 
     type Ticket {
@@ -67,7 +77,7 @@
         sprint: Sprint @relation(name: "SPRINT_TASK", direction: OUT)
         project: Project @relation(name: "TICKET", direction: OUT)
         assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
-        creator: [Created]
+        creator: Created
     }
 
     type Sprint {
@@ -109,6 +119,18 @@
         CreateUser(id: ID!, firstName: String!, lastName: String, username: String!, email: String!, password: String!, passwordUpdate: Boolean!): User
         UpdateTicketAssignee(tick: _TicketInput!, remUser: _UserInput, addUser: _UserInput, project: _ProjectInput!): User
         UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
+        UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
+        StartToSprint(project: _ProjectInput!, tick: _TicketInput!, sprintAdd: _SprintInput! ): String
+        SprintToStart(project: _ProjectInput!, tick: _TicketInput!, sprintRemove: _SprintInput! ): String
+        CreateProject(
+            id: ID,
+            title: String!,
+            desc: String,
+            label: String!,
+            startDate: String!,
+            endDate: String!,
+            members: [_UserInput]!
+        ): Project
         TicSwitchSprint(tickId: String!, sprintIdFrom: String!, sprintIdTo: String!): JSON
             @cypher(statement:"""
             MATCH (a:Ticket{id:tickId})-[rel:SPRINT_TASK]->(b:Sprint {id:sprintIdFrom})

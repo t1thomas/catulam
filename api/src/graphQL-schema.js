@@ -21,8 +21,8 @@ const idListScalar = new GraphQLObjectType({
 });
 
 async function createUserToken(user, exp) {
-    const {username, id} = user;
-    const token = jwt.sign({exp, username, id, role: "user"}, process.env.JWT_SECRET);
+    const {username, id, type} = user;
+    const token = jwt.sign({exp, username, id, role: type}, process.env.JWT_SECRET);
     // add jwt token to db, with a 'time to live' configuration that deletes the token at exp time
     return await neode.cypher("MATCH (u:User { username: $username}) CREATE (u)-[rel:JWT]->(t: Token {token:$token}) WITH u, rel, t" +
         " CALL apoc.ttl.expire(t, $ttl, 's') RETURN t.token",
@@ -38,6 +38,11 @@ async function createUserToken(user, exp) {
 const resolveFunctions = {
     JSON: GraphQLJSON,
     idList: idListScalar,
+    User: {
+        fullName(obj, params, ctx, resolveInfo) {
+            return `${obj.firstName} ${obj.lastName}`;
+        }
+    },
     Query:{
         getCurrentUser: async (_, args, {currentUser, req}) =>{
             if(!currentUser) {
@@ -55,23 +60,157 @@ const resolveFunctions = {
         },
     },
     Mutation: {
-        RemoveTicketUserStory:  async (object, params, ctx, resolveInfo) => {
-            const tickId = params.from.id;
-
-            return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+        CreateProject: async (_, { id, title, desc, label, startDate, endDate, members }, {pubSub}) => {
+            console.log(title, desc, label, startDate, endDate, members);
+            try {
+                let query = '';
+                let params = undefined;
+                if(desc === undefined) {
+                    query = 'CREATE (p:Project{id: apoc.create.uuid(), title:$title,' +
+                        ' label:$label, startDate:$startDate, endDate:$endDate })' +
+                        ' WITH $members AS users, p' +
+                        ' UNWIND users AS user' +
+                        ' MATCH (u:User)' +
+                        ' WHERE u.id = user.id' +
+                        ' CREATE (p)<-[:TEAM_MEMBER {type: u.type}]-(u)' +
+                        ' RETURN p';
+                    params = { title, label, startDate, endDate, members  };
+                } else {
+                    query = 'CREATE (p:Project{id: apoc.create.uuid(), title:$title,' +
+                        ' label:$label, startDate:$startDate, endDate:$endDate, desc:$desc })' +
+                        ' WITH $members AS users, p' +
+                        ' UNWIND users AS user' +
+                        ' MATCH (u:User)' +
+                        ' WHERE u.id = user.id' +
+                        ' CREATE (p)<-[:TEAM_MEMBER {type: u.type}]-(u)' +
+                        ' RETURN p';
+                    params = { title, label, startDate, endDate, members, desc  };
+                }
+                return neode.cypher(query, params)
+                    .then((result) => {
+                        return result.records[0].get('p').properties;
+                    })
+                    .catch(e => {
+                        throw e;
+                    });
+            }catch (e) {
+                throw new Error(e);
+            }
         },
-        UnassignedTicketSwitch: async (_, { project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd }, {pubSub}) => {
-            console.log(project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd);
+        StartToSprint: async (_, { project, tick, sprintAdd }, {pubSub}) => {
+            try {
+                return neode.cypher(
+                    'MATCH (t:Ticket),(s:Sprint)' +
+                    ' WHERE t.id = $tick.id AND s.id = $sprintAdd.id' +
+                    ' CREATE (t)-[rel1:SPRINT_TASK]->(s)',
+                    {tick, sprintAdd})
+                    .then(() => {
+                        pubSub.publish('project', {update: project.id});
+                        return tick.id;
+                    })
+                    .catch(e => {
+                        throw e;
+                    });
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
+        SprintToStart: async (_, { project, tick, sprintRemove }, {pubSub}) => {
+            try {
+                return neode.cypher(
+                    'MATCH (t:Ticket {id:$tick.id})-[rel1:SPRINT_TASK]->(s:Sprint{id:$sprintRemove.id})' +
+                    ' DELETE rel1',
+                    {tick, sprintRemove})
+                    .then(() => {
+                        pubSub.publish('project', {update: project.id});
+                        return tick.id;
+                    })
+                    .catch(e => {
+                        throw e;
+                    });
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
+        UStoryTicketSwitch: async (_, { project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd }, {pubSub}) => {
             try {
                 let query = '';
                 let params = undefined;
                 switch (true) {
-                    case uStoryRemove && !sprintRemove && !uStoryAdd && !sprintAdd:
+                    case uStoryRemove !== undefined && uStoryAdd !== undefined && sprintRemove === undefined && sprintAdd === undefined:
+                        // UserStory Switch Only
+                        query = 'MATCH (a:Ticket { id:$tick.id })-[rel:SUB_TASK]->(b:UserStory{ id:$uStoryRemove.id })' +
+                            ' MATCH (c:UserStory { id:$uStoryAdd.id })'+
+                            ' CALL apoc.refactor.to(rel, c)'+
+                            ' YIELD input, output, error' +
+                            ' RETURN c';
+                        params = { tick, uStoryRemove, uStoryAdd };
+                        break;
+                    case uStoryRemove !== undefined && uStoryAdd !== undefined && sprintAdd !== undefined && sprintRemove === undefined:
+                        // Switch User Story and add sprint
+                        // console.log(project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd);
+                        console.log('here Mate');
+                        query = 'MATCH (t:Ticket { id:$tick.id })-[rel:SUB_TASK]->(b:UserStory{ id:$uStoryRemove.id })' +
+                            ' MATCH (c:UserStory { id:$uStoryAdd.id })' +
+                            ' CALL apoc.refactor.to(rel, c)' +
+                            ' YIELD input, output, error' +
+                            ' WITH t' +
+                            ' MATCH (s:Sprint{id:$sprintAdd.id})' +
+                            ' CREATE (t)-[rel1:SPRINT_TASK]->(s)';
+                        params = {tick, uStoryRemove, uStoryAdd, sprintAdd};
+                        break;
+                    case uStoryRemove !== undefined && uStoryAdd !== undefined && sprintRemove !== undefined && sprintAdd === undefined:
+                        // Switch User Story and remove sprint
+                        query = 'MATCH (t:Ticket { id:$tick.id })-[rel:SUB_TASK]->(b:UserStory{ id:$uStoryRemove.id })' +
+                            ' MATCH (c:UserStory { id:$uStoryAdd.id })' +
+                            ' CALL apoc.refactor.to(rel, c)' +
+                            ' YIELD input, output, error' +
+                            ' WITH t' +
+                            ' MATCH (t)-[rel1:SPRINT_TASK]->(s:Sprint{id:$sprintRemove.id})' +
+                            ' DELETE rel1';
+                        params = {tick, uStoryRemove, uStoryAdd, sprintRemove};
+                        break;
+                    case uStoryAdd !== undefined && sprintAdd !== undefined && uStoryRemove !== undefined && sprintRemove !== undefined:
+                        // change sprint and change user story
+                        query = 'MATCH (t:Ticket { id:$tick.id })-[rel:SUB_TASK]->(u1:UserStory{ id:$uStoryRemove.id })' +
+                            ' MATCH (u2:UserStory { id:$uStoryAdd.id })' +
+                            ' CALL apoc.refactor.to(rel,u2)' +
+                            ' YIELD input, output, error' +
+                            ' WITH t' +
+                            ' MATCH (t)-[rel1:SPRINT_TASK]->(s1:Sprint{id:$sprintRemove.id})' +
+                            ' MATCH (s2:Sprint { id:$sprintAdd.id })' +
+                            ' CALL apoc.refactor.to(rel1, s2)' +
+                            ' YIELD input, output, error' +
+                            ' RETURN input, output, error';
+                        params = {tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd};
+                        break;
+                    default:
+                        throw 'Query does not contain necessary params';
+                }
+                return neode.cypher(query,params)
+                    .then(() => {
+                        // trigger DOM update for all subscribers
+                        pubSub.publish('project', {update: project.id});
+                        return tick.id;
+                    })
+                    .catch(e => {
+                        throw e;
+                    });
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
+        UnassignedTicketSwitch: async (_, { project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd }, {pubSub}) => {
+            try {
+                let query = '';
+                let params = undefined;
+                switch (true) {
+                    case uStoryRemove !== undefined && sprintRemove === undefined && uStoryAdd === undefined && sprintAdd === undefined:
                         // UserStory Remove Only
                         query = 'MATCH (t:Ticket {id:$tick.id})-[rel:SUB_TASK]->(u:UserStory {id:$uStoryRemove.id}) DELETE rel ';
                         params = { tick, uStoryRemove };
                         break;
-                    case uStoryRemove && sprintRemove && !uStoryAdd && !sprintAdd:
+                    case uStoryRemove !== undefined && sprintRemove !== undefined && uStoryAdd === undefined && sprintAdd === undefined:
                         // REMOVE_USERSTORY_REMOVE_SPRINT
                         // console.log(project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd);
                         console.log('here Mate');
@@ -79,14 +218,14 @@ const resolveFunctions = {
                             ' DELETE rel1, rel2 ';
                         params = {tick, uStoryRemove, sprintRemove};
                         break;
-                    case !uStoryRemove && !sprintRemove && uStoryAdd && !sprintAdd:
+                    case uStoryRemove === undefined && sprintRemove === undefined && uStoryAdd !== undefined && sprintAdd === undefined:
                         // ADD_NEW_USERSTORY only
                         query = 'MATCH (t:Ticket),(u:UserStory)' +
                             ' WHERE t.id = $tick.id AND u.id = $uStoryAdd.id' +
                             ' CREATE (t)-[rel:SUB_TASK]->(u)';
                         params = { tick, uStoryAdd };
                         break;
-                    case  uStoryAdd && sprintAdd && !uStoryRemove && !sprintRemove:
+                    case  uStoryAdd !== undefined && sprintAdd !== undefined && uStoryRemove === undefined && sprintRemove === undefined:
                         // ADD_NEW_USERSTORY_ADD_NEW_SPRINT
                         query = 'MATCH (t:Ticket), (u:UserStory), (s:Sprint)' +
                             ' WHERE t.id = $tick.id AND u.id = $uStoryAdd.id AND s.id = $sprintAdd.id' +
@@ -96,7 +235,6 @@ const resolveFunctions = {
                     default:
                         throw 'Query does not contain necessary params';
                 }
-                console.log(params);
                 return neode.cypher(query,params)
                     .then(() => {
                         // trigger DOM update for all subscribers
@@ -310,7 +448,6 @@ const resolveFunctions = {
                     return payload.update === variables.proId;
                     }
             )
-            // subscribe: (_,__,{pubSub}) => pubSub.asyncIterator('project')
         }
     },
 };
@@ -323,7 +460,7 @@ const schema = makeAugmentedSchema({
             hasRole: true
         },
         mutation: {
-            exclude: ["Mutation.RemoveUserTickets","RemoveUserTickets","MergeUserTickets"]
+            exclude: ["_AddUserTicketsPayload","_RemoveUserTicketsPayload","_MergeUserTicketsPayload"]
         }
     }
 });

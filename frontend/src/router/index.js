@@ -34,21 +34,23 @@ const AuthAccess = async (to, from, next) => {
     })
     .catch((e) => {
       console.error(e);
-
       next({
         path: '/',
       });
     });
 };
-// const ForbiddenAccess = async (to, from, next) => {
+// const HomeAccess = async (to, from, next) => {
 //   const user = await Vue.$store.getters.getCurrentUser;
 //   if (user === null) {
 //     next({
 //       path: '/',
 //     });
-//   } else if (user.passwordUpdate === true) {
-//     // if a reset password is required, send user to reset page
-//     next();
+//   } else {
+//     console.log(to);
+//     console.log('heyoo');
+//     next({
+//       path: `/home/${user.type}`,
+//     });
 //   }
 // };
 

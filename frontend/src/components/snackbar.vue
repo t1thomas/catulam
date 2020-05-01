@@ -6,7 +6,7 @@
       class="pa-0"
     >
       <v-alert
-        type="warning"
+        :type="type"
         class="ma-0"
       >
         {{ message }}

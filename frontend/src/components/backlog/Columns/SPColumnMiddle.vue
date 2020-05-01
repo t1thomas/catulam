@@ -22,7 +22,6 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import DraggableTickList from '../DraggableTickList.vue';
 
-
 export default {
   name: 'SPColumnMiddle',
   components: {
@@ -70,6 +69,14 @@ export default {
         userStoryId: this.userStoryId, columnType: 'sprint', sprintId: id, disabled: false, sprintNo,
       };
     },
+    // onSwipeLeft() {
+    //   console.log('Left');
+    //   this.carouselModelLocal += 1;
+    // },
+    // onSwipeRight() {
+    //   console.log('Right');
+    //   this.carouselModelLocal -= 1;
+    // },
   },
 };
 </script>

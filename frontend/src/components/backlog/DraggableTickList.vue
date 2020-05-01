@@ -139,12 +139,16 @@ export default {
     },
     async sprintToStart(ticketId, sprintId, evt) {
       await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SprintToStart,
+        mutation: gqlQueries.SwitchStartSprint.TIC_REMOVE_SPRINT,
         fetchPolicy: 'no-cache',
-        variables: { ticket: { id: ticketId }, sprint: { id: sprintId } },
+        variables: {
+          project: { id: this.proId },
+          tick: { id: ticketId },
+          sprintRemove: { id: sprintId },
+        },
       }).then((response) => {
         console.log(response);
-        this.updateStore();
+        // DOM auto updates via API subscription
       }).catch((error) => {
         console.error(error);
         this.switchBack(evt);
@@ -152,11 +156,15 @@ export default {
     },
     async startToSprint(ticketId, sprintId, evt) {
       await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.StartToSprint,
-        variables: { ticket: { id: ticketId }, sprint: { id: sprintId } },
+        mutation: gqlQueries.SwitchStartSprint.TIC_ADD_SPRINT,
+        variables: {
+          project: { id: this.proId },
+          tick: { id: ticketId },
+          sprintAdd: { id: sprintId },
+        },
       }).then((response) => {
         console.log(response);
-        this.updateStore();
+        // DOM auto updates via API subscription
       }).catch((error) => {
         console.error(error);
         this.switchBack(evt);

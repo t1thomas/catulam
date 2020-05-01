@@ -1,5 +1,15 @@
 <template>
-  <v-card v-if="loaded">
+  <v-card
+    v-if="loaded"
+    min-height="30vh"
+  >
+    <v-toolbar
+      flat
+      color="primary"
+      dark
+    >
+      <v-toolbar-title>My Projects</v-toolbar-title>
+    </v-toolbar>
     <v-tabs
       v-model="tab"
       dark
@@ -84,6 +94,9 @@ export default {
     ...mapGetters([
       'getCurrentUser',
     ]),
+    projectsNone() {
+      return this.projects.length === 0;
+    },
   },
   async mounted() {
     await this.userTasks();
@@ -126,7 +139,7 @@ export default {
       })
         .then((response) => {
           const { User } = response.data;
-          this.projects = User[0].projects;
+          this.projects = User[0].projects.map((pro) => pro.Project);
           this.loaded = true;
         })
         .catch((error) => {

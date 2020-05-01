@@ -51,13 +51,6 @@
           <v-btn
             color="blue darken-1"
             text
-            @click="print"
-          >
-            Print
-          </v-btn>
-          <v-btn
-            color="blue darken-1"
-            text
             @click="onConfirm"
           >
             Confirm
@@ -127,111 +120,76 @@ export default {
       'USDialogSwitcher', // opens/closes dialog
       'fetchBackLogData',
     ]),
-    print() {
-      console.log(this.getSprintValues);
-      console.log(this.selectedSprint);
-      console.log(this.selectedOption);
-    },
-    onConfirm() {
+    async onConfirm() {
       switch (true) {
         case this.removedFrom.sprintId === undefined
         && this.selectedOption.value === 0:
           console.log('no sprints, ticket moved to Todo in new userStory');
-          this.uStorySwitchOnly();
+          // this.uStorySwitchOnly();
+          await this.dataMutation({
+            project: { id: this.proId },
+            tick: { id: this.ticketId },
+            uStoryRemove: { id: this.removedFrom.userStoryId },
+            uStoryAdd: { id: this.addedTo.userStoryId },
+          });
           break;
         case this.removedFrom.sprintId === undefined
         && this.selectedOption.value !== 0:
-          console.log('undefined sprint to changed sprints, ticket with no sprint moved to a sprint in new userStory');
-          this.uStorySwitchAddNewSprint(this.selectedOption.id);
+          // ticket without a sprint moved to a sprint in a new userStory');
+          await this.dataMutation({
+            project: { id: this.proId },
+            tick: { id: this.ticketId },
+            uStoryRemove: { id: this.removedFrom.userStoryId },
+            uStoryAdd: { id: this.addedTo.userStoryId },
+            sprintAdd: { id: this.selectedOption.id },
+          });
           break;
         case this.removedFrom.sprintId !== undefined
         && this.selectedOption.value === 0:
-          console.log('defined sprint to no sprints, ticket with sprint moved to Todo in new userStory (removed sprint)');
-          this.uStorySwitchRemoveSprint();
+          // Switch User Story and remove sprint
+          await this.dataMutation({
+            project: { id: this.proId },
+            tick: { id: this.ticketId },
+            uStoryRemove: { id: this.removedFrom.userStoryId },
+            uStoryAdd: { id: this.addedTo.userStoryId },
+            sprintRemove: { id: this.removedFrom.sprintId },
+          });
           break;
         case this.removedFrom.sprintId !== this.selectedOption.id:
-          console.log('sprint to changed sprints');
-          this.uStorySwitchChangeSprint(this.selectedOption.id);
+          console.log('here');
+          // change sprint and change user story
+          await this.dataMutation({
+            project: { id: this.proId },
+            tick: { id: this.ticketId },
+            uStoryRemove: { id: this.removedFrom.userStoryId },
+            sprintRemove: { id: this.removedFrom.sprintId },
+            uStoryAdd: { id: this.addedTo.userStoryId },
+            sprintAdd: { id: this.selectedOption.id },
+          });
           break;
         default:
           console.log('no changed sprints');
-          this.uStorySwitchOnly();
+          await this.dataMutation({
+            project: { id: this.proId },
+            tick: { id: this.ticketId },
+            uStoryRemove: { id: this.removedFrom.userStoryId },
+            uStoryAdd: { id: this.addedTo.userStoryId },
+          });
           break;
       }
       this.USDialogSwitcher();
     },
-    async uStorySwitchOnly() {
+    async dataMutation(payload) {
       await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SwitchUserStory.storySwitch,
+        mutation: gqlQueries.SwitchUserStory.USTORY_TICKET_SWITCH,
         fetchPolicy: 'no-cache',
-        variables: {
-          ticket: this.ticketId,
-          usFrom: this.removedFrom.userStoryId,
-          usTo: this.addedTo.userStoryId,
-        },
+        variables: payload,
       }).then((response) => {
         console.log(response);
-        this.updateStore();
+        // DOM auto updates via API subscription
       }).catch((error) => {
         console.error(error);
-        this.switchBack();
-      });
-    },
-    async uStorySwitchAddNewSprint(sprintAddId) {
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SwitchUserStory.AddNewSprint,
-        fetchPolicy: 'no-cache',
-        variables: {
-          ticket: { id: this.ticketId },
-          sprintAdd: { id: sprintAddId },
-          uStoryRemove: { id: this.removedFrom.userStoryId },
-          uStoryAdd: { id: this.addedTo.userStoryId },
-        },
-
-      }).then((response) => {
-        console.log(response);
-        this.updateStore();
-      }).catch((error) => {
-        console.error(error);
-        this.switchBack();
-      });
-    },
-    async uStorySwitchRemoveSprint() {
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SwitchUserStory.RemoveSprint,
-        fetchPolicy: 'no-cache',
-        variables: {
-          ticket: { id: this.ticketId },
-          sprintRemove: { id: this.removedFrom.sprintId },
-          uStoryRemove: { id: this.removedFrom.userStoryId },
-          uStoryAdd: { id: this.addedTo.userStoryId },
-        },
-
-      }).then((response) => {
-        console.log(response);
-        this.updateStore();
-      }).catch((error) => {
-        console.error(error);
-        this.switchBack();
-      });
-    },
-    // yet to be tested
-    async uStorySwitchChangeSprint(sprintAddId) {
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SwitchUserStory.ChangeSprint,
-        fetchPolicy: 'no-cache',
-        variables: {
-          ticket: { id: this.ticketId },
-          sprintRemove: { id: this.removedFrom.sprintId },
-          sprintAdd: { id: sprintAddId },
-          uStoryRemove: { id: this.removedFrom.userStoryId },
-          uStoryAdd: { id: this.addedTo.userStoryId },
-        },
-      }).then((response) => {
-        console.log(response);
-        this.updateStore();
-      }).catch((error) => {
-        console.error(error);
+        // if mutation fails, ticket returns to previous position in DOM
         this.switchBack();
       });
     },

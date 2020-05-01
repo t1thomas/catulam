@@ -100,7 +100,7 @@ export default {
   async beforeUpdate() {
     if (this.currentUser) {
       await this.fetchAllUserList();
-      await this.fetchCurrentUserTasks({ username: this.currentUser.username });
+      // await this.fetchCurrentUserTasks({ username: this.currentUser.username });
     }
   },
   methods: {

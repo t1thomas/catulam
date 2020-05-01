@@ -91,15 +91,19 @@ const gqlQueries = {
         id
         firstName
         lastName
+        fullName
         email
-        projects {
-          id
-        }
+          projects {
+            Project {
+              id
+            }
+          }
         userStories {
           id
         }
         tickets {
           id
+          done
         }
         avatar
       }
@@ -169,19 +173,70 @@ const gqlQueries = {
     query($username: String!) {
       User(filter: { username: $username }) {
         projects {
-          id
-          label
-          tickets(filter: { assignee: { username: $username } }) {
+          Project {
             id
-            issueNumber
-            title
-          }
-          userStories(filter: { assignee: { username: $username } }) {
-            id
-            issueNumber
-            storyText
+            label
+            tickets(filter: { assignee: { username: $username } }) {
+              id
+              issueNumber
+              title
+            }
+            userStories(filter: { assignee: { username: $username } }) {
+              id
+              issueNumber
+              storyText
+            }
           }
         }
+      }
+    }`,
+  PM_TASKS: gql`
+    query($username: String!) {
+      User(filter: { username: $username }) {
+        projects {
+          Project {
+            id
+            label
+            tickets {
+              id
+              issueNumber
+              title
+            }
+            userStories {
+              id
+              issueNumber
+              storyText
+            }
+            members {
+              User {
+                id
+              }
+            }
+          }
+        }
+      }
+    }`,
+  CREATE_PROJECT: gql`
+    mutation(
+      $id: ID
+      $title: String!
+      $desc: String
+      $label: String!
+      $startDate: String!
+      $endDate: String!
+      $members: [_UserInput]!
+    ) {
+      CreateProject(
+        title: $title
+        label: $label
+        desc: $desc
+        id: $id
+        startDate: $startDate
+        endDate: $endDate
+        members: $members
+      ) {
+        id
+        title
       }
     }`,
   PROJECTS: gql`
@@ -233,10 +288,12 @@ const gqlQueries = {
       id
       firstName
       lastName
+      fullName
       username
       email
       passwordUpdate
       avatar
+      type
     }
   }`,
   Tickets: gql`query{
@@ -281,18 +338,32 @@ const gqlQueries = {
       }
     }
   }`,
-  StartToSprint: gql`mutation($ticket: _TicketInput! $sprint: _SprintInput!){
-    AddTicketSprint(from: $ticket to: $sprint){
-      from{id}
-      to{id}
-    }
-  }`,
-  SprintToStart: gql`mutation($ticket: _TicketInput! $sprint: _SprintInput!){
-    RemoveTicketSprint(from: $ticket to:$sprint){
-      from{id}
-      to{id}
-    }
-  }`,
+  SwitchStartSprint: {
+    TIC_ADD_SPRINT: gql`
+      mutation(
+        $project: _ProjectInput!
+        $tick: _TicketInput!
+        $sprintAdd: _SprintInput!
+      ) {
+        StartToSprint(
+          project: $project
+          tick: $tick
+          sprintAdd: $sprintAdd
+        )
+      }`,
+    TIC_REMOVE_SPRINT: gql`
+      mutation(
+        $project: _ProjectInput!
+        $tick: _TicketInput!
+        $sprintRemove: _SprintInput!
+      ) {
+        SprintToStart(
+          project: $project
+          tick: $tick
+          sprintRemove: $sprintRemove
+        )
+      }`,
+  },
   SwitchUnassigned: {
     UNASSIGNED_TICK_SWITCH: gql`
       mutation(
@@ -312,183 +383,26 @@ const gqlQueries = {
           sprintAdd: $sprintAdd
         )
       }`,
-    REMOVE_USERSTORY: gql`mutation(
-      $ticket: _TicketInput!
-      $uStoryRemove: _UserStoryInput!
-    ) {
-      end:RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-    }`,
-    REMOVE_USERSTORY_REMOVE_SPRINT: gql`mutation(
-      $ticket: _TicketInput!
-      $uStoryRemove: _UserStoryInput!
-      $sprintRemove: _SprintInput!
-    ) {
-      start:RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-      end:RemoveTicketSprint(from: $ticket, to: $sprintRemove) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-    }`,
-    ADD_NEW_USERSTORY: gql`mutation(
-      $ticket: _TicketInput!
-      $uStoryAdd: _UserStoryInput!
-    ) {
-      end:AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-    }`,
-    ADD_NEW_USERSTORY_ADD_NEW_SPRINT: gql`mutation(
-      $ticket: _TicketInput!
-      $uStoryAdd: _UserStoryInput!
-      $sprintAdd: _SprintInput!
-    ) {
-      start:AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-      end:AddTicketSprint(from: $ticket, to: $sprintAdd) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-    }`,
   },
   SwitchUserStory: {
-    storySwitch: gql`mutation($ticket: String! $usFrom: String! $usTo: String!){
-     TicSwitchUStory(tickId: $ticket UStoryIdFrom: $usFrom UStoryIdTo: $usTo)
-    }`,
-    AddNewSprint: gql`mutation(
-      $ticket: _TicketInput!
-      $sprintAdd: _SprintInput!
-      $uStoryRemove: _UserStoryInput!
-      $uStoryAdd: _UserStoryInput!
-    ) {
-      RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-      AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-      AddTicketSprint(from: $ticket, to: $sprintAdd) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-    }`,
-    RemoveSprint: gql`mutation(
-      $ticket: _TicketInput!
-      $sprintRemove: _SprintInput!
-      $uStoryRemove: _UserStoryInput!
-      $uStoryAdd: _UserStoryInput!
-    ) {
-      RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-      AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-      RemoveTicketSprint(from: $ticket, to: $sprintRemove) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-    }`,
-    ChangeSprint: gql`mutation(
-      $ticket: _TicketInput!
-      $sprintRemove: _SprintInput!
-      $sprintAdd: _SprintInput!
-      $uStoryRemove: _UserStoryInput!
-      $uStoryAdd: _UserStoryInput!
-    ) {
-      RemoveTicketUserStory(from: $ticket, to: $uStoryRemove) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-      AddTicketUserStory(from: $ticket, to: $uStoryAdd) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-      RemoveTicketSprint(from: $ticket, to: $sprintRemove) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-      AddTicketSprint(from: $ticket, to: $sprintAdd) {
-        from {
-          id
-        }
-        to {
-          id
-        }
-      }
-    }`,
+    USTORY_TICKET_SWITCH: gql`
+      mutation(
+        $project: _ProjectInput!
+        $tick: _TicketInput!
+        $uStoryRemove: _UserStoryInput
+        $sprintRemove: _SprintInput
+        $uStoryAdd: _UserStoryInput
+        $sprintAdd: _SprintInput
+      ) {
+        UStoryTicketSwitch(
+          project: $project
+          tick: $tick
+          uStoryRemove: $uStoryRemove
+          sprintRemove: $sprintRemove
+          uStoryAdd: $uStoryAdd
+          sprintAdd: $sprintAdd
+        )
+      }`,
   },
 };
 export default gqlQueries;
