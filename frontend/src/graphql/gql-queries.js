@@ -201,16 +201,28 @@ const gqlQueries = {
               id
               issueNumber
               title
+              done
+              hourEstimate
+              assignee {
+                id
+              }
             }
             userStories {
               id
-              issueNumber
               storyText
+              tickets {
+                id
+              }
             }
             members {
               User {
                 id
+                firstName
+                lastName
+                fullName
+                avatar
               }
+              type
             }
           }
         }

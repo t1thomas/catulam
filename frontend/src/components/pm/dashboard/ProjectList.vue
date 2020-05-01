@@ -1,7 +1,5 @@
 <template>
-  <v-card
-    min-height="30vh"
-  >
+  <v-card>
     <v-toolbar
       flat
       color="primary"
@@ -68,14 +66,10 @@
         :key="project.id"
       >
         {{ project.label }}
-        <v-badge
-          v-if="tasksTotal(project.id) > 0"
-          inline
-          :content="tasksTotal(project.id)"
-        />
       </v-tab>
     </v-tabs>
     <v-tabs-items
+      style="height: calc(100vh - 400px);overflow-y: auto;"
       v-if="!projectsNone"
       v-model="tab"
     >

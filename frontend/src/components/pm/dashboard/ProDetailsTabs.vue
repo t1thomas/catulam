@@ -1,34 +1,48 @@
 <template>
-  <v-card>
+  <v-card flat>
     <v-tabs
       v-if="currProject"
       vertical
       color="orange"
     >
-      <v-tab>
+      <v-tab style="place-content: start">
         <v-icon left>
           mdi-account
         </v-icon>
         Members
         <v-badge
           inline
-          :content="currProject.members.length"
+          :content="currProject.members.length.toString()"
         />
       </v-tab>
-      <v-tab>
+      <v-tab style="place-content: start">
         <v-icon left>
-          mdi-lock
+          mdi-ticket-confirmation
         </v-icon>
-        Option 2
+        Tickets
+        <v-badge
+          inline
+          :content="currProject.tickets.length.toString()"
+        />
+      </v-tab>
+      <v-tab style="place-content: start">
+        <v-icon left>
+          mdi-book-open-page-variant
+        </v-icon>
+        User Stories
+        <v-badge
+          inline
+          :content="currProject.userStories.length.toString()"
+        />
       </v-tab>
 
       <v-tab-item>
-        <v-btn
-          class="primary"
-          @click="print"
-        >
-          Print
-        </v-btn>
+<!--        <v-btn-->
+<!--          class="primary"-->
+<!--          @click="print"-->
+<!--        >-->
+<!--          Print-->
+<!--        </v-btn>-->
         <v-card flat>
           <v-simple-table>
             <template v-slot:default>
@@ -38,16 +52,16 @@
                     Member
                   </th>
                   <th>
-                    To do
+                    To do (Tickets)
                   </th>
                   <th>
-                    Done
+                    Done (Tickets)
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr
-                  v-for="member in proMembers()"
+                  v-for="member in proMembers"
                   :key="member.id"
                 >
                   <td>
@@ -59,14 +73,29 @@
                           :src="gravatar(member)"
                         />
                       </v-avatar>
-                      {{ member.fullName }}
+                      {{ member.User.fullName }}
+                      <v-chip
+                        v-if="member.type === 'pm'"
+                        class="ml-2"
+                        x-small
+                        color="orange"
+                        text-color="white"
+                      >
+                        PM
+                        <v-icon
+                          right
+                          x-small
+                        >
+                          mdi-crown
+                        </v-icon>
+                      </v-chip>
                     </v-chip>
                   </td>
                   <td>
-                    {{ doneTicksCount(member) }}
+                    {{ unCompleteTicksCount(member.User) }}
                   </td>
                   <td>
-                    {{ unCompleteTicksCount(member) }}
+                    {{ doneTicksCount(member.User) }}
                   </td>
                 </tr>
               </tbody>
@@ -76,11 +105,114 @@
       </v-tab-item>
       <v-tab-item>
         <v-card flat>
-          <v-card-text>
-            <p class="mb-0">
-              hi
-            </p>
-          </v-card-text>
+          <v-simple-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th>
+                    Name
+                  </th>
+                  <th>
+                    Estimate (Hrs)
+                  </th>
+                  <th>
+                    Completed
+                  </th>
+                  <th>
+                    Assignee
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="ticket in proTickets"
+                  :key="ticket.id"
+                >
+                  <td>
+                    {{ ticket.title }}
+                  </td>
+                  <td>
+                    {{ ticket.hourEstimate.toString() }}
+                  </td>
+                  <td>
+                    <v-icon
+                      v-if="ticket.done"
+                      color="green"
+                    >
+                      mdi-check
+                    </v-icon>
+                    <v-icon
+                      v-else
+                      color="amber"
+                    >
+                      mdi-close
+                    </v-icon>
+                  </td>
+                  <td>
+                    <v-chip
+                      v-if="ticket.assignee !== null"
+                      pill
+                      small
+                    >
+                      <v-avatar left>
+                        <v-img
+                          :src="gravatar(memberByID(ticket.assignee.id))"
+                        />
+                      </v-avatar>
+                      {{ memberByID(ticket.assignee.id).User.fullName }}
+                    </v-chip>
+                    <v-chip
+                      v-else
+                      small
+                      pill
+                    >
+                      <v-avatar left>
+                        <v-icon
+                          dark
+                        >
+                          mdi-help-circle
+                        </v-icon>
+                      </v-avatar>
+                      Unassigned
+                    </v-chip>
+                  </td>
+                </tr>
+              </tbody>
+            </template>
+          </v-simple-table>
+        </v-card>
+      </v-tab-item>
+      <v-tab-item>
+        <v-card flat>
+          <v-simple-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th>
+                    Story
+                  </th>
+                  <th>
+                    Tickets
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="story in proStories"
+                  :key="story.id"
+                >
+                  <td
+                    style="word-wrap: break-word;white-space: normal;"
+                  >
+                    {{ story.storyText }}
+                  </td>
+                  <td>
+                    {{ story.tickets.length.toString() }}
+                  </td>
+                </tr>
+              </tbody>
+            </template>
+          </v-simple-table>
         </v-card>
       </v-tab-item>
     </v-tabs>
@@ -109,37 +241,40 @@ export default {
       }
       return this.projects.find((project) => project.id === this.projectId);
     },
+    proMembers() {
+      // get all the members from state.currPmProjects
+      return this.currProject.members;
+    },
+    proTicketsComplete() {
+      return this.currProject.tickets.filter((tick) => tick.done === true);
+    },
+    proTicketsUnComplete() {
+      return this.currProject.tickets.filter((tick) => tick.done === false);
+    },
+    proTickets() {
+      return this.currProject.tickets;
+    },
+    proStories() {
+      return this.currProject.userStories;
+    },
   },
   methods: {
+    memberByID(id) {
+      return this.proMembers.find((member) => member.User.id === id);
+    },
     gravatar(member) {
-      return `https://gravatar.com/avatar/${member.avatar}?d=identicon`;
+      return `https://gravatar.com/avatar/${member.User.avatar}?d=identicon`;
     },
     print() {
-      console.log(this.proMembers());
-    },
-    proMembers() {
-      // get all the member ids from state.currPmProjects
-      const userIds = this.currProject.members.map((member) => member.User.id);
-      // filter the allUsers to get members full details
-      return this.allUsers.filter((member) => userIds.includes(member.id));
+      console.log(this.proMembers);
     },
     doneTicksCount(member) {
-      let count = 0;
-      member.tickets.forEach((tick) => {
-        if (tick.done) {
-          count += 1;
-        }
-      });
-      return count;
+      const completed = this.proTicketsComplete.filter((tick) => tick.assignee.id === member.id);
+      return completed.length;
     },
     unCompleteTicksCount(member) {
-      let count = 0;
-      member.tickets.forEach((tick) => {
-        if (!tick.done) {
-          count += 1;
-        }
-      });
-      return count;
+      const unComplete = this.proTicketsUnComplete.filter((tick) => tick.assignee.id === member.id);
+      return unComplete.length;
     },
   },
 };

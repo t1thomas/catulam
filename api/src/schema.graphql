@@ -23,7 +23,6 @@
               RETURN collect(rec.id) AS ids
          """)
         project: Project @relation(name: "USER_STORY", direction: OUT)
-        assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
     }
 
     type User {
