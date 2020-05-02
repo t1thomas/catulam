@@ -7,7 +7,7 @@ import Home from '../views/Home.vue';
 import backlog from '../views/Backlog.vue';
 import login from '../views/Login.vue';
 import PassReset from '../views/PassReset.vue';
-import TicketPage from '../components/TicketPage.vue';
+import TicketPage from '../components/TicketPage/TicketPage.vue';
 import UserStoryPage from '../components/UserStoryPage.vue';
 import SprintBoard from '../views/SprintBoard.vue';
 // eslint-disable-next-line no-unused-vars

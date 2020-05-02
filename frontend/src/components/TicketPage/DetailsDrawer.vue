@@ -29,9 +29,9 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
-import topSection from '../dunno/topSection.vue';
-import detailsSection from '../dunno/detailsSection.vue';
-import descSection from '../dunno/descSection.vue';
+import topSection from './topSection.vue';
+import detailsSection from './detailsSection.vue';
+import descSection from './descSection.vue';
 
 export default {
   name: 'DetailsDrawer',

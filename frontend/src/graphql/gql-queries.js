@@ -190,6 +190,20 @@ const gqlQueries = {
         }
       }
     }`,
+  S_PLANNER_DATA: gql`
+    query ($id: ID!){
+      Project(filter: { id: $id }) {
+        startDate
+        endDate
+        sprints {
+          id
+          sprintNo
+          tickets {
+            id
+          }
+        }
+      }
+    }`,
   PM_TASKS: gql`
     query($username: String!) {
       User(filter: { username: $username }) {
@@ -197,6 +211,13 @@ const gqlQueries = {
           Project {
             id
             label
+            startDate
+            endDate
+            sprints {
+              id
+              sprintNo
+              active
+            }
             tickets {
               id
               issueNumber

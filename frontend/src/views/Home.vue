@@ -7,8 +7,8 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import DevHome from './DevHome.vue';
-import PMHome from './PMHome.vue';
+import DevHome from '../components/dev/dashboard/DevHome.vue';
+import PMHome from '../components/pm/dashboard/PMHome.vue';
 
 export default {
   name: 'Home',

@@ -27,37 +27,24 @@
         cols="12"
         md="6"
       >
-        <ProjectList />
+        <UserTasks />
       </v-col>
     </v-row>
-    <NProDialog v-if="showDialog"/>
   </v-container>
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
-import NProDialog from '../components/pm/dashboard/NProDialog.vue';
-import ProjectList from '../components/pm/dashboard/ProjectList.vue';
+// @ is an alias to /src
+// import Vue from 'vue';
+import UserTasks from './UserTasks.vue';
+// import gqlQueries from '../graphql/gql-queries';
 
 export default {
-  name: 'Home',
+  name: 'DevHome',
   components: {
-    NProDialog,
-    ProjectList,
-  },
-  computed: {
-    ...mapState({
-      currUser: (state) => state.currentUser,
-      showDialog: (state) => state.nProDialog.show,
-    }),
-  },
-  async mounted() {
-    await this.fetchPmPros({ username: this.currUser.username });
+    UserTasks,
   },
   methods: {
-    ...mapActions([
-      'fetchPmPros',
-    ]),
     async print() {
       // await Vue.$apolloClient.query({
       //   query: gqlQueries.ALL_USERS,

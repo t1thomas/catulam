@@ -35,14 +35,24 @@
           :content="currProject.userStories.length.toString()"
         />
       </v-tab>
+      <v-tab style="place-content: start">
+        <v-icon left>
+          mdi-run-fast
+        </v-icon>
+        Sprints
+        <v-badge
+          inline
+          :content="currProject.sprints.length.toString()"
+        />
+      </v-tab>
 
       <v-tab-item>
-<!--        <v-btn-->
-<!--          class="primary"-->
-<!--          @click="print"-->
-<!--        >-->
-<!--          Print-->
-<!--        </v-btn>-->
+        <!--        <v-btn-->
+        <!--          class="primary"-->
+        <!--          @click="print"-->
+        <!--        >-->
+        <!--          Print-->
+        <!--        </v-btn>-->
         <v-card flat>
           <v-simple-table>
             <template v-slot:default>
@@ -183,7 +193,55 @@
         </v-card>
       </v-tab-item>
       <v-tab-item>
-        <v-card flat>
+        <not-found-card
+          v-if="proStories.length <= 0"
+          type="UStory"
+        />
+        <v-card
+          v-else
+          flat
+        >
+          <v-simple-table>
+            <template v-slot:default>
+              <thead>
+                <tr>
+                  <th>
+                    Story
+                  </th>
+                  <th>
+                    Tickets
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="story in proStories"
+                  :key="story.id"
+                >
+                  <td
+                    style="word-wrap: break-word;white-space: normal;"
+                  >
+                    {{ story.storyText }}
+                  </td>
+                  <td>
+                    {{ story.tickets.length.toString() }}
+                  </td>
+                </tr>
+              </tbody>
+            </template>
+          </v-simple-table>
+        </v-card>
+      </v-tab-item>
+      <v-tab-item>
+        <not-found-card
+          v-if="proSprints.length <= 0"
+          type="Sprint"
+          @createAction="sPlanShow"
+        />
+        <v-card
+          v-else
+          flat
+        >
           <v-simple-table>
             <template v-slot:default>
               <thead>
@@ -220,10 +278,14 @@
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
+import NotFoundCard from './NotFoundCard.vue';
 
 export default {
   name: 'ProDetailsTabs',
+  components: {
+    NotFoundCard,
+  },
   props: {
     projectId: {
       type: String,
@@ -257,8 +319,17 @@ export default {
     proStories() {
       return this.currProject.userStories;
     },
+    proSprints() {
+      return this.currProject.sprints;
+    },
   },
   methods: {
+    ...mapActions([
+      'sPlannerShow',
+    ]),
+    sPlanShow() {
+      this.sPlannerShow({ show: true, proId: this.currProject.id });
+    },
     memberByID(id) {
       return this.proMembers.find((member) => member.User.id === id);
     },

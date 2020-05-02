@@ -82,6 +82,7 @@
     type Sprint {
         id: ID!
         sprintNo: Int!
+        active: Boolean!
         tickets: [Ticket] @relation(name: "SPRINT_TASK", direction: IN)
         userStories: [UserStory] @cypher(statement: """
             MATCH (this)<-[:SPRINT_TASK]-(:Ticket)-[r1:SUB_TASK]->(rec:UserStory)

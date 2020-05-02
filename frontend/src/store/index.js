@@ -18,6 +18,10 @@ export default new Vuex.Store({
     nTicketDialog: {
       show: false,
     },
+    sPlanDialog: {
+      show: false,
+      proId: null,
+    },
     nProDialog: {
       show: false,
     },
@@ -180,6 +184,16 @@ export default new Vuex.Store({
       } else {
         state.detailsDrawer.show = obj.show;
         state.detailsDrawer.ticketId = obj.ticketId;
+      }
+    },
+    set_sPlanShow(state, obj) {
+      if (obj.show === false) {
+        state.sPlanDialog.show = obj.show;
+        state.sPlanDialog.proId = null;
+        // state.currentTicket = null;
+      } else {
+        state.sPlanDialog.show = obj.show;
+        state.sPlanDialog.proId = obj.proId;
       }
     },
     set_nTicDialogShow(state, obj) {
@@ -517,6 +531,9 @@ export default new Vuex.Store({
     /* -------------------------------------- */
     detDrawShow({ commit }, val) {
       commit('set_DrawerShow', val);
+    },
+    sPlannerShow({ commit }, val) {
+      commit('set_sPlanShow', val);
     },
     nTicDialogShow({ commit }, val) {
       commit('set_nTicDialogShow', val);

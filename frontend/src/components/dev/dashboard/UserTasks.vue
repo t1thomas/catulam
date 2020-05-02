@@ -81,7 +81,7 @@
 <script>
 import Vue from 'vue';
 import { mapGetters } from 'vuex';
-import gqlQueries from '../../graphql/gql-queries';
+import gqlQueries from '../../../graphql/gql-queries';
 
 export default {
   name: 'UserTasks',

@@ -11,7 +11,6 @@
         </v-card-title>
         <v-card-text>
           <v-form
-            v-if="allUsers"
             ref="proForm"
             v-model="valid"
             :lazy-validation="false"
@@ -178,12 +177,8 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
-import Vue from 'vue';
-import gqlQueries from '../../../graphql/gql-queries';
-
 export default {
-  name: 'NProDialog',
+  name: 'NSprintDialog',
   data: () => ({
     desc: '',
     title: '',
@@ -198,111 +193,6 @@ export default {
     dateMenu2: false,
     currentDate: new Date().toISOString().substr(0, 10),
   }),
-  computed: {
-    ...mapState({
-      currUser: (state) => state.currentUser,
-      showDialog: (state) => state.nProDialog.show,
-      allUsers: (state) => state.allUserList,
-    }),
-    descProvided() {
-      return this.desc.length > 0;
-    },
-    selectedProvided() {
-      return this.selected.length > 0;
-    },
-  },
-  methods: {
-    ...mapActions([
-      'fetchPmPros',
-      'nProDialogShow',
-      'snackBarOn',
-    ]),
-    getMembers() {
-      return this.$store.getters.getUserSelection(this.currUser.id);
-    },
-    gravatar(user) {
-      return `https://gravatar.com/avatar/${user.avatar}?d=identicon`;
-    },
-    onCancel() {
-      this.nProDialogShow({ show: false });
-    },
-    async onCreate() {
-      if (this.$refs.proForm.validate()) {
-        this.setSaving();
-        await Vue.$apolloClient.mutate({
-          mutation: gqlQueries.CREATE_PROJECT,
-          fetchPolicy: 'no-cache',
-          variables: {
-            title: this.title,
-            label: this.label,
-            startDate: this.startDate,
-            endDate: this.endDate,
-            // conditional check: adds desc, if provided by user
-            ...(this.descProvided && { desc: this.desc }),
-            members: this.getSelectedMembers(),
-          },
-        }).then((response) => {
-          const { CreateProject } = response.data;
-          const payload = { message: `Successfully Created project: '${CreateProject.title}'`, type: 'success' };
-          this.snackBarOn(payload);
-          // update the store, this in turn will Update DOM with new projects
-          this.fetchPmPros({ username: this.currUser.username });
-        }).catch((error) => {
-          console.error(error);
-        });
-        this.setSaving();
-        this.onCancel();
-      }
-    },
-    getSelectedMembers() {
-      const arr = [];
-      /* first add pm id to list, as his/her own name won't
-        show up in selection field */
-      arr.push({ id: this.currUser.id });
-      /* if additional members have been chosen
-       add those in the _UserInput format */
-      if (this.selectedProvided) {
-        this.selected.forEach((member) => {
-          arr.push({ id: member });
-        });
-      }
-      return arr;
-    },
-    dateMenuError(val) {
-      if (!val > 0) {
-        return 'Field is Required';
-      }
-      if (new Date(this.currentDate) > new Date(val)) {
-        return 'Date cannot be in the past!';
-      }
-      if (new Date(this.startDate) > new Date(this.endDate)) {
-        return 'End Date must be greater than Start Date!';
-      }
-      return true;
-    },
-    titleError(val) {
-      if (!val > 0) {
-        return 'Field is Required';
-      }
-      return true;
-    },
-    setSaving() {
-      this.saving = !this.saving;
-    },
-    labelError(val) {
-      if (!val > 0) {
-        return 'Field is Required';
-      }
-      if (val.length > 5) {
-        return 'Max Length 5';
-      }
-      return true;
-    },
-    remove(user) {
-      const index = this.selected.indexOf(user.id);
-      if (index >= 0) this.selected.splice(user.id, 1);
-    },
-  },
 };
 </script>
 
