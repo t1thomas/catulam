@@ -46,7 +46,6 @@ export default new Vuex.Store({
     currentProject: null,
     currProElements: null,
     allUserList: null,
-    currUserTasks: null,
     currPmProjects: null,
   },
   mutations: {
@@ -67,13 +66,12 @@ export default new Vuex.Store({
       } else {
         state.currProElements = { ...obj };
       }
-      // Vue.set(state, 'backLogData', [...obj]);
     },
     set_currentUserTasks(state, obj) {
       if (obj === null) {
         state.currentUserTasks = null;
       } else {
-        state.currentUserTasks = { ...obj };
+        state.currentUserTasks = [...obj];
       }
     },
     set_allUserList(state, obj) {
@@ -323,6 +321,7 @@ export default new Vuex.Store({
       });
     },
     async fetchCurrentUserTasks({ commit }, payload) {
+      console.log('fetchCurrentUserTasks');
       return Vue.$apolloClient.query({
         query: gqlQueries.USER_TASKS,
         variables: payload,
@@ -333,11 +332,11 @@ export default new Vuex.Store({
           if (User === null) {
             throw new Error();
           } else {
-            commit('set_currentUserTasks', User[0]);
+            commit('set_currentUserTasks', User[0].projects.map((pro) => pro.Project));
           }
         })
         .catch((error) => {
-          console.log('Unable to fetch User Tasks');
+          console.log('Unable to fetch User Data');
           console.error(error);
         });
     },
@@ -380,7 +379,6 @@ export default new Vuex.Store({
       });
     },
     async fetchCurrTicket({ commit }, id) {
-      console.log(id);
       await Vue.$apolloClient.query({
         query: gqlQueries.CURRENT_TICKET,
         fetchPolicy: 'no-cache',

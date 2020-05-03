@@ -32,7 +32,7 @@ export default {
   },
   computed: {
     ...mapState({
-      unAsTicks: (state) => state.backLogData.tickets,
+      unAsTicks: (state) => state.backLogData.unAss,
     }),
     tickListConfig() {
       return { userStoryId: null, columnType: 'Unassigned', disabled: false };
@@ -42,6 +42,9 @@ export default {
     },
   },
   methods: {
+    print() {
+      console.log(this.tickIds);
+    },
     ...mapActions([
       'nTicDialogShow',
     ]),

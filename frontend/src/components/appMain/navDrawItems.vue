@@ -1,7 +1,7 @@
 <template>
   <v-list dense>
     <v-list-item
-      v-if="currentUser"
+      v-if="currUser"
       link
       @click="logout"
     >
@@ -13,7 +13,7 @@
       </v-list-item-content>
     </v-list-item>
     <v-list-item
-      v-if="currentUser"
+      v-if="currUser"
       link
       @click="print"
     >
@@ -26,7 +26,7 @@
     </v-list-item>
 
     <v-list-group
-      v-if="currentUserTasks"
+      v-if="projects"
       prepend-icon="mdi-view-list"
       no-action
     >
@@ -34,7 +34,6 @@
         <v-list-item-title>Backlog</v-list-item-title>
       </template>
       <template v-if="projects.length > 0">
-        <v-subheader>Projects</v-subheader>
         <v-list-item
           v-for="(project, i) in projects"
           :key="i"
@@ -61,20 +60,17 @@ import { mapState, mapActions } from 'vuex';
 export default {
   name: 'NavDrawer',
   computed: {
-    ...mapState([
-      'currentUser',
-      'currentUserTasks',
-    ]),
-    projects() {
-      return this.currentUserTasks.projects;
-    },
+    ...mapState({
+      currUser: 'currentUser',
+      projects: 'currentUserTasks',
+    }),
   },
   methods: {
     print() {
       console.log(this.projects);
     },
     toBacklog(project) {
-      // tickId and proId passed as query in url link
+      // proId passed as query in url link
       const { id } = project;
       this.$router.push({
         path: '/backlog',

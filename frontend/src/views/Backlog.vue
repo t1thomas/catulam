@@ -18,7 +18,7 @@ import { mapActions, mapState } from 'vuex';
 import UserStoryRows from '../components/backlog/UserStoryRows.vue';
 import UADialog from '../components/backlog/Columns/UADialog.vue';
 import USDialog from '../components/backlog/Columns/USDialog.vue';
-import DetailsDrawer from '../components/TicketPage/DetailsDrawer.vue';
+import DetailsDrawer from '../components/Ticket/DetailsDrawer.vue';
 import NTicDialog from '../components/backlog/NTicDialog.vue';
 import gqlQueries from '../graphql/gql-queries';
 
@@ -43,6 +43,14 @@ export default {
     }),
     proId() {
       return this.$route.query.proId;
+    },
+  },
+  watch: {
+    async proId() {
+      this.loaded = false;
+      await this.loadData();
+      this.startSubscription();
+      this.loaded = true;
     },
   },
   async mounted() {

@@ -1,5 +1,6 @@
 <template>
   <v-card
+    v-if="ticket"
     width="100%"
   >
     <v-row no-gutters>
@@ -28,7 +29,7 @@
           >
             <v-img
               v-if="assignee"
-              :src="gravatar()"
+              :src="gravatar"
             />
             <v-icon
               v-else
@@ -37,7 +38,7 @@
               mdi-help-circle
             </v-icon>
           </v-avatar>
-          {{ fullName(assignee) }}
+          {{ fullName }}
         </v-chip>
       </v-col>
     </v-row>
@@ -66,15 +67,12 @@ export default {
       if (this.ticket.assignee === null) {
         return null;
       }
-      return this.members.find((member) => member.id === this.ticket.assignee.id);
+      const memObj = this.members.find((member) => member.User.id === this.ticket.assignee.id);
+      return memObj.User;
     },
     ticket() {
       return this.getTicketById(this.tickId);
-      /* getTicketById: (state) => (id) => state.currProElements.tickets
-      .find((ticket) => ticket.id === id), */
     },
-  },
-  methods: {
     gravatar() {
       return `https://gravatar.com/avatar/${this.assignee.avatar}?d=identicon`;
     },

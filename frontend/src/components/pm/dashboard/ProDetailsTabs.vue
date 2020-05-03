@@ -137,6 +137,8 @@
                 <tr
                   v-for="ticket in proTickets"
                   :key="ticket.id"
+                  style="cursor: pointer"
+                  @click="tickNavigation(ticket)"
                 >
                   <td>
                     {{ ticket.title }}
@@ -346,6 +348,12 @@ export default {
     unCompleteTicksCount(member) {
       const unComplete = this.proTicketsUnComplete.filter((tick) => tick.assignee.id === member.id);
       return unComplete.length;
+    },
+    tickNavigation(ticket) {
+      this.$router.push({
+        path: '/ticket',
+        query: { tickId: ticket.id, proId: this.currProject.id },
+      });
     },
   },
 };

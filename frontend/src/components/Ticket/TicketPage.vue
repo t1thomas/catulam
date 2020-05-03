@@ -41,8 +41,8 @@ export default {
   async mounted() {
     await this.fetchCurrTicket(this.tickId);
     await this.fetchCurrProElements(this.proId);
-    console.log(this.ticket);
-    console.log(this.project);
+    // console.log(this.ticket);
+    // console.log(this.project);
   },
   methods: {
     ...mapActions([

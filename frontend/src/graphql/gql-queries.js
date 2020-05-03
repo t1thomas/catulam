@@ -25,34 +25,34 @@ const gqlQueries = {
     }`,
   BACKLOG_DATA: gql`
     query($id: ID!) {
-      Project(filter: { id: $id }) {
+    Project(filter: { id: $id }) {
+      id
+      title
+      desc
+      label
+      userStories {
         id
-        title
-        desc
-        label
-        userStories {
-          id
-          tickets {
-            id
-            done
-            sprint {
-              id
-            }
-          }
-        }
-        tickets(filter: { userStory: null }) {
+        tickets {
           id
           done
           sprint {
             id
           }
         }
-        sprints {
+      }
+      unAss: tickets(filter: { userStory: null }) {
+        id
+        done
+        sprint {
           id
-          sprintNo
         }
       }
-    }`,
+      sprints {
+        id
+        sprintNo
+      }
+    }
+  }`,
   CURR_PROJECT_ELEMENTS: gql`
     query($id: ID!) {
       Project(filter: { id: $id }) {
@@ -61,10 +61,13 @@ const gqlQueries = {
           storyText
         }
         members {
-          id
-          avatar
-          firstName
-          lastName
+          User {
+            id
+            avatar
+            firstName
+            lastName
+            fullName
+          }
         }
         tickets {
           assignee {
@@ -180,11 +183,6 @@ const gqlQueries = {
               id
               issueNumber
               title
-            }
-            userStories(filter: { assignee: { username: $username } }) {
-              id
-              issueNumber
-              storyText
             }
           }
         }

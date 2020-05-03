@@ -26,6 +26,7 @@ services:
     networks:
       - catLink
   api:
+    container_name: catulam-api
     build: ./api
     ports:
       - 7000:7000
@@ -41,11 +42,12 @@ services:
     networks:
       - catLink
   frontend:
+    container_name: catulam-frontend
     build: ./frontend
     ports:
       - 8080:8080
     environment:
-      - VUE_APP_GRAPHQL_URI=http://api:7000/graphql
+      - VUE_APP_GRAPHQL_URI=http://catulam-api:7000/graphql
       - VUE_APP_SUB_CLI_URL=ws://api:7000/graphql
     links:
       - api

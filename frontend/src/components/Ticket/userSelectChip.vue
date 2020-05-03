@@ -98,13 +98,13 @@ export default {
       return this.$route.query.proId;
     },
     members() {
-      return this.project.members;
+      return this.project.members.map((member) => member.User);
     },
     assignee() {
       if (this.ticket.assignee === null) {
         return null;
       }
-      return this.project.members.find((member) => member.id === this.ticket.assignee.id);
+      return this.members.find((member) => member.id === this.ticket.assignee.id);
     },
   },
   methods: {

@@ -178,14 +178,14 @@ export default {
       if (this.ticket.creator.length === 0) {
         return null;
       }
-      const { id } = this.ticket.creator[0].User;
+      const { id } = this.ticket.creator.User;
       return this.users.find((user) => user.id === id);
     },
     creatorName() {
       return `${this.creatorObject.firstName} ${this.creatorObject.lastName}`;
     },
     creationTime() {
-      const { timestamp } = this.ticket.creator[0];
+      const { timestamp } = this.ticket.creator;
       const date = new Date(Number(timestamp));
       return date.toLocaleString('en-GB');
     },
@@ -202,19 +202,6 @@ export default {
         };
       }
       return false;
-    },
-  },
-  methods: {
-    async print() {
-      const { id } = this.ticket.creator[0].User;
-
-      const { timestamp } = this.ticket.creator[0];
-      console.log(id);
-      console.log(timestamp);
-      const creator = this.users.find((user) => user.id === id);
-      console.log(creator);
-      const date = new Date(Number(timestamp));
-      console.log(date.toLocaleString('en-GB'));
     },
   },
 };

@@ -1,6 +1,6 @@
 <template>
   <v-card
-    v-if="loaded"
+    v-if="projects"
     min-height="30vh"
   >
     <v-toolbar
@@ -8,7 +8,7 @@
       color="primary"
       dark
     >
-      <v-toolbar-title>My Projects</v-toolbar-title>
+      <v-toolbar-title>My Tasks</v-toolbar-title>
     </v-toolbar>
     <v-tabs
       v-model="tab"
@@ -55,16 +55,9 @@
               >
                 <td>
                   <v-icon
-                    v-if="task.type === 'ticket'"
                     color="blue"
                   >
                     mdi-ticket-confirmation
-                  </v-icon>
-                  <v-icon
-                    v-else
-                    color="green"
-                  >
-                    mdi-book-open-page-variant
                   </v-icon>
                 </td>
                 <td># {{ task.issueNo }}</td>
@@ -79,88 +72,49 @@
 </template>
 
 <script>
-import Vue from 'vue';
-import { mapGetters } from 'vuex';
-import gqlQueries from '../../../graphql/gql-queries';
+import { mapState } from 'vuex';
 
 export default {
   name: 'UserTasks',
   data: () => ({
     tab: null,
-    projects: null,
     loaded: false,
   }),
   computed: {
-    ...mapGetters([
-      'getCurrentUser',
-    ]),
+    ...mapState({
+      currUser: 'currentUser',
+      projects: 'currentUserTasks',
+    }),
     projectsNone() {
       return this.projects.length === 0;
     },
-  },
-  async mounted() {
-    await this.userTasks();
   },
   methods: {
     tasksTotal(id) {
       // find task with correct project Id
       const currProject = this.projects.find((project) => project.id === id);
-      return currProject.tickets.length + currProject.userStories.length;
+      return currProject.tickets.length;
     },
     projectTasks(id) {
       const currProject = this.projects.find((project) => project.id === id);
       const tasks = [];
-
       currProject.tickets.forEach((tick) => {
         tasks.push({
           tickId: tick.id,
           proId: id,
           issueNo: tick.issueNumber,
           title: tick.title,
-          type: 'ticket',
         });
       });
-      currProject.userStories.forEach((story) => {
-        tasks.push({
-          id: story.id,
-          issueNo: story.issueNumber,
-          title: story.storyText,
-          type: 'story',
-        });
-      });
-
       return tasks;
     },
-    async userTasks() {
-      await Vue.$apolloClient.query({
-        query: gqlQueries.USER_TASKS,
-        fetchPolicy: 'no-cache',
-        variables: { username: this.getCurrentUser.username },
-      })
-        .then((response) => {
-          const { User } = response.data;
-          this.projects = User[0].projects.map((pro) => pro.Project);
-          this.loaded = true;
-        })
-        .catch((error) => {
-          console.log('User not found');
-          console.error(error);
-        });
-    },
     navigation(task) {
-      if (task.type === 'ticket') {
-        // tickId and proId passed as query in url link
-        const { tickId, proId } = task;
-        this.$router.push({
-          path: '/ticket',
-          query: { tickId, proId },
-        });
-      } else if (task.type === 'story') {
-        this.$router.push({
-          path: '/uStory',
-          query: { id: task.id },
-        });
-      }
+      // tickId and proId passed as query in url link
+      const { tickId, proId } = task;
+      this.$router.push({
+        path: '/ticket',
+        query: { tickId, proId },
+      });
     },
   },
 };
