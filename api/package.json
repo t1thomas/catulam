@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "nodemon": "nodemon src/index.js",
+    "start": "node src/index.js",
     "lint": "eslint",
     "test": "jest --detectOpenHandles"
   },

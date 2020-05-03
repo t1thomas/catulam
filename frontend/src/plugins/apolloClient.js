@@ -82,7 +82,7 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 
 const httpLink = new HttpLink({
-  uri: 'http://localhost:7000/graphql',
+  uri: process.env.VUE_APP_GRAPHQL_URI || 'http://localhost:7000/graphql',
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -118,7 +118,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 //   },
 // });
 
-const wsLink = new SubscriptionClient('ws://localhost:7000/graphql', {
+const wsLink = new SubscriptionClient(process.env.VUE_APP_SUB_CLI_URL || 'ws://localhost:7000/graphql', {
   reconnect: true,
   connectionParams: {
     authToken: localStorage.getItem('catulam_token'),
