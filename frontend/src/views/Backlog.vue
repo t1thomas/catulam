@@ -22,7 +22,7 @@ import UADialog from '../components/backlog/dialogs/UADialog.vue';
 import USDialog from '../components/backlog/dialogs/USDialog.vue';
 import DetailsDrawer from '../components/Ticket/DetailsDrawer.vue';
 import NTicDialog from '../components/backlog/NTicDialog.vue';
-import gqlQueries from '../graphql/gql-queries';
+// import gqlQueries from '../graphql/gql-queries';
 
 export default {
   name: 'Backlog',
@@ -51,14 +51,13 @@ export default {
     async proId() {
       this.loaded = false;
       await this.loadData();
-      this.startSubscription();
+      // this.startSubscription();
       this.loaded = true;
     },
   },
   async mounted() {
     await this.loadData();
     this.loaded = true;
-    this.startSubscription();
   },
   methods: {
     ...mapActions([
@@ -68,20 +67,6 @@ export default {
     async loadData() {
       await this.fetchCurrProElements(this.proId);
       await this.fetchBackLogData(this.proId);
-    },
-    startSubscription() {
-      const self = this;
-      this.$apollo.subscribe({
-        query: gqlQueries.SUB_BACKLOG_UPDATE,
-        variables: { proId: this.proId },
-      }).subscribe({
-        async next() {
-          await self.loadData();
-        },
-        error(error) {
-          console.error(error);
-        },
-      });
     },
   },
 };

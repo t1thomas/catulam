@@ -17,7 +17,7 @@
           v-else
           class="pa-0"
         >
-          No User Story
+          Unassigned tickets
         </v-card-subtitle>
       </v-col>
       <v-col class="pa-0">

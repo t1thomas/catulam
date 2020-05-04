@@ -1,5 +1,6 @@
 <template>
-  <div class="containers">
+  <v-content
+    class="fill-height containers">
     <v-row
       class="mb-2"
       no-gutters
@@ -56,14 +57,15 @@
         />
       </v-col>
     </v-row>
-  </div>
+  </v-content>
 </template>
 <script>
-import { mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import USColumnStart from './Columns/USColStart.vue';
 import USColumnEnd from './Columns/USColEnd.vue';
 import SPColumnMiddle from './Columns/SPColMid.vue';
 import unassignedTicks from './Columns/unassignedTicks.vue';
+import gqlQueries from '../../graphql/gql-queries';
 
 export default {
   name: 'BoardRows',
@@ -76,17 +78,47 @@ export default {
     // eslint-disable-next-line vue/no-unused-components
     unassignedTicks,
   },
+  data: () => ({
+    mess: 'hello',
+  }),
   computed: {
     ...mapState({
       stories: (state) => state.currProElements.userStories,
     }),
+    proId() {
+      return this.$route.query.proId;
+    },
+  },
+  mounted() {
+    const self = this;
+    const observer = this.$apollo.subscribe({
+      query: gqlQueries.SUB_BACKLOG_UPDATE,
+      variables: { proId: this.proId },
+    });
+    observer.subscribe({
+      async next() {
+        await self.loadData();
+      },
+      error(error) {
+        console.error(error);
+      },
+    });
+  },
+  methods: {
+    ...mapActions([
+      'fetchBackLogData',
+      'fetchCurrProElements',
+    ]),
+    async loadData() {
+      await this.fetchCurrProElements(this.proId);
+      await this.fetchBackLogData(this.proId);
+    },
   },
 };
 </script>
 
 <style scoped>
   .containers {
-    width: 100%;
     display: grid;
     grid-template-rows: auto;
   }
