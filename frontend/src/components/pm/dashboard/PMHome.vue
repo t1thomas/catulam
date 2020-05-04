@@ -27,7 +27,7 @@
         cols="12"
         md="6"
       >
-        <project-list />
+        <project-list v-if="projects !== null"/>
       </v-col>
     </v-row>
     <n-pro-dialog v-if="showNProDialog" />

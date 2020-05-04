@@ -1,11 +1,5 @@
 <template>
-  <v-sheet style="height: 100%">
-    <div
-      v-if="sprintColumn"
-      class="overline"
-    >
-      Sprint {{ listProperties.sprintNo }}
-    </div>
+  <v-sheet class="fill-height">
     <draggable
       tag="div"
       v-bind="dragOptions"
@@ -54,9 +48,6 @@ export default {
     },
   },
   computed: {
-    sprintColumn() {
-      return this.listProperties.columnType === 'sprint';
-    },
     dragOptions() {
       return {
         animation: 200,

@@ -84,18 +84,7 @@
         sprintNo: Int!
         active: Boolean!
         tickets: [Ticket] @relation(name: "SPRINT_TASK", direction: IN)
-        userStories: [UserStory] @cypher(statement: """
-            MATCH (this)<-[:SPRINT_TASK]-(:Ticket)-[r1:SUB_TASK]->(rec:UserStory)
-            WITH rec, COUNT(r1) AS num ORDER BY num DESC
-            RETURN rec
-         """)
-        ticketIds: idList
-          @cypher(statement: """
-              MATCH (this)<-[:SPRINT_TASK]-(rec:Ticket)
-              RETURN collect(rec.id) AS ids
-         """)
         project: Project @relation(name: "SPRINT", direction: OUT)
-
     }
 
     type Query {
@@ -122,6 +111,7 @@
         UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
         StartToSprint(project: _ProjectInput!, tick: _TicketInput!, sprintAdd: _SprintInput! ): String
         SprintToStart(project: _ProjectInput!, tick: _TicketInput!, sprintRemove: _SprintInput! ): String
+        SwitchSprint(project: _ProjectInput!, tick: _TicketInput!, sprintAdd: _SprintInput!, sprintRemove: _SprintInput! ): String
         CreateProject(
             id: ID,
             title: String!,

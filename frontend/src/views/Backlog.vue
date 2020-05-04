@@ -1,5 +1,8 @@
 <template>
-  <v-content>
+  <v-container
+    class="fill-height"
+    fluid
+  >
     <UADialog
       v-if="showUADialog"
     />
@@ -9,15 +12,14 @@
     <DetailsDrawer v-if="showDrawer" />
     <UserStoryRows v-if="loaded" />
     <NTicDialog v-if="showNTicDialog" />
-  </v-content>
+  </v-container>
 </template>
 
 <script>
 import { mapActions, mapState } from 'vuex';
-// import Vue from 'vue';
 import UserStoryRows from '../components/backlog/UserStoryRows.vue';
-import UADialog from '../components/backlog/Columns/UADialog.vue';
-import USDialog from '../components/backlog/Columns/USDialog.vue';
+import UADialog from '../components/backlog/dialogs/UADialog.vue';
+import USDialog from '../components/backlog/dialogs/USDialog.vue';
 import DetailsDrawer from '../components/Ticket/DetailsDrawer.vue';
 import NTicDialog from '../components/backlog/NTicDialog.vue';
 import gqlQueries from '../graphql/gql-queries';

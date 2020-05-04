@@ -25,34 +25,67 @@ const gqlQueries = {
     }`,
   BACKLOG_DATA: gql`
     query($id: ID!) {
-    Project(filter: { id: $id }) {
-      id
-      title
-      desc
-      label
-      userStories {
-        id
-        tickets {
+      noUsNoSp: Project(filter: { id: $id }) {
+        tickets(
+          filter: { AND: [{ done: false }, { userStory: null }, { sprint: null }] }
+        ) {
           id
-          done
+        }
+      }
+      noUsSp: Project(filter: { id: $id }) {
+        tickets(
+          filter: {
+            AND: [{ done: false }, { userStory: null }, { sprint_not: null }]
+          }
+        ) {
+          id
           sprint {
             id
           }
         }
       }
-      unAss: tickets(filter: { userStory: null }) {
-        id
-        done
-        sprint {
+      UsNoSp: Project(filter: { id: $id }) {
+        tickets(
+          filter: {
+            AND: [{ done: false }, { userStory_not: null }, { sprint: null }]
+          }
+        ) {
+          id
+          userStory {
+            id
+          }
+        }
+      }
+      UsSp: Project(filter: { id: $id }) {
+        tickets(
+          filter: {
+            AND: [{ done: false }, { userStory_not: null }, { sprint_not: null }]
+          }
+        ) {
+          id
+          sprint {
+            id
+          }
+          userStory{
+            id
+          }
+        }
+      }
+      DUS: Project(filter: { id: $id }) {
+        tickets(filter: { AND: [{ done: true }, { userStory_not: null }] }) {
+          id
+          userStory {
+            id
+          }
+        }
+      }
+      DnoUS: Project(filter: { id: $id }) {
+        tickets(filter: { AND: [{ done: true }, { userStory: null }] }) {
           id
         }
       }
-      sprints {
-        id
-        sprintNo
-      }
     }
-  }`,
+  `,
   CURR_PROJECT_ELEMENTS: gql`
     query($id: ID!) {
       Project(filter: { id: $id }) {
@@ -391,6 +424,20 @@ const gqlQueries = {
         SprintToStart(
           project: $project
           tick: $tick
+          sprintRemove: $sprintRemove
+        )
+      }`,
+    TIC_CHANGE_SPRINT: gql`
+      mutation(
+        $project: _ProjectInput!
+        $tick: _TicketInput!
+        $sprintAdd: _SprintInput!
+        $sprintRemove: _SprintInput!
+      ) {
+        SwitchSprint(
+          project: $project
+          tick: $tick
+          sprintAdd: $sprintAdd
           sprintRemove: $sprintRemove
         )
       }`,

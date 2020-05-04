@@ -45,9 +45,7 @@
       </v-btn>
     </v-app-bar>
     <snackbar />
-    <v-container fluid>
-
-      <!-- If using vue-router -->
+    <v-container fill-height fluid>
       <router-view/>
     </v-container>
   </v-app>

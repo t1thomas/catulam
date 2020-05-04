@@ -1,13 +1,15 @@
 <template>
-  <v-content
+  <v-container fluid fill-height
     v-if="dataLoaded"
   >
-    <topSection />
-    <v-divider />
-    <details-section />
-    <v-divider />
-    <desc-section />
-  </v-content>
+    <v-content class="fill-height">
+      <topSection />
+      <v-divider />
+      <details-section />
+      <v-divider />
+      <desc-section />
+    </v-content>
+  </v-container>
 </template>
 
 <script>
@@ -41,8 +43,6 @@ export default {
   async mounted() {
     await this.fetchCurrTicket(this.tickId);
     await this.fetchCurrProElements(this.proId);
-    // console.log(this.ticket);
-    // console.log(this.project);
   },
   methods: {
     ...mapActions([

@@ -1,7 +1,7 @@
 <template>
   <v-card flat>
     <v-tabs
-      v-if="currProject"
+      v-if="currProject !== null"
       vertical
       color="orange"
     >
@@ -47,12 +47,12 @@
       </v-tab>
 
       <v-tab-item>
-        <!--        <v-btn-->
-        <!--          class="primary"-->
-        <!--          @click="print"-->
-        <!--        >-->
-        <!--          Print-->
-        <!--        </v-btn>-->
+        <v-btn
+          class="primary"
+          @click="print"
+        >
+          Print
+        </v-btn>
         <v-card flat>
           <v-simple-table>
             <template v-slot:default>
@@ -83,7 +83,7 @@
                           :src="gravatar(member)"
                         />
                       </v-avatar>
-                      {{ member.User.fullName }}
+                      {{ member.fullName }}
                       <v-chip
                         v-if="member.type === 'pm'"
                         class="ml-2"
@@ -102,10 +102,10 @@
                     </v-chip>
                   </td>
                   <td>
-                    {{ unCompleteTicksCount(member.User) }}
+                    {{ unCompleteTicksCount(member) }}
                   </td>
                   <td>
-                    {{ doneTicksCount(member.User) }}
+                    {{ doneTicksCount(member) }}
                   </td>
                 </tr>
               </tbody>
@@ -171,7 +171,7 @@
                           :src="gravatar(memberByID(ticket.assignee.id))"
                         />
                       </v-avatar>
-                      {{ memberByID(ticket.assignee.id).User.fullName }}
+                      {{ memberByID(ticket.assignee.id).fullName }}
                     </v-chip>
                     <v-chip
                       v-else
@@ -307,7 +307,7 @@ export default {
     },
     proMembers() {
       // get all the members from state.currPmProjects
-      return this.currProject.members;
+      return this.currProject.members.map((member) => member.User);
     },
     proTicketsComplete() {
       return this.currProject.tickets.filter((tick) => tick.done === true);
@@ -333,10 +333,10 @@ export default {
       this.sPlannerShow({ show: true, proId: this.currProject.id });
     },
     memberByID(id) {
-      return this.proMembers.find((member) => member.User.id === id);
+      return this.proMembers.find((member) => member.id === id);
     },
     gravatar(member) {
-      return `https://gravatar.com/avatar/${member.User.avatar}?d=identicon`;
+      return `https://gravatar.com/avatar/${member.avatar}?d=identicon`;
     },
     print() {
       console.log(this.proMembers);

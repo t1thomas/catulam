@@ -10,8 +10,19 @@
       :key="sprint.id"
       :name="sprint.sprintNo"
     >
+      <div
+        class="overline"
+      >
+        Sprint {{ sprint.sprintNo }}
+      </div>
       <draggable-tick-list
-        :ticket-ids="getTicsPerSprint(sprint.id, userStoryId)"
+        v-if="!noUs"
+        :ticket-ids="tickIds(sprint.id, userStoryId)"
+        :list-properties="tickListConfig(sprint.id, sprint.sprintNo)"
+      />
+      <draggable-tick-list
+        v-else
+        :ticket-ids="tickIdsNoUs(sprint.id)"
         :list-properties="tickListConfig(sprint.id, sprint.sprintNo)"
       />
     </v-carousel-item>
@@ -37,8 +48,11 @@ export default {
     carouselModelLocal: 0,
   }),
   computed: {
+    noUs() {
+      return this.userStoryId === 'noUs';
+    },
     ...mapState({
-      sprintList: (state) => state.backLogData.sprints,
+      sprintList: (state) => state.currProElements.sprints,
       carModP: (state) => state.carouselModelParent,
     }),
     carouselModel: {
@@ -51,32 +65,33 @@ export default {
         this.setCarouselModel(newValue);
       },
     },
-    ...mapGetters([
-      'getStoryById',
-      'getTicsPerSprint',
-    ]),
+    ...mapGetters({
+      tickIds: 'getTickIdsPerSprintUS',
+      tickIdsNoUs: 'getTickIdsPerSprintNoUS',
+    }),
   },
   methods: {
-    // ticsPerSprint(id) {
-    //   const tickets = this.story.tickets.filter((tick) => tick.sprint.id === id);
-    //   return tickets.map((tick) => tick.id);
-    // },
     ...mapActions([
       'setCarouselModel',
     ]),
     tickListConfig(id, sprintNo) {
+      if (!this.noUs) {
+        return {
+          userStoryId: this.userStoryId,
+          columnType: 'sprint',
+          sprintId: id,
+          disabled: false,
+          sprintNo,
+        };
+      }
       return {
-        userStoryId: this.userStoryId, columnType: 'sprint', sprintId: id, disabled: false, sprintNo,
+        userStoryId: null,
+        columnType: 'sprint',
+        sprintId: id,
+        disabled: false,
+        sprintNo,
       };
     },
-    // onSwipeLeft() {
-    //   console.log('Left');
-    //   this.carouselModelLocal += 1;
-    // },
-    // onSwipeRight() {
-    //   console.log('Right');
-    //   this.carouselModelLocal -= 1;
-    // },
   },
 };
 </script>

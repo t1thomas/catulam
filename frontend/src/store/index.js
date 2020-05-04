@@ -58,7 +58,6 @@ export default new Vuex.Store({
       } else {
         state.backLogData = { ...obj };
       }
-      // Vue.set(state, 'backLogData', [...obj]);
     },
     set_currProElements(state, obj) {
       if (obj === null) {
@@ -282,11 +281,11 @@ export default new Vuex.Store({
         variables: { id },
       })
         .then((response) => {
-          const { Project } = response.data;
-          if (Project === null) {
+          const { data } = response;
+          if (data === null) {
             throw new Error();
           } else {
-            commit('set_backLogData', Project[0]);
+            commit('set_backLogData', data);
           }
         })
         .catch((error) => {
@@ -566,36 +565,31 @@ export default new Vuex.Store({
       .find((ticket) => ticket.id === id),
     /* eslint-disable no-underscore-dangle */
     getIssueById: (state) => (issueId) => state.issues.filter((issue) => issueId === issue._id),
-    // getCompletedTickIds: state => ArrTicketIds => ArrTicketIds
-    //   .filter(tickId => state.tickets[tickId].done === true),
-    // getUnCompleteTickIds: state => ArrTicketIds => ArrTicketIds
-    //   .filter(tickId => state.tickets[tickId].done === false),
-    getTicsPerSprint: (state) => (sprintId, userStoryId) => state.backLogData.userStories
-      .find((story) => story.id === userStoryId).tickets
-      .reduce((arr, currTicket) => {
-        if (currTicket.sprint !== null) {
-          if (currTicket.sprint.id === sprintId) {
-            arr.push(currTicket.id);
-          }
-        }
-        return arr;
-      }, []),
-    getUnStagedTicks: (state) => (userStoryId) => state.backLogData.userStories
-      .find((userStory) => userStory.id === userStoryId).tickets
-      .reduce((arr, currTicket) => {
-        if (currTicket.done === false && currTicket.sprint === null) {
-          arr.push(currTicket.id);
-        }
-        return arr;
-      }, []),
-    getCompletedTicks: (state) => (userStoryId) => state.backLogData.userStories
-      .find((userStory) => userStory.id === userStoryId).tickets
-      .reduce((arr, currTicket) => {
-        if (currTicket.done === true && currTicket.sprint === null) {
-          arr.push(currTicket.id);
-        }
-        return arr;
-      }, []),
+    // get ticket ids that dont have sprints, and have a uStory id that matches param
+    getTicksUsNoSp: (state) => (userStoryId) => state.backLogData.UsNoSp[0].tickets
+      .filter((tick) => tick.userStory.id === userStoryId)
+      .map((tick) => tick.id),
+    // get ticket ids that are done, and have a uStory id that matches param
+    getDoneTicksUs: (state) => (userStoryId) => state.backLogData.DUS[0].tickets
+      .filter((tick) => tick.userStory.id === userStoryId)
+      .map((tick) => tick.id),
+    // get ticket ids that are done, and have no uStory id
+    getDoneTicksNoUs: (state) => state.backLogData.DnoUS[0].tickets
+      .map((tick) => tick.id),
+    // get ticket ids have a uStory id sprint id that matches params
+    getTickIdsPerSprintUS: (state) => (sprintId, userStoryId) => state.backLogData.UsSp[0].tickets
+      .filter((tick) => tick.sprint.id === sprintId && tick.userStory.id === userStoryId)
+      .map((tick) => tick.id),
+    // get ticket ids that dont have sprints, and no a uStory
+    getTicksNoUsNoSp: (state) => state.backLogData.noUsNoSp[0].tickets
+      .map((tick) => tick.id),
+
+    // get ticket ids without uStory, but sprint id that matches params
+    getTickIdsPerSprintNoUS: (state) => (sprintId) => state.backLogData.noUsSp[0].tickets
+      .filter((tick) => tick.sprint.id === sprintId)
+      .map((tick) => tick.id),
+
+
     getUserStoryText: (state) => (userStoryId) => state.currProElements.userStories
       .find((userStory) => userStory.id === userStoryId).storyText,
     getSprintValues: (state) => state.currProElements.sprints
@@ -620,35 +614,6 @@ export default new Vuex.Store({
         }
         return arr;
       }, []),
-    /* Retrieve tickets in done vs un-complete state based on array of tick Ids passed in */
-    // getRepoNames: state => state.repoAndBranch.reduce((arr, repo) => {
-    //   arr.push(repo.name);
-    //   return arr;
-    // }, []),
-    // getRepoBranches: state => repoName => state.repoAndBranch
-    //   .filter(repo => repoName === repo.name)
-    //   .reduce((arr, repo) => {
-    //     (repo.refs.nodes).forEach((branch) => {
-    //       const currentDatetime = new Date(branch.target.committedDate);
-    // eslint-disable-next-line max-len
-    //       const formattedDate = `${currentDatetime.getDate()}-${currentDatetime.getMonth() + 1}-${currentDatetime.getFullYear()} ${currentDatetime.getHours()}:${currentDatetime.getMinutes()}`;
-    //       arr.push({
-    //         label: branch.name,
-    //         lastCommit: formattedDate,
-    //         lastCommitFullDate: currentDatetime,
-    //         oid: branch.target.oid,
-    //         repoId: repo.id,
-    //         branchUrl: `${repo.url}/tree/${branch.name}`,
-    //       });
-    //     });
-    //     return arr;
-    //   }, []).sort((a, b) => {
-    //     /* eslint-disable no-param-reassign, no-nested-ternary */
-    //     a = new Date(a.lastCommitFullDate);
-    //     b = new Date(b.lastCommitFullDate);
-    //     return a > b ? -1 : a < b ? 1 : 0;
-    //     /* eslint-enable */
-    //   }),
   },
   modules: {
   },
