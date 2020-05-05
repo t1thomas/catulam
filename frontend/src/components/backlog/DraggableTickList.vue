@@ -30,7 +30,7 @@
 import { mapActions, mapState } from 'vuex';
 import draggable from 'vuedraggable';
 import Vue from 'vue';
-import ticketCardSlim from '../Ticket/ticketCardSlim.vue';
+import ticketCardSlim from '../Ticket/card/ticketCardSlim.vue';
 import gqlQueries from '../../graphql/gql-queries';
 
 export default {

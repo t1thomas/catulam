@@ -83,6 +83,8 @@
         id: ID!
         sprintNo: Int!
         active: Boolean!
+        startDate: String!
+        endDate: String!
         tickets: [Ticket] @relation(name: "SPRINT_TASK", direction: IN)
         project: Project @relation(name: "SPRINT", direction: OUT)
     }

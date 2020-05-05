@@ -1,52 +1,98 @@
 <template>
   <v-card color="#5c535366">
-    <v-toolbar dense>
-      <v-toolbar-title>{{ proTitle }} ({{ proLabel}})</v-toolbar-title>
-
-      <v-spacer></v-spacer>
-
-      <v-speed-dial
-        v-model="addBtn"
-        right
-        direction="left"
-        open-on-hover
-        transition="slide-x-reverse-transition"
+    <v-card-title
+      class="pa-0"
+    >
+      <v-toolbar
+        dense
+        fixed
+        class="d-inline"
+        extension-height="0"
+        style="z-index: 1"
       >
-        <template v-slot:activator>
-          <v-btn
-            small
+        <v-toolbar-title>{{ currPro.title }} ({{ currPro.label }})</v-toolbar-title>
+        <template
+          v-slot:extension
+        >
+          <v-speed-dial
             v-model="addBtn"
-            color="blue darken-2"
-            dark
-            fab
+            right
+            absolute
+            direction="left"
+            transition="slide-x-reverse-transition"
           >
-            <v-icon v-if="addBtn">mdi-close</v-icon>
-            <v-icon v-else>mdi-plus</v-icon>
-          </v-btn>
-        </template>
-        <v-btn
-          fab
-          dark
-          x-small
-          color="#1f4423"
-          @click="nTicShow"
-        >
-          <v-icon>mdi-ticket-confirmation</v-icon>
-        </v-btn>
-        <v-btn
-          fab
-          dark
-          x-small
-          color="#17429b66"
-        >
-          <v-icon>mdi-book-open-variant</v-icon>
-        </v-btn>
-      </v-speed-dial>
-    </v-toolbar>
+            <template v-slot:activator>
+              <v-btn
+                v-model="addBtn"
+                small
+                color="blue darken-2"
+                dark
+                fab
+              >
+                <v-icon v-if="addBtn">
+                  mdi-close
+                </v-icon>
+                <v-icon v-else>
+                  mdi-plus
+                </v-icon>
+              </v-btn>
+            </template>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  fab
+                  dark
+                  x-small
+                  color="#1f4423"
+                  v-on="on"
+                  @click="nTicShow"
+                >
+                  <v-icon>mdi-ticket-confirmation</v-icon>
+                </v-btn>
+              </template>
+              <span class="caption">New Ticket</span>
+            </v-tooltip>
 
-    <v-divider></v-divider>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  fab
+                  dark
+                  x-small
+                  color="#17429b66"
+                  v-on="on"
+                >
+                  <v-icon>mdi-book-open-variant</v-icon>
+                </v-btn>
+              </template>
+              <span class="caption">New Story</span>
+            </v-tooltip>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                <v-btn
+                  fab
+                  dark
+                  x-small
+                  color="#4d371a"
+                  v-on="on"
+                  @click="sPlanShow"
+                >
+                  <v-icon>mdi-run-fast</v-icon>
+                </v-btn>
+              </template>
+              <span class="caption">New Sprint</span>
+            </v-tooltip>
+          </v-speed-dial>
+        </template>
+      </v-toolbar>
+    </v-card-title>
+
+    <v-divider />
     <v-card-text class="pa-2">
-      <div class="containers overflow-y-auto" style="height: 80vh" >
+      <div
+        class="containers overflow-y-auto"
+        style="height: 80vh"
+      >
         <v-row
           no-gutters
           class="mb-0"
@@ -73,7 +119,7 @@
           </v-col>
         </v-row>
         <v-row
-          v-for="story in stories"
+          v-for="story in currPro.userStories"
           :key="story.id"
           class="mb-0"
           no-gutters
@@ -112,19 +158,14 @@ import { mapActions, mapState } from 'vuex';
 import USColumnStart from './Columns/USColStart.vue';
 import USColumnEnd from './Columns/USColEnd.vue';
 import SPColumnMiddle from './Columns/SPColMid.vue';
-import unassignedTicks from './Columns/unassignedTicks.vue';
 import gqlQueries from '../../graphql/gql-queries';
 
 export default {
   name: 'BoardRows',
   components: {
-    // eslint-disable-next-line vue/no-unused-components
     'sprints-column': SPColumnMiddle,
     'start-column': USColumnStart,
-    // eslint-disable-next-line vue/no-unused-components
     'done-column': USColumnEnd,
-    // eslint-disable-next-line vue/no-unused-components
-    unassignedTicks,
   },
   data: () => ({
     mess: 'hello',
@@ -132,15 +173,10 @@ export default {
   }),
   computed: {
     ...mapState({
-      stories: (state) => state.currProElements.userStories,
-      proTitle: (state) => state.currProElements.title,
-      proLabel: (state) => state.currProElements.label,
+      currPro: (state) => state.currProElements,
     }),
     proId() {
       return this.$route.query.proId;
-    },
-    rowHeight() {
-      return `calc(100% / ${this.stories.length} * ${this.stories.length + 1} )`;
     },
   },
   mounted() {
@@ -163,6 +199,7 @@ export default {
       'fetchBackLogData',
       'fetchCurrProElements',
       'nTicDialogShow',
+      'sPlannerShow',
     ]),
     async loadData() {
       await this.fetchCurrProElements(this.proId);
@@ -170,6 +207,9 @@ export default {
     },
     nTicShow() {
       this.nTicDialogShow({ show: true });
+    },
+    sPlanShow() {
+      this.sPlannerShow({ show: true, proId: this.currPro.id });
     },
   },
 };
@@ -181,5 +221,8 @@ export default {
     grid-gap: 10px;
     display: grid;
     grid-auto-rows: 12rem;
+  }
+  .v-toolbar__extension {
+    height: 0!important;
   }
 </style>

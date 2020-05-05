@@ -231,9 +231,13 @@ const gqlQueries = {
         endDate
         sprints {
           id
+          startDate
+          endDate
           sprintNo
+          active
           tickets {
             id
+            done
           }
         }
       }

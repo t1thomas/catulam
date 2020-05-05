@@ -9,6 +9,7 @@
     <DetailsDrawer />
     <UserStoryRows v-if="loaded" />
     <NTicDialog v-if="showNTicDialog" />
+    <s-planner-dialog v-if="showSPlanDialog" />
   </v-content>
 </template>
 
@@ -17,9 +18,9 @@ import { mapActions, mapState } from 'vuex';
 import UserStoryRows from '../components/backlog/UserStoryRows.vue';
 import UADialog from '../components/backlog/dialogs/UADialog.vue';
 import USDialog from '../components/backlog/dialogs/USDialog.vue';
-import DetailsDrawer from '../components/Ticket/DetailsDrawer.vue';
+import DetailsDrawer from '../components/Ticket/drawer component/DetailsDrawer.vue';
 import NTicDialog from '../components/backlog/NTicDialog.vue';
-// import gqlQueries from '../graphql/gql-queries';
+import SPlannerDialog from '../components/pm/SprintPlan/SPlannerDialog.vue';
 
 export default {
   name: 'Backlog',
@@ -29,6 +30,7 @@ export default {
     USDialog,
     DetailsDrawer,
     NTicDialog,
+    SPlannerDialog,
   },
   data: () => ({
     loaded: false,
@@ -38,7 +40,7 @@ export default {
       showUADialog: (state) => state.changeDialog.showUADialog,
       showUSDialog: (state) => state.changeDialog.showUSDialog,
       showNTicDialog: (state) => state.nTicketDialog.show,
-      showDrawer: (state) => state.detailsDrawer.show,
+      showSPlanDialog: (state) => state.sPlanDialog.show,
     }),
     proId() {
       return this.$route.query.proId;
@@ -48,7 +50,6 @@ export default {
     async proId() {
       this.loaded = false;
       await this.loadData();
-      // this.startSubscription();
       this.loaded = true;
     },
   },
@@ -60,6 +61,7 @@ export default {
     ...mapActions([
       'fetchBackLogData',
       'fetchCurrProElements',
+      'sPlannerShow',
     ]),
     async loadData() {
       await this.fetchCurrProElements(this.proId);

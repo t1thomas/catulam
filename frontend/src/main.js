@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 import Vue from 'vue';
 import App from './App.vue';
 import router from './router';
@@ -8,6 +10,8 @@ import '@babel/polyfill';
 import 'roboto-fontface/css/roboto/roboto-fontface.css';
 import '@mdi/font/css/materialdesignicons.css';
 
+
+Vue.$moment = moment;
 Vue.config.productionTip = false;
 Vue.$store = store;
 

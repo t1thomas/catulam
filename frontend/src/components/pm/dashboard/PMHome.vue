@@ -65,15 +65,6 @@ export default {
     ]),
     async print() {
       console.log(this.projects);
-      // await Vue.$apolloClient.query({
-      //   query: gqlQueries.ALL_USERS,
-      //   fetchPolicy: 'no-cache',
-      // }).then((response) => {
-      //   const { User } = response.data;
-      //   console.log(User);
-      // }).catch((error) => {
-      //   console.error(error);
-      // });
     },
   },
 };
