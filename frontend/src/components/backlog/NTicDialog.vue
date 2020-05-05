@@ -84,12 +84,6 @@
     </v-dialog>
   </v-row>
 </template>
-<!--id: ID!-->
-<!--issueNumber: Int!-->
-<!--title: String!-->
-<!--done: Boolean!-->
-<!--hourEstimate: Int-->
-<!--creator: [Created]-->
 <script>
 import { mapActions, mapState } from 'vuex';
 import Vue from 'vue';

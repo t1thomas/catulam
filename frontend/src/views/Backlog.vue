@@ -1,18 +1,15 @@
 <template>
-  <v-container
-    class="fill-height"
-    fluid
-  >
+  <v-content class="pb-0">
     <UADialog
       v-if="showUADialog"
     />
     <USDialog
       v-if="showUSDialog"
     />
-    <DetailsDrawer v-if="showDrawer" />
+    <DetailsDrawer />
     <UserStoryRows v-if="loaded" />
     <NTicDialog v-if="showNTicDialog" />
-  </v-container>
+  </v-content>
 </template>
 
 <script>

@@ -4,7 +4,7 @@
       tag="div"
       v-bind="dragOptions"
       class="v-list v-list--dense"
-      style="background: rgb(39, 54, 102); width: 100%; height: 100%;"
+      style="background: #17429b66; width: 100%; height: 100%;"
       @end="ended"
       @add="onAdd"
       @remove="onRemove"
@@ -18,7 +18,9 @@
         clickable
         @dblclick="detailsDrawer(ticketId)"
       >
-        <ticket-card-slim :tick-id="ticketId" />
+        <ticket-card-slim
+          :tick-id="ticketId"
+        />
       </v-list-item>
     </draggable>
   </v-sheet>

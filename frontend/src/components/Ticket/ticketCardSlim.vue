@@ -1,48 +1,54 @@
 <template>
-  <v-card
-    v-if="ticket"
-    width="100%"
+  <v-hover
+    v-slot:default="{ hover }"
+    open-delay="100"
   >
-    <v-row no-gutters>
-      <v-col style="text-align: center">
-        <span class="font-weight-medium body-2">
-          {{ ticket.title }}    #{{ ticket.issueNumber }}
-        </span>
-        <v-chip
-          x-small
-          color="dark-grey"
-          text-color="white"
-        >
-          <v-avatar left>
-            <v-icon>mdi-progress-clock</v-icon>
-          </v-avatar>
-          {{ ticket.hourEstimate }}hr
-        </v-chip>
-        <v-chip
-          x-small
-          pill
-          class="ml-2"
-        >
-          <v-avatar
-            left
-            tile
+    <v-card
+      v-if="ticket"
+      :elevation="hover ? 12 : 2"
+      width="100%"
+    >
+      <v-row no-gutters>
+        <v-col style="text-align: center">
+          <span class="font-weight-medium body-2">
+            {{ ticket.title }}    #{{ ticket.issueNumber }}
+          </span>
+          <v-chip
+            x-small
+            color="dark-grey"
+            text-color="white"
           >
-            <v-img
-              v-if="assignee"
-              :src="gravatar"
-            />
-            <v-icon
-              v-else
-              dark
+            <v-avatar left>
+              <v-icon>mdi-progress-clock</v-icon>
+            </v-avatar>
+            {{ ticket.hourEstimate }}hr
+          </v-chip>
+          <v-chip
+            x-small
+            pill
+            class="ml-2"
+          >
+            <v-avatar
+              left
+              tile
             >
-              mdi-help-circle
-            </v-icon>
-          </v-avatar>
-          {{ fullName }}
-        </v-chip>
-      </v-col>
-    </v-row>
-  </v-card>
+              <v-img
+                v-if="assignee"
+                :src="gravatar"
+              />
+              <v-icon
+                v-else
+                dark
+              >
+                mdi-help-circle
+              </v-icon>
+            </v-avatar>
+            {{ fullName }}
+          </v-chip>
+        </v-col>
+      </v-row>
+    </v-card>
+  </v-hover>
 </template>
 
 <script>

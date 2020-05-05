@@ -1,63 +1,111 @@
 <template>
-  <v-content
-    class="fill-height containers">
-    <v-row
-      class="mb-2"
-      no-gutters
-    >
-      <v-col
-        class="columns"
-        cols="5"
-      >
-        <start-column user-story-id="noUs" />
-      </v-col>
-      <v-col
-        class="columns"
+  <v-card color="#5c535366">
+    <v-toolbar dense>
+      <v-toolbar-title>{{ proTitle }} ({{ proLabel}})</v-toolbar-title>
 
-        cols="4"
-      >
-        <sprints-column user-story-id="noUs" />
-      </v-col>
-      <v-col
-        class="columns"
+      <v-spacer></v-spacer>
 
-        cols="3"
+      <v-speed-dial
+        v-model="addBtn"
+        right
+        direction="left"
+        open-on-hover
+        transition="slide-x-reverse-transition"
       >
-        <done-column user-story-id="noUs" />
-      </v-col>
-    </v-row>
-    <v-row
-      v-for="story in stories"
-      :key="story.id"
-      class="mb-2"
-      no-gutters
-    >
-      <v-col
-        class="columns"
-        cols="5"
-      >
-        <start-column :user-story-id="story.id" />
-      </v-col>
-      <v-col
-        class="columns"
+        <template v-slot:activator>
+          <v-btn
+            small
+            v-model="addBtn"
+            color="blue darken-2"
+            dark
+            fab
+          >
+            <v-icon v-if="addBtn">mdi-close</v-icon>
+            <v-icon v-else>mdi-plus</v-icon>
+          </v-btn>
+        </template>
+        <v-btn
+          fab
+          dark
+          x-small
+          color="#1f4423"
+          @click="nTicShow"
+        >
+          <v-icon>mdi-ticket-confirmation</v-icon>
+        </v-btn>
+        <v-btn
+          fab
+          dark
+          x-small
+          color="#17429b66"
+        >
+          <v-icon>mdi-book-open-variant</v-icon>
+        </v-btn>
+      </v-speed-dial>
+    </v-toolbar>
 
-        cols="4"
-      >
-        <sprints-column
-          :user-story-id="story.id"
-        />
-      </v-col>
-      <v-col
-        class="columns"
+    <v-divider></v-divider>
+    <v-card-text class="pa-2">
+      <div class="containers overflow-y-auto" style="height: 80vh" >
+        <v-row
+          no-gutters
+          class="mb-0"
+        >
+          <v-col
+            class="columns"
+            cols="5"
+          >
+            <start-column user-story-id="noUs" />
+          </v-col>
+          <v-col
+            class="columns"
 
-        cols="3"
-      >
-        <done-column
-          :user-story-id="story.id"
-        />
-      </v-col>
-    </v-row>
-  </v-content>
+            cols="4"
+          >
+            <sprints-column user-story-id="noUs" />
+          </v-col>
+          <v-col
+            class="columns"
+
+            cols="3"
+          >
+            <done-column user-story-id="noUs" />
+          </v-col>
+        </v-row>
+        <v-row
+          v-for="story in stories"
+          :key="story.id"
+          class="mb-0"
+          no-gutters
+        >
+          <v-col
+            class="columns"
+            cols="5"
+          >
+            <start-column :user-story-id="story.id" />
+          </v-col>
+          <v-col
+            class="columns"
+
+            cols="4"
+          >
+            <sprints-column
+              :user-story-id="story.id"
+            />
+          </v-col>
+          <v-col
+            class="columns"
+
+            cols="3"
+          >
+            <done-column
+              :user-story-id="story.id"
+            />
+          </v-col>
+        </v-row>
+      </div>
+    </v-card-text>
+  </v-card>
 </template>
 <script>
 import { mapActions, mapState } from 'vuex';
@@ -80,13 +128,19 @@ export default {
   },
   data: () => ({
     mess: 'hello',
+    addBtn: false,
   }),
   computed: {
     ...mapState({
       stories: (state) => state.currProElements.userStories,
+      proTitle: (state) => state.currProElements.title,
+      proLabel: (state) => state.currProElements.label,
     }),
     proId() {
       return this.$route.query.proId;
+    },
+    rowHeight() {
+      return `calc(100% / ${this.stories.length} * ${this.stories.length + 1} )`;
     },
   },
   mounted() {
@@ -108,10 +162,14 @@ export default {
     ...mapActions([
       'fetchBackLogData',
       'fetchCurrProElements',
+      'nTicDialogShow',
     ]),
     async loadData() {
       await this.fetchCurrProElements(this.proId);
       await this.fetchBackLogData(this.proId);
+    },
+    nTicShow() {
+      this.nTicDialogShow({ show: true });
     },
   },
 };
@@ -119,7 +177,9 @@ export default {
 
 <style scoped>
   .containers {
+    width: 100%;
+    grid-gap: 10px;
     display: grid;
-    grid-template-rows: auto;
+    grid-auto-rows: 12rem;
   }
 </style>

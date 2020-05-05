@@ -62,19 +62,21 @@ export default {
       },
     },
   },
-  async mounted() {
-    await this.fetchCurrTicket(this.ticketId);
+  watch: {
+    async show(val) {
+      if (val) {
+        await this.fetchCurrTicket(this.ticketId);
+      }
+    },
   },
+  // async mounted() {
+  //   await this.fetchCurrTicket(this.ticketId);
+  // },
   methods: {
     ...mapActions([
       'detDrawShow',
       'fetchCurrTicket',
     ]),
-    // async getCurrentTicket() {
-    //   if (this.ticketId !== null) {
-    //     await this.fetchCurrTicket(this.ticketId);
-    //   }
-    // },
   },
 };
 </script>

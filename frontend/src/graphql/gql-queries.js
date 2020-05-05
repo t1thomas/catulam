@@ -89,6 +89,9 @@ const gqlQueries = {
   CURR_PROJECT_ELEMENTS: gql`
     query($id: ID!) {
       Project(filter: { id: $id }) {
+        id
+        title
+        label
         userStories {
           id
           storyText
