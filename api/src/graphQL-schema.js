@@ -327,6 +327,18 @@ const resolveFunctions = {
                 throw new Error(e);
             }
         },
+        CreateUserStory:  async (object, params, ctx, resolveInfo) => {
+            try {
+                // query for the project id linked to the current ticket
+                console.log(params);
+                const { id } = params.project;
+                // using project Id found,
+                ctx.pubSub.publish('project', {update: id});
+                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
         UpdateTicketAssignee: async (_, { tick, remUser, addUser, project }, {pubSub}) => {
             if(remUser && !addUser){
                 try {
@@ -403,6 +415,54 @@ const resolveFunctions = {
                     .then((result) => {
                         pubSub.publish('project', {update: project.id});
                         return result.records[0].get('t').properties;
+                    })
+                    .catch(e => {
+                        throw e;
+                    });
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
+        // CreateUserStory: async (_, { storyText, project }, {pubSub}) => {
+        //     try {
+        //         return neode.cypher('MATCH (p:Project)'+
+        //             ' WHERE p.id = $proId' +
+        //             ' CREATE (p)<-[:USER_STORY]-(us: UserStory { id: apoc.create.uuid(), storyText: $storyText })'+
+        //             ' WITH p, us' +
+        //             ' MATCH (p)<-[r1:USER_STORY]-(:UserStory)' +
+        //             ' WITH COUNT(r1) AS issNo, us' +
+        //             ' SET us.issueNumber = issNo' +
+        //             ' RETURN us',
+        //             { storyText, proId: project.id})
+        //             .then((result) => {
+        //                 pubSub.publish('project', {update: project.id});
+        //                 console.log(result.records[0].get('us').properties);
+        //                 return result.records[0].get('us').properties;
+        //             })
+        //             .catch(e => {
+        //                 throw e;
+        //             });
+        //     }catch (e) {
+        //         throw new Error(e);
+        //     }
+        // },
+        CreateSprint: async (_, { sprintNo, active, startDate, endDate, project }, {pubSub}) => {
+            try {
+                return neode.cypher('CREATE (s:Sprint{' +
+                    '  id : apoc.create.uuid(),' +
+                    '  sprintNo: $sprintNo,' +
+                    '  active: $active,' +
+                    '  startDate: $startDate,' +
+                    '  endDate: $endDate' +
+                    '})' +
+                    ' WITH s' +
+                    ' MATCH (p:Project) WHERE p.id = $project.id' +
+                    ' CREATE (s)-[r:SPRINT]->(p)' +
+                    ' RETURN s',
+                    {sprintNo, active, startDate, endDate, project})
+                    .then((result) => {
+                        pubSub.publish('project', {update: project.id});
+                        return result.records[0].get('s').properties;
                     })
                     .catch(e => {
                         throw e;

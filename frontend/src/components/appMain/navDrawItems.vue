@@ -1,7 +1,9 @@
 <template>
-  <v-list dense>
+  <v-list
+    v-if="currUser"
+    dense
+  >
     <v-list-item
-      v-if="currUser"
       link
       @click="logout"
     >
@@ -13,7 +15,6 @@
       </v-list-item-content>
     </v-list-item>
     <v-list-item
-      v-if="currUser"
       link
       @click="print"
     >
@@ -22,6 +23,17 @@
       </v-list-item-action>
       <v-list-item-content>
         <v-list-item-title>PRINT</v-list-item-title>
+      </v-list-item-content>
+    </v-list-item>
+    <v-list-item
+      link
+      to="/home"
+    >
+      <v-list-item-action>
+        <v-icon>mdi-home</v-icon>
+      </v-list-item-action>
+      <v-list-item-content>
+        <v-list-item-title>Home</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
 
@@ -62,8 +74,15 @@ export default {
   computed: {
     ...mapState({
       currUser: 'currentUser',
-      projects: 'currentUserTasks',
+      devTasks: 'currentUserTasks',
+      pmProjects: 'currPmProjects',
     }),
+    projects() {
+      if (this.currUser.type === 'pm') {
+        return this.pmProjects;
+      }
+      return this.devTasks;
+    },
   },
   methods: {
     print() {

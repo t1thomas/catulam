@@ -146,8 +146,6 @@ Vue.use(VueApollo, { apolloClient });
 Vue.$apolloClient = apolloClient;
 
 const apolloProvider = new VueApollo({
-  // Apollo 2.0 allows multiple clients to be enabled at once.
-  // Here we select the default (and only) client.
   defaultClient: apolloClient,
 });
 

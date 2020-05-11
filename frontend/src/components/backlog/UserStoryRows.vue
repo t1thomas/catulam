@@ -61,13 +61,17 @@
                   x-small
                   color="#17429b66"
                   v-on="on"
+                  @click="NUStoryShow"
                 >
                   <v-icon>mdi-book-open-variant</v-icon>
                 </v-btn>
               </template>
               <span class="caption">New Story</span>
             </v-tooltip>
-            <v-tooltip bottom>
+            <v-tooltip
+              v-if="isPm"
+              bottom
+            >
               <template v-slot:activator="{ on }">
                 <v-btn
                   fab
@@ -95,28 +99,37 @@
       >
         <v-row
           no-gutters
-          class="mb-0"
+          class="mb-0 fill-height"
         >
           <v-col
-            class="columns"
+            class="columns fill-height"
             cols="5"
           >
             <start-column user-story-id="noUs" />
           </v-col>
           <v-col
-            class="columns"
+            class="columns fill-height"
 
             cols="4"
           >
             <sprints-column user-story-id="noUs" />
           </v-col>
           <v-col
-            class="columns"
+            class="columns fill-height"
 
             cols="3"
           >
             <done-column user-story-id="noUs" />
           </v-col>
+        </v-row>
+        <v-row
+          v-if="currPro.userStories.length <= 0"
+          no-gutters
+        >
+          <not-found-card
+            type="UStory"
+            @createAction="NUStoryShow"
+          />
         </v-row>
         <v-row
           v-for="story in currPro.userStories"
@@ -151,6 +164,8 @@
         </v-row>
       </div>
     </v-card-text>
+    <s-planner-dialog v-if="showSPlanDialog" />
+    <n-u-story-dialog v-if="showNUStoryDialog" />
   </v-card>
 </template>
 <script>
@@ -158,6 +173,9 @@ import { mapActions, mapState } from 'vuex';
 import USColumnStart from './Columns/USColStart.vue';
 import USColumnEnd from './Columns/USColEnd.vue';
 import SPColumnMiddle from './Columns/SPColMid.vue';
+import SPlannerDialog from '../pm/SprintPlan/planner dialog/SPlannerDialog.vue';
+import NotFoundCard from '../NotFoundCard.vue';
+import NUStoryDialog from '../UserStory/dialogs/NUStoryDialog.vue';
 import gqlQueries from '../../graphql/gql-queries';
 
 export default {
@@ -166,6 +184,9 @@ export default {
     'sprints-column': SPColumnMiddle,
     'start-column': USColumnStart,
     'done-column': USColumnEnd,
+    SPlannerDialog,
+    NUStoryDialog,
+    NotFoundCard,
   },
   data: () => ({
     mess: 'hello',
@@ -174,9 +195,15 @@ export default {
   computed: {
     ...mapState({
       currPro: (state) => state.currProElements,
+      currUser: (state) => state.currentUser,
+      showSPlanDialog: (state) => state.sPlanDialog.show,
+      showNUStoryDialog: (state) => state.nUStoryDialog.show,
     }),
     proId() {
       return this.$route.query.proId;
+    },
+    isPm() {
+      return this.currUser.type === 'pm';
     },
   },
   mounted() {
@@ -188,6 +215,7 @@ export default {
     observer.subscribe({
       async next() {
         await self.loadData();
+        await self.updateSPlanData();
       },
       error(error) {
         console.error(error);
@@ -200,6 +228,7 @@ export default {
       'fetchCurrProElements',
       'nTicDialogShow',
       'sPlannerShow',
+      'nUStoryDialogShow',
     ]),
     async loadData() {
       await this.fetchCurrProElements(this.proId);
@@ -208,8 +237,17 @@ export default {
     nTicShow() {
       this.nTicDialogShow({ show: true });
     },
-    sPlanShow() {
-      this.sPlannerShow({ show: true, proId: this.currPro.id });
+    async sPlanShow() {
+      await this.sPlannerShow({ show: true, proId: this.proId });
+    },
+    async NUStoryShow() {
+      this.nUStoryDialogShow({ show: true });
+    },
+    async updateSPlanData() {
+      // only request update if sprint planner is currently in view
+      if (this.showSPlanDialog) {
+        await this.sPlannerShow({ show: true, proId: this.proId });
+      }
     },
   },
 };

@@ -44,14 +44,17 @@
                 <th class="text-left">
                   Summary
                 </th>
+                <th class="text-left">
+                  Estimate (hrs)
+                </th>
               </tr>
             </thead>
             <tbody>
               <tr
-                v-for="task in projectTasks(project.id)"
-                :key="task.issueNo"
+                v-for="ticket in project.tickets"
+                :key="ticket.id"
                 style="cursor: pointer"
-                @click="navigation(task)"
+                @click="navigation(ticket.id, project.id)"
               >
                 <td>
                   <v-icon
@@ -60,8 +63,9 @@
                     mdi-ticket-confirmation
                   </v-icon>
                 </td>
-                <td># {{ task.issueNo }}</td>
-                <td>{{ task.title }}</td>
+                <td># {{ ticket.issueNumber }}</td>
+                <td>{{ ticket.title }}</td>
+                <td>{{ ticket.hourEstimate }}</td>
               </tr>
             </tbody>
           </template>
@@ -95,22 +99,8 @@ export default {
       const currProject = this.projects.find((project) => project.id === id);
       return currProject.tickets.length;
     },
-    projectTasks(id) {
-      const currProject = this.projects.find((project) => project.id === id);
-      const tasks = [];
-      currProject.tickets.forEach((tick) => {
-        tasks.push({
-          tickId: tick.id,
-          proId: id,
-          issueNo: tick.issueNumber,
-          title: tick.title,
-        });
-      });
-      return tasks;
-    },
-    navigation(task) {
+    navigation(tickId, proId) {
       // tickId and proId passed as query in url link
-      const { tickId, proId } = task;
       this.$router.push({
         path: '/ticket',
         query: { tickId, proId },

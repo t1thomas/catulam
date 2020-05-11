@@ -18,10 +18,16 @@ export default new Vuex.Store({
     nTicketDialog: {
       show: false,
     },
+    nUStoryDialog: {
+      show: false,
+    },
     sPlanDialog: {
       show: false,
       proId: null,
+      project: null,
+      sprints: null,
     },
+    nSpDialog: false,
     nProDialog: {
       show: false,
     },
@@ -39,16 +45,17 @@ export default new Vuex.Store({
     carouselModelParent: 1,
     backLogData: [],
     sprintList: [],
-    tickets: [],
-    routeAuth: false,
+    // tickets: [],
     projects: null,
     currentTicket: null,
-    currentProject: null,
     currProElements: null,
     allUserList: null,
     currPmProjects: null,
   },
   mutations: {
+    set_nSpDialog(state, obj) {
+      state.nSpDialog = obj;
+    },
     set_currPmPros(state, obj) {
       state.currPmProjects = obj;
     },
@@ -100,9 +107,9 @@ export default new Vuex.Store({
     set_projects(state, obj) {
       state.projects = obj;
     },
-    set_tickets(state, obj) {
-      Object.assign(state.tickets, obj);
-    },
+    // set_tickets(state, obj) {
+    //   Object.assign(state.tickets, obj);
+    // },
     set_sprintList(state, obj) {
       Vue.set(state, 'sprintList', [...obj]);
     },
@@ -155,9 +162,6 @@ export default new Vuex.Store({
         state.currentTicket.assignee = { ...obj };
       }
     },
-    set_currProject(state, obj) {
-      state.currentProject = { ...obj };
-    },
     set_currentUser(state, obj) {
       if (obj === null) {
         state.currentUser = null;
@@ -186,21 +190,26 @@ export default new Vuex.Store({
     set_sPlanShow(state, obj) {
       if (obj.show === false) {
         state.sPlanDialog.show = obj.show;
-        state.sPlanDialog.proId = null;
-        // state.currentTicket = null;
+        state.sPlanDialog.project = null;
+        state.sPlanDialog.sprints = null;
       } else {
         state.sPlanDialog.show = obj.show;
-        state.sPlanDialog.proId = obj.proId;
+        state.sPlanDialog.project = obj.project;
+        state.sPlanDialog.sprints = obj.sprints;
       }
     },
     set_nTicDialogShow(state, obj) {
       if (obj.show === false) {
         state.nTicketDialog.show = obj.show;
-        // state.detailsDrawer.ticketId = null;
-        // state.currentTicket = null;
       } else {
         state.nTicketDialog.show = obj.show;
-        // state.detailsDrawer.ticketId = obj.ticketId;
+      }
+    },
+    set_nUStoryDialogShow(state, obj) {
+      if (obj.show === false) {
+        state.nUStoryDialog.show = obj.show;
+      } else {
+        state.nUStoryDialog.show = obj.show;
       }
     },
     set_nProDialog(state, obj) {
@@ -213,9 +222,6 @@ export default new Vuex.Store({
         // state.detailsDrawer.ticketId = obj.ticketId;
       }
     },
-    // set_snackBarType(state, obj) {
-    //   state.snackBar.type = obj;
-    // },
   },
   actions: {
     snackBarOff({ commit }) {
@@ -232,17 +238,17 @@ export default new Vuex.Store({
       const { UserStory } = response.data;
       commit('set_userStories', UserStory);
     },
-    async fetchTickets({ commit }) {
-      await Vue.$apolloClient.query({
-        query: gqlQueries.Tickets,
-        fetchPolicy: 'no-cache',
-      }).then((response) => {
-        const { Ticket } = response.data;
-        commit('set_tickets', Ticket);
-      }).catch((error) => {
-        console.error(error);
-      });
-    },
+    // async fetchTickets({ commit }) {
+    //   await Vue.$apolloClient.query({
+    //     query: gqlQueries.Tickets,
+    //     fetchPolicy: 'no-cache',
+    //   }).then((response) => {
+    //     const { Ticket } = response.data;
+    //     commit('set_tickets', Ticket);
+    //   }).catch((error) => {
+    //     console.error(error);
+    //   });
+    // },
     async fetchSprints({ commit }) {
       await Vue.$apolloClient.query({
         query: gqlQueries.Sprints,
@@ -254,7 +260,18 @@ export default new Vuex.Store({
         console.error(error);
       });
     },
-
+    async fetchSPlannerData({ commit }, id) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.S_PLANNER_DATA,
+        fetchPolicy: 'no-cache',
+        variables: { id },
+      }).then((response) => {
+        const { Sprint } = response.data;
+        commit('set_sprintList', Sprint);
+      }).catch((error) => {
+        console.error(error);
+      });
+    },
     async fetchCurrProElements({ commit }, id) {
       await Vue.$apolloClient.query({
         query: gqlQueries.CURR_PROJECT_ELEMENTS,
@@ -415,25 +432,6 @@ export default new Vuex.Store({
           console.error(error);
         });
     },
-    async fetchCurrProject({ commit }, id) {
-      await Vue.$apolloClient.query({
-        query: gqlQueries.CURRENT_PROJECT,
-        fetchPolicy: 'no-cache',
-        variables: { id },
-      })
-        .then((response) => {
-          const { Project } = response.data;
-          if (Project === null) {
-            throw new Error();
-          } else {
-            commit('set_currProject', Project[0]);
-          }
-        })
-        .catch((error) => {
-          console.log('Unable to fetch Ticket');
-          console.error(error);
-        });
-    },
     async updateTicketHours({ commit }, payload) {
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.UPDATE_TICKET_ETIME,
@@ -470,7 +468,7 @@ export default new Vuex.Store({
     },
     async fetchPmPros({ commit }, payload) {
       await Vue.$apolloClient.query({
-        query: gqlQueries.PM_TASKS,
+        query: gqlQueries.PM_PROJECTS,
         fetchPolicy: 'no-cache',
         variables: payload,
       }).then((response) => {
@@ -484,6 +482,27 @@ export default new Vuex.Store({
           console.log('User not found');
           console.error(error);
         });
+    },
+    async sPlannerShow({ commit }, payload) {
+      if (!payload.show) {
+        commit('set_sPlanShow', payload);
+      } else {
+        await Vue.$apolloClient.query({
+          query: gqlQueries.S_PLANNER_DATA,
+          fetchPolicy: 'no-cache',
+          variables: { id: payload.proId },
+        })
+          .then((response) => {
+            const { Project } = response.data;
+            const project = Project[0];
+            const sprints = Project[0].sprints.sort((a, b) => a.sprintNo - b.sprintNo);
+            commit('set_sPlanShow', { show: true, project, sprints });
+          })
+          .catch((error) => {
+            console.log('Unable to load Sprint Planner');
+            console.error(error);
+          });
+      }
     },
     setCurrTickDesc({ commit }, value) {
       commit('set_currTickDesc', value);
@@ -529,11 +548,11 @@ export default new Vuex.Store({
     detDrawShow({ commit }, val) {
       commit('set_DrawerShow', val);
     },
-    sPlannerShow({ commit }, val) {
-      commit('set_sPlanShow', val);
-    },
     nTicDialogShow({ commit }, val) {
       commit('set_nTicDialogShow', val);
+    },
+    nUStoryDialogShow({ commit }, val) {
+      commit('set_nUStoryDialogShow', val);
     },
     nProDialogShow({ commit }, val) {
       commit('set_nProDialog', val);
@@ -588,8 +607,6 @@ export default new Vuex.Store({
     getTickIdsPerSprintNoUS: (state) => (sprintId) => state.backLogData.noUsSp[0].tickets
       .filter((tick) => tick.sprint.id === sprintId)
       .map((tick) => tick.id),
-
-
     getUserStoryText: (state) => (userStoryId) => state.currProElements.userStories
       .find((userStory) => userStory.id === userStoryId).storyText,
     getSprintValues: (state) => state.currProElements.sprints

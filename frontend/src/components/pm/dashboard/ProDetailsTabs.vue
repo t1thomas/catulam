@@ -47,12 +47,6 @@
       </v-tab>
 
       <v-tab-item>
-        <v-btn
-          class="primary"
-          @click="print"
-        >
-          Print
-        </v-btn>
         <v-card flat>
           <v-simple-table>
             <template v-slot:default>
@@ -281,7 +275,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
-import NotFoundCard from './NotFoundCard.vue';
+import NotFoundCard from '../../NotFoundCard.vue';
 
 export default {
   name: 'ProDetailsTabs',
@@ -309,12 +303,6 @@ export default {
       // get all the members from state.currPmProjects
       return this.currProject.members.map((member) => member.User);
     },
-    proTicketsComplete() {
-      return this.currProject.tickets.filter((tick) => tick.done === true);
-    },
-    proTicketsUnComplete() {
-      return this.currProject.tickets.filter((tick) => tick.done === false);
-    },
     proTickets() {
       return this.currProject.tickets;
     },
@@ -323,6 +311,12 @@ export default {
     },
     proSprints() {
       return this.currProject.sprints;
+    },
+    proTicketsComplete() {
+      return this.currProject.tickets.filter((tick) => tick.done === true);
+    },
+    proTicketsUnComplete() {
+      return this.currProject.tickets.filter((tick) => tick.done === false);
     },
   },
   methods: {
@@ -339,14 +333,16 @@ export default {
       return `https://gravatar.com/avatar/${member.avatar}?d=identicon`;
     },
     print() {
-      console.log(this.proMembers);
+      console.log(this.currProject.tickets);
     },
     doneTicksCount(member) {
-      const completed = this.proTicketsComplete.filter((tick) => tick.assignee.id === member.id);
+      const completed = this.proTicketsComplete
+        .filter((tick) => (tick.assignee) && tick.assignee.id === member.id);
       return completed.length;
     },
     unCompleteTicksCount(member) {
-      const unComplete = this.proTicketsUnComplete.filter((tick) => tick.assignee.id === member.id);
+      const unComplete = this.proTicketsUnComplete
+        .filter((tick) => (tick.assignee) && tick.assignee.id === member.id);
       return unComplete.length;
     },
     tickNavigation(ticket) {

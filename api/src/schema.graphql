@@ -114,6 +114,8 @@
         StartToSprint(project: _ProjectInput!, tick: _TicketInput!, sprintAdd: _SprintInput! ): String
         SprintToStart(project: _ProjectInput!, tick: _TicketInput!, sprintRemove: _SprintInput! ): String
         SwitchSprint(project: _ProjectInput!, tick: _TicketInput!, sprintAdd: _SprintInput!, sprintRemove: _SprintInput! ): String
+        CreateSprint(sprintNo: Int!, active: Boolean!, startDate: String!, endDate: String!, project: _ProjectInput!): Sprint
+
         CreateProject(
             id: ID,
             title: String!,
@@ -123,6 +125,19 @@
             endDate: String!,
             members: [_UserInput]!
         ): Project
+
+        CreateUserStory(storyText: String!, project: _ProjectInput!): UserStory
+            @cypher(statement:"""
+            MATCH (p:Project)
+            WHERE p.id = $project.id
+            CREATE (p)<-[:USER_STORY]-(us: UserStory { id: apoc.create.uuid(), storyText: $storyText })
+            WITH p, us
+            MATCH (p)<-[r1:USER_STORY]-(:UserStory)
+            WITH COUNT(r1) AS issNo, us
+            SET us.issueNumber = issNo
+            RETURN us
+            """)
+
         TicSwitchSprint(tickId: String!, sprintIdFrom: String!, sprintIdTo: String!): JSON
             @cypher(statement:"""
             MATCH (a:Ticket{id:tickId})-[rel:SPRINT_TASK]->(b:Sprint {id:sprintIdFrom})

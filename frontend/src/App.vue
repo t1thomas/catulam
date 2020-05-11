@@ -45,8 +45,11 @@
       </v-btn>
     </v-app-bar>
     <snackbar />
-    <v-container fill-height fluid>
-      <router-view/>
+    <v-container
+      fill-height
+      fluid
+    >
+      <router-view />
     </v-container>
   </v-app>
 </template>
@@ -97,8 +100,12 @@ export default {
   },
   async beforeUpdate() {
     if (this.currentUser) {
+      if (this.currentUser.type === 'pm') {
+        await this.fetchPmPros({ username: this.currentUser.username });
+      } else if (this.currentUser.type === 'dev') {
+        await this.fetchCurrentUserTasks({ username: this.currentUser.username });
+      }
       await this.fetchAllUserList();
-      await this.fetchCurrentUserTasks({ username: this.currentUser.username });
     }
   },
   methods: {
@@ -106,6 +113,7 @@ export default {
       'fetchAllUserList',
       'fetchCurrentUserTasks',
       'logoutUser',
+      'fetchPmPros',
     ]),
     async logout() {
       await this.logoutUser();

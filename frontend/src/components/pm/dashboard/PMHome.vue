@@ -36,10 +36,10 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapState } from 'vuex';
 import NProDialog from './NProDialog.vue';
 import ProjectList from './ProjectList.vue';
-import SPlannerDialog from '../SprintPlan/SPlannerDialog.vue';
+import SPlannerDialog from '../SprintPlan/planner dialog/SPlannerDialog.vue';
 
 export default {
   name: 'Home',
@@ -56,13 +56,7 @@ export default {
       projects: (state) => state.currPmProjects,
     }),
   },
-  async mounted() {
-    await this.fetchPmPros({ username: this.currUser.username });
-  },
   methods: {
-    ...mapActions([
-      'fetchPmPros',
-    ]),
     async print() {
       console.log(this.projects);
     },

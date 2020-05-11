@@ -23,6 +23,38 @@ const gqlQueries = {
         id
       }
     }`,
+  CREATE_USER_STORY: gql`
+    mutation(
+    $storyText: String!,
+    $project: _ProjectInput!
+    ) {
+      CreateUserStory(
+        storyText: $storyText,
+        project: $project
+      ) {
+        id
+        issueNumber
+      }
+    }`,
+  CREATE_SPRINT: gql`
+    mutation(
+    $sprintNo: Int!,
+    $active: Boolean!,
+    $startDate: String!,
+    $endDate: String!,
+    $project: _ProjectInput!
+    ) {
+      CreateSprint(
+        sprintNo: $sprintNo,
+        active: $active,
+        startDate: $startDate,
+        endDate: $endDate,
+        project: $project
+      ) {
+        id
+        sprintNo
+      }
+    }`,
   BACKLOG_DATA: gql`
     query($id: ID!) {
       noUsNoSp: Project(filter: { id: $id }) {
@@ -219,6 +251,7 @@ const gqlQueries = {
               id
               issueNumber
               title
+              hourEstimate
             }
           }
         }
@@ -242,7 +275,7 @@ const gqlQueries = {
         }
       }
     }`,
-  PM_TASKS: gql`
+  PM_PROJECTS: gql`
     query($username: String!) {
       User(filter: { username: $username }) {
         projects {

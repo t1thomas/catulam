@@ -5,7 +5,7 @@ import backlog from '../views/Backlog.vue';
 import login from '../views/Login.vue';
 import PassReset from '../views/PassReset.vue';
 import TicketPage from '../components/Ticket/Page Components/TicketPage.vue';
-import UserStoryPage from '../components/UserStoryPage.vue';
+import UserStoryPage from '../components/UserStory/UserStoryPage.vue';
 import SprintBoard from '../views/SprintBoard.vue';
 
 Vue.use(VueRouter);

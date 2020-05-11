@@ -34,10 +34,7 @@
 </template>
 
 <script>
-// @ is an alias to /src
-// import Vue from 'vue';
 import UserTasks from './UserTasks.vue';
-// import gqlQueries from '../graphql/gql-queries';
 
 export default {
   name: 'DevHome',

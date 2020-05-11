@@ -9,7 +9,6 @@
     <DetailsDrawer />
     <UserStoryRows v-if="loaded" />
     <NTicDialog v-if="showNTicDialog" />
-    <s-planner-dialog v-if="showSPlanDialog" />
   </v-content>
 </template>
 
@@ -19,8 +18,7 @@ import UserStoryRows from '../components/backlog/UserStoryRows.vue';
 import UADialog from '../components/backlog/dialogs/UADialog.vue';
 import USDialog from '../components/backlog/dialogs/USDialog.vue';
 import DetailsDrawer from '../components/Ticket/drawer component/DetailsDrawer.vue';
-import NTicDialog from '../components/backlog/NTicDialog.vue';
-import SPlannerDialog from '../components/pm/SprintPlan/SPlannerDialog.vue';
+import NTicDialog from '../components/Ticket/dialogs/NTicDialog.vue';
 
 export default {
   name: 'Backlog',
@@ -30,7 +28,6 @@ export default {
     USDialog,
     DetailsDrawer,
     NTicDialog,
-    SPlannerDialog,
   },
   data: () => ({
     loaded: false,
@@ -40,7 +37,6 @@ export default {
       showUADialog: (state) => state.changeDialog.showUADialog,
       showUSDialog: (state) => state.changeDialog.showUSDialog,
       showNTicDialog: (state) => state.nTicketDialog.show,
-      showSPlanDialog: (state) => state.sPlanDialog.show,
     }),
     proId() {
       return this.$route.query.proId;
