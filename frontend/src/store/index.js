@@ -44,6 +44,7 @@ export default new Vuex.Store({
     currentUserTasks: null,
     carouselModelParent: 1,
     backLogData: [],
+    sprintBoardData: null,
     sprintList: [],
     // tickets: [],
     projects: null,
@@ -64,6 +65,13 @@ export default new Vuex.Store({
         state.backLogData = null;
       } else {
         state.backLogData = { ...obj };
+      }
+    },
+    set_sprintBoardData(state, obj) {
+      if (obj === null) {
+        state.sprintBoardData = null;
+      } else {
+        state.sprintBoardData = { ...obj };
       }
     },
     set_currProElements(state, obj) {
@@ -307,6 +315,25 @@ export default new Vuex.Store({
         })
         .catch((error) => {
           console.log('Unable to fetch Backlog for project');
+          console.error(error);
+        });
+    },
+    async fetchSprintBoardData({ commit }, id) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.SPRINT_BOARD_DATA,
+        fetchPolicy: 'no-cache',
+        variables: { id },
+      })
+        .then((response) => {
+          const { data } = response;
+          if (data === null) {
+            throw new Error();
+          } else {
+            commit('set_sprintBoardData', data);
+          }
+        })
+        .catch((error) => {
+          console.log('Unable to fetch Sprint Data project');
           console.error(error);
         });
     },
@@ -631,6 +658,12 @@ export default new Vuex.Store({
         }
         return arr;
       }, []),
+    getPos0Ticks: (state) => state.sprintBoardData.pos0[0].tickets
+      .map((tick) => tick.id),
+    getPos1Ticks: (state) => state.sprintBoardData.pos1[0].tickets
+      .map((tick) => tick.id),
+    getPosDoneTicks: (state) => state.sprintBoardData.posDone[0].tickets
+      .map((tick) => tick.id),
   },
   modules: {
   },

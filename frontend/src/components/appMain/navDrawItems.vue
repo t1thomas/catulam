@@ -63,6 +63,52 @@
         </v-list-item>
       </template>
     </v-list-group>
+
+
+    <v-list-group
+      v-if="projects"
+      prepend-icon="mdi-view-dashboard-variant"
+      no-action
+    >
+      <template v-slot:activator>
+        <v-list-item-title>Sprints</v-list-item-title>
+      </template>
+
+      <v-list-group
+        v-for="project in projects"
+        :key="project.id"
+        no-action
+        sub-group
+      >
+        <template v-slot:activator>
+          <v-list-item-content>
+            <v-list-item-title>{{ project.label }}</v-list-item-title>
+          </v-list-item-content>
+        </template>
+
+        <template v-if="project.sprints.length > 0">
+          <v-list-item
+            v-for="sprint in project.sprints"
+            :key="sprint.id"
+            link
+            @click="toSprint(sprint.id, project.id)"
+          >
+            <v-list-item-title>
+              Sprint {{ sprint.sprintNo }}
+            </v-list-item-title>
+          </v-list-item>
+        </template>
+        <template v-else>
+          <v-list-item>
+            <v-list-item-title>
+              No Sprints Found
+            </v-list-item-title>
+          </v-list-item>
+        </template>
+      </v-list-group>
+    </v-list-group>
+
+
   </v-list>
 </template>
 
@@ -94,6 +140,13 @@ export default {
       this.$router.push({
         path: '/backlog',
         query: { proId: id },
+      });
+    },
+    toSprint(sprintId, proId) {
+      // proId passed as query in url link
+      this.$router.push({
+        path: '/sprint',
+        query: { sprintId, proId },
       });
     },
     ...mapActions([

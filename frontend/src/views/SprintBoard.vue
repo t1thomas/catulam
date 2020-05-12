@@ -1,13 +1,48 @@
 <template>
-  <div>Sprints {{sprintId}}</div>
+  <v-content class="fill-height">
+    <sprint-columns v-if="loaded" />
+  </v-content>
 </template>
 
 <script>
+import { mapActions } from 'vuex';
+import sprintColumns from '../components/sprintBoard/sprintColumns.vue';
+
 export default {
   name: 'SprintBoard',
+  components: {
+    sprintColumns,
+  },
+  data: () => ({
+    loaded: false,
+  }),
   computed: {
     sprintId() {
       return this.$route.query.sprintId;
+    },
+    proId() {
+      return this.$route.query.proId;
+    },
+  },
+  watch: {
+    async sprintId() {
+      this.loaded = false;
+      await this.loadData();
+      this.loaded = true;
+    },
+  },
+  async mounted() {
+    await this.loadData();
+    this.loaded = true;
+  },
+  methods: {
+    ...mapActions([
+      'fetchSprintBoardData',
+      'fetchCurrProElements',
+    ]),
+    async loadData() {
+      await this.fetchCurrProElements(this.proId);
+      await this.fetchSprintBoardData(this.sprintId);
     },
   },
 };

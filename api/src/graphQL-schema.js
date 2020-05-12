@@ -164,7 +164,7 @@ const resolveFunctions = {
                         params = { tick, uStoryRemove };
                         break;
                     case uStoryRemove !== undefined && sprintRemove === undefined && uStoryAdd === undefined && sprintAdd !== undefined:
-                        // UserStory Remove Only
+                        // UserStory Remove Only and add sprint
                         query = 'MATCH (t:Ticket {id:$tick.id})-[rel:SUB_TASK]->(u:UserStory {id:$uStoryRemove.id})'+
                             ' DELETE rel' +
                             ' WITH t' +

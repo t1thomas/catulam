@@ -1,0 +1,42 @@
+<template>
+  <v-col>
+    <v-card>
+      <v-card-title class="py-0">
+        Start
+      </v-card-title>
+      <v-card-text style="height: 85vh">
+        <drag-list
+          :list-properties="tickListConfig"
+          :ticket-ids="tickIdsPos0"
+        />
+      </v-card-text>
+    </v-card>
+  </v-col>
+</template>
+
+<script>
+import { mapGetters } from 'vuex';
+import DraggableTickListSprint from '../DraggableTickListSprint.vue';
+
+export default {
+  name: 'StartCol',
+  components: {
+    'drag-list': DraggableTickListSprint,
+  },
+  computed: {
+    tickListConfig() {
+      return {
+        columnType: 'start',
+        disabled: false,
+      };
+    },
+    ...mapGetters({
+      tickIdsPos0: 'getPos0Ticks',
+    }),
+  },
+};
+</script>
+
+<style scoped>
+
+</style>

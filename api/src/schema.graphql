@@ -42,16 +42,19 @@
         avatar: String
         type: Role!
     }
+
     type Created @relation(name: "CREATED") {
         from: User
         to: Ticket
         timestamp: String!
     }
+
     type Member @relation(name: "TEAM_MEMBER") {
         from: User
         to: Project
         type: Role!
     }
+
     type Project {
         id: ID!
         title: String!
@@ -69,6 +72,7 @@
         id: ID!
         issueNumber: Int
         hourEstimate: Int
+        sprintPos: Int!
         userStory: UserStory @relation(name: "SUB_TASK", direction: OUT)
         title: String!
         desc: String
@@ -96,10 +100,9 @@
            WITH n.id as key, apoc.map.removeKey(n {.*}, 'id')  as value
            RETURN apoc.map.fromPairs(collect([key, value]))
         """)
-
         getCurrentUser: User
-
     }
+
     type Subscription {
         update(proId:String!): String
     }
@@ -168,6 +171,7 @@
             id:apoc.create.uuid(),
             title:$title,
             hourEstimate:$hourEstimate,
+            sprintPos: 0,
             desc:$desc,
             done:false
             })<-[:CREATED {timestamp: apoc.date.currentTimestamp()}]-(u)

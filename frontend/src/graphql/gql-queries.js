@@ -249,6 +249,11 @@ const gqlQueries = {
           Project {
             id
             label
+            sprints {
+              id
+              sprintNo
+              active
+            }
             tickets(filter: { assignee: { username: $username } }) {
               id
               issueNumber
@@ -274,6 +279,24 @@ const gqlQueries = {
             id
             done
           }
+        }
+      }
+    }`,
+  SPRINT_BOARD_DATA: gql`
+    query($id: ID!) {
+      pos0: Sprint(filter: { id: $id }) {
+        tickets(filter: { AND: [{ done: false }, { sprintPos: 0 }] }) {
+          id
+        }
+      }
+      pos1: Sprint(filter: { id: $id }) {
+        tickets(filter: { AND: [{ done: false }, { sprintPos: 1 }] }) {
+          id
+        }
+      }
+      posDone: Sprint(filter: { id: $id }) {
+        tickets(filter: { AND: [{ done: true }, { sprintPos: 2 }] }) {
+          id
         }
       }
     }`,
