@@ -125,13 +125,14 @@
             RETURN t
             """)
 
-        SwitchSprint(project: _ProjectInput!, tick: _TicketInput!, sprintAdd: _SprintInput!, sprintRemove: _SprintInput! ): String
+        SwitchSprint(project: _ProjectInput!, ticket: _TicketInput!, sprintAdd: _SprintInput!, sprintRemove: _SprintInput! ): Ticket
             @cypher(statement:"""
-            MATCH (t:Ticket{id:$tick.id})-[rel:SPRINT_TASK]->(s1:Sprint {id:$sprintRemove.id})
+            MATCH (t:Ticket{id:$ticket.id})-[rel:SPRINT_TASK]->(s1:Sprint {id:$sprintRemove.id})
             MATCH (s2:Sprint {id:sprintAdd.id})
             CALL apoc.refactor.to(rel, s2)
             YIELD input, output, error
-            RETURN input, output, error
+            WITH t
+            RETURN t
             """)
 
         CreateProject(title: String!, desc: String, label: String!, startDate: String!, endDate: String!, members: [_UserInput]!): Project

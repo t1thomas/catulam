@@ -262,19 +262,29 @@ export default {
             fetchPolicy: 'no-cache',
             variables: {
               project: { id: this.proId },
-              tick: { id: this.ticketId },
+              ticket: { id: this.ticketId },
               sprintRemove: { id: this.removedFrom.sprintId },
               sprintAdd: { id: this.selectedOption.id },
             },
-          })
-            .then((response) => {
-              console.log(response);
-              // DOM auto updates via API subscription
-            })
-            .catch((error) => {
-              console.error(error);
-              this.switchBack();
+          }).then((response) => {
+            const { SwitchSprint } = response.data;
+            if (SwitchSprint === null) {
+              throw new Error('Unable to Update Ticket');
+            } else {
+              // show success notification of Ticket creation
+              this.snackBarOn({
+                message: `Switched Ticket ${SwitchSprint.title} #${SwitchSprint.issueNumber} to Sprint ${SwitchSprint.sprint.sprintNo} Successfully`,
+                type: 'success',
+              });
+            }
+          }).catch((error) => {
+            console.error(error);
+            this.snackBarOn({
+              message: error,
+              type: 'error',
             });
+            this.switchBack();
+          });
           break;
         default:
           console.log('No changes made');

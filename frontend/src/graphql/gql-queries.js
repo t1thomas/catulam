@@ -480,16 +480,22 @@ const gqlQueries = {
     TIC_CHANGE_SPRINT: gql`
       mutation(
         $project: _ProjectInput!
-        $tick: _TicketInput!
+        $ticket: _TicketInput!
         $sprintAdd: _SprintInput!
         $sprintRemove: _SprintInput!
       ) {
         SwitchSprint(
           project: $project
-          tick: $tick
+          ticket: $ticket
           sprintAdd: $sprintAdd
           sprintRemove: $sprintRemove
-        )
+        ){
+          title
+          issueNumber
+          sprint {
+            sprintNo
+          }
+        }
       }`,
   },
   SwitchUnassigned: {

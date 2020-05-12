@@ -103,8 +103,6 @@ const resolveFunctions = {
                         break;
                     case uStoryRemove !== undefined && uStoryAdd !== undefined && sprintAdd !== undefined && sprintRemove === undefined:
                         // Switch User Story and add sprint
-                        // console.log(project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd);
-                        console.log('here Mate');
                         query = 'MATCH (t:Ticket { id:$tick.id })-[rel:SUB_TASK]->(b:UserStory{ id:$uStoryRemove.id })' +
                             ' MATCH (c:UserStory { id:$uStoryAdd.id })' +
                             ' CALL apoc.refactor.to(rel, c)' +
