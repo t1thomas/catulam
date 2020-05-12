@@ -106,26 +106,76 @@
     type Mutation {
         loginUser(username: String!, password: String!): Token!
         resetPassword(username: String!, newPassword: String!): Token!
-        CreateTicket(hourEstimate: Int, title: String!, desc: String, project: _ProjectInput!, user: _UserInput!): Ticket
         CreateUser(id: ID!, firstName: String!, lastName: String, username: String!, email: String!, password: String!, passwordUpdate: Boolean!): User
         UpdateTicketAssignee(tick: _TicketInput!, remUser: _UserInput, addUser: _UserInput, project: _ProjectInput!): User
         UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
         UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
-        StartToSprint(project: _ProjectInput!, tick: _TicketInput!, sprintAdd: _SprintInput! ): String
-        SprintToStart(project: _ProjectInput!, tick: _TicketInput!, sprintRemove: _SprintInput! ): String
+        StartToSprint(project: _ProjectInput!, ticket: _TicketInput!, sprintAdd: _SprintInput! ): Ticket
+            @cypher(statement:"""
+            MATCH (t:Ticket),(s:Sprint)
+            WHERE t.id = $ticket.id AND s.id = $sprintAdd.id
+            CREATE (t)-[rel1:SPRINT_TASK]->(s)
+            RETURN t
+            """)
+        SprintToStart(project: _ProjectInput!, ticket: _TicketInput!, sprintRemove: _SprintInput! ): Ticket
+            @cypher(statement:"""
+            MATCH (t:Ticket {id:$ticket.id})-[rel1:SPRINT_TASK]->(s:Sprint{id:$sprintRemove.id})
+            WITH t, rel1
+            DELETE rel1
+            RETURN t
+            """)
+
         SwitchSprint(project: _ProjectInput!, tick: _TicketInput!, sprintAdd: _SprintInput!, sprintRemove: _SprintInput! ): String
+            @cypher(statement:"""
+            MATCH (t:Ticket{id:$tick.id})-[rel:SPRINT_TASK]->(s1:Sprint {id:$sprintRemove.id})
+            MATCH (s2:Sprint {id:sprintAdd.id})
+            CALL apoc.refactor.to(rel, s2)
+            YIELD input, output, error
+            RETURN input, output, error
+            """)
+
+        CreateProject(title: String!, desc: String, label: String!, startDate: String!, endDate: String!, members: [_UserInput]!): Project
+            @cypher(statement:"""
+            CREATE (p:Project{id: apoc.create.uuid(), title:$title,
+            label:$label, startDate:$startDate, endDate:$endDate, desc:$desc })
+            WITH $members AS users, p
+            UNWIND users AS user
+            MATCH (u:User)
+            WHERE u.id = user.id
+            CREATE (p)<-[:TEAM_MEMBER {type: u.type}]-(u)
+            RETURN p
+            """)
         CreateSprint(sprintNo: Int!, active: Boolean!, startDate: String!, endDate: String!, project: _ProjectInput!): Sprint
-
-        CreateProject(
-            id: ID,
-            title: String!,
-            desc: String,
-            label: String!,
-            startDate: String!,
-            endDate: String!,
-            members: [_UserInput]!
-        ): Project
-
+            @cypher(statement:"""
+            CREATE (s:Sprint{
+            id : apoc.create.uuid(),
+            sprintNo: $sprintNo,
+            active: $active,
+            startDate: $startDate,
+            endDate: $endDate
+            })
+            WITH s
+            MATCH (p:Project) WHERE p.id = $project.id
+            CREATE (s)-[r:SPRINT]->(p)
+            RETURN s
+            """)
+        CreateTicket(hourEstimate: Int, title: String!, desc: String, project: _ProjectInput!, user: _UserInput!): Ticket
+            @cypher(statement:"""
+            MATCH (p:Project),(u:User)
+            WHERE p.id = $project.id AND u.id = $user.id
+            CREATE (p)<-[:TICKET]-(t: Ticket {
+            id:apoc.create.uuid(),
+            title:$title,
+            hourEstimate:$hourEstimate,
+            desc:$desc,
+            done:false
+            })<-[:CREATED {timestamp: apoc.date.currentTimestamp()}]-(u)
+            WITH p, t
+            MATCH (p)<-[r1:TICKET]-(:Ticket)
+            WITH COUNT(r1) AS issNo, t
+            SET t.issueNumber = issNo
+            RETURN t
+            """)
         CreateUserStory(storyText: String!, project: _ProjectInput!): UserStory
             @cypher(statement:"""
             MATCH (p:Project)

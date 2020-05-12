@@ -139,6 +139,7 @@ export default {
     ...mapActions([
       'UADialogSwitcher', // opens/closes dialog
       'fetchBackLogData',
+      'snackBarOn',
     ]),
     print() {
       console.log(this.getSprintValues);
@@ -231,16 +232,27 @@ export default {
             fetchPolicy: 'no-cache',
             variables: {
               project: { id: this.proId },
-              tick: { id: this.ticketId },
+              ticket: { id: this.ticketId },
               sprintRemove: { id: this.removedFrom.sprintId },
             },
           })
             .then((response) => {
-              console.log(response);
-              // DOM auto updates via API subscription
-            })
-            .catch((error) => {
+              const { SprintToStart } = response.data;
+              if (SprintToStart === null) {
+                throw new Error('Unable to Update Ticket');
+              } else {
+                // show success notification of Ticket creation
+                this.snackBarOn({
+                  message: `Removed Ticket ${SprintToStart.title} #${SprintToStart.issueNumber} from sprint Successfully`,
+                  type: 'success',
+                });
+              }
+            }).catch((error) => {
               console.error(error);
+              this.snackBarOn({
+                message: error,
+                type: 'error',
+              });
               this.switchBack();
             });
           break;
@@ -279,18 +291,28 @@ export default {
           mutation: gqlQueries.SwitchStartSprint.TIC_ADD_SPRINT,
           variables: {
             project: { id: this.proId },
-            tick: { id: this.ticketId },
+            ticket: { id: this.ticketId },
             sprintAdd: { id: this.addedTo.sprintId },
           },
-        })
-          .then((response) => {
-            console.log(response);
-            // DOM auto updates via API subscription
-          })
-          .catch((error) => {
-            console.error(error);
-            this.switchBack();
+        }).then((response) => {
+          const { StartToSprint } = response.data;
+          if (StartToSprint === null) {
+            throw new Error('Unable to Update Ticket');
+          } else {
+            // show success notification of Ticket creation
+            this.snackBarOn({
+              message: `Moved Ticket ${StartToSprint.title} #${StartToSprint.issueNumber} to Sprint ${StartToSprint.sprint.sprintNo} Successfully`,
+              type: 'success',
+            });
+          }
+        }).catch((error) => {
+          console.error(error);
+          this.snackBarOn({
+            message: error,
+            type: 'error',
           });
+          this.switchBack();
+        });
       }
     },
     async removeFromUsStart() {

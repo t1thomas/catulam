@@ -110,6 +110,7 @@ export default {
   methods: {
     ...mapActions([
       'nTicDialogShow',
+      'snackBarOn',
     ]),
     titleMessage(val) {
       if (!val > 0) {
@@ -144,9 +145,19 @@ export default {
           const { CreateTicket } = response.data;
           if (CreateTicket === null) {
             throw new Error('Unable to Create Ticket');
+          } else {
+            // show success notification of Ticket creation
+            this.snackBarOn({
+              message: `Created Ticket ${CreateTicket.title} #${CreateTicket.issueNumber} Successfully`,
+              type: 'success',
+            });
           }
         }).catch((error) => {
           console.error(error);
+          this.snackBarOn({
+            message: error,
+            type: 'error',
+          });
         });
         this.setSaving();
         this.onCancel();

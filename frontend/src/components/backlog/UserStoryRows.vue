@@ -166,6 +166,13 @@
     </v-card-text>
     <s-planner-dialog v-if="showSPlanDialog" />
     <n-u-story-dialog v-if="showNUStoryDialog" />
+    <n-tic-dialog v-if="showNTicDialog" />
+    <u-a-dialog
+      v-if="showUADialog"
+    />
+    <u-s-dialog
+      v-if="showUSDialog"
+    />
   </v-card>
 </template>
 <script>
@@ -176,6 +183,9 @@ import SPColumnMiddle from './Columns/SPColMid.vue';
 import SPlannerDialog from '../pm/SprintPlan/planner dialog/SPlannerDialog.vue';
 import NotFoundCard from '../NotFoundCard.vue';
 import NUStoryDialog from '../UserStory/dialogs/NUStoryDialog.vue';
+import USDialog from './dialogs/USDialog.vue';
+import UADialog from './dialogs/UADialog.vue';
+import NTicDialog from '../Ticket/dialogs/NTicDialog.vue';
 import gqlQueries from '../../graphql/gql-queries';
 
 export default {
@@ -187,6 +197,9 @@ export default {
     SPlannerDialog,
     NUStoryDialog,
     NotFoundCard,
+    NTicDialog,
+    USDialog,
+    UADialog,
   },
   data: () => ({
     mess: 'hello',
@@ -198,6 +211,9 @@ export default {
       currUser: (state) => state.currentUser,
       showSPlanDialog: (state) => state.sPlanDialog.show,
       showNUStoryDialog: (state) => state.nUStoryDialog.show,
+      showNTicDialog: (state) => state.nTicketDialog.show,
+      showUADialog: (state) => state.changeDialog.showUADialog,
+      showUSDialog: (state) => state.changeDialog.showUSDialog,
     }),
     proId() {
       return this.$route.query.proId;

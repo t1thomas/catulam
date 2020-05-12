@@ -21,6 +21,8 @@ const gqlQueries = {
         user: $user
       ) {
         id
+        title
+        issueNumber
       }
     }`,
   CREATE_USER_STORY: gql`
@@ -322,7 +324,6 @@ const gqlQueries = {
     }`,
   CREATE_PROJECT: gql`
     mutation(
-      $id: ID
       $title: String!
       $desc: String
       $label: String!
@@ -334,7 +335,6 @@ const gqlQueries = {
         title: $title
         label: $label
         desc: $desc
-        id: $id
         startDate: $startDate
         endDate: $endDate
         members: $members
@@ -446,26 +446,36 @@ const gqlQueries = {
     TIC_ADD_SPRINT: gql`
       mutation(
         $project: _ProjectInput!
-        $tick: _TicketInput!
+        $ticket: _TicketInput!
         $sprintAdd: _SprintInput!
       ) {
         StartToSprint(
           project: $project
-          tick: $tick
+          ticket: $ticket
           sprintAdd: $sprintAdd
         )
+        {
+          title
+          issueNumber
+          sprint {
+            sprintNo
+          }
+        }
       }`,
     TIC_REMOVE_SPRINT: gql`
       mutation(
         $project: _ProjectInput!
-        $tick: _TicketInput!
+        $ticket: _TicketInput!
         $sprintRemove: _SprintInput!
       ) {
         SprintToStart(
           project: $project
-          tick: $tick
+          ticket: $ticket
           sprintRemove: $sprintRemove
-        )
+        ){
+          title
+          issueNumber
+        }
       }`,
     TIC_CHANGE_SPRINT: gql`
       mutation(

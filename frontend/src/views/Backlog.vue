@@ -1,43 +1,25 @@
 <template>
   <v-content class="pb-0">
-    <UADialog
-      v-if="showUADialog"
-    />
-    <USDialog
-      v-if="showUSDialog"
-    />
     <DetailsDrawer />
     <UserStoryRows v-if="loaded" />
-    <NTicDialog v-if="showNTicDialog" />
   </v-content>
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions } from 'vuex';
 import UserStoryRows from '../components/backlog/UserStoryRows.vue';
-import UADialog from '../components/backlog/dialogs/UADialog.vue';
-import USDialog from '../components/backlog/dialogs/USDialog.vue';
 import DetailsDrawer from '../components/Ticket/drawer component/DetailsDrawer.vue';
-import NTicDialog from '../components/Ticket/dialogs/NTicDialog.vue';
 
 export default {
   name: 'Backlog',
   components: {
     UserStoryRows,
-    UADialog,
-    USDialog,
     DetailsDrawer,
-    NTicDialog,
   },
   data: () => ({
     loaded: false,
   }),
   computed: {
-    ...mapState({
-      showUADialog: (state) => state.changeDialog.showUADialog,
-      showUSDialog: (state) => state.changeDialog.showUSDialog,
-      showNTicDialog: (state) => state.nTicketDialog.show,
-    }),
     proId() {
       return this.$route.query.proId;
     },
@@ -57,7 +39,6 @@ export default {
     ...mapActions([
       'fetchBackLogData',
       'fetchCurrProElements',
-      'sPlannerShow',
     ]),
     async loadData() {
       await this.fetchCurrProElements(this.proId);

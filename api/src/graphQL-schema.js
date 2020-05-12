@@ -60,94 +60,29 @@ const resolveFunctions = {
         },
     },
     Mutation: {
-        CreateProject: async (_, { id, title, desc, label, startDate, endDate, members }, {pubSub}) => {
-            console.log(title, desc, label, startDate, endDate, members);
+        StartToSprint: async (object, params, ctx, resolveInfo) => {
             try {
-                let query = '';
-                let params = undefined;
-                if(desc === undefined) {
-                    query = 'CREATE (p:Project{id: apoc.create.uuid(), title:$title,' +
-                        ' label:$label, startDate:$startDate, endDate:$endDate })' +
-                        ' WITH $members AS users, p' +
-                        ' UNWIND users AS user' +
-                        ' MATCH (u:User)' +
-                        ' WHERE u.id = user.id' +
-                        ' CREATE (p)<-[:TEAM_MEMBER {type: u.type}]-(u)' +
-                        ' RETURN p';
-                    params = { title, label, startDate, endDate, members  };
-                } else {
-                    query = 'CREATE (p:Project{id: apoc.create.uuid(), title:$title,' +
-                        ' label:$label, startDate:$startDate, endDate:$endDate, desc:$desc })' +
-                        ' WITH $members AS users, p' +
-                        ' UNWIND users AS user' +
-                        ' MATCH (u:User)' +
-                        ' WHERE u.id = user.id' +
-                        ' CREATE (p)<-[:TEAM_MEMBER {type: u.type}]-(u)' +
-                        ' RETURN p';
-                    params = { title, label, startDate, endDate, members, desc  };
-                }
-                return neode.cypher(query, params)
-                    .then((result) => {
-                        return result.records[0].get('p').properties;
-                    })
-                    .catch(e => {
-                        throw e;
-                    });
+                // using project Id found,
+                ctx.pubSub.publish('project', {update: params.project.id});
+                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
             }catch (e) {
                 throw new Error(e);
             }
         },
-        StartToSprint: async (_, { project, tick, sprintAdd }, {pubSub}) => {
+        SwitchSprint: async (object, params, ctx, resolveInfo) => {
             try {
-                return neode.cypher(
-                    'MATCH (t:Ticket),(s:Sprint)' +
-                    ' WHERE t.id = $tick.id AND s.id = $sprintAdd.id' +
-                    ' CREATE (t)-[rel1:SPRINT_TASK]->(s)',
-                    {tick, sprintAdd})
-                    .then(() => {
-                        pubSub.publish('project', {update: project.id});
-                        return tick.id;
-                    })
-                    .catch(e => {
-                        throw e;
-                    });
+                // using project Id found,
+                ctx.pubSub.publish('project', {update: params.project.id});
+                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
             }catch (e) {
                 throw new Error(e);
             }
         },
-        SwitchSprint: async (_, { project, tick, sprintAdd, sprintRemove }, {pubSub}) => {
+        SprintToStart: async (object, params, ctx, resolveInfo) => {
             try {
-                return neode.cypher(
-                    'MATCH (t:Ticket{id:$tick.id})-[rel:SPRINT_TASK]->(s1:Sprint {id:$sprintRemove.id})'+
-                    ' MATCH (s2:Sprint {id:sprintAdd.id})' +
-                    ' CALL apoc.refactor.to(rel, s2)' +
-                    ' YIELD input, output, error' +
-                    ' RETURN input, output, error',
-                    {tick, sprintAdd, sprintRemove})
-                    .then(() => {
-                        pubSub.publish('project', {update: project.id});
-                        return tick.id;
-                    })
-                    .catch(e => {
-                        throw e;
-                    });
-            }catch (e) {
-                throw new Error(e);
-            }
-        },
-        SprintToStart: async (_, { project, tick, sprintRemove }, {pubSub}) => {
-            try {
-                return neode.cypher(
-                    'MATCH (t:Ticket {id:$tick.id})-[rel1:SPRINT_TASK]->(s:Sprint{id:$sprintRemove.id})' +
-                    ' DELETE rel1',
-                    {tick, sprintRemove})
-                    .then(() => {
-                        pubSub.publish('project', {update: project.id});
-                        return tick.id;
-                    })
-                    .catch(e => {
-                        throw e;
-                    });
+                // using project Id found,
+                ctx.pubSub.publish('project', {update: params.project.id});
+                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
             }catch (e) {
                 throw new Error(e);
             }
@@ -329,11 +264,8 @@ const resolveFunctions = {
         },
         CreateUserStory:  async (object, params, ctx, resolveInfo) => {
             try {
-                // query for the project id linked to the current ticket
-                console.log(params);
-                const { id } = params.project;
                 // using project Id found,
-                ctx.pubSub.publish('project', {update: id});
+                ctx.pubSub.publish('project', {update: params.project.id});
                 return await neo4jgraphql(object, params, ctx, resolveInfo, false);
             }catch (e) {
                 throw new Error(e);
@@ -397,76 +329,20 @@ const resolveFunctions = {
                 throw new Error('Query does not contain necessary params');
             }
         },
-        CreateTicket: async (_, { hourEstimate, title, desc, project, user }, {pubSub}) => {
+        CreateTicket:  async (object, params, ctx, resolveInfo) => {
             try {
-                return neode.cypher('MATCH (p:Project),(u:User)'+
-                    ' WHERE p.id = $proId AND u.id = $userId' +
-                    ' CREATE (p)<-[:TICKET]-(t: Ticket {id:apoc.create.uuid(), title:$title, hourEstimate:$hourEst, desc:$description, done:false})<-[:CREATED {timestamp: apoc.date.currentTimestamp()}]-(u)'+
-                    ' WITH p, t' +
-                    ' MATCH (p)<-[r1:TICKET]-(:Ticket)' +
-                    ' WITH COUNT(r1) AS issNo, t' +
-                    ' SET t.issueNumber = issNo' +
-                    ' RETURN t',
-                    {
-                        ...(hourEstimate ? {hourEst: neo4j.int(hourEstimate)} : {hourEst: neo4j.int(0)}),
-                        title, ...(desc ? {description:desc} : {description:''}),
-                        proId: project.id, userId: user.id
-                    })
-                    .then((result) => {
-                        pubSub.publish('project', {update: project.id});
-                        return result.records[0].get('t').properties;
-                    })
-                    .catch(e => {
-                        throw e;
-                    });
+                // using project Id found,
+                ctx.pubSub.publish('project', {update: params.project.id});
+                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
             }catch (e) {
                 throw new Error(e);
             }
         },
-        // CreateUserStory: async (_, { storyText, project }, {pubSub}) => {
-        //     try {
-        //         return neode.cypher('MATCH (p:Project)'+
-        //             ' WHERE p.id = $proId' +
-        //             ' CREATE (p)<-[:USER_STORY]-(us: UserStory { id: apoc.create.uuid(), storyText: $storyText })'+
-        //             ' WITH p, us' +
-        //             ' MATCH (p)<-[r1:USER_STORY]-(:UserStory)' +
-        //             ' WITH COUNT(r1) AS issNo, us' +
-        //             ' SET us.issueNumber = issNo' +
-        //             ' RETURN us',
-        //             { storyText, proId: project.id})
-        //             .then((result) => {
-        //                 pubSub.publish('project', {update: project.id});
-        //                 console.log(result.records[0].get('us').properties);
-        //                 return result.records[0].get('us').properties;
-        //             })
-        //             .catch(e => {
-        //                 throw e;
-        //             });
-        //     }catch (e) {
-        //         throw new Error(e);
-        //     }
-        // },
-        CreateSprint: async (_, { sprintNo, active, startDate, endDate, project }, {pubSub}) => {
+        CreateSprint: async (object, params, ctx, resolveInfo) => {
             try {
-                return neode.cypher('CREATE (s:Sprint{' +
-                    '  id : apoc.create.uuid(),' +
-                    '  sprintNo: $sprintNo,' +
-                    '  active: $active,' +
-                    '  startDate: $startDate,' +
-                    '  endDate: $endDate' +
-                    '})' +
-                    ' WITH s' +
-                    ' MATCH (p:Project) WHERE p.id = $project.id' +
-                    ' CREATE (s)-[r:SPRINT]->(p)' +
-                    ' RETURN s',
-                    {sprintNo, active, startDate, endDate, project})
-                    .then((result) => {
-                        pubSub.publish('project', {update: project.id});
-                        return result.records[0].get('s').properties;
-                    })
-                    .catch(e => {
-                        throw e;
-                    });
+                // using project Id found,
+                ctx.pubSub.publish('project', {update: params.project.id});
+                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
             }catch (e) {
                 throw new Error(e);
             }
@@ -521,9 +397,6 @@ const resolveFunctions = {
                     if(e === 'pass'){
                         throw new Error('Password invalid');
                     }
-                    // if(e === 'cypher'){
-                    //     throw new Error('INTERNAL_ERROR: DATABASE STORAGE FAILED')
-                    // }
                     throw new Error('Username invalid');
                 });
         },

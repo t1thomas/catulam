@@ -155,8 +155,8 @@
             </v-row>
           </v-form>
         </v-card-text>
-        <small>*indicates required field</small>
         <v-card-actions>
+          <small>*indicates required field</small>
           <v-spacer />
           <v-btn
             color="blue darken-1"
@@ -204,9 +204,6 @@ export default {
       showDialog: (state) => state.nProDialog.show,
       allUsers: (state) => state.allUserList,
     }),
-    descProvided() {
-      return this.desc.length > 0;
-    },
     selectedProvided() {
       return this.selected.length > 0;
     },
@@ -237,18 +234,23 @@ export default {
             label: this.label,
             startDate: this.startDate,
             endDate: this.endDate,
-            // conditional check: adds desc, if provided by user
-            ...(this.descProvided && { desc: this.desc }),
+            desc: this.desc,
             members: this.getSelectedMembers(),
           },
         }).then((response) => {
           const { CreateProject } = response.data;
-          const payload = { message: `Successfully Created project: '${CreateProject.title}'`, type: 'success' };
-          this.snackBarOn(payload);
+          this.snackBarOn({
+            message: `Successfully Created project: '${CreateProject.title}'`,
+            type: 'success',
+          });
           // update the store, this in turn will Update DOM with new projects
           this.fetchPmPros({ username: this.currUser.username });
         }).catch((error) => {
           console.error(error);
+          this.snackBarOn({
+            message: error,
+            type: 'error',
+          });
         });
         this.setSaving();
         this.onCancel();

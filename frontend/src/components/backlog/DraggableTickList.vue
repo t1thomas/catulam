@@ -76,6 +76,7 @@ export default {
       'USDialogSwitcher',
       'UADialogSwitcher',
       'detDrawShow',
+      'snackBarOn',
     ]),
     detailsDrawer(ticketId) {
       this.detDrawShow({ show: true, ticketId });
@@ -136,14 +137,26 @@ export default {
         fetchPolicy: 'no-cache',
         variables: {
           project: { id: this.proId },
-          tick: { id: ticketId },
+          ticket: { id: ticketId },
           sprintRemove: { id: sprintId },
         },
       }).then((response) => {
-        console.log(response);
-        // DOM auto updates via API subscription
+        const { SprintToStart } = response.data;
+        if (SprintToStart === null) {
+          throw new Error('Unable to Update Ticket');
+        } else {
+          // show success notification of Ticket creation
+          this.snackBarOn({
+            message: `Removed Ticket ${SprintToStart.title} #${SprintToStart.issueNumber} from sprint Successfully`,
+            type: 'success',
+          });
+        }
       }).catch((error) => {
         console.error(error);
+        this.snackBarOn({
+          message: error,
+          type: 'error',
+        });
         this.switchBack(evt);
       });
     },
@@ -152,14 +165,26 @@ export default {
         mutation: gqlQueries.SwitchStartSprint.TIC_ADD_SPRINT,
         variables: {
           project: { id: this.proId },
-          tick: { id: ticketId },
+          ticket: { id: ticketId },
           sprintAdd: { id: sprintId },
         },
       }).then((response) => {
-        console.log(response);
-        // DOM auto updates via API subscription
+        const { StartToSprint } = response.data;
+        if (StartToSprint === null) {
+          throw new Error('Unable to Update Ticket');
+        } else {
+          // show success notification of Ticket creation
+          this.snackBarOn({
+            message: `Moved Ticket ${StartToSprint.title} #${StartToSprint.issueNumber} to Sprint ${StartToSprint.sprint.sprintNo} Successfully`,
+            type: 'success',
+          });
+        }
       }).catch((error) => {
         console.error(error);
+        this.snackBarOn({
+          message: error,
+          type: 'error',
+        });
         this.switchBack(evt);
       });
     },
