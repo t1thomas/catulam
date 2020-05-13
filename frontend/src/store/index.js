@@ -17,8 +17,8 @@ export default new Vuex.Store({
     },
     sBoardTicMove: {
       ticketId: null,
-      removedFrom: {},
-      addedTo: {},
+      removedFrom: null,
+      addedTo: null,
       evt: null,
     },
     nTicketDialog: {
@@ -127,7 +127,7 @@ export default new Vuex.Store({
     set_sprintList(state, obj) {
       Vue.set(state, 'sprintList', [...obj]);
     },
-    /* mutations to manipulate data for changeDialog in backlog */
+    /* mutations to get data for changeDialog in backlog */
     uSCDSet_evt(state, obj) {
       state.changeDialog.evt = obj;
     },
@@ -141,7 +141,7 @@ export default new Vuex.Store({
       state.changeDialog.addedTo = obj;
     },
     /* ----------------------------------------------------------*/
-    /* mutations to manipulate data for changeDialog in backlog */
+    /* mutations to get data for change in sprintBoard */
     sBoardSet_evt(state, obj) {
       state.sBoardTicMove.evt = obj;
     },
@@ -153,6 +153,12 @@ export default new Vuex.Store({
     },
     sBoardSet_addedTo(state, obj) {
       state.sBoardTicMove.addedTo = obj;
+    },
+    sBoardSet_clear(state) {
+      state.sBoardTicMove.evt = null;
+      state.sBoardTicMove.ticketId = null;
+      state.sBoardTicMove.removedFrom = null;
+      state.sBoardTicMove.addedTo = null;
     },
     /* ----------------------------------------------------------*/
     set_USChangeDialog(state) {
@@ -606,6 +612,9 @@ export default new Vuex.Store({
     },
     sBoardAddedTo({ commit }, value) {
       commit('sBoardSet_addedTo', value);
+    },
+    sBoardClear({ commit }) {
+      commit('sBoardSet_clear');
     },
     /* -------------------------------------- */
     detDrawShow({ commit }, val) {

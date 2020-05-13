@@ -60,8 +60,10 @@ export default {
       };
     },
     ...mapState({
-      addedTo: (state) => state.changeDialog.addedTo,
-      removedFrom: (state) => state.changeDialog.removedFrom,
+      addedTo: (state) => state.sBoardTicMove.addedTo,
+      removedFrom: (state) => state.sBoardTicMove.removedFrom,
+      ticketId: (state) => state.sBoardTicMove.ticketId,
+      evt: (state) => state.sBoardTicMove.evt,
     }),
     proId() {
       return this.$route.query.proId;
@@ -75,6 +77,7 @@ export default {
       'sBoardAddedTo',
       'detDrawShow',
       'snackBarOn',
+      'sBoardClear',
     ]),
     detailsDrawer(ticketId) {
       this.detDrawShow({ show: true, ticketId });
@@ -88,64 +91,49 @@ export default {
       this.sBoardAddedTo(this.listProperties);
     },
     ended(evt) {
-      this.ticketMoveResolve(evt);
+      this.sBoardEvt(evt);
+      this.sBoardTicketId(evt.item.id);
+      this.ticketMoveResolve();
     },
-    ticketMoveResolve(evt) {
-      const ticketId = evt.item.id;
-      const fromData = this.removedFrom;
-      const toData = this.addedTo;
-      // fromData and toData remains undefined if ticket is not moved between diff lists
-      if (fromData !== undefined || toData !== undefined) {
-        if (fromData.userStoryId === null || toData.userStoryId === null) {
-          /* if userStoryId === null for either toData or fromData the
-         ticket is being moved to/from unassigned ticket list */
-          this.switchUADialog(evt);
-        } else {
-          switch (true) {
-            case fromData.userStoryId !== toData.userStoryId:
-              this.switchUSDialog(evt);
-              break;
-            case fromData.columnType === 'start' && toData.columnType === 'sprint':
-              this.startToSprint(ticketId, toData.sprintId, evt);
-              break;
-            case fromData.columnType === 'sprint' && toData.columnType === 'start':
-              this.sprintToStart(ticketId, fromData.sprintId, evt);
-              break;
-            default:
-              break;
-          }
-        }
+    async ticketMoveResolve() {
+      switch (true) {
+        case this.addedTo.columnType === 'to-do':
+          await this.moveToToDo();
+          break;
+        case this.addedTo.columnType === 'doing':
+          await this.moveToDoing();
+          break;
+        case this.addedTo.columnType === 'done':
+          await this.moveToDone();
+          break;
+        default:
+          break;
       }
+      this.sBoardClear();
     },
-    switchUADialog(evt) {
-      const tickId = evt.item.id;
-      this.uSCDTicketId(tickId);
-      this.uSCDEvt(evt);
-      this.UADialogSwitcher();
-    },
-    switchUSDialog(evt) {
-      const tickId = evt.item.id;
-      this.uSCDTicketId(tickId);
-      this.uSCDEvt(evt);
-      this.USDialogSwitcher();
-    },
-    async sprintToStart(ticketId, sprintId, evt) {
+    async moveToToDo() {
+      console.log('heree');
+      console.log({
+        project: { id: this.proId },
+        ticket: { id: this.ticketId },
+        from: { id: this.removedFrom.columnType },
+      });
       await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SwitchStartSprint.TIC_REMOVE_SPRINT,
+        mutation: gqlQueries.sBoardTicMove.MOVE_TO_TODO,
         fetchPolicy: 'no-cache',
         variables: {
           project: { id: this.proId },
-          ticket: { id: ticketId },
-          sprintRemove: { id: sprintId },
+          ticket: { id: this.ticketId },
+          from: this.removedFrom.columnType,
         },
       }).then((response) => {
-        const { SprintToStart } = response.data;
-        if (SprintToStart === null) {
-          throw new Error('Unable to Update Ticket');
+        const { TicToToDo } = response.data;
+        if (TicToToDo === null) {
+          throw new Error('Unable to Complete Operation');
         } else {
           // show success notification of Ticket creation
           this.snackBarOn({
-            message: `Removed Ticket ${SprintToStart.title} #${SprintToStart.issueNumber} from sprint Successfully`,
+            message: `Moved Ticket ${TicToToDo.title} #${TicToToDo.issueNumber} to TO-DO Successfully`,
             type: 'success',
           });
         }
@@ -155,25 +143,26 @@ export default {
           message: error,
           type: 'error',
         });
-        this.switchBack(evt);
+        this.switchBack();
       });
     },
-    async startToSprint(ticketId, sprintId, evt) {
+    async moveToDoing() {
       await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SwitchStartSprint.TIC_ADD_SPRINT,
+        mutation: gqlQueries.sBoardTicMove.MOVE_TO_DOING,
+        fetchPolicy: 'no-cache',
         variables: {
           project: { id: this.proId },
-          ticket: { id: ticketId },
-          sprintAdd: { id: sprintId },
+          ticket: { id: this.ticketId },
+          from: this.removedFrom.columnType,
         },
       }).then((response) => {
-        const { StartToSprint } = response.data;
-        if (StartToSprint === null) {
-          throw new Error('Unable to Update Ticket');
+        const { TicToDoing } = response.data;
+        if (TicToDoing === null) {
+          throw new Error('Unable to Complete Operation');
         } else {
           // show success notification of Ticket creation
           this.snackBarOn({
-            message: `Moved Ticket ${StartToSprint.title} #${StartToSprint.issueNumber} to Sprint ${StartToSprint.sprint.sprintNo} Successfully`,
+            message: `Moved Ticket ${TicToDoing.title} #${TicToDoing.issueNumber} to DOING Successfully`,
             type: 'success',
           });
         }
@@ -183,17 +172,44 @@ export default {
           message: error,
           type: 'error',
         });
-        this.switchBack(evt);
+        this.switchBack();
       });
     },
-    switchBack(evt) {
+    async moveToDone() {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.sBoardTicMove.MOVE_TO_DONE,
+        fetchPolicy: 'no-cache',
+        variables: {
+          project: { id: this.proId },
+          ticket: { id: this.ticketId },
+        },
+      }).then((response) => {
+        const { TicToDone } = response.data;
+        if (TicToDone === null) {
+          throw new Error('Unable to Complete Operation');
+        } else {
+          // show success notification of Ticket creation
+          this.snackBarOn({
+            message: `Moved Ticket ${TicToDone.title} #${TicToDone.issueNumber} to DONE Successfully`,
+            type: 'success',
+          });
+        }
+      }).catch((error) => {
+        console.error(error);
+        this.snackBarOn({
+          message: error,
+          type: 'error',
+        });
+        this.switchBack();
+      });
+    },
+
+    switchBack() {
+      const { evt } = this;
       // remove ticket from new list and put back in old list
       evt.from.insertBefore(evt.to.childNodes[evt.newDraggableIndex],
         evt.from.childNodes[evt.oldDraggableIndex]);
     },
-    // updateStore() {
-    //   this.fetchBackLogData(this.proId);
-    // },
   },
 };
 </script>

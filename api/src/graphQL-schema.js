@@ -336,6 +336,33 @@ const resolveFunctions = {
                 throw new Error(e);
             }
         },
+        TicToToDo:  async (object, params, ctx, resolveInfo) => {
+            try {
+                // using project Id found,
+                ctx.pubSub.publish('project', {update: params.project.id});
+                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
+        TicToDoing:  async (object, params, ctx, resolveInfo) => {
+            try {
+                // using project Id found,
+                ctx.pubSub.publish('project', {update: params.project.id});
+                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
+        TicToDone:  async (object, params, ctx, resolveInfo) => {
+            try {
+                // using project Id found,
+                ctx.pubSub.publish('project', {update: params.project.id});
+                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
         CreateSprint: async (object, params, ctx, resolveInfo) => {
             try {
                 // using project Id found,

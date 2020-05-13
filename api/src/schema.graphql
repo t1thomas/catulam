@@ -114,12 +114,33 @@
         UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
         UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
         StartToSprint(project: _ProjectInput!, ticket: _TicketInput!, sprintAdd: _SprintInput! ): Ticket
+
+        TicToToDo(project: _ProjectInput!, ticket: _TicketInput!, from: String!): Ticket
             @cypher(statement:"""
-            MATCH (t:Ticket),(s:Sprint)
-            WHERE t.id = $ticket.id AND s.id = $sprintAdd.id
-            CREATE (t)-[rel1:SPRINT_TASK]->(s)
+            CALL apoc.do.when($from = 'done',
+            'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 0  SET t.done = false RETURN t',
+            'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 0 RETURN t', {ticket: $ticket})
+            YIELD value
+            RETURN value.t
+            """)
+        TicToDoing(project: _ProjectInput!, ticket: _TicketInput!, from: String!): Ticket
+            @cypher(statement:"""
+            CALL apoc.do.when($from = 'done',
+            'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 1  SET t.done = false RETURN t',
+            'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 1 RETURN t', {ticket: $ticket})
+            YIELD value
+            RETURN value.t
+            """)
+
+        TicToDone(project: _ProjectInput!, ticket: _TicketInput!): Ticket
+            @cypher(statement:"""
+            MATCH (t:Ticket)
+            WHERE t.id = $ticket.id
+            SET t.sprintPos = 2
+            SET t.done = true
             RETURN t
             """)
+
         SprintToStart(project: _ProjectInput!, ticket: _TicketInput!, sprintRemove: _SprintInput! ): Ticket
             @cypher(statement:"""
             MATCH (t:Ticket {id:$ticket.id})-[rel1:SPRINT_TASK]->(s:Sprint{id:$sprintRemove.id})

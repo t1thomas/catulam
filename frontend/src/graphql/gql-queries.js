@@ -524,6 +524,34 @@ const gqlQueries = {
         }
       }`,
   },
+  sBoardTicMove: {
+    MOVE_TO_TODO: gql`
+      mutation($project: _ProjectInput!, $ticket: _TicketInput!, $from: String!) {
+        TicToToDo(project: $project, ticket: $ticket, from: $from) {
+          id
+          title
+          issueNumber
+        }
+      }
+    `,
+    MOVE_TO_DOING: gql`
+      mutation($project: _ProjectInput!, $ticket: _TicketInput!, $from: String!) {
+        TicToDoing(project: $project, ticket: $ticket, from: $from) {
+          id
+          title
+          issueNumber
+        }
+      }`,
+    MOVE_TO_DONE: gql`
+      mutation($project: _ProjectInput!, $ticket: _TicketInput!) {
+        TicToDone(project: $project, ticket: $ticket) {
+          id
+          title
+          issueNumber
+        }
+      }
+    `,
+  },
   SwitchUnassigned: {
     UNASSIGNED_TICK_SWITCH: gql`
       mutation(
