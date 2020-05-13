@@ -1,8 +1,8 @@
 <template>
   <v-col>
-    <v-card>
+    <v-card style="background-color: #27201f">
       <v-card-title class="py-0">
-        Start
+        To-do
       </v-card-title>
       <v-card-text style="height: 85vh">
         <drag-list
@@ -19,15 +19,16 @@ import { mapGetters } from 'vuex';
 import DraggableTickListSprint from '../DraggableTickListSprint.vue';
 
 export default {
-  name: 'StartCol',
+  name: 'ToDoCol',
   components: {
     'drag-list': DraggableTickListSprint,
   },
   computed: {
     tickListConfig() {
       return {
-        columnType: 'start',
+        columnType: 'to-do',
         disabled: false,
+        background: '#08000482',
       };
     },
     ...mapGetters({

@@ -224,6 +224,9 @@ const gqlQueries = {
           issueNumber
           storyText
         }
+        project {
+          id
+        }
         title
         desc
         done

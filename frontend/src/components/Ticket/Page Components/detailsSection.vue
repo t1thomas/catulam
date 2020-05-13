@@ -13,12 +13,12 @@
               v-if="sprintInfo"
               class="align-end"
             >
-              <router-link
-                style="cursor: pointer; max-width: fit-content"
-                :to="sprintInfo.to"
+              <a
+                style="cursor: pointer; max-width: fit-content;text-decoration-line: underline;"
+                @click="onSprintLink"
               >
                 {{ sprintInfo.text }}
-              </router-link>
+              </a>
             </v-list-item-content>
             <v-list-item-content
               v-else
@@ -158,15 +158,15 @@ export default {
   },
   computed: {
     ...mapState({
-      ticket: 'currentTicket',
-      users: 'allUserList',
+      ticket: (state) => state.currentTicket,
+      users: (state) => state.allUserList,
+      drawer: (state) => state.detailsDrawer.show,
     }),
     sprintInfo() {
       const { sprint } = this.ticket;
       if (sprint !== null) {
         return {
           text: `Sprint ${sprint.sprintNo}`,
-          to: { path: '/sprint', query: { sprintId: sprint.id } },
         };
       }
       return false;
@@ -202,6 +202,20 @@ export default {
         };
       }
       return false;
+    },
+  },
+  methods: {
+    onSprintLink() {
+      this.$router.push({
+        path: '/sprint',
+        query: { sprintId: this.ticket.sprint.id, proId: this.ticket.project.id },
+      });
+      this.closeDrawer();
+    },
+    closeDrawer() {
+      if (this.drawer) {
+        this.$store.commit('set_DrawerShow', { show: false });
+      }
     },
   },
 };

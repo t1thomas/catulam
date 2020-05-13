@@ -1,6 +1,6 @@
 <template>
   <v-col>
-    <v-card>
+    <v-card style="background: #233308bf">
       <v-card-title class="py-0">
         Done
       </v-card-title>
@@ -28,6 +28,7 @@ export default {
       return {
         columnType: 'done',
         disabled: false,
+        background: '#020e0282',
       };
     },
     ...mapGetters({

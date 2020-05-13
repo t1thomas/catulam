@@ -4,7 +4,8 @@
       tag="div"
       v-bind="dragOptions"
       class="v-list v-list--dense fill-height"
-      style="background: #17429b66; width: 100%; overflow-y: auto"
+      :style="{background: listProperties.background}"
+      style="width: 100%; overflow-y: auto"
       @end="ended"
       @add="onAdd"
       @remove="onRemove"
@@ -68,13 +69,10 @@ export default {
   },
   methods: {
     ...mapActions([
-      'fetchBackLogData',
-      'uSCDRemovedFrom',
-      'uSCDAddedTo',
-      'uSCDTicketId',
-      'uSCDEvt',
-      'USDialogSwitcher',
-      'UADialogSwitcher',
+      'sBoardEvt',
+      'sBoardTicketId',
+      'sBoardRemovedFrom',
+      'sBoardAddedTo',
       'detDrawShow',
       'snackBarOn',
     ]),
@@ -83,11 +81,11 @@ export default {
     },
     onRemove() {
       // mutate store
-      this.uSCDRemovedFrom(this.listProperties);
+      this.sBoardRemovedFrom(this.listProperties);
     },
     onAdd() {
       // mutate store
-      this.uSCDAddedTo(this.listProperties);
+      this.sBoardAddedTo(this.listProperties);
     },
     ended(evt) {
       this.ticketMoveResolve(evt);
@@ -193,9 +191,9 @@ export default {
       evt.from.insertBefore(evt.to.childNodes[evt.newDraggableIndex],
         evt.from.childNodes[evt.oldDraggableIndex]);
     },
-    updateStore() {
-      this.fetchBackLogData(this.proId);
-    },
+    // updateStore() {
+    //   this.fetchBackLogData(this.proId);
+    // },
   },
 };
 </script>

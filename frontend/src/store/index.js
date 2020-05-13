@@ -15,6 +15,12 @@ export default new Vuex.Store({
       addedTo: {},
       evt: null,
     },
+    sBoardTicMove: {
+      ticketId: null,
+      removedFrom: {},
+      addedTo: {},
+      evt: null,
+    },
     nTicketDialog: {
       show: false,
     },
@@ -121,7 +127,7 @@ export default new Vuex.Store({
     set_sprintList(state, obj) {
       Vue.set(state, 'sprintList', [...obj]);
     },
-    /* mutations to manipulate data for changeDialog */
+    /* mutations to manipulate data for changeDialog in backlog */
     uSCDSet_evt(state, obj) {
       state.changeDialog.evt = obj;
     },
@@ -134,6 +140,21 @@ export default new Vuex.Store({
     uSCDSet_addedTo(state, obj) {
       state.changeDialog.addedTo = obj;
     },
+    /* ----------------------------------------------------------*/
+    /* mutations to manipulate data for changeDialog in backlog */
+    sBoardSet_evt(state, obj) {
+      state.sBoardTicMove.evt = obj;
+    },
+    sBoardSet_ticketId(state, obj) {
+      state.sBoardTicMove.ticketId = obj;
+    },
+    sBoardSet_removedFrom(state, obj) {
+      state.sBoardTicMove.removedFrom = obj;
+    },
+    sBoardSet_addedTo(state, obj) {
+      state.sBoardTicMove.addedTo = obj;
+    },
+    /* ----------------------------------------------------------*/
     set_USChangeDialog(state) {
       if (state.changeDialog.showUSDialog === false) {
         state.changeDialog.showUSDialog = true;
@@ -549,7 +570,7 @@ export default new Vuex.Store({
     setRemovedFrom({ commit }, value) {
       commit('set_removedFrom', value);
     },
-    /* actions to set data for changeDialog */
+    /* actions to set data for changeDialog in backlog */
     uSCDEvt({ commit }, value) {
       commit('uSCDSet_evt', value);
     },
@@ -570,6 +591,21 @@ export default new Vuex.Store({
     },
     UADialogSwitcher({ commit }) {
       commit('set_UAChangeDialog');
+    },
+    /* -------------------------------------- */
+
+    /* actions to set data for change in sprintBoard */
+    sBoardEvt({ commit }, value) {
+      commit('sBoardSet_evt', value);
+    },
+    sBoardTicketId({ commit }, value) {
+      commit('sBoardSet_ticketId', value);
+    },
+    sBoardRemovedFrom({ commit }, value) {
+      commit('sBoardSet_removedFrom', value);
+    },
+    sBoardAddedTo({ commit }, value) {
+      commit('sBoardSet_addedTo', value);
     },
     /* -------------------------------------- */
     detDrawShow({ commit }, val) {

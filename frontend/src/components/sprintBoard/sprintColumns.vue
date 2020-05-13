@@ -8,7 +8,7 @@
 
 <script>
 import { mapActions } from 'vuex';
-import startCol from './Columns/startCol.vue';
+import startCol from './Columns/ToDoCol.vue';
 import doingCol from './Columns/doingCol.vue';
 import doneCol from './Columns/doneCol.vue';
 import gqlQueries from '../../graphql/gql-queries';
