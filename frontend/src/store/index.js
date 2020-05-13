@@ -664,6 +664,8 @@ export default new Vuex.Store({
       .map((tick) => tick.id),
     getPosDoneTicks: (state) => state.sprintBoardData.posDone[0].tickets
       .map((tick) => tick.id),
+    getMemberById: (state) => (memberId) => state.currProElements.members
+      .find((member) => member.User.id === memberId).User,
   },
   modules: {
   },

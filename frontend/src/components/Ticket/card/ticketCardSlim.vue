@@ -86,7 +86,7 @@ export default {
       if (this.assignee === null) {
         return 'n/a';
       }
-      return `${this.assignee.firstName} ${this.assignee.lastName}`;
+      return this.assignee.fullName;
     },
   },
 };

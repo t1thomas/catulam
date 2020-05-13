@@ -1,5 +1,6 @@
 <template>
   <v-content class="fill-height">
+    <details-drawer />
     <sprint-columns v-if="loaded" />
   </v-content>
 </template>
@@ -7,11 +8,13 @@
 <script>
 import { mapActions } from 'vuex';
 import sprintColumns from '../components/sprintBoard/sprintColumns.vue';
+import DetailsDrawer from '../components/Ticket/drawer component/DetailsDrawer.vue';
 
 export default {
   name: 'SprintBoard',
   components: {
     sprintColumns,
+    DetailsDrawer,
   },
   data: () => ({
     loaded: false,

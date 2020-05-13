@@ -1,7 +1,7 @@
 <template>
   <v-content class="pb-0">
-    <DetailsDrawer />
-    <UserStoryRows v-if="loaded" />
+    <details-drawer />
+    <user-story-rows v-if="loaded" />
   </v-content>
 </template>
 

@@ -18,7 +18,7 @@
         clickable
         @dblclick="detailsDrawer(ticketId)"
       >
-        <ticket-card-slim
+        <ticket-card
           :tick-id="ticketId"
         />
       </v-list-item>
@@ -30,14 +30,14 @@
 import { mapActions, mapState } from 'vuex';
 import draggable from 'vuedraggable';
 import Vue from 'vue';
-import ticketCardSlim from '../Ticket/card/ticketCardSlim.vue';
+import ticketCard from '../Ticket/card/ticketCard.vue';
 import gqlQueries from '../../graphql/gql-queries';
 
 export default {
   name: 'DraggableTickList',
   components: {
     draggable,
-    ticketCardSlim,
+    ticketCard,
   },
   props: {
     ticketIds: {

@@ -1,60 +1,74 @@
 <template>
-  <v-card
-    height="5.5rem"
-    width="100%"
+  <v-hover
+    v-slot:default="{ hover }"
+    open-delay="100"
   >
-    <v-list-item
-      three-line
-      class="px-2"
+    <v-card
+      height="5.5rem"
+      :elevation="hover ? 12 : 2"
+      width="100%"
     >
-      <v-list-item-content class="py-0 d-inline-block">
-        <v-list-item-title class="d-flex mb-0">
-          <span class="font-weight-medium body-2">
-            {{ ticket.title }}
-          </span>
-          <span class="font-weight-thin ml-auto body-2">
-            #{{ ticket.issueNumber }}
-          </span>
-        </v-list-item-title>
-        <v-list-item-subtitle class="pa-0">
-          <span class="font-weight-light caption">
+      <v-card-title class="pt-1 pb-0 px-2">
+        <span class="font-weight-bold body-2">
+          {{ ticket.title }}
+        </span>
+        <v-spacer />
+        <span class="font-weight-thin body-2">
+          #{{ ticket.issueNumber }}
+        </span>
+      </v-card-title>
+      <v-list-item
+        class="py-0 px-2"
+        dense
+        style="min-height: auto"
+        three-line
+      >
+        <v-list-item-content class="pa-0">
+          <v-list-item-subtitle
+            class="font-weight-light"
+            style="font-size: 0.75rem"
+          >
             {{ ticket.desc }}
-          </span>
-        </v-list-item-subtitle>
-        <div class="card-bottom">
-          <v-chip
-            small
-            color="dark-grey"
-            text-color="white"
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+      <v-card-actions class="pt-1 pb-0">
+        <v-spacer />
+        <v-chip
+          small
+          color="dark-grey"
+          text-color="white"
+        >
+          <v-avatar left>
+            <v-icon>mdi-progress-clock</v-icon>
+          </v-avatar>
+          {{ ticket.hourEstimate }}hr
+        </v-chip>
+        <v-chip
+          small
+          pill
+          class="ml-2"
+        >
+          <v-avatar
+            left
+            tile
           >
-            <v-avatar left>
-              <v-icon>mdi-progress-clock</v-icon>
-            </v-avatar>
-            {{ ticket.hourEstimate }}hr
-          </v-chip>
-          <v-chip
-            small
-            pill
-            class="ml-2"
-          >
-            <v-avatar left tile>
-              <v-img
-                v-if="assignee"
-                :src="gravatar()"
-              />
-              <v-icon
-                v-else
-                dark
-              >
-                mdi-help-circle
-              </v-icon>
-            </v-avatar>
-            {{ fullName(assignee) }}
-          </v-chip>
-        </div>
-      </v-list-item-content>
-    </v-list-item>
-  </v-card>
+            <v-img
+              v-if="assignee"
+              :src="gravatar"
+            />
+            <v-icon
+              v-else
+              dark
+            >
+              mdi-help-circle
+            </v-icon>
+          </v-avatar>
+          {{ fullName(assignee) }}
+        </v-chip>
+      </v-card-actions>
+    </v-card>
+  </v-hover>
 </template>
 
 <script>
@@ -74,26 +88,28 @@ export default {
     }),
     ...mapGetters([
       'getTicketById',
+      'getMemberById',
     ]),
     assignee() {
       if (this.ticket.assignee === null) {
         return null;
       }
-      return this.members.find((member) => member.id === this.ticket.assignee.id);
+      // const memObj = this.members.find((member) => member.User.id === this.ticket.assignee.id);
+      return this.getMemberById(this.ticket.assignee.id);
     },
     ticket() {
       return this.getTicketById(this.tickId);
     },
-  },
-  methods: {
     gravatar() {
       return `https://gravatar.com/avatar/${this.assignee.avatar}?d=identicon`;
     },
+  },
+  methods: {
     fullName() {
       if (this.assignee === null) {
         return 'Unassigned';
       }
-      return `${this.assignee.firstName} ${this.assignee.lastName}`;
+      return this.assignee.fullName;
     },
   },
 };

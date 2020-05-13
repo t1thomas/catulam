@@ -14,10 +14,11 @@
         <template
           v-if="!saving"
           v-slot:append
+          style="display: grid"
         >
           <v-btn
             v-if="editButton"
-            color="primary"
+            color="dark"
             fab
             x-small
             dark
@@ -26,29 +27,34 @@
           >
             <v-icon>mdi-pencil</v-icon>
           </v-btn>
-          <v-btn
-            v-if="btnUndoSave"
-            class="mx-2"
-            color="primary"
-            fab
-            x-small
-            dark
-            style="pointer-events: auto"
-            @click="setOriginalText"
+          <div
+            v-if="!disabled"
+            class="edit-btns"
           >
-            <v-icon>mdi-undo</v-icon>
-          </v-btn>
-          <v-btn
-            v-if="btnUndoSave"
-            color="primary"
-            fab
-            x-small
-            dark
-            style="pointer-events: auto"
-            @click="onSave"
-          >
-            <v-icon>mdi-content-save</v-icon>
-          </v-btn>
+            <v-btn
+              ccolor="dark"
+              class="mb-2"
+              fab
+              x-small
+              :disabled="!btnUndoSave"
+              dark
+              style="pointer-events: auto"
+              @click="setOriginalText"
+            >
+              <v-icon>mdi-undo</v-icon>
+            </v-btn>
+            <v-btn
+              color="dark"
+              fab
+              :disabled="!btnUndoSave"
+              x-small
+              dark
+              style="pointer-events: auto"
+              @click="onSave"
+            >
+              <v-icon>mdi-content-save</v-icon>
+            </v-btn>
+          </div>
         </template>
         <template
           v-slot:progress
@@ -90,12 +96,12 @@ export default {
       return false;
     },
     editButton() {
-      return this.disabled && this.checkInput;
+      return this.disabled && this.checkInputSame;
     },
     btnUndoSave() {
       return this.text !== this.desc;
     },
-    checkInput() {
+    checkInputSame() {
       return this.text === this.desc;
     },
   },
@@ -110,7 +116,7 @@ export default {
       this.text = this.desc;
     },
     onBlur() {
-      if (this.checkInput) {
+      if (this.checkInputSame) {
         this.disabled = true;
       }
     },
@@ -147,5 +153,7 @@ export default {
 </script>
 
 <style scoped>
-
+.edit-btns {
+  display: grid;
+}
 </style>
