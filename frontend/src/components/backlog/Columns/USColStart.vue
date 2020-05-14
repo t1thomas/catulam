@@ -88,7 +88,7 @@ export default {
       };
     },
     ...mapGetters({
-      storyById: 'getStoryById',
+      storyById: 'getUserStoryText',
       tickIds: 'getTicksUsNoSp',
       tickIdsNoUs: 'getTicksNoUsNoSp',
     }),

@@ -62,7 +62,7 @@ const resolveFunctions = {
             try {
                 // using project Id found,
                 ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+                return await neo4jgraphql(object, params, ctx, resolveInfo);
             }catch (e) {
                 throw new Error(e);
             }
@@ -71,7 +71,7 @@ const resolveFunctions = {
             try {
                 // using project Id found,
                 ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+                return await neo4jgraphql(object, params, ctx, resolveInfo);
             }catch (e) {
                 throw new Error(e);
             }
@@ -80,7 +80,7 @@ const resolveFunctions = {
             try {
                 // using project Id found,
                 ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+                return await neo4jgraphql(object, params, ctx, resolveInfo);
             }catch (e) {
                 throw new Error(e);
             }
@@ -253,7 +253,7 @@ const resolveFunctions = {
                     });
                 // using project Id found,
                 ctx.pubSub.publish('project', {update: proId});
-                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+                return await neo4jgraphql(object, params, ctx, resolveInfo);
             }catch (e) {
                 throw new Error(e);
             }
@@ -262,7 +262,7 @@ const resolveFunctions = {
             try {
                 // using project Id found,
                 ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+                return await neo4jgraphql(object, params, ctx, resolveInfo);
             }catch (e) {
                 throw new Error(e);
             }
@@ -329,7 +329,7 @@ const resolveFunctions = {
             try {
                 // using project Id found,
                 ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+                return await neo4jgraphql(object, params, ctx, resolveInfo);
             }catch (e) {
                 throw new Error(e);
             }
@@ -338,7 +338,7 @@ const resolveFunctions = {
             try {
                 // using project Id found,
                 ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+                return await neo4jgraphql(object, params, ctx, resolveInfo);
             }catch (e) {
                 throw new Error(e);
             }
@@ -347,7 +347,25 @@ const resolveFunctions = {
             try {
                 // using project Id found,
                 ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+                return await neo4jgraphql(object, params, ctx, resolveInfo);
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
+        UpdateUserStory:  async (object, params, ctx, resolveInfo) => {
+            try {
+                const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+                await ctx.pubSub.publish('project', {update: result.project.id});
+                return result;
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
+        DeleteUserStory:  async (object, params, ctx, resolveInfo) => {
+            try {
+                const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+                await ctx.pubSub.publish('project', {update: result.project.id});
+                return result;
             }catch (e) {
                 throw new Error(e);
             }
@@ -356,7 +374,7 @@ const resolveFunctions = {
             try {
                 // using project Id found,
                 ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+                return await neo4jgraphql(object, params, ctx, resolveInfo);
             }catch (e) {
                 throw new Error(e);
             }
@@ -365,7 +383,7 @@ const resolveFunctions = {
             try {
                 // using project Id found,
                 ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo, false);
+                return await neo4jgraphql(object, params, ctx, resolveInfo);
             }catch (e) {
                 throw new Error(e);
             }

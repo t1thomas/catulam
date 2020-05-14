@@ -46,6 +46,10 @@ export default new Vuex.Store({
       show: false,
       ticketId: null,
     },
+    delUSDialog: {
+      show: false,
+      userStoryId: null,
+    },
     detDrawerUStory: {
       show: false,
       userStoryId: null,
@@ -239,6 +243,15 @@ export default new Vuex.Store({
         state.detDrawerUStory.show = obj.show;
       }
     },
+    set_delUSDialog(state, obj) {
+      if (obj.show === false) {
+        state.delUSDialog.show = obj.show;
+        state.delUSDialog.userStoryId = null;
+      } else {
+        state.delUSDialog.userStoryId = obj.userStoryId;
+        state.delUSDialog.show = obj.show;
+      }
+    },
     set_sPlanShow(state, obj) {
       if (obj.show === false) {
         state.sPlanDialog.show = obj.show;
@@ -276,6 +289,9 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    delUSDialogShow({ commit }, payload) {
+      commit('set_delUSDialog', payload);
+    },
     snackBarOff({ commit }) {
       commit('set_snackBarShow_false');
     },
@@ -290,17 +306,6 @@ export default new Vuex.Store({
       const { UserStory } = response.data;
       commit('set_userStories', UserStory);
     },
-    // async fetchTickets({ commit }) {
-    //   await Vue.$apolloClient.query({
-    //     query: gqlQueries.Tickets,
-    //     fetchPolicy: 'no-cache',
-    //   }).then((response) => {
-    //     const { Ticket } = response.data;
-    //     commit('set_tickets', Ticket);
-    //   }).catch((error) => {
-    //     console.error(error);
-    //   });
-    // },
     async fetchSprints({ commit }) {
       await Vue.$apolloClient.query({
         query: gqlQueries.Sprints,
@@ -668,8 +673,8 @@ export default new Vuex.Store({
         });
         return arr;
       }, []),
-    getStoryById: (state) => (id) => state.currProElements.userStories
-      .find((story) => story.id === id).storyText,
+    // getStoryById: (state) => (id) => state.currProElements.userStories
+    //   .find((story) => story.id === id).storyText,
     getCurrentUser: (state) => state.currentUser,
     getCurrProject: (state) => (proId) => state.currPmProjects
       .find((project) => project.id === proId),

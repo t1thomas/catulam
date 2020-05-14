@@ -181,6 +181,23 @@ const gqlQueries = {
         avatar
       }
     }`,
+  UPDATE_USER_STORY_TEXT: gql`
+    mutation($id: ID!, $storyText: String!) {
+      UpdateUserStory(id: $id, storyText: $storyText) {
+        id
+        project {
+          id
+        }
+      }
+    }`,
+  DELETE_USER_STORY: gql`
+    mutation($id: ID!) {
+      DeleteUserStory(id: $id) {
+        project {
+          id
+        }
+      }
+    }`,
   UPDATE_TICKET_DESC: gql`
     mutation($id: ID!, $desc: String!) {
       UpdateTicket(id: $id, desc: $desc) {

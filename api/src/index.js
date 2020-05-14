@@ -3,7 +3,7 @@ const { ApolloServer, AuthenticationError, PubSub } = require('apollo-server-exp
 const schema = require('./graphQL-schema');
 const driver = require('./neo4jDriver');
 const http = require('http');
-
+const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
 // set environment variables from ../.env
 
@@ -11,6 +11,8 @@ require('dotenv').config();
 
 const PORT = process.env.GRAPHQL_LISTEN_PORT;
 const app = express();
+app.use(bodyParser.json());
+
 
 
 // verify JWT sent from client

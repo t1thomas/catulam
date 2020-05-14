@@ -3,6 +3,7 @@
     <tic-det-drawer />
     <uStory-det-drawer />
     <user-story-rows v-if="loaded" />
+    <del-u-s-dialog />
   </v-content>
 </template>
 
@@ -11,6 +12,7 @@ import { mapActions } from 'vuex';
 import UserStoryRows from '../components/backlog/UserStoryRows.vue';
 import DetailsDrawer from '../components/Ticket/drawer component/DetailsDrawer.vue';
 import DetDrawerUStory from '../components/backlog/UStoryDrawer/DetDrawerUStory.vue';
+import DelUSDialog from '../components/backlog/dialogs/DelUSDialog.vue';
 
 export default {
   name: 'Backlog',
@@ -18,6 +20,7 @@ export default {
     UserStoryRows,
     'tic-det-drawer': DetailsDrawer,
     'uStory-det-drawer': DetDrawerUStory,
+    DelUSDialog,
   },
   data: () => ({
     loaded: false,
