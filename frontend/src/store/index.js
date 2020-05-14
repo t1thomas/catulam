@@ -46,6 +46,11 @@ export default new Vuex.Store({
       show: false,
       ticketId: null,
     },
+    detDrawerUStory: {
+      show: false,
+      userStoryId: null,
+    },
+    proListTabsModel: 0,
     currentUser: null,
     currentUserTasks: null,
     carouselModelParent: 1,
@@ -60,6 +65,9 @@ export default new Vuex.Store({
     currPmProjects: null,
   },
   mutations: {
+    set_proLstTabModel(state, obj) {
+      state.proListTabsModel = obj;
+    },
     set_nSpDialog(state, obj) {
       state.nSpDialog = obj;
     },
@@ -220,6 +228,15 @@ export default new Vuex.Store({
       } else {
         state.detailsDrawer.show = obj.show;
         state.detailsDrawer.ticketId = obj.ticketId;
+      }
+    },
+    set_DrawShowUStory(state, obj) {
+      if (obj.show === false) {
+        state.detDrawerUStory.show = obj.show;
+        state.detDrawerUStory.userStoryId = null;
+      } else {
+        state.detDrawerUStory.userStoryId = obj.userStoryId;
+        state.detDrawerUStory.show = obj.show;
       }
     },
     set_sPlanShow(state, obj) {
@@ -620,6 +637,9 @@ export default new Vuex.Store({
     detDrawShow({ commit }, val) {
       commit('set_DrawerShow', val);
     },
+    detDrawUStoryShow({ commit }, val) {
+      commit('set_DrawShowUStory', val);
+    },
     nTicDialogShow({ commit }, val) {
       commit('set_nTicDialogShow', val);
     },
@@ -631,6 +651,9 @@ export default new Vuex.Store({
     },
     setUser({ commit }, value) {
       commit('set_currentUser', value);
+    },
+    onTabChange({ commit }, value) {
+      commit('set_proLstTabModel', value);
     },
   },
   getters: {
@@ -646,16 +669,12 @@ export default new Vuex.Store({
         return arr;
       }, []),
     getStoryById: (state) => (id) => state.currProElements.userStories
-      .find((story) => story.id === id),
+      .find((story) => story.id === id).storyText,
     getCurrentUser: (state) => state.currentUser,
-    // getTicIdsPerSprint: state => (sprintNo, arrTicketIds) => arrTicketIds
-    //   .filter(tickId => state.sprintList[sprintNo - 1].ticketIds.includes(tickId)),
-    getIssueType: (state) => state.issueType,
-    getIssues: (state) => state.issues,
+    getCurrProject: (state) => (proId) => state.currPmProjects
+      .find((project) => project.id === proId),
     getTicketById: (state) => (id) => state.currProElements.tickets
       .find((ticket) => ticket.id === id),
-    /* eslint-disable no-underscore-dangle */
-    getIssueById: (state) => (issueId) => state.issues.filter((issue) => issueId === issue._id),
     // get ticket ids that dont have sprints, and have a uStory id that matches param
     getTicksUsNoSp: (state) => (userStoryId) => state.backLogData.UsNoSp[0].tickets
       .filter((tick) => tick.userStory.id === userStoryId)

@@ -6,19 +6,33 @@
     >
       <v-col
         cols="4"
+        @mouseenter="editBtn = !editBtn"
+        @mouseleave="editBtn = !editBtn"
       >
-        <v-card-subtitle
-          v-if="!noUs"
-          class="pa-0"
-        >
-          {{ storyById(userStoryId).storyText }}
-        </v-card-subtitle>
-        <v-card-subtitle
-          v-else
-          class="pa-0"
-        >
-          Unassigned tickets
-        </v-card-subtitle>
+        <template v-if="noUs">
+          <v-card-subtitle>
+            Unassigned tickets
+          </v-card-subtitle>
+        </template>
+        <template v-else>
+          <v-card-subtitle style="height: 75%">
+            {{ storyById(userStoryId)}}
+          </v-card-subtitle>
+          <v-card-actions class="px-0">
+            <v-spacer />
+            <v-btn
+              v-if="editBtn"
+              color="#3a2c2c"
+              fab
+              x-small
+              dark
+              style="pointer-events: auto"
+              @click="showDrawer({show: true, userStoryId })"
+            >
+              <v-icon>mdi-pencil</v-icon>
+            </v-btn>
+          </v-card-actions>
+        </template>
       </v-col>
       <v-col class="pa-0">
         <draggable-tick-list
@@ -38,7 +52,7 @@
 
 <script>
 
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 import DraggableTickList from '../DraggableTickList.vue';
 
 export default {
@@ -52,6 +66,9 @@ export default {
       required: true,
     },
   },
+  data: () => ({
+    editBtn: false,
+  }),
   computed: {
     noUs() {
       return this.userStoryId === 'noUs';
@@ -74,6 +91,11 @@ export default {
       storyById: 'getStoryById',
       tickIds: 'getTicksUsNoSp',
       tickIdsNoUs: 'getTicksNoUsNoSp',
+    }),
+  },
+  methods: {
+    ...mapActions({
+      showDrawer: 'detDrawUStoryShow',
     }),
   },
 };

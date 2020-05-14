@@ -34,13 +34,13 @@ const server = new ApolloServer({
     // },
     context: async ({req, connection}) => {
         if (connection) {
-            return { ...connection.context, pubSub}
+            return { ...connection.context, pubSub};
         } else {
             return {driver, currentUser: await verifyToken(req.headers['authorization']), req, pubSub};
         }
     },
     subscriptions: {
-        onConnect: async(connectionParams, webSocket) => {
+        onConnect: async(connectionParams) => {
             console.log(connectionParams.authToken);
             if (connectionParams.authToken) {
                 return {currentUser: await verifyToken(connectionParams.authToken)};

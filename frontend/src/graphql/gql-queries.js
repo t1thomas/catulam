@@ -316,6 +316,12 @@ const gqlQueries = {
               id
               sprintNo
               active
+              startDate
+              endDate
+              tickets {
+                id
+                done
+              }
             }
             tickets {
               id

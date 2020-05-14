@@ -31,7 +31,6 @@
       </v-col>
     </v-row>
     <n-pro-dialog v-if="showNProDialog" />
-    <s-planner-dialog v-if="showSPlanDialog" />
   </v-container>
 </template>
 
@@ -39,14 +38,12 @@
 import { mapState } from 'vuex';
 import NProDialog from './NProDialog.vue';
 import ProjectList from './ProjectList.vue';
-import SPlannerDialog from '../SprintPlan/planner dialog/SPlannerDialog.vue';
 
 export default {
   name: 'Home',
   components: {
     NProDialog,
     ProjectList,
-    SPlannerDialog,
   },
   computed: {
     ...mapState({

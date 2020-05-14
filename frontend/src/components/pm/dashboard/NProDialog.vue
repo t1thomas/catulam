@@ -246,7 +246,6 @@ export default {
           // update the store, this in turn will Update DOM with new projects
           this.fetchPmPros({ username: this.currUser.username });
         }).catch((error) => {
-          console.error(error);
           this.snackBarOn({
             message: error,
             type: 'error',

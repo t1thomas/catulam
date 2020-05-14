@@ -3,7 +3,7 @@
     <v-tabs
       v-if="currProject !== null"
       vertical
-      color="orange"
+      color="#7ea9c5"
     >
       <v-tab style="place-content: start">
         <v-icon left>
@@ -27,16 +27,6 @@
       </v-tab>
       <v-tab style="place-content: start">
         <v-icon left>
-          mdi-book-open-page-variant
-        </v-icon>
-        User Stories
-        <v-badge
-          inline
-          :content="currProject.userStories.length.toString()"
-        />
-      </v-tab>
-      <v-tab style="place-content: start">
-        <v-icon left>
           mdi-run-fast
         </v-icon>
         Sprints
@@ -45,7 +35,14 @@
           :content="currProject.sprints.length.toString()"
         />
       </v-tab>
-
+      <v-btn
+        color="#5c535366"
+        class="ma-2 white--text"
+        @click="navBacklog()"
+      >
+        Open Backlog
+        <v-icon right dark>mdi-chevron-right</v-icon>
+      </v-btn>
       <v-tab-item>
         <v-card flat>
           <v-simple-table>
@@ -190,46 +187,6 @@
       </v-tab-item>
       <v-tab-item>
         <not-found-card
-          v-if="proStories.length <= 0"
-          type="UStory"
-        />
-        <v-card
-          v-else
-          flat
-        >
-          <v-simple-table>
-            <template v-slot:default>
-              <thead>
-                <tr>
-                  <th>
-                    Story
-                  </th>
-                  <th>
-                    Tickets
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="story in proStories"
-                  :key="story.id"
-                >
-                  <td
-                    style="word-wrap: break-word;white-space: normal;"
-                  >
-                    {{ story.storyText }}
-                  </td>
-                  <td>
-                    {{ story.tickets.length.toString() }}
-                  </td>
-                </tr>
-              </tbody>
-            </template>
-          </v-simple-table>
-        </v-card>
-      </v-tab-item>
-      <v-tab-item>
-        <not-found-card
           v-if="proSprints.length <= 0"
           type="Sprint"
           @createAction="sPlanShow"
@@ -243,25 +200,52 @@
               <thead>
                 <tr>
                   <th>
-                    Story
+                    Sprint
                   </th>
                   <th>
                     Tickets
+                  </th>
+                  <th>
+                    Status
+                  </th>
+                  <th>
+                    Start ~ End
                   </th>
                 </tr>
               </thead>
               <tbody>
                 <tr
-                  v-for="story in proStories"
-                  :key="story.id"
+                  v-for="sprint in proSprints"
+                  :key="sprint.id"
+                  style="cursor: pointer"
+                  @click="sprintNavigation(sprint)"
                 >
-                  <td
-                    style="word-wrap: break-word;white-space: normal;"
-                  >
-                    {{ story.storyText }}
+                  <td>
+                    Sprint {{ sprint.sprintNo }}
                   </td>
                   <td>
-                    {{ story.tickets.length.toString() }}
+                    {{ unCompTicksCountSprint(sprint) }}
+                  </td>
+                  <td>
+                    <span v-if="sprint.active">
+                      Active
+                      <v-badge
+                        dot
+                        color="#3aaf25"
+                        inline
+                      />
+                    </span>
+                    <span v-else>
+                      In-active
+                      <v-badge
+                        dot
+                        color="#ffae4a"
+                        inline
+                      />
+                    </span>
+                  </td>
+                  <td>
+                    {{ sprint.startDate }} ~ {{ sprint.endDate }}
                   </td>
                 </tr>
               </tbody>
@@ -274,7 +258,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapActions } from 'vuex';
 import NotFoundCard from '../../NotFoundCard.vue';
 
 export default {
@@ -289,15 +273,8 @@ export default {
     },
   },
   computed: {
-    ...mapState({
-      projects: (state) => state.currPmProjects,
-      allUsers: (state) => state.allUserList,
-    }),
     currProject() {
-      if (this.projects === null || this.allUsers === null) {
-        return null;
-      }
-      return this.projects.find((project) => project.id === this.projectId);
+      return this.$store.getters.getCurrProject(this.projectId);
     },
     proMembers() {
       // get all the members from state.currPmProjects
@@ -305,9 +282,6 @@ export default {
     },
     proTickets() {
       return this.currProject.tickets;
-    },
-    proStories() {
-      return this.currProject.userStories;
     },
     proSprints() {
       return this.currProject.sprints;
@@ -322,8 +296,16 @@ export default {
   methods: {
     ...mapActions([
       'sPlannerShow',
+      'nUStoryDialogShow',
     ]),
+    navBacklog() {
+      this.$router.push({
+        path: '/backlog',
+        query: { proId: this.currProject.id },
+      });
+    },
     sPlanShow() {
+      this.navBacklog();
       this.sPlannerShow({ show: true, proId: this.currProject.id });
     },
     memberByID(id) {
@@ -345,10 +327,20 @@ export default {
         .filter((tick) => (tick.assignee) && tick.assignee.id === member.id);
       return unComplete.length;
     },
+    unCompTicksCountSprint(sprint) {
+      const unComplete = sprint.tickets.filter((tick) => tick.done === false);
+      return unComplete.length;
+    },
     tickNavigation(ticket) {
       this.$router.push({
         path: '/ticket',
         query: { tickId: ticket.id, proId: this.currProject.id },
+      });
+    },
+    sprintNavigation(sprint) {
+      this.$router.push({
+        path: '/sprint',
+        query: { sprintId: sprint.id, proId: this.currProject.id },
       });
     },
   },

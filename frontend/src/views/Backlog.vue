@@ -1,6 +1,7 @@
 <template>
   <v-content class="pb-0">
-    <details-drawer />
+    <tic-det-drawer />
+    <uStory-det-drawer />
     <user-story-rows v-if="loaded" />
   </v-content>
 </template>
@@ -9,12 +10,14 @@
 import { mapActions } from 'vuex';
 import UserStoryRows from '../components/backlog/UserStoryRows.vue';
 import DetailsDrawer from '../components/Ticket/drawer component/DetailsDrawer.vue';
+import DetDrawerUStory from '../components/backlog/UStoryDrawer/DetDrawerUStory.vue';
 
 export default {
   name: 'Backlog',
   components: {
     UserStoryRows,
-    DetailsDrawer,
+    'tic-det-drawer': DetailsDrawer,
+    'uStory-det-drawer': DetDrawerUStory,
   },
   data: () => ({
     loaded: false,

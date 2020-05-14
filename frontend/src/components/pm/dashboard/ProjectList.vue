@@ -2,7 +2,7 @@
   <v-card>
     <v-toolbar
       flat
-      color="primary"
+      color="#3d4042"
       dark
     >
       <v-toolbar-title>My Projects</v-toolbar-title>
@@ -57,29 +57,30 @@
         </div>
       </v-card>
     </v-container>
-    <v-tabs
-      v-if="!projectsNone"
-      v-model="tab"
-    >
-      <v-tab
-        v-for="project in projects"
-        :key="project.id"
+    <template v-else>
+      <v-tabs
+        v-model="tab"
+        color="white"
       >
-        {{ project.label }}
-      </v-tab>
-    </v-tabs>
-    <v-tabs-items
-      style="height: calc(100vh - 400px);overflow-y: auto;"
-      v-if="!projectsNone"
-      v-model="tab"
-    >
-      <v-tab-item
-        v-for="project in projects"
-        :key="project.id"
+        <v-tab
+          v-for="project in projects"
+          :key="project.id"
+        >
+          {{ project.label }}
+        </v-tab>
+      </v-tabs>
+      <v-tabs-items
+        v-model="tab"
+        style="height: calc(100vh - 400px);overflow-y: auto;"
       >
-        <pro-details-tabs :project-id="project.id" />
-      </v-tab-item>
-    </v-tabs-items>
+        <v-tab-item
+          v-for="project in projects"
+          :key="project.id"
+        >
+          <pro-details-tabs :project-id="project.id" />
+        </v-tab-item>
+      </v-tabs-items>
+    </template>
   </v-card>
 </template>
 
@@ -92,10 +93,15 @@ export default {
   components: {
     ProDetailsTabs,
   },
-  data: () => ({
-    tab: null,
-  }),
   computed: {
+    tab: {
+      get() {
+        return this.$store.state.proListTabsModel;
+      },
+      set(val) {
+        this.$store.dispatch('onTabChange', val);
+      },
+    },
     // this property always returns true if there are no new projects
     projectsNone() {
       return this.projects === null;
@@ -108,49 +114,6 @@ export default {
     ...mapActions([
       'nProDialogShow',
     ]),
-    tasksTotal(id) {
-      // find task with correct project Id
-      const currProject = this.projects.find((project) => project.id === id);
-      return currProject.tickets.length + currProject.userStories.length;
-    },
-    projectTasks(id) {
-      const currProject = this.projects.find((project) => project.id === id);
-      const tasks = [];
-
-      currProject.tickets.forEach((tick) => {
-        tasks.push({
-          tickId: tick.id,
-          proId: id,
-          issueNo: tick.issueNumber,
-          title: tick.title,
-          type: 'ticket',
-        });
-      });
-      currProject.userStories.forEach((story) => {
-        tasks.push({
-          id: story.id,
-          issueNo: story.issueNumber,
-          title: story.storyText,
-          type: 'story',
-        });
-      });
-      return tasks;
-    },
-    navigation(task) {
-      if (task.type === 'ticket') {
-        // tickId and proId passed as query in url link
-        const { tickId, proId } = task;
-        this.$router.push({
-          path: '/ticket',
-          query: { tickId, proId },
-        });
-      } else if (task.type === 'story') {
-        this.$router.push({
-          path: '/uStory',
-          query: { id: task.id },
-        });
-      }
-    },
     createProDialog() {
       this.nProDialogShow({ show: true });
     },

@@ -30,12 +30,12 @@ async function verifyToken(token) {
     }
 }
 const testUser = {
-    id : "user1test",
-    firstName : "Joe",
-    lastName : "Bloggz",
-    username : "user1",
-    email : "test@gmail.com",
-    password: "$2b$12$h6BlNYjDx8r2Uug3crDs8OhT6EME94TmBojovXCLsnbiun9EH6SbS",
+    id : 'user1test',
+    firstName : 'Joe',
+    lastName : 'Bloggz',
+    username : 'user1',
+    email : 'test@gmail.com',
+    password: '$2b$12$h6BlNYjDx8r2Uug3crDs8OhT6EME94TmBojovXCLsnbiun9EH6SbS',
     passwordUpdate: true,
 };
 
@@ -56,9 +56,9 @@ module.exports = () => describe('User Login Mutations', () => {
 
         const res = await mutate({
             mutation: gqlQueries.LOGIN_USER,
-            variables: {username:"invalidUser", password:"invalid"}
+            variables: {username:'invalidUser', password:'invalid'}
         });
-        expect(res.errors[0].message).toBe("Username invalid");
+        expect(res.errors[0].message).toBe('Username invalid');
     });
 
     it('Login password invalid error ', async () => {
@@ -66,9 +66,9 @@ module.exports = () => describe('User Login Mutations', () => {
 
         const res = await mutate({
             mutation: gqlQueries.LOGIN_USER,
-            variables: {username: testUser.username, password:"invalid"}
+            variables: {username: testUser.username, password:'invalid'}
         });
-        expect(res.errors[0].message).toBe("Password invalid");
+        expect(res.errors[0].message).toBe('Password invalid');
     });
 
     it('Login test user', async () => {
@@ -76,16 +76,16 @@ module.exports = () => describe('User Login Mutations', () => {
 
         const res = await mutate({
             mutation: gqlQueries.LOGIN_USER,
-            variables: {username: testUser.username, password: "test"}
+            variables: {username: testUser.username, password: 'test'}
         });
         jwtToken = res.data.loginUser.token;
         // verifyToken only returns decrypted token payload, if the token can be verified successfully
         expect(await verifyToken(jwtToken)).toEqual(expect.objectContaining({
-                exp: expect.any(Number), // expiry set by JWT token is in format NUMBER
-                username: testUser.username,
-                id: testUser.id,
-                iat: expect.any(Number), // ISSUED AT TIME  set by JWT token is in format NUMBER
-            })
+            exp: expect.any(Number), // expiry set by JWT token is in format NUMBER
+            username: testUser.username,
+            id: testUser.id,
+            iat: expect.any(Number), // ISSUED AT TIME  set by JWT token is in format NUMBER
+        })
         );
     });
 

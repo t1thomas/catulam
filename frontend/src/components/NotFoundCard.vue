@@ -48,11 +48,11 @@ export default {
     message() {
       switch (this.type) {
         case 'Sprint':
-          return { title: '0 Sprints Found', subtitle: 'Add new Sprint' };
+          return { title: '0 Sprints Found', subtitle: 'Add new Sprint (Open BackLog)' };
         case 'UStory':
-          return { title: '0 User Stories Found', subtitle: 'Add new User Story' };
+          return { title: '0 User Stories Found', subtitle: 'Add new User Story (Open BackLog)' };
         case 'Ticket':
-          return { title: '0 Tickets Found', subtitle: 'Add new Ticket' };
+          return { title: '0 Tickets Found', subtitle: 'Add new Ticket (Open BackLog)' };
         default:
           return null;
       }

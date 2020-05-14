@@ -103,21 +103,13 @@ export default {
         case this.addedTo.columnType === 'doing':
           await this.moveToDoing();
           break;
-        case this.addedTo.columnType === 'done':
-          await this.moveToDone();
-          break;
         default:
+          await this.moveToDone();
           break;
       }
       this.sBoardClear();
     },
     async moveToToDo() {
-      console.log('heree');
-      console.log({
-        project: { id: this.proId },
-        ticket: { id: this.ticketId },
-        from: { id: this.removedFrom.columnType },
-      });
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.sBoardTicMove.MOVE_TO_TODO,
         fetchPolicy: 'no-cache',
