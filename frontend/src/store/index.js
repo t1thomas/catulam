@@ -7,114 +7,275 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    uSChangeDialog: {
-      showDialog: false,
+    changeDialog: {
+      showUSDialog: false,
+      showUADialog: false,
       ticketId: null,
       removedFrom: {},
       addedTo: {},
       evt: null,
     },
+    sBoardTicMove: {
+      ticketId: null,
+      removedFrom: null,
+      addedTo: null,
+      evt: null,
+    },
+    nTicketDialog: {
+      show: false,
+    },
+    nUStoryDialog: {
+      show: false,
+    },
+    sPlanDialog: {
+      show: false,
+      proId: null,
+      project: null,
+      sprints: null,
+    },
+    nSpDialog: false,
+    nProDialog: {
+      show: false,
+    },
+    snackBar: {
+      show: false,
+      message: '',
+      type: '',
+    },
+    detailsDrawer: {
+      show: false,
+      ticketId: null,
+    },
+    delUSDialog: {
+      show: false,
+      userStoryId: null,
+    },
+    detDrawerUStory: {
+      show: false,
+      userStoryId: null,
+    },
+    proListTabsModel: 0,
     currentUser: null,
-    showDialog: false,
-    carouselModelParent: 0,
+    currentUserTasks: null,
+    carouselModelParent: 1,
     backLogData: [],
-    // userStories: [],
-    sprintList: [],
-    tickets: [],
-    removedFrom: {},
-    addedTo: {},
-    routeAuth: false,
-    projects: null,
-    // repoAndBranch: {},
-    // cardMoved: { removedFrom: undefined, addedTo: undefined },
+    sprintBoardData: null,
+    currentTicket: null,
+    currProElements: null,
+    allUserList: null,
+    currPmProjects: null,
   },
   mutations: {
+    set_proLstTabModel(state, obj) {
+      state.proListTabsModel = obj;
+    },
+    set_nSpDialog(state, obj) {
+      state.nSpDialog = obj;
+    },
+    set_currPmPros(state, obj) {
+      state.currPmProjects = obj;
+    },
+    set_backLogData(state, obj) {
+      if (obj === null) {
+        state.backLogData = null;
+      } else {
+        state.backLogData = { ...obj };
+      }
+    },
+    set_sprintBoardData(state, obj) {
+      if (obj === null) {
+        state.sprintBoardData = null;
+      } else {
+        state.sprintBoardData = { ...obj };
+      }
+    },
+    set_currProElements(state, obj) {
+      if (obj === null) {
+        state.currProElements = null;
+      } else {
+        state.currProElements = { ...obj };
+      }
+    },
+    set_currentUserTasks(state, obj) {
+      if (obj === null) {
+        state.currentUserTasks = null;
+      } else {
+        state.currentUserTasks = [...obj];
+      }
+    },
+    set_allUserList(state, obj) {
+      state.allUserList = obj;
+    },
+    set_currTickDesc(state, obj) {
+      state.currentTicket.desc = obj;
+    },
+    set_currTickHours(state, obj) {
+      state.currentTicket.hourEstimate = obj;
+    },
     set_removedFrom(state, obj) {
       state.removedFrom = obj;
     },
     set_addedTo(state, obj) {
       state.addedTo = obj;
     },
-    set_repoAndBranch(state, obj) {
-      state.repoAndBranch = obj;
-    },
-    set_issues(state, obj) {
-      state.issues = obj;
-    },
-    set_userStories(state, obj) {
-      state.userStories = obj;
-    },
-    set_projects(state, obj) {
-      state.projects = obj;
-    },
-    set_tickets(state, obj) {
-      Object.assign(state.tickets, obj);
-    },
-    set_sprintList(state, obj) {
-      Vue.set(state, 'sprintList', [...obj]);
-    },
-    set_backLogData(state, obj) {
-      Vue.set(state, 'backLogData', [...obj]);
-    },
-    /* mutations to manipulate data for uSChangeDialog */
+    /* mutations to get data for changeDialog in backlog */
     uSCDSet_evt(state, obj) {
-      state.uSChangeDialog.evt = obj;
+      state.changeDialog.evt = obj;
     },
     uSCDSet_ticketId(state, obj) {
-      state.uSChangeDialog.ticketId = obj;
+      state.changeDialog.ticketId = obj;
     },
     uSCDSet_removedFrom(state, obj) {
-      state.uSChangeDialog.removedFrom = obj;
+      state.changeDialog.removedFrom = obj;
     },
     uSCDSet_addedTo(state, obj) {
-      state.uSChangeDialog.addedTo = obj;
+      state.changeDialog.addedTo = obj;
     },
-    set_uSChangeDialog(state) {
-      if (state.uSChangeDialog.showDialog === false) {
-        state.uSChangeDialog.showDialog = true;
+    /* ----------------------------------------------------------*/
+    /* mutations to get data for change in sprintBoard */
+    sBoardSet_evt(state, obj) {
+      state.sBoardTicMove.evt = obj;
+    },
+    sBoardSet_ticketId(state, obj) {
+      state.sBoardTicMove.ticketId = obj;
+    },
+    sBoardSet_removedFrom(state, obj) {
+      state.sBoardTicMove.removedFrom = obj;
+    },
+    sBoardSet_addedTo(state, obj) {
+      state.sBoardTicMove.addedTo = obj;
+    },
+    sBoardSet_clear(state) {
+      state.sBoardTicMove.evt = null;
+      state.sBoardTicMove.ticketId = null;
+      state.sBoardTicMove.removedFrom = null;
+      state.sBoardTicMove.addedTo = null;
+    },
+    /* ----------------------------------------------------------*/
+    set_USChangeDialog(state) {
+      if (state.changeDialog.showUSDialog === false) {
+        state.changeDialog.showUSDialog = true;
       } else {
-        state.uSChangeDialog.showDialog = false;
-        state.uSChangeDialog.removedFrom = undefined;
-        state.uSChangeDialog.addedTo = undefined;
-        state.uSChangeDialog.addedTo = null;
+        state.changeDialog.showUSDialog = false;
+        state.changeDialog.removedFrom = undefined;
+        state.changeDialog.addedTo = undefined;
+        state.changeDialog.evt = null;
+        state.changeDialog.ticketId = null;
+      }
+    },
+    set_UAChangeDialog(state) {
+      if (state.changeDialog.showUADialog === false) {
+        state.changeDialog.showUADialog = true;
+      } else {
+        state.changeDialog.showUADialog = false;
+        state.changeDialog.removedFrom = undefined;
+        state.changeDialog.addedTo = undefined;
+        state.changeDialog.evt = null;
+        state.changeDialog.ticketId = null;
       }
     },
     /* ------------------------------------------------*/
     set_carouselModel(state, obj) {
       state.carouselModelParent = obj;
     },
+    set_currTicket(state, obj) {
+      state.currentTicket = { ...obj };
+    },
+    set_currTicket_assignee(state, obj) {
+      if (obj === null) {
+        state.currentTicket.assignee = null;
+      } else {
+        state.currentTicket.assignee = { ...obj };
+      }
+    },
     set_currentUser(state, obj) {
       if (obj === null) {
         state.currentUser = null;
       } else {
         state.currentUser = { ...obj };
-
-        // Object.keys(obj)
-        //   .forEach((key) => {
-        //     Vue.set(state.currentUser, key, obj[key]);
-        //   });
+      }
+    },
+    set_snackBarShow_false(state) {
+      state.snackBar.show = false;
+    },
+    set_snackBarShow(state, obj) {
+      state.snackBar.message = obj.message;
+      state.snackBar.type = obj.type;
+      state.snackBar.show = true;
+    },
+    set_DrawerShow(state, obj) {
+      if (obj.show === false) {
+        state.detailsDrawer.show = obj.show;
+        state.detailsDrawer.ticketId = null;
+        state.currentTicket = null;
+      } else {
+        state.detailsDrawer.show = obj.show;
+        state.detailsDrawer.ticketId = obj.ticketId;
+      }
+    },
+    set_DrawShowUStory(state, obj) {
+      if (obj.show === false) {
+        state.detDrawerUStory.show = obj.show;
+        state.detDrawerUStory.userStoryId = null;
+      } else {
+        state.detDrawerUStory.userStoryId = obj.userStoryId;
+        state.detDrawerUStory.show = obj.show;
+      }
+    },
+    set_delUSDialog(state, obj) {
+      if (obj.show === false) {
+        state.delUSDialog.show = obj.show;
+        state.delUSDialog.userStoryId = null;
+      } else {
+        state.delUSDialog.userStoryId = obj.userStoryId;
+        state.delUSDialog.show = obj.show;
+      }
+    },
+    set_sPlanShow(state, obj) {
+      if (obj.show === false) {
+        state.sPlanDialog.show = obj.show;
+        state.sPlanDialog.project = null;
+        state.sPlanDialog.sprints = null;
+      } else {
+        state.sPlanDialog.show = obj.show;
+        state.sPlanDialog.project = obj.project;
+        state.sPlanDialog.sprints = obj.sprints;
+      }
+    },
+    set_nTicDialogShow(state, obj) {
+      if (obj.show === false) {
+        state.nTicketDialog.show = obj.show;
+      } else {
+        state.nTicketDialog.show = obj.show;
+      }
+    },
+    set_nUStoryDialogShow(state, obj) {
+      if (obj.show === false) {
+        state.nUStoryDialog.show = obj.show;
+      } else {
+        state.nUStoryDialog.show = obj.show;
+      }
+    },
+    set_nProDialog(state, obj) {
+      if (obj.show === false) {
+        state.nProDialog.show = obj.show;
+        // state.detailsDrawer.ticketId = null;
+        // state.currentTicket = null;
+      } else {
+        state.nProDialog.show = obj.show;
+        // state.detailsDrawer.ticketId = obj.ticketId;
       }
     },
   },
   actions: {
-    async fetchUserStories({ commit }) {
-      const response = await Vue.$apolloClient.query({
-        query: gqlQueries.USWithTickIds,
-        fetchPolicy: 'no-cache',
-      });
-      const { UserStory } = response.data;
-      commit('set_userStories', UserStory);
+    delUSDialogShow({ commit }, payload) {
+      commit('set_delUSDialog', payload);
     },
-    async fetchTickets({ commit }) {
-      await Vue.$apolloClient.query({
-        query: gqlQueries.Tickets,
-        fetchPolicy: 'no-cache',
-      }).then((response) => {
-        const { Ticket } = response.data;
-        commit('set_tickets', Ticket);
-      }).catch((error) => {
-        console.error(error);
-      });
+    snackBarOff({ commit }) {
+      commit('set_snackBarShow_false');
+    },
+    snackBarOn({ commit }, payload) {
+      commit('set_snackBarShow', payload);
     },
     async fetchSprints({ commit }) {
       await Vue.$apolloClient.query({
@@ -124,30 +285,76 @@ export default new Vuex.Store({
         const { Sprint } = response.data;
         commit('set_sprintList', Sprint);
       }).catch((error) => {
-        console.error(error);
+        commit('set_snackBarShow', error);
       });
     },
-    async fetchBackLogData({ commit }) {
+    async fetchSPlannerData({ commit }, id) {
       await Vue.$apolloClient.query({
-        query: gqlQueries.BackLogData,
+        query: gqlQueries.S_PLANNER_DATA,
         fetchPolicy: 'no-cache',
+        variables: { id },
       }).then((response) => {
-        const { UserStory } = response.data;
-        commit('set_backLogData', UserStory);
+        const { Sprint } = response.data;
+        commit('set_sprintList', Sprint);
       }).catch((error) => {
-        console.error(error);
+        commit('set_snackBarShow', error);
       });
     },
-    async fetchProjects({ commit }) {
+    async fetchCurrProElements({ commit }, id) {
       await Vue.$apolloClient.query({
-        query: gqlQueries.PROJECTS,
+        query: gqlQueries.CURR_PROJECT_ELEMENTS,
         fetchPolicy: 'no-cache',
-      }).then((response) => {
-        const { Project } = response.data;
-        commit('set_projects', Project);
-      }).catch((error) => {
-        console.error(error);
-      });
+        variables: { id },
+      })
+        .then((response) => {
+          const { Project } = response.data;
+          if (Project === null) {
+            throw new Error();
+          } else {
+            commit('set_currProElements', Project[0]);
+          }
+        })
+        .catch((error) => {
+          commit('set_snackBarShow', error);
+        });
+    },
+    async fetchBackLogData({ commit }, id) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.BACKLOG_DATA,
+        fetchPolicy: 'no-cache',
+        variables: { id },
+      })
+        .then((response) => {
+          const { data } = response;
+          if (data === null) {
+            throw new Error();
+          } else {
+            commit('set_backLogData', data);
+          }
+        })
+        // eslint-disable-next-line no-unused-vars
+        .catch((error) => {
+          commit('set_snackBarShow', 'Unable to fetch Backlog for project');
+        });
+    },
+    async fetchSprintBoardData({ commit }, id) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.SPRINT_BOARD_DATA,
+        fetchPolicy: 'no-cache',
+        variables: { id },
+      })
+        .then((response) => {
+          const { data } = response;
+          if (data === null) {
+            throw new Error();
+          } else {
+            commit('set_sprintBoardData', data);
+          }
+        })
+      // eslint-disable-next-line no-unused-vars
+        .catch((error) => {
+          commit('set_snackBarShow', 'Unable to fetch Sprint Data project');
+        });
     },
     async fetchCurrentUser({ commit }) {
       return Vue.$apolloClient.query({
@@ -160,10 +367,28 @@ export default new Vuex.Store({
         // eslint-disable-next-line no-unused-vars
       }).catch((error) => {
         commit('set_currentUser', null);
-        throw new Error(error);
+        commit('set_snackBarShow', error);
       });
     },
-
+    async fetchCurrentUserTasks({ commit }, payload) {
+      return Vue.$apolloClient.query({
+        query: gqlQueries.USER_TASKS,
+        variables: payload,
+        fetchPolicy: 'no-cache',
+      })
+        .then((response) => {
+          const { User } = response.data;
+          if (User === null) {
+            throw new Error();
+          } else {
+            commit('set_currentUserTasks', User[0].projects.map((pro) => pro.Project));
+          }
+        })
+        .catch((error) => {
+          // console.log('Unable to fetch User Data');
+          commit('set_snackBarShow', error);
+        });
+    },
     async logoutUser({ commit }) {
       /* remove token right away, s even if the database
       operation fails the client no longer has a token
@@ -179,7 +404,7 @@ export default new Vuex.Store({
         commit('set_currentUser', null);
         router.push('/');
       }).catch((error) => {
-        console.error(error);
+        commit('set_snackBarShow', error);
       });
     },
     async resetPass({ commit }, payload) {
@@ -188,7 +413,6 @@ export default new Vuex.Store({
         fetchPolicy: 'no-cache',
         variables: payload,
       }).then((response) => {
-        console.log(commit);
         const { resetPassword } = response.data;
         localStorage.setItem('catulam_token', resetPassword.token);
         // router.push('/backlog');
@@ -197,10 +421,123 @@ export default new Vuex.Store({
         */
       }).catch((error) => {
         localStorage.setItem('catulam_token', '');
-        console.error(error);
+        commit('set_snackBarShow', error);
         // don't know if it makes a diffrence
         commit('set_currentUser', null);
       });
+    },
+    async fetchCurrTicket({ commit }, id) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.CURRENT_TICKET,
+        fetchPolicy: 'no-cache',
+        variables: { id },
+      })
+        .then((response) => {
+          const { Ticket } = response.data;
+          if (Ticket === null) {
+            throw new Error();
+          } else {
+            commit('set_currTicket', Ticket[0]);
+          }
+        })
+        .catch((error) => {
+          // console.log('Unable to fetch Ticket');
+          commit('set_snackBarShow', error);
+        });
+    },
+    async fetchAllUserList({ commit }, id) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.ALL_USERS,
+        fetchPolicy: 'no-cache',
+        variables: { id },
+      })
+        .then((response) => {
+          const { User } = response.data;
+          if (User === null) {
+            throw new Error();
+          } else {
+            commit('set_allUserList', User);
+          }
+        })
+        .catch((error) => {
+          // console.log('Unable to fetch Users');
+          commit('set_snackBarShow', error);
+        });
+    },
+    async updateTicketHours({ commit }, payload) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.UPDATE_TICKET_ETIME,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { UpdateTicket } = response.data;
+        if (UpdateTicket === null) {
+          throw new Error('Unable to save changes');
+        } else {
+          commit('set_currTickHours', UpdateTicket.hourEstimate);
+        }
+      }).catch((error) => {
+        commit('set_snackBarShow', error);
+      });
+    },
+    async updateTicketAssignee({ commit }, payload) {
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.UPDATE_TICKET_ASSIGNEE,
+        name: 'update',
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { UpdateTicketAssignee } = response.data;
+        // Updates the current ticket in DOM
+        if (UpdateTicketAssignee === null) {
+          commit('set_currTicket_assignee', null);
+        } else {
+          commit('set_currTicket_assignee', UpdateTicketAssignee);
+        }
+      }).catch((error) => {
+        commit('set_snackBarShow', error);
+      });
+    },
+    async fetchPmPros({ commit }, payload) {
+      await Vue.$apolloClient.query({
+        query: gqlQueries.PM_PROJECTS,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { projects } = response.data.User[0];
+        if (projects.length > 0) {
+          const data = projects.map((pro) => pro.Project);
+          commit('set_currPmPros', data);
+        }
+      })
+        .catch((error) => {
+          // console.log('User not found');
+          commit('set_snackBarShow', error);
+        });
+    },
+    async sPlannerShow({ commit }, payload) {
+      if (!payload.show) {
+        commit('set_sPlanShow', payload);
+      } else {
+        await Vue.$apolloClient.query({
+          query: gqlQueries.S_PLANNER_DATA,
+          fetchPolicy: 'no-cache',
+          variables: { id: payload.proId },
+        })
+          .then((response) => {
+            const { Project } = response.data;
+            const project = Project[0];
+            const sprints = Project[0].sprints.sort((a, b) => a.sprintNo - b.sprintNo);
+            commit('set_sPlanShow', { show: true, project, sprints });
+          })
+          .catch((error) => {
+            // console.log('Unable to load Sprint Planner');
+            commit('set_snackBarShow', error);
+          });
+      }
+    },
+    setCurrTickDesc({ commit }, value) {
+      commit('set_currTickDesc', value);
     },
     setCardRemoved({ commit }, listConfig) {
       commit('set_cardRemoved', listConfig);
@@ -217,7 +554,7 @@ export default new Vuex.Store({
     setRemovedFrom({ commit }, value) {
       commit('set_removedFrom', value);
     },
-    /* actions to set data for uSChangeDialog */
+    /* actions to set data for changeDialog in backlog */
     uSCDEvt({ commit }, value) {
       commit('uSCDSet_evt', value);
     },
@@ -233,59 +570,98 @@ export default new Vuex.Store({
     setAddedTo({ commit }, value) {
       commit('set_addedTo', value);
     },
-    showDialogUSSwitcher({ commit }) {
-      commit('set_uSChangeDialog');
+    USDialogSwitcher({ commit }) {
+      commit('set_USChangeDialog');
+    },
+    UADialogSwitcher({ commit }) {
+      commit('set_UAChangeDialog');
     },
     /* -------------------------------------- */
 
+    /* actions to set data for change in sprintBoard */
+    sBoardEvt({ commit }, value) {
+      commit('sBoardSet_evt', value);
+    },
+    sBoardTicketId({ commit }, value) {
+      commit('sBoardSet_ticketId', value);
+    },
+    sBoardRemovedFrom({ commit }, value) {
+      commit('sBoardSet_removedFrom', value);
+    },
+    sBoardAddedTo({ commit }, value) {
+      commit('sBoardSet_addedTo', value);
+    },
+    sBoardClear({ commit }) {
+      commit('sBoardSet_clear');
+    },
+    /* -------------------------------------- */
+    detDrawShow({ commit }, val) {
+      commit('set_DrawerShow', val);
+    },
+    detDrawUStoryShow({ commit }, val) {
+      commit('set_DrawShowUStory', val);
+    },
+    nTicDialogShow({ commit }, val) {
+      commit('set_nTicDialogShow', val);
+    },
+    nUStoryDialogShow({ commit }, val) {
+      commit('set_nUStoryDialogShow', val);
+    },
+    nProDialogShow({ commit }, val) {
+      commit('set_nProDialog', val);
+    },
     setUser({ commit }, value) {
       commit('set_currentUser', value);
     },
-    // cardMoveStartToSprint({commit}) {
-    //
-    // }
+    onTabChange({ commit }, value) {
+      commit('set_proLstTabModel', value);
+    },
   },
   getters: {
+    // gets users apart from currentUser logged in
+    getUserSelection: (state) => (id) => state.allUserList
+      .filter((user) => user.id !== id)
+      .reduce((arr, currUser) => {
+        arr.push({
+          id: currUser.id,
+          fullName: currUser.fullName,
+          avatar: currUser.avatar,
+        });
+        return arr;
+      }, []),
+    // getStoryById: (state) => (id) => state.currProElements.userStories
+    //   .find((story) => story.id === id).storyText,
     getCurrentUser: (state) => state.currentUser,
-    // getTicIdsPerSprint: state => (sprintNo, arrTicketIds) => arrTicketIds
-    //   .filter(tickId => state.sprintList[sprintNo - 1].ticketIds.includes(tickId)),
-    getIssueType: (state) => state.issueType,
-    getIssues: (state) => state.issues,
-    getTicketById: (state) => (tickId) => state.tickets.find((ticket) => ticket.id === tickId),
-    /* eslint-disable no-underscore-dangle */
-    getIssueById: (state) => (issueId) => state.issues.filter((issue) => issueId === issue._id),
-    // getCompletedTickIds: state => ArrTicketIds => ArrTicketIds
-    //   .filter(tickId => state.tickets[tickId].done === true),
-    // getUnCompleteTickIds: state => ArrTicketIds => ArrTicketIds
-    //   .filter(tickId => state.tickets[tickId].done === false),
-    getTicsPerSprint: (state) => (sprintId, userStoryId) => state.sprintList
-      .find((sprint) => sprint.id === sprintId).tickets
-      .reduce((arr, currTicket) => {
-        if (currTicket.userStory.id === userStoryId) {
-          arr.push(currTicket.id);
-        }
-        return arr;
-      }, []),
-    getUnStagedTicks: (state) => (userStoryId) => state.backLogData
-      .find((userStory) => userStory.id === userStoryId).tickets
-      .reduce((arr, currTicket) => {
-        if (currTicket.done === false && currTicket.sprint === null) {
-          arr.push(currTicket.id);
-        }
-        return arr;
-      }, []),
-    getCompletedTicks: (state) => (userStoryId) => state.backLogData
-      .find((userStory) => userStory.id === userStoryId).tickets
-      .reduce((arr, currTicket) => {
-        if (currTicket.done === true && currTicket.sprint === null) {
-          arr.push(currTicket.id);
-        }
-        return arr;
-      }, []),
-    getUserStoryText: (state) => (userStoryId) => state.backLogData
-      .find((userStory) => userStory.id === userStoryId)
-      .storyText,
-    getSprintValues: (state) => state.sprintList
+    getCurrProject: (state) => (proId) => state.currPmProjects
+      .find((project) => project.id === proId),
+    getTicketById: (state) => (id) => state.currProElements.tickets
+      .find((ticket) => ticket.id === id),
+    // get ticket ids that dont have sprints, and have a uStory id that matches param
+    getTicksUsNoSp: (state) => (userStoryId) => state.backLogData.UsNoSp[0].tickets
+      .filter((tick) => tick.userStory.id === userStoryId)
+      .map((tick) => tick.id),
+    // get ticket ids that are done, and have a uStory id that matches param
+    getDoneTicksUs: (state) => (userStoryId) => state.backLogData.DUS[0].tickets
+      .filter((tick) => tick.userStory.id === userStoryId)
+      .map((tick) => tick.id),
+    // get ticket ids that are done, and have no uStory id
+    getDoneTicksNoUs: (state) => state.backLogData.DnoUS[0].tickets
+      .map((tick) => tick.id),
+    // get ticket ids have a uStory id sprint id that matches params
+    getTickIdsPerSprintUS: (state) => (sprintId, userStoryId) => state.backLogData.UsSp[0].tickets
+      .filter((tick) => tick.sprint.id === sprintId && tick.userStory.id === userStoryId)
+      .map((tick) => tick.id),
+    // get ticket ids that dont have sprints, and no a uStory
+    getTicksNoUsNoSp: (state) => state.backLogData.noUsNoSp[0].tickets
+      .map((tick) => tick.id),
+
+    // get ticket ids without uStory, but sprint id that matches params
+    getTickIdsPerSprintNoUS: (state) => (sprintId) => state.backLogData.noUsSp[0].tickets
+      .filter((tick) => tick.sprint.id === sprintId)
+      .map((tick) => tick.id),
+    getUserStoryText: (state) => (userStoryId) => state.currProElements.userStories
+      .find((userStory) => userStory.id === userStoryId).storyText,
+    getSprintValues: (state) => state.currProElements.sprints
       .reduce((arr, currSprint, index) => {
         if (index === 0) {
           arr.push({
@@ -307,35 +683,14 @@ export default new Vuex.Store({
         }
         return arr;
       }, []),
-    /* Retrieve tickets in done vs un-complete state based on array of tick Ids passed in */
-    // getRepoNames: state => state.repoAndBranch.reduce((arr, repo) => {
-    //   arr.push(repo.name);
-    //   return arr;
-    // }, []),
-    // getRepoBranches: state => repoName => state.repoAndBranch
-    //   .filter(repo => repoName === repo.name)
-    //   .reduce((arr, repo) => {
-    //     (repo.refs.nodes).forEach((branch) => {
-    //       const currentDatetime = new Date(branch.target.committedDate);
-    // eslint-disable-next-line max-len
-    //       const formattedDate = `${currentDatetime.getDate()}-${currentDatetime.getMonth() + 1}-${currentDatetime.getFullYear()} ${currentDatetime.getHours()}:${currentDatetime.getMinutes()}`;
-    //       arr.push({
-    //         label: branch.name,
-    //         lastCommit: formattedDate,
-    //         lastCommitFullDate: currentDatetime,
-    //         oid: branch.target.oid,
-    //         repoId: repo.id,
-    //         branchUrl: `${repo.url}/tree/${branch.name}`,
-    //       });
-    //     });
-    //     return arr;
-    //   }, []).sort((a, b) => {
-    //     /* eslint-disable no-param-reassign, no-nested-ternary */
-    //     a = new Date(a.lastCommitFullDate);
-    //     b = new Date(b.lastCommitFullDate);
-    //     return a > b ? -1 : a < b ? 1 : 0;
-    //     /* eslint-enable */
-    //   }),
+    getPos0Ticks: (state) => state.sprintBoardData.pos0[0].tickets
+      .map((tick) => tick.id),
+    getPos1Ticks: (state) => state.sprintBoardData.pos1[0].tickets
+      .map((tick) => tick.id),
+    getPosDoneTicks: (state) => state.sprintBoardData.posDone[0].tickets
+      .map((tick) => tick.id),
+    getMemberById: (state) => (memberId) => state.currProElements.members
+      .find((member) => member.User.id === memberId).User,
   },
   modules: {
   },

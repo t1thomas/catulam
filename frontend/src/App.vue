@@ -4,57 +4,75 @@
       v-model="drawer"
       app
       clipped
+      mini-variant
+      expand-on-hover
     >
-      <v-list dense>
-        <v-list-item link>
-          <v-list-item-action>
-            <v-icon>mdi-view-dashboard</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Dashboard</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-        <v-list-item link>
-          <v-list-item-action>
-            <v-icon>mdi-settings</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Settings</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
+      <nav-draw-items />
     </v-navigation-drawer>
-
     <v-app-bar
       app
       clipped-left
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title>Application</v-toolbar-title>
+      <v-toolbar-title>Caṭulam</v-toolbar-title>
+      <v-spacer />
+      <v-btn
+        v-if="currentUser"
+        class="ma-2"
+        text
+        icon
+        color="red lighten-2"
+      >
+        <v-avatar
+          size="30"
+        >
+          <img
+            :src="gravatar"
+            alt="John"
+          >
+        </v-avatar>
+      </v-btn>
+      <v-btn
+        v-if="currentUser"
+        dark
+        color="secondary"
+        @click="logout"
+      >
+        Logout
+        <v-icon right>
+          mdi-logout-variant
+        </v-icon>
+      </v-btn>
     </v-app-bar>
-
-    <v-content>
+    <snackbar />
+    <v-container
+      fill-height
+      fluid
+    >
       <router-view />
-    </v-content>
-
-    <v-footer app>
-      <span>&copy; 2019</span>
-    </v-footer>
+    </v-container>
   </v-app>
 </template>
 
 <script>
 
-import { mapState } from 'vuex';
+import { mapState, mapActions } from 'vuex';
+import snackbar from './components/snackbar.vue';
+import navDrawItems from './components/appMain/navDrawItems.vue';
 
 export default {
   name: 'LayoutDefault',
-  data() {
-    return {
-      drawer: null,
-    };
+  components: {
+    snackbar,
+    navDrawItems,
   },
+  data: () => ({
+    drawer: true,
+  }),
   computed: {
+    gravatar() {
+      return `https://gravatar.com/avatar/${this.currentUser.avatar}?d=identicon`;
+    },
     ...mapState([
       'currentUser',
     ]),
@@ -76,13 +94,40 @@ export default {
   created() {
     this.$store.dispatch('fetchCurrentUser')
       .catch((e) => {
-        console.error(e);
+        this.snackBarOn({
+          message: e,
+          type: 'error',
+        });
       });
     this.$vuetify.theme.dark = true;
+  },
+  async beforeUpdate() {
+    if (this.currentUser) {
+      if (this.currentUser.type === 'pm') {
+        await this.fetchPmPros({ username: this.currentUser.username });
+      } else if (this.currentUser.type === 'dev') {
+        await this.fetchCurrentUserTasks({ username: this.currentUser.username });
+      }
+      await this.fetchAllUserList();
+    }
+  },
+  methods: {
+    ...mapActions([
+      'fetchAllUserList',
+      'fetchCurrentUserTasks',
+      'logoutUser',
+      'fetchPmPros',
+      'snackBarOn',
+    ]),
+    async logout() {
+      await this.logoutUser();
+    },
   },
 };
 </script>
 
 <style>
-
+  .v-snack__content {
+    padding: 0 !important;
+  }
 </style>

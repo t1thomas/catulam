@@ -1,41 +1,33 @@
 <template>
-  <v-container
-    class="fill-height"
-    fluid
-  >
-    <v-row
-      align="center"
-      justify="center"
-    >
-      <v-col
-        cols="12"
-        md="6"
-      >
-        <div
-          color="warning"
-          class="px-5 py-3"
-        >
-          WIP
-        </div>
-      </v-col>
-      <v-col
-        cols="12"
-        md="6"
-      >
-        <UserTasks />
-      </v-col>
-    </v-row>
-  </v-container>
+  <v-content>
+    <DevHome v-if="userType==='dev'" />
+    <PMHome v-if="userType==='pm'" />
+  </v-content>
 </template>
 
 <script>
-// @ is an alias to /src
-import UserTasks from '../components/dashboard/UserTasks.vue';
+import { mapGetters } from 'vuex';
+import DevHome from '../components/dev/dashboard/DevHome.vue';
+import PMHome from '../components/pm/dashboard/PMHome.vue';
 
 export default {
   name: 'Home',
   components: {
-    UserTasks,
+    DevHome,
+    PMHome,
+  },
+  computed: {
+    ...mapGetters([
+      'getCurrentUser',
+    ]),
+    userType() {
+      return this.getCurrentUser.type;
+    },
+  },
+  mounted() {
+    if (this.getCurrentUser === null) {
+      this.$router.push('/');
+    }
   },
 };
 </script>

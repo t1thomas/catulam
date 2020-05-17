@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "nodemon": "nodemon src/index.js",
+    "start": "node src/index.js",
     "lint": "eslint",
     "test": "jest --detectOpenHandles"
   },
@@ -19,8 +20,10 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "graphql": "^14.6.0",
+    "graphql-auth-directives": "^2.2.0",
     "graphql-type-json": "^0.3.1",
     "jsonwebtoken": "^8.5.1",
+    "md5": "^2.2.1",
     "neo4j-driver": "^4.0.1",
     "neo4j-graphql-js": "^2.12.1",
     "neode": "^0.4.3"

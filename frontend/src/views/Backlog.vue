@@ -1,67 +1,59 @@
 <template>
-  <v-container
-    class="fill-height d-inline-block"
-  >
-    <div
-      v-if="loaded"
-      class="containers"
-    >
-      <UserStoryRows
-        v-for="(story) in backLogData"
-        :key="story.id"
-        :story="story"
-      />
-    </div>
-<!--    <USSwitchDialog v-if="showDialog" />-->
-  </v-container>
+  <v-content class="pb-0">
+    <tic-det-drawer />
+    <uStory-det-drawer />
+    <user-story-rows v-if="loaded" />
+    <del-u-s-dialog />
+  </v-content>
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions } from 'vuex';
 import UserStoryRows from '../components/backlog/UserStoryRows.vue';
-// import USSwitchDialog from '../components/backlog/Columns/Dialog.vue';
+import DetailsDrawer from '../components/Ticket/drawer component/DetailsDrawer.vue';
+import DetDrawerUStory from '../components/backlog/UStoryDrawer/DetDrawerUStory.vue';
+import DelUSDialog from '../components/backlog/dialogs/DelUSDialog.vue';
 
 export default {
   name: 'Backlog',
   components: {
     UserStoryRows,
-    // USSwitchDialog,
+    'tic-det-drawer': DetailsDrawer,
+    'uStory-det-drawer': DetDrawerUStory,
+    DelUSDialog,
   },
   data: () => ({
     loaded: false,
-
   }),
   computed: {
-    ...mapState([
-      'userStories',
-      'backLogData',
-      'uSChangeDialog',
-    ]),
-    showDialog() {
-      return this.uSChangeDialog.showDialog;
+    proId() {
+      return this.$route.query.proId;
+    },
+  },
+  watch: {
+    async proId() {
+      this.loaded = false;
+      await this.loadData();
+      this.loaded = true;
     },
   },
   async mounted() {
-    await this.fetchTickets();
-    await this.fetchSprints();
-    await this.fetchBackLogData();
+    await this.loadData();
     this.loaded = true;
   },
   methods: {
     ...mapActions([
-      'fetchUserStories',
-      'fetchTickets',
-      'fetchSprints',
       'fetchBackLogData',
+      'fetchCurrProElements',
     ]),
+    async loadData() {
+      await this.fetchCurrProElements(this.proId);
+      await this.fetchBackLogData(this.proId);
+    },
   },
 };
 </script>
 
 <style scoped>
-.containers {
-  height: 100%;
-  display: grid;
-  grid-template-rows: auto;
-}
+
 </style>

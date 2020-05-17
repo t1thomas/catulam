@@ -1,14 +1,12 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
-// import GitAuth from '../views/GitAuthentication.vue';
-// import repoandbranchselector from '../views/Ebranchselector.vue';
-// import repoandbranchselector from '../components/Ebranchselector.vue';
 import backlog from '../views/Backlog.vue';
 import login from '../views/Login.vue';
 import PassReset from '../views/PassReset.vue';
-// eslint-disable-next-line no-unused-vars
-import gqlQueries from '../graphql/gql-queries';
+import TicketPage from '../components/Ticket/Page Components/TicketPage.vue';
+import UserStoryPage from '../components/UserStory/UserStoryPage.vue';
+import SprintBoard from '../views/SprintBoard.vue';
 
 Vue.use(VueRouter);
 
@@ -30,26 +28,46 @@ const AuthAccess = async (to, from, next) => {
       }
     })
     .catch((e) => {
-      console.error(e);
-
+      Vue.$store.dispatch('snackBarOn', e);
       next({
         path: '/',
       });
     });
 };
-// const ForbiddenAccess = async (to, from, next) => {
+// const HomeAccess = async (to, from, next) => {
 //   const user = await Vue.$store.getters.getCurrentUser;
 //   if (user === null) {
 //     next({
 //       path: '/',
 //     });
-//   } else if (user.passwordUpdate === true) {
-//     // if a reset password is required, send user to reset page
-//     next();
+//   } else {
+//     console.log(to);
+//     console.log('heyoo');
+//     next({
+//       path: `/home/${user.type}`,
+//     });
 //   }
 // };
 
 const routes = [
+  {
+    path: '/sprint',
+    name: 'sprint',
+    component: SprintBoard,
+    beforeEnter: AuthAccess,
+  },
+  {
+    path: '/uStory',
+    name: 'uStory',
+    component: UserStoryPage,
+    beforeEnter: AuthAccess,
+  },
+  {
+    path: '/ticket',
+    name: 'ticket',
+    component: TicketPage,
+    beforeEnter: AuthAccess,
+  },
   {
     path: '/home',
     name: 'home',
@@ -76,24 +94,6 @@ const routes = [
     name: 'ResetPass',
     component: PassReset,
   },
-  // {
-  //   path: '/gitauth/callback',
-  //   name: 'about',
-  //   // route level code-splitting
-  //   // this generates a separate chunk (about.[hash].js) for this route
-  //   // which is lazy-loaded when the route is visited.
-  //   component: () => import(/* webpackChunkName: "about" */ '../views/About.vue'),
-  // },
-  // {
-  //   path: '/gitauth/callback',
-  //   name: 'GitAuth',
-  //   component: GitAuth,
-  // },
-  // {
-  //   path: '/repoandbranch',
-  //   name: 'repoandbranchselector',
-  //   component: repoandbranchselector,
-  // },
 ];
 
 const router = new VueRouter({

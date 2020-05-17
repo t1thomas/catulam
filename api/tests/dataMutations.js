@@ -2,7 +2,6 @@ const { ApolloServer } = require('apollo-server-express');
 const { createTestClient } = require('apollo-server-testing');
 const driver = require('./testDb/testDbNeo4jDriver');
 const gqlQueries = require('./gql-queries-mutations');
-const jwt = require('jsonwebtoken');
 
 // schema used for testing is same as production
 const schema = require('../src/graphQL-schema');
