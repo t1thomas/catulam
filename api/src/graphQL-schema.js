@@ -60,27 +60,27 @@ const resolveFunctions = {
     Mutation: {
         StartToSprint: async (object, params, ctx, resolveInfo) => {
             try {
-                // using project Id found,
-                ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo);
-            }catch (e) {
-                throw new Error(e);
-            }
-        },
-        SwitchSprint: async (object, params, ctx, resolveInfo) => {
-            try {
-                // using project Id found,
-                ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo);
+                const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+                await ctx.pubSub.publish('project', {update: result.project.id});
+                return result;
             }catch (e) {
                 throw new Error(e);
             }
         },
         SprintToStart: async (object, params, ctx, resolveInfo) => {
             try {
-                // using project Id found,
-                ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo);
+                const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+                await ctx.pubSub.publish('project', {update: result.project.id});
+                return result;
+            }catch (e) {
+                throw new Error(e);
+            }
+        },
+        SwitchSprint: async (object, params, ctx, resolveInfo) => {
+            try {
+                const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+                await ctx.pubSub.publish('project', {update: result.project.id});
+                return result;
             }catch (e) {
                 throw new Error(e);
             }
@@ -260,9 +260,9 @@ const resolveFunctions = {
         },
         CreateUserStory:  async (object, params, ctx, resolveInfo) => {
             try {
-                // using project Id found,
-                ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo);
+                const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+                await ctx.pubSub.publish('project', {update: result.project.id});
+                return result;
             }catch (e) {
                 throw new Error(e);
             }
@@ -327,27 +327,27 @@ const resolveFunctions = {
         },
         CreateTicket:  async (object, params, ctx, resolveInfo) => {
             try {
-                // using project Id found,
-                ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo);
+                const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+                await ctx.pubSub.publish('project', {update: result.project.id});
+                return result;
             }catch (e) {
                 throw new Error(e);
             }
         },
         TicToToDo:  async (object, params, ctx, resolveInfo) => {
             try {
-                // using project Id found,
-                ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo);
+                const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+                await ctx.pubSub.publish('project', {update: result.project.id});
+                return result;
             }catch (e) {
                 throw new Error(e);
             }
         },
         TicToDoing:  async (object, params, ctx, resolveInfo) => {
             try {
-                // using project Id found,
-                ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo);
+                const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+                await ctx.pubSub.publish('project', {update: result.project.id});
+                return result;
             }catch (e) {
                 throw new Error(e);
             }
@@ -372,18 +372,18 @@ const resolveFunctions = {
         },
         TicToDone:  async (object, params, ctx, resolveInfo) => {
             try {
-                // using project Id found,
-                ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo);
+                const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+                await ctx.pubSub.publish('project', {update: result.project.id});
+                return result;
             }catch (e) {
                 throw new Error(e);
             }
         },
         CreateSprint: async (object, params, ctx, resolveInfo) => {
             try {
-                // using project Id found,
-                ctx.pubSub.publish('project', {update: params.project.id});
-                return await neo4jgraphql(object, params, ctx, resolveInfo);
+                const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+                await ctx.pubSub.publish('project', {update: result.project.id});
+                return result;
             }catch (e) {
                 throw new Error(e);
             }
