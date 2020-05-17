@@ -28,7 +28,7 @@ const AuthAccess = async (to, from, next) => {
       }
     })
     .catch((e) => {
-      console.error(e);
+      Vue.$store.dispatch('snackBarOn', e);
       next({
         path: '/',
       });

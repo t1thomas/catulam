@@ -153,7 +153,6 @@ export default {
             });
           }
         }).catch((error) => {
-          console.error(error);
           this.snackBarOn({
             message: error,
             type: 'error',

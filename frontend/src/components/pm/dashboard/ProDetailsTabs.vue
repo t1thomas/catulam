@@ -41,7 +41,12 @@
         @click="navBacklog()"
       >
         Open Backlog
-        <v-icon right dark>mdi-chevron-right</v-icon>
+        <v-icon
+          right
+          dark
+        >
+          mdi-chevron-right
+        </v-icon>
       </v-btn>
       <v-tab-item>
         <v-card flat>
@@ -313,9 +318,6 @@ export default {
     },
     gravatar(member) {
       return `https://gravatar.com/avatar/${member.avatar}?d=identicon`;
-    },
-    print() {
-      console.log(this.currProject.tickets);
     },
     doneTicksCount(member) {
       const completed = this.proTicketsComplete

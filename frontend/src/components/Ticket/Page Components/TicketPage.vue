@@ -1,6 +1,8 @@
 <template>
-  <v-container fluid fill-height
+  <v-container
     v-if="dataLoaded"
+    fluid
+    fill-height
   >
     <v-content class="fill-height">
       <topSection />

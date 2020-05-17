@@ -16,7 +16,7 @@
         </template>
         <template v-else>
           <v-card-subtitle style="height: 75%">
-            {{ storyById(userStoryId)}}
+            {{ storyById(userStoryId) }}
           </v-card-subtitle>
           <v-card-actions class="px-0">
             <v-spacer />

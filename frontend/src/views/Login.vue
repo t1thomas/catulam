@@ -1,5 +1,8 @@
 <template>
-  <v-container fill-height fluid>
+  <v-container
+    fill-height
+    fluid
+  >
     <v-row
       align="center"
       justify="center"
@@ -113,6 +116,7 @@ export default {
   methods: {
     ...mapActions([
       'fetchCurrentUser',
+      'snackBarOn',
     ]),
     onSubmit() {
       this.$v.$touch();
@@ -131,8 +135,10 @@ export default {
         localStorage.setItem('catulam_token', loginUser.token);
         this.$router.go();
       }).catch((error) => {
-        console.log('here login');
-        console.error(error);
+        this.snackBarOn({
+          message: error,
+          type: 'error',
+        });
       });
     },
   },

@@ -1,5 +1,5 @@
 <template>
-  <div>UserStory {{id}}</div>
+  <div>UserStory {{ id }}</div>
 </template>
 
 <script>

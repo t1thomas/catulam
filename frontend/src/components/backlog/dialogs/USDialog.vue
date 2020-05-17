@@ -119,12 +119,12 @@ export default {
     ...mapActions([
       'USDialogSwitcher', // opens/closes dialog
       'fetchBackLogData',
+      'snackBarOn',
     ]),
     async onConfirm() {
       switch (true) {
         case this.removedFrom.sprintId === undefined
         && this.selectedOption.value === 0:
-          console.log('no sprints, ticket moved to Todo in new userStory');
           // this.uStorySwitchOnly();
           await this.dataMutation({
             project: { id: this.proId },
@@ -156,7 +156,6 @@ export default {
           });
           break;
         case this.removedFrom.sprintId !== this.selectedOption.id:
-          console.log('here');
           // change sprint and change user story
           await this.dataMutation({
             project: { id: this.proId },
@@ -168,7 +167,6 @@ export default {
           });
           break;
         default:
-          console.log('no changed sprints');
           await this.dataMutation({
             project: { id: this.proId },
             tick: { id: this.ticketId },
@@ -184,11 +182,11 @@ export default {
         mutation: gqlQueries.SwitchUserStory.USTORY_TICKET_SWITCH,
         fetchPolicy: 'no-cache',
         variables: payload,
-      }).then((response) => {
-        console.log(response);
-        // DOM auto updates via API subscription
       }).catch((error) => {
-        console.error(error);
+        this.snackBarOn({
+          message: error,
+          type: 'error',
+        });
         // if mutation fails, ticket returns to previous position in DOM
         this.switchBack();
       });

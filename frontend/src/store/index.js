@@ -60,9 +60,6 @@ export default new Vuex.Store({
     carouselModelParent: 1,
     backLogData: [],
     sprintBoardData: null,
-    sprintList: [],
-    // tickets: [],
-    projects: null,
     currentTicket: null,
     currProElements: null,
     allUserList: null,
@@ -120,24 +117,6 @@ export default new Vuex.Store({
     },
     set_addedTo(state, obj) {
       state.addedTo = obj;
-    },
-    set_repoAndBranch(state, obj) {
-      state.repoAndBranch = obj;
-    },
-    set_issues(state, obj) {
-      state.issues = obj;
-    },
-    set_userStories(state, obj) {
-      state.userStories = obj;
-    },
-    set_projects(state, obj) {
-      state.projects = obj;
-    },
-    // set_tickets(state, obj) {
-    //   Object.assign(state.tickets, obj);
-    // },
-    set_sprintList(state, obj) {
-      Vue.set(state, 'sprintList', [...obj]);
     },
     /* mutations to get data for changeDialog in backlog */
     uSCDSet_evt(state, obj) {
@@ -298,14 +277,6 @@ export default new Vuex.Store({
     snackBarOn({ commit }, payload) {
       commit('set_snackBarShow', payload);
     },
-    async fetchUserStories({ commit }) {
-      const response = await Vue.$apolloClient.query({
-        query: gqlQueries.USWithTickIds,
-        fetchPolicy: 'no-cache',
-      });
-      const { UserStory } = response.data;
-      commit('set_userStories', UserStory);
-    },
     async fetchSprints({ commit }) {
       await Vue.$apolloClient.query({
         query: gqlQueries.Sprints,
@@ -314,7 +285,7 @@ export default new Vuex.Store({
         const { Sprint } = response.data;
         commit('set_sprintList', Sprint);
       }).catch((error) => {
-        console.error(error);
+        commit('set_snackBarShow', error);
       });
     },
     async fetchSPlannerData({ commit }, id) {
@@ -326,7 +297,7 @@ export default new Vuex.Store({
         const { Sprint } = response.data;
         commit('set_sprintList', Sprint);
       }).catch((error) => {
-        console.error(error);
+        commit('set_snackBarShow', error);
       });
     },
     async fetchCurrProElements({ commit }, id) {
@@ -344,8 +315,7 @@ export default new Vuex.Store({
           }
         })
         .catch((error) => {
-          console.log('Unable to fetch Project');
-          console.error(error);
+          commit('set_snackBarShow', error);
         });
     },
     async fetchBackLogData({ commit }, id) {
@@ -362,9 +332,9 @@ export default new Vuex.Store({
             commit('set_backLogData', data);
           }
         })
+        // eslint-disable-next-line no-unused-vars
         .catch((error) => {
-          console.log('Unable to fetch Backlog for project');
-          console.error(error);
+          commit('set_snackBarShow', 'Unable to fetch Backlog for project');
         });
     },
     async fetchSprintBoardData({ commit }, id) {
@@ -381,21 +351,10 @@ export default new Vuex.Store({
             commit('set_sprintBoardData', data);
           }
         })
+      // eslint-disable-next-line no-unused-vars
         .catch((error) => {
-          console.log('Unable to fetch Sprint Data project');
-          console.error(error);
+          commit('set_snackBarShow', 'Unable to fetch Sprint Data project');
         });
-    },
-    async fetchProjects({ commit }) {
-      await Vue.$apolloClient.query({
-        query: gqlQueries.PROJECTS,
-        fetchPolicy: 'no-cache',
-      }).then((response) => {
-        const { Project } = response.data;
-        commit('set_projects', Project);
-      }).catch((error) => {
-        console.error(error);
-      });
     },
     async fetchCurrentUser({ commit }) {
       return Vue.$apolloClient.query({
@@ -408,12 +367,10 @@ export default new Vuex.Store({
         // eslint-disable-next-line no-unused-vars
       }).catch((error) => {
         commit('set_currentUser', null);
-        console.error(error);
-        throw new Error(error);
+        commit('set_snackBarShow', error);
       });
     },
     async fetchCurrentUserTasks({ commit }, payload) {
-      console.log('fetchCurrentUserTasks');
       return Vue.$apolloClient.query({
         query: gqlQueries.USER_TASKS,
         variables: payload,
@@ -428,8 +385,8 @@ export default new Vuex.Store({
           }
         })
         .catch((error) => {
-          console.log('Unable to fetch User Data');
-          console.error(error);
+          // console.log('Unable to fetch User Data');
+          commit('set_snackBarShow', error);
         });
     },
     async logoutUser({ commit }) {
@@ -447,7 +404,7 @@ export default new Vuex.Store({
         commit('set_currentUser', null);
         router.push('/');
       }).catch((error) => {
-        console.error(error);
+        commit('set_snackBarShow', error);
       });
     },
     async resetPass({ commit }, payload) {
@@ -456,7 +413,6 @@ export default new Vuex.Store({
         fetchPolicy: 'no-cache',
         variables: payload,
       }).then((response) => {
-        console.log(commit);
         const { resetPassword } = response.data;
         localStorage.setItem('catulam_token', resetPassword.token);
         // router.push('/backlog');
@@ -465,7 +421,7 @@ export default new Vuex.Store({
         */
       }).catch((error) => {
         localStorage.setItem('catulam_token', '');
-        console.error(error);
+        commit('set_snackBarShow', error);
         // don't know if it makes a diffrence
         commit('set_currentUser', null);
       });
@@ -485,8 +441,8 @@ export default new Vuex.Store({
           }
         })
         .catch((error) => {
-          console.log('Unable to fetch Ticket');
-          console.error(error);
+          // console.log('Unable to fetch Ticket');
+          commit('set_snackBarShow', error);
         });
     },
     async fetchAllUserList({ commit }, id) {
@@ -504,8 +460,8 @@ export default new Vuex.Store({
           }
         })
         .catch((error) => {
-          console.log('Unable to fetch Users');
-          console.error(error);
+          // console.log('Unable to fetch Users');
+          commit('set_snackBarShow', error);
         });
     },
     async updateTicketHours({ commit }, payload) {
@@ -521,7 +477,7 @@ export default new Vuex.Store({
           commit('set_currTickHours', UpdateTicket.hourEstimate);
         }
       }).catch((error) => {
-        console.error(error);
+        commit('set_snackBarShow', error);
       });
     },
     async updateTicketAssignee({ commit }, payload) {
@@ -539,7 +495,7 @@ export default new Vuex.Store({
           commit('set_currTicket_assignee', UpdateTicketAssignee);
         }
       }).catch((error) => {
-        console.error(error);
+        commit('set_snackBarShow', error);
       });
     },
     async fetchPmPros({ commit }, payload) {
@@ -555,8 +511,8 @@ export default new Vuex.Store({
         }
       })
         .catch((error) => {
-          console.log('User not found');
-          console.error(error);
+          // console.log('User not found');
+          commit('set_snackBarShow', error);
         });
     },
     async sPlannerShow({ commit }, payload) {
@@ -575,8 +531,8 @@ export default new Vuex.Store({
             commit('set_sPlanShow', { show: true, project, sprints });
           })
           .catch((error) => {
-            console.log('Unable to load Sprint Planner');
-            console.error(error);
+            // console.log('Unable to load Sprint Planner');
+            commit('set_snackBarShow', error);
           });
       }
     },

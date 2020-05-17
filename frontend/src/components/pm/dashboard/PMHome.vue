@@ -17,7 +17,6 @@
         >
           <v-btn
             class="primary"
-            @click="print"
           >
             Print
           </v-btn>
@@ -27,7 +26,7 @@
         cols="12"
         md="6"
       >
-        <project-list v-if="projects !== null"/>
+        <project-list v-if="projects !== null" />
       </v-col>
     </v-row>
     <n-pro-dialog v-if="showNProDialog" />
@@ -52,11 +51,6 @@ export default {
       showSPlanDialog: (state) => state.sPlanDialog.show,
       projects: (state) => state.currPmProjects,
     }),
-  },
-  methods: {
-    async print() {
-      console.log(this.projects);
-    },
   },
 };
 </script>

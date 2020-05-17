@@ -20,12 +20,6 @@ new Vue({
   router,
   store,
   apolloProvider,
-  created() {
-    this.$store.dispatch('fetchCurrentUser')
-      .catch((e) => {
-        console.error(e);
-      });
-  },
   vuetify,
   render: (h) => h(App),
 }).$mount('#app');

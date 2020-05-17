@@ -3,28 +3,28 @@
     v-if="currUser"
     dense
   >
-    <v-list-item
-      link
-      @click="logout"
-    >
-      <v-list-item-action>
-        <v-icon>mdi-logout-variant</v-icon>
-      </v-list-item-action>
-      <v-list-item-content>
-        <v-list-item-title>Logout</v-list-item-title>
-      </v-list-item-content>
-    </v-list-item>
-    <v-list-item
-      link
-      @click="print"
-    >
-      <v-list-item-action>
-        <v-icon>mdi-logout-variant</v-icon>
-      </v-list-item-action>
-      <v-list-item-content>
-        <v-list-item-title>PRINT</v-list-item-title>
-      </v-list-item-content>
-    </v-list-item>
+    <!--    <v-list-item-->
+    <!--      link-->
+    <!--      @click="logout"-->
+    <!--    >-->
+    <!--      <v-list-item-action>-->
+    <!--        <v-icon>mdi-logout-variant</v-icon>-->
+    <!--      </v-list-item-action>-->
+    <!--      <v-list-item-content>-->
+    <!--        <v-list-item-title>Logout</v-list-item-title>-->
+    <!--      </v-list-item-content>-->
+    <!--    </v-list-item>-->
+    <!--    <v-list-item-->
+    <!--      link-->
+    <!--      @click="print"-->
+    <!--    >-->
+    <!--      <v-list-item-action>-->
+    <!--        <v-icon>mdi-logout-variant</v-icon>-->
+    <!--      </v-list-item-action>-->
+    <!--      <v-list-item-content>-->
+    <!--        <v-list-item-title>PRINT</v-list-item-title>-->
+    <!--      </v-list-item-content>-->
+    <!--    </v-list-item>-->
     <v-list-item
       link
       to="/home"
@@ -107,8 +107,6 @@
         </template>
       </v-list-group>
     </v-list-group>
-
-
   </v-list>
 </template>
 
@@ -132,7 +130,7 @@ export default {
   },
   methods: {
     print() {
-      console.log(this.projects);
+      // console.log(this.projects);
     },
     toBacklog(project) {
       // proId passed as query in url link

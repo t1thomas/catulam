@@ -122,7 +122,6 @@ export default {
       if (this.$refs.passForm.validate()) {
         await this.resetPass({ username: this.currentUser.username, newPassword: this.password2 });
         await this.fetchCurrentUser();
-        console.log('Pass change Submit');
       }
     },
   },

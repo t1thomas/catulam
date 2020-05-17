@@ -39,7 +39,10 @@ export default {
         await self.loadData();
       },
       error(error) {
-        console.error(error);
+        this.snackBarOn({
+          message: error,
+          type: 'error',
+        });
       },
     });
   },
@@ -47,6 +50,7 @@ export default {
     ...mapActions([
       'fetchSprintBoardData',
       'fetchCurrProElements',
+      'snackBarOn',
     ]),
     async loadData() {
       await this.fetchCurrProElements(this.proId);

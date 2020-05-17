@@ -1,7 +1,7 @@
 <template>
   <v-content>
-    <DevHome v-if="userType==='dev'"/>
-    <PMHome v-if="userType==='pm'"/>
+    <DevHome v-if="userType==='dev'" />
+    <PMHome v-if="userType==='pm'" />
   </v-content>
 </template>
 

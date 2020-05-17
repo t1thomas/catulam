@@ -111,6 +111,7 @@ export default {
   methods: {
     ...mapActions([
       'setCurrTickDesc',
+      'snackBarOn',
     ]),
     setOriginalText() {
       this.text = this.desc;
@@ -141,7 +142,10 @@ export default {
         })
         .catch((error) => {
           this.disabled = false;
-          console.error(error);
+          this.snackBarOn({
+            message: error,
+            type: 'error',
+          });
           this.savingProgress();
         });
     },

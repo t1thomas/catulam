@@ -23,6 +23,9 @@ const gqlQueries = {
         id
         title
         issueNumber
+        project {
+          id
+        }
       }
     }`,
   CREATE_USER_STORY: gql`
@@ -36,6 +39,9 @@ const gqlQueries = {
       ) {
         id
         issueNumber
+        project {
+          id
+        }
       }
     }`,
   CREATE_SPRINT: gql`
@@ -55,6 +61,9 @@ const gqlQueries = {
       ) {
         id
         sprintNo
+        project {
+          id
+        }
       }
     }`,
   BACKLOG_DATA: gql`
@@ -392,27 +401,6 @@ const gqlQueries = {
         title
       }
     }`,
-  PROJECTS: gql`
-    query {
-      Project {
-        id
-        title
-        desc
-        label
-        members {
-          id
-        }
-        userStories {
-          id
-        }
-        tickets {
-          id
-        }
-        sprints {
-          id
-        }
-      }
-    }`,
   RESET_PASS: gql`mutation($username: String!, $newPassword: String!) {
     resetPassword(username: $username, newPassword: $newPassword) {
       token
@@ -466,18 +454,6 @@ const gqlQueries = {
       }
     }
   }`,
-  Sprints: gql`query{
-    Sprint{
-      id
-      sprintNo
-      tickets{
-        id
-        userStory{
-          id
-        }
-      }
-    }
-  }`,
   BackLogData: gql`query{
     UserStory{
       id
@@ -494,12 +470,10 @@ const gqlQueries = {
   SwitchStartSprint: {
     TIC_ADD_SPRINT: gql`
       mutation(
-        $project: _ProjectInput!
         $ticket: _TicketInput!
         $sprintAdd: _SprintInput!
       ) {
         StartToSprint(
-          project: $project
           ticket: $ticket
           sprintAdd: $sprintAdd
         )
@@ -509,32 +483,34 @@ const gqlQueries = {
           sprint {
             sprintNo
           }
+          project {
+            id
+          }
         }
       }`,
     TIC_REMOVE_SPRINT: gql`
       mutation(
-        $project: _ProjectInput!
         $ticket: _TicketInput!
         $sprintRemove: _SprintInput!
       ) {
         SprintToStart(
-          project: $project
           ticket: $ticket
           sprintRemove: $sprintRemove
         ){
           title
           issueNumber
+          project {
+            id
+          }
         }
       }`,
     TIC_CHANGE_SPRINT: gql`
       mutation(
-        $project: _ProjectInput!
         $ticket: _TicketInput!
         $sprintAdd: _SprintInput!
         $sprintRemove: _SprintInput!
       ) {
         SwitchSprint(
-          project: $project
           ticket: $ticket
           sprintAdd: $sprintAdd
           sprintRemove: $sprintRemove
@@ -544,33 +520,45 @@ const gqlQueries = {
           sprint {
             sprintNo
           }
+          project {
+            id
+          }
         }
       }`,
   },
   sBoardTicMove: {
     MOVE_TO_TODO: gql`
-      mutation($project: _ProjectInput!, $ticket: _TicketInput!, $from: String!) {
-        TicToToDo(project: $project, ticket: $ticket, from: $from) {
+      mutation($ticket: _TicketInput!, $from: String!) {
+        TicToToDo(ticket: $ticket, from: $from) {
           id
           title
           issueNumber
+          project {
+            id
+          }
         }
       }
     `,
     MOVE_TO_DOING: gql`
-      mutation($project: _ProjectInput!, $ticket: _TicketInput!, $from: String!) {
-        TicToDoing(project: $project, ticket: $ticket, from: $from) {
+      mutation($ticket: _TicketInput!, $from: String!) {
+        TicToDoing(ticket: $ticket, from: $from) {
           id
           title
           issueNumber
+          project {
+            id
+          }
         }
       }`,
     MOVE_TO_DONE: gql`
-      mutation($project: _ProjectInput!, $ticket: _TicketInput!) {
-        TicToDone(project: $project, ticket: $ticket) {
+      mutation($ticket: _TicketInput!) {
+        TicToDone(ticket: $ticket) {
           id
           title
           issueNumber
+          project {
+            id
+          }
         }
       }
     `,

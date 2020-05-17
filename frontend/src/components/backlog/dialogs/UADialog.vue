@@ -60,7 +60,6 @@
           <v-btn
             color="blue darken-1"
             text
-            @click="print"
           >
             Print
           </v-btn>
@@ -141,11 +140,6 @@ export default {
       'fetchBackLogData',
       'snackBarOn',
     ]),
-    print() {
-      console.log(this.getSprintValues);
-      console.log(this.selectedSprint);
-      console.log(this.selectedOption);
-    },
     async onConfirm() {
       switch (true) {
         case this.removedFrom.userStoryId === null && this.removedFrom.columnType === 'start':
@@ -193,7 +187,6 @@ export default {
       } else {
         switch (true) {
           case this.selectedOption.value === 0:
-            console.log('here start');
             // moves to us start
             await this.dataMutation({
               project: { id: this.proId },
@@ -248,7 +241,6 @@ export default {
                 });
               }
             }).catch((error) => {
-              console.error(error);
               this.snackBarOn({
                 message: error,
                 type: 'error',
@@ -278,7 +270,6 @@ export default {
               });
             }
           }).catch((error) => {
-            console.error(error);
             this.snackBarOn({
               message: error,
               type: 'error',
@@ -287,14 +278,12 @@ export default {
           });
           break;
         default:
-          console.log('No changes made');
           this.switchBack();
           break;
       }
     },
     async startSwitch() {
       if (this.selectedOption.value === 0) {
-        console.log('No changes made');
         this.switchBack();
       } else {
         await Vue.$apolloClient.mutate({
@@ -316,7 +305,6 @@ export default {
             });
           }
         }).catch((error) => {
-          console.error(error);
           this.snackBarOn({
             message: error,
             type: 'error',
@@ -377,13 +365,11 @@ export default {
         fetchPolicy: 'no-cache',
         variables: payload,
       })
-        .then((response) => {
-          console.log(response);
-          // this.updateStore();
-          // DOM auto updates via API subscription
-        })
         .catch((error) => {
-          console.error(error);
+          this.snackBarOn({
+            message: error,
+            type: 'error',
+          });
           this.switchBack();
         });
     },

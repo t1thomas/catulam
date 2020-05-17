@@ -125,7 +125,6 @@ export default {
         this.saving = true;
         const payload = { id: this.ticket.id, hrs: Number(this.hours) };
         await this.updateTicketHours(payload);
-        console.log('valid');
         this.selector = false;
         this.saving = false;
       } else {

@@ -14,7 +14,7 @@
       clipped-left
     >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title>Application</v-toolbar-title>
+      <v-toolbar-title>Caṭulam</v-toolbar-title>
       <v-spacer />
       <v-btn
         v-if="currentUser"
@@ -94,7 +94,10 @@ export default {
   created() {
     this.$store.dispatch('fetchCurrentUser')
       .catch((e) => {
-        console.error(e);
+        this.snackBarOn({
+          message: e,
+          type: 'error',
+        });
       });
     this.$vuetify.theme.dark = true;
   },
@@ -114,6 +117,7 @@ export default {
       'fetchCurrentUserTasks',
       'logoutUser',
       'fetchPmPros',
+      'snackBarOn',
     ]),
     async logout() {
       await this.logoutUser();

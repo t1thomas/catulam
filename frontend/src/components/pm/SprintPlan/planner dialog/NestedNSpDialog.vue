@@ -194,8 +194,6 @@ export default {
             message: error,
             type: 'error',
           });
-          // need to set fail snackbar
-          console.error(error);
         });
         this.setSaving();
         this.onCancel();

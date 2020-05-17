@@ -101,10 +101,10 @@ const authLink = setContext((_, { headers }) => {
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors) {
     graphQLErrors.forEach((err) => {
-      console.dir(err);
+      Vue.$store.dispatch('snackBarOn', err);
     });
   }
-  if (networkError) console.log(`[Network error]: ${networkError}`);
+  Vue.$store.dispatch('snackBarOn', `[Network error]: ${networkError}`);
 });
 
 // Set up subscription

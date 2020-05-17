@@ -234,7 +234,10 @@ export default {
         await self.updateSPlanData();
       },
       error(error) {
-        console.error(error);
+        self.snackBarOn({
+          message: error,
+          type: 'error',
+        });
       },
     });
   },
@@ -245,6 +248,7 @@ export default {
       'nTicDialogShow',
       'sPlannerShow',
       'nUStoryDialogShow',
+      'snackBarOn',
     ]),
     async loadData() {
       await this.fetchCurrProElements(this.proId);

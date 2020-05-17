@@ -9,7 +9,10 @@
           <span class="subtitle-1">
             Sprint {{ sprint.sprintNo }}
           </span>
-          <v-list dense style="background-color: inherit">
+          <v-list
+            dense
+            style="background-color: inherit"
+          >
             <v-list-item>
               <v-list-item-content>
                 <v-chip
@@ -58,7 +61,10 @@
           cols="auto"
           style="text-align: center;"
         >
-          <v-card flat style="background-color: inherit">
+          <v-card
+            flat
+            style="background-color: inherit"
+          >
             <v-simple-table style="background-color: inherit">
               <template v-slot:default>
                 <thead>
