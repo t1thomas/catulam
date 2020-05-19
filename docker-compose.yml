@@ -41,6 +41,7 @@ services:
       - GRAPHQL_URI=http://catulam-api:7000/graphql
       - JWT_SECRET=catulam2A34iaeDwefdAaawe12s0wfha048
       - BCRYPTHASHCOST=10
+      - NODE_ENV=production
     links:
       - neo4j
     depends_on:

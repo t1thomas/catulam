@@ -50,8 +50,6 @@ const server = new ApolloServer({
             throw new Error('Missing auth token!');
         },
     },
-    introspection: true,
-    playground: true,
 });
 
 server.applyMiddleware({ app });
