@@ -20,11 +20,12 @@ services:
       - $HOME/neo4j/plugins:/plugins
     environment:
       - NEO4J_AUTH=neo4j/test
-      - apoc.ttl.enabled=true
-      - apoc.ttl.schedule=10
-      - apoc.import.file.enabled=true
       - NEO4JLABS_PLUGINS=["apoc"]
-      - NEO4J_dbms_memory_pagecache_size=4G
+      - NEO4J_apoc_export_file_enabled=true
+      - NEO4J_apoc_import_file_enabled=true
+      - NEO4J_apoc_ttl_enabled=true
+      - NEO4J_apoc_ttl_schedule=10
+      - NEO4J_dbms_memory_pagecache_size=2G
     networks:
       - catLink
   api:
