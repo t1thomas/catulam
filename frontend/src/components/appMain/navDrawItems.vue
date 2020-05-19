@@ -3,28 +3,6 @@
     v-if="currUser"
     dense
   >
-    <!--    <v-list-item-->
-    <!--      link-->
-    <!--      @click="logout"-->
-    <!--    >-->
-    <!--      <v-list-item-action>-->
-    <!--        <v-icon>mdi-logout-variant</v-icon>-->
-    <!--      </v-list-item-action>-->
-    <!--      <v-list-item-content>-->
-    <!--        <v-list-item-title>Logout</v-list-item-title>-->
-    <!--      </v-list-item-content>-->
-    <!--    </v-list-item>-->
-    <!--    <v-list-item-->
-    <!--      link-->
-    <!--      @click="print"-->
-    <!--    >-->
-    <!--      <v-list-item-action>-->
-    <!--        <v-icon>mdi-logout-variant</v-icon>-->
-    <!--      </v-list-item-action>-->
-    <!--      <v-list-item-content>-->
-    <!--        <v-list-item-title>PRINT</v-list-item-title>-->
-    <!--      </v-list-item-content>-->
-    <!--    </v-list-item>-->
     <v-list-item
       link
       to="/home"
@@ -38,7 +16,6 @@
     </v-list-item>
 
     <v-list-group
-      v-if="projects"
       prepend-icon="mdi-view-list"
       no-action
     >
@@ -66,27 +43,25 @@
 
 
     <v-list-group
-      v-if="projects"
       prepend-icon="mdi-view-dashboard-variant"
       no-action
     >
       <template v-slot:activator>
         <v-list-item-title>Sprints</v-list-item-title>
       </template>
+      <template v-if="!noSprints">
+        <v-list-group
+          v-for="project in projects"
+          :key="project.id"
+          no-action
+          sub-group
+        >
+          <template v-slot:activator>
+            <v-list-item-content>
+              <v-list-item-title>{{ project.label }}</v-list-item-title>
+            </v-list-item-content>
+          </template>
 
-      <v-list-group
-        v-for="project in projects"
-        :key="project.id"
-        no-action
-        sub-group
-      >
-        <template v-slot:activator>
-          <v-list-item-content>
-            <v-list-item-title>{{ project.label }}</v-list-item-title>
-          </v-list-item-content>
-        </template>
-
-        <template v-if="project.sprints.length > 0">
           <v-list-item
             v-for="sprint in project.sprints"
             :key="sprint.id"
@@ -97,15 +72,15 @@
               Sprint {{ sprint.sprintNo }}
             </v-list-item-title>
           </v-list-item>
-        </template>
-        <template v-else>
-          <v-list-item>
-            <v-list-item-title>
-              No Sprints Found
-            </v-list-item-title>
-          </v-list-item>
-        </template>
-      </v-list-group>
+        </v-list-group>
+      </template>
+      <template v-else>
+        <v-list-item>
+          <v-list-item-title>
+            No Sprints Found
+          </v-list-item-title>
+        </v-list-item>
+      </template>
     </v-list-group>
   </v-list>
 </template>
@@ -127,11 +102,15 @@ export default {
       }
       return this.devTasks;
     },
+    noSprints() {
+      if (this.projects.length > 0) {
+        const proWithSprints = this.projects.filter((pro) => pro.sprints.length > 0).length;
+        return proWithSprints <= 0;
+      }
+      return true;
+    },
   },
   methods: {
-    print() {
-      // console.log(this.projects);
-    },
     toBacklog(project) {
       // proId passed as query in url link
       const { id } = project;

@@ -102,9 +102,9 @@ export default {
         this.$store.dispatch('onTabChange', val);
       },
     },
-    // this property always returns true if there are no new projects
+    // this property always returns true if there are no projects
     projectsNone() {
-      return this.projects === null;
+      return this.projects.length === 0;
     },
     ...mapState({
       projects: (state) => state.currPmProjects,
