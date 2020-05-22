@@ -467,6 +467,18 @@ const gqlQueries = {
       }
     }
   }`,
+  ADD_PROJECT_MEMBER: gql`
+    mutation($members: [_UserInput]!, $project: _ProjectInput!) {
+      AddProjectMembers(members: $members, project: $project) {
+        id
+      }
+    }`,
+  REMOVE_PROJECT_MEMBER: gql`
+    mutation($members: [_UserInput]!, $project: _ProjectInput!) {
+      RemoveProjectMembers(members: $members, project: $project) {
+        id
+      }
+    }`,
   SwitchStartSprint: {
     TIC_ADD_SPRINT: gql`
       mutation(

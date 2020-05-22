@@ -34,6 +34,10 @@ export default new Vuex.Store({
       sprints: null,
     },
     nSpDialog: false,
+    editMemDialog: {
+      show: false,
+      proId: null,
+    },
     nProDialog: {
       show: false,
     },
@@ -71,6 +75,15 @@ export default new Vuex.Store({
     },
     set_nSpDialog(state, obj) {
       state.nSpDialog = obj;
+    },
+    set_editMemDialog(state, obj) {
+      if (obj.show === false) {
+        state.editMemDialog.show = obj.show;
+        state.editMemDialog.proId = null;
+      } else {
+        state.editMemDialog.show = obj.show;
+        state.editMemDialog.proId = obj.proId;
+      }
     },
     set_currPmPros(state, obj) {
       state.currPmProjects = [...obj];
@@ -264,6 +277,9 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    showEditMemDialog({ commit }, obj) {
+      commit('set_editMemDialog', obj);
+    },
     delUSDialogShow({ commit }, payload) {
       commit('set_delUSDialog', payload);
     },
@@ -688,6 +704,9 @@ export default new Vuex.Store({
       .map((tick) => tick.id),
     getMemberById: (state) => (memberId) => state.currProElements.members
       .find((member) => member.User.id === memberId).User,
+    // get members of current project, apart from currently logged in PM
+    getProMembers_ex_pm: (state) => state.currProElements.members
+      .filter((member) => member.User.id !== state.currentUser.id),
   },
   modules: {
   },

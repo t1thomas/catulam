@@ -13,7 +13,7 @@ import VueApollo from 'vue-apollo';
 
 
 const httpLink = new HttpLink({
-  uri: `${window.location.origin}:7000/graphql`,
+  uri: 'http://localhost:7000/graphql',
 });
 
 const authLink = setContext((_, { headers }) => {
@@ -39,7 +39,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 });
 
 
-const wsLink = new SubscriptionClient(`ws://${window.location.origin.split('//')[1]}:7000/graphql`, {
+const wsLink = new SubscriptionClient('ws://localhost:7000/graphql', {
   reconnect: true,
   connectionParams: {
     authToken: localStorage.getItem('catulam_token'),

@@ -14,60 +14,80 @@
         <template
           v-slot:extension
         >
-          <v-speed-dial
-            v-model="addBtn"
-            right
-            absolute
-            direction="left"
-            transition="slide-x-reverse-transition"
-          >
-            <template v-slot:activator>
-              <v-btn
-                v-model="addBtn"
-                small
-                color="blue darken-2"
-                dark
-                fab
-              >
-                <v-icon v-if="addBtn">
-                  mdi-close
-                </v-icon>
-                <v-icon v-else>
-                  mdi-plus
-                </v-icon>
-              </v-btn>
-            </template>
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on }">
+          <v-spacer />
+          <div class="d-inline-flex">
+            <v-speed-dial
+              v-model="addBtn"
+              direction="left"
+              transition="slide-x-reverse-transition"
+              class="mr-2"
+            >
+              <template v-slot:activator>
                 <v-btn
-                  fab
+                  v-model="addBtn"
+                  small
+                  color="blue darken-2"
                   dark
-                  x-small
-                  color="#1f4423"
-                  v-on="on"
-                  @click="nTicShow"
+                  fab
                 >
-                  <v-icon>mdi-ticket-confirmation</v-icon>
+                  <v-icon v-if="addBtn">
+                    mdi-close
+                  </v-icon>
+                  <v-icon v-else>
+                    mdi-plus
+                  </v-icon>
                 </v-btn>
               </template>
-              <span class="caption">New Ticket</span>
-            </v-tooltip>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    fab
+                    dark
+                    x-small
+                    color="#1f4423"
+                    v-on="on"
+                    @click="nTicShow"
+                  >
+                    <v-icon>mdi-ticket-confirmation</v-icon>
+                  </v-btn>
+                </template>
+                <span class="caption">New Ticket</span>
+              </v-tooltip>
 
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on }">
-                <v-btn
-                  fab
-                  dark
-                  x-small
-                  color="#17429b66"
-                  v-on="on"
-                  @click="NUStoryShow"
-                >
-                  <v-icon>mdi-book-open-variant</v-icon>
-                </v-btn>
-              </template>
-              <span class="caption">New Story</span>
-            </v-tooltip>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    fab
+                    dark
+                    x-small
+                    color="#17429b66"
+                    v-on="on"
+                    @click="NUStoryShow"
+                  >
+                    <v-icon>mdi-book-open-variant</v-icon>
+                  </v-btn>
+                </template>
+                <span class="caption">New Story</span>
+              </v-tooltip>
+              <v-tooltip
+                v-if="isPm"
+                bottom
+              >
+                <template v-slot:activator="{ on }">
+                  <v-btn
+                    fab
+                    dark
+                    x-small
+                    color="#4d371a"
+                    v-on="on"
+                    @click="sPlanShow"
+                  >
+                    <v-icon>mdi-run-fast</v-icon>
+                  </v-btn>
+                </template>
+                <span class="caption">New Sprint</span>
+              </v-tooltip>
+            </v-speed-dial>
             <v-tooltip
               v-if="isPm"
               bottom
@@ -76,17 +96,17 @@
                 <v-btn
                   fab
                   dark
-                  x-small
-                  color="#4d371a"
+                  small
+                  color="#e0d07066"
                   v-on="on"
-                  @click="sPlanShow"
+                  @click="editMemDialogShow"
                 >
-                  <v-icon>mdi-run-fast</v-icon>
+                  <v-icon>mdi-account-edit</v-icon>
                 </v-btn>
               </template>
-              <span class="caption">New Sprint</span>
+              <span class="caption">Edit Members</span>
             </v-tooltip>
-          </v-speed-dial>
+          </div>
         </template>
       </v-toolbar>
     </v-card-title>
@@ -173,6 +193,7 @@
     <u-s-dialog
       v-if="showUSDialog"
     />
+    <edit-members />
   </v-card>
 </template>
 <script>
@@ -186,6 +207,7 @@ import NUStoryDialog from '../UserStory/dialogs/NUStoryDialog.vue';
 import USDialog from './dialogs/USDialog.vue';
 import UADialog from './dialogs/UADialog.vue';
 import NTicDialog from '../Ticket/dialogs/NTicDialog.vue';
+import editMemberDialog from './dialogs/EditMembers/editMemberDialog.vue';
 import gqlQueries from '../../graphql/gql-queries';
 
 export default {
@@ -194,6 +216,7 @@ export default {
     'sprints-column': SPColumnMiddle,
     'start-column': USColumnStart,
     'done-column': USColumnEnd,
+    'edit-members': editMemberDialog,
     SPlannerDialog,
     NUStoryDialog,
     NotFoundCard,
@@ -249,6 +272,7 @@ export default {
       'sPlannerShow',
       'nUStoryDialogShow',
       'snackBarOn',
+      'showEditMemDialog',
     ]),
     async loadData() {
       await this.fetchCurrProElements(this.proId);
@@ -262,6 +286,9 @@ export default {
     },
     async NUStoryShow() {
       this.nUStoryDialogShow({ show: true });
+    },
+    async editMemDialogShow() {
+      this.showEditMemDialog({ show: true, proId: this.proId });
     },
     async updateSPlanData() {
       // only request update if sprint planner is currently in view

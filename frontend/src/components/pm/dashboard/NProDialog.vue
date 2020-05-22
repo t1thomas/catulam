@@ -215,6 +215,7 @@ export default {
       'snackBarOn',
     ]),
     getMembers() {
+      // get all members apart from current User
       return this.$store.getters.getUserSelection(this.currUser.id);
     },
     gravatar(user) {

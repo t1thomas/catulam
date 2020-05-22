@@ -193,7 +193,7 @@
         SwitchSprint(ticket: _TicketInput!, sprintAdd: _SprintInput!, sprintRemove: _SprintInput! ): Ticket
             @cypher(statement:"""
             MATCH (t:Ticket{id:$ticket.id})-[rel:SPRINT_TASK]->(s1:Sprint {id:$sprintRemove.id})
-            MATCH (s2:Sprint {id:sprintAdd.id})
+            MATCH (s2:Sprint {id:$sprintAdd.id})
             CALL apoc.refactor.to(rel, s2)
             YIELD input, output, error
             WITH t
@@ -209,6 +209,28 @@
             MATCH (u:User)
             WHERE u.id = user.id
             CREATE (p)<-[:TEAM_MEMBER {type: u.type}]-(u)
+            RETURN p
+            """)
+        AddProjectMembers(members: [_UserInput]!, project: _ProjectInput!): Project
+            @cypher(statement:"""
+            MATCH (p:Project)
+            WHERE p.id = $project.id
+            WITH $members AS users, p
+            UNWIND users AS user
+            MATCH (u:User)
+            WHERE u.id = user.id
+            CREATE (p)<-[:TEAM_MEMBER {type: u.type}]-(u)
+            RETURN p
+            """)
+        RemoveProjectMembers(members: [_UserInput]!, project: _ProjectInput!): Project
+            @cypher(statement:"""
+            MATCH (p:Project)
+            WHERE p.id = $project.id
+            WITH $members AS users, p
+            UNWIND users AS user
+            MATCH (p)<-[rel:TEAM_MEMBER {type: u.type}]-(u:User)
+            WHERE u.id = user.id
+            DELETE rel
             RETURN p
             """)
 
