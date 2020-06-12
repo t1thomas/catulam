@@ -47,7 +47,6 @@ module.exports = () => describe('User Login Mutations', () => {
             mutation: gqlQueries.CREATE_USER,
             variables: Object.assign({}, testUser),
         });
-        console.log(res.data.CreateUser);
         expect(res.data.CreateUser).toEqual(testUser);
     });
 

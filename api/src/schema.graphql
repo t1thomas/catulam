@@ -107,12 +107,45 @@
         update(proId:String!): String
     }
     type Mutation {
-        loginUser(username: String!, password: String!): Token!
-        resetPassword(username: String!, newPassword: String!): Token!
-        CreateUser(id: ID!, firstName: String!, lastName: String, username: String!, email: String!, password: String!, passwordUpdate: Boolean!): User
         UpdateTicketAssignee(tick: _TicketInput!, remUser: _UserInput, addUser: _UserInput, project: _ProjectInput!): User
         UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
         UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
+
+        loginUser(username: String!, password: String!): Token!
+            @cypher(statement:"""
+            MATCH(u:User{username: $username})
+            CREATE (u)-[rel:JWT]->(t: Token {token: $token})
+            WITH t
+            CALL apoc.ttl.expire(t, $exp, 's')
+            RETURN t
+            """)
+
+        resetPassword(username: String!, newPassword: String!): Token!
+            @cypher(statement:"""
+            MATCH(u:User{username: $username})
+            SET u.password = $newPassword
+            SET u.passwordUpdate = false
+            WITH u
+            CREATE (u)-[rel:JWT]->(t: Token {token: $token})
+            WITH t
+            CALL apoc.ttl.expire(t, $exp, 's')
+            RETURN t
+            """)
+
+        CreateUser(firstName: String!, lastName: String, username: String!, email: String!, password: String!, type: Role!): User
+            @cypher(statement:"""
+            CREATE (u:User {
+            id : apoc.create.uuid(),
+            firstName : $firstName,
+            lastName : $lastName,
+            username : $username,
+            email : $email,
+            password: $password,
+            passwordUpdate: true,
+            avatar: $avatarHash,
+            type: $type })
+            RETURN u
+            """)
 
         StartToSprint(ticket: _TicketInput!, sprintAdd: _SprintInput! ): Ticket
             @cypher(statement:"""
@@ -160,7 +193,7 @@
         SwitchSprint(ticket: _TicketInput!, sprintAdd: _SprintInput!, sprintRemove: _SprintInput! ): Ticket
             @cypher(statement:"""
             MATCH (t:Ticket{id:$ticket.id})-[rel:SPRINT_TASK]->(s1:Sprint {id:$sprintRemove.id})
-            MATCH (s2:Sprint {id:sprintAdd.id})
+            MATCH (s2:Sprint {id:$sprintAdd.id})
             CALL apoc.refactor.to(rel, s2)
             YIELD input, output, error
             WITH t
@@ -176,6 +209,28 @@
             MATCH (u:User)
             WHERE u.id = user.id
             CREATE (p)<-[:TEAM_MEMBER {type: u.type}]-(u)
+            RETURN p
+            """)
+        AddProjectMembers(members: [_UserInput]!, project: _ProjectInput!): Project
+            @cypher(statement:"""
+            MATCH (p:Project)
+            WHERE p.id = $project.id
+            WITH $members AS users, p
+            UNWIND users AS user
+            MATCH (u:User)
+            WHERE u.id = user.id
+            CREATE (p)<-[:TEAM_MEMBER {type: u.type}]-(u)
+            RETURN p
+            """)
+        RemoveProjectMembers(members: [_UserInput]!, project: _ProjectInput!): Project
+            @cypher(statement:"""
+            MATCH (p:Project)
+            WHERE p.id = $project.id
+            WITH $members AS users, p
+            UNWIND users AS user
+            MATCH (p)<-[rel:TEAM_MEMBER {type: u.type}]-(u:User)
+            WHERE u.id = user.id
+            DELETE rel
             RETURN p
             """)
 

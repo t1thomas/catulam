@@ -56,7 +56,7 @@
 
 <script>
 
-import { mapState, mapActions } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import snackbar from './components/snackbar.vue';
 import navDrawItems from './components/appMain/navDrawItems.vue';
 
@@ -73,9 +73,9 @@ export default {
     gravatar() {
       return `https://gravatar.com/avatar/${this.currentUser.avatar}?d=identicon`;
     },
-    ...mapState([
-      'currentUser',
-    ]),
+    ...mapState({
+      currentUser: 'currentUser',
+    }),
     fullName() {
       return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
     },
@@ -91,17 +91,16 @@ export default {
       ];
     },
   },
-  created() {
-    this.$store.dispatch('fetchCurrentUser')
+  async created() {
+    this.$vuetify.theme.dark = true;
+    await this.$store.dispatch('fetchCurrentUser')
       .catch((e) => {
         this.snackBarOn({
           message: e,
           type: 'error',
         });
       });
-    this.$vuetify.theme.dark = true;
-  },
-  async beforeUpdate() {
+    // console.log(this.currentUser);
     if (this.currentUser) {
       if (this.currentUser.type === 'pm') {
         await this.fetchPmPros({ username: this.currentUser.username });

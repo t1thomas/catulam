@@ -26,7 +26,7 @@
         cols="12"
         md="6"
       >
-        <project-list v-if="projects !== null" />
+        <project-list />
       </v-col>
     </v-row>
     <n-pro-dialog v-if="showNProDialog" />
@@ -49,7 +49,6 @@ export default {
       currUser: (state) => state.currentUser,
       showNProDialog: (state) => state.nProDialog.show,
       showSPlanDialog: (state) => state.sPlanDialog.show,
-      projects: (state) => state.currPmProjects,
     }),
   },
 };

@@ -34,6 +34,10 @@ export default new Vuex.Store({
       sprints: null,
     },
     nSpDialog: false,
+    editMemDialog: {
+      show: false,
+      proId: null,
+    },
     nProDialog: {
       show: false,
     },
@@ -56,14 +60,14 @@ export default new Vuex.Store({
     },
     proListTabsModel: 0,
     currentUser: null,
-    currentUserTasks: null,
+    currentUserTasks: [],
     carouselModelParent: 1,
     backLogData: [],
     sprintBoardData: null,
     currentTicket: null,
     currProElements: null,
     allUserList: null,
-    currPmProjects: null,
+    currPmProjects: [],
   },
   mutations: {
     set_proLstTabModel(state, obj) {
@@ -72,8 +76,17 @@ export default new Vuex.Store({
     set_nSpDialog(state, obj) {
       state.nSpDialog = obj;
     },
+    set_editMemDialog(state, obj) {
+      if (obj.show === false) {
+        state.editMemDialog.show = obj.show;
+        state.editMemDialog.proId = null;
+      } else {
+        state.editMemDialog.show = obj.show;
+        state.editMemDialog.proId = obj.proId;
+      }
+    },
     set_currPmPros(state, obj) {
-      state.currPmProjects = obj;
+      state.currPmProjects = [...obj];
     },
     set_backLogData(state, obj) {
       if (obj === null) {
@@ -97,11 +110,7 @@ export default new Vuex.Store({
       }
     },
     set_currentUserTasks(state, obj) {
-      if (obj === null) {
-        state.currentUserTasks = null;
-      } else {
-        state.currentUserTasks = [...obj];
-      }
+      state.currentUserTasks = [...obj];
     },
     set_allUserList(state, obj) {
       state.allUserList = obj;
@@ -268,6 +277,9 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    showEditMemDialog({ commit }, obj) {
+      commit('set_editMemDialog', obj);
+    },
     delUSDialogShow({ commit }, payload) {
       commit('set_delUSDialog', payload);
     },
@@ -370,25 +382,6 @@ export default new Vuex.Store({
         commit('set_snackBarShow', error);
       });
     },
-    async fetchCurrentUserTasks({ commit }, payload) {
-      return Vue.$apolloClient.query({
-        query: gqlQueries.USER_TASKS,
-        variables: payload,
-        fetchPolicy: 'no-cache',
-      })
-        .then((response) => {
-          const { User } = response.data;
-          if (User === null) {
-            throw new Error();
-          } else {
-            commit('set_currentUserTasks', User[0].projects.map((pro) => pro.Project));
-          }
-        })
-        .catch((error) => {
-          // console.log('Unable to fetch User Data');
-          commit('set_snackBarShow', error);
-        });
-    },
     async logoutUser({ commit }) {
       /* remove token right away, s even if the database
       operation fails the client no longer has a token
@@ -408,6 +401,15 @@ export default new Vuex.Store({
       });
     },
     async resetPass({ commit }, payload) {
+      /* Delete temp token which has a 5min lifespan */
+      const token1 = localStorage.getItem('catulam_token');
+      localStorage.setItem('catulam_token', '');
+      await Vue.$apolloClient.mutate({
+        mutation: gqlQueries.DeleteToken,
+        fetchPolicy: 'no-cache',
+        variables: { token: token1 },
+      });
+      /* -------------------------------------------- */
       await Vue.$apolloClient.mutate({
         mutation: gqlQueries.RESET_PASS,
         fetchPolicy: 'no-cache',
@@ -422,7 +424,6 @@ export default new Vuex.Store({
       }).catch((error) => {
         localStorage.setItem('catulam_token', '');
         commit('set_snackBarShow', error);
-        // don't know if it makes a diffrence
         commit('set_currentUser', null);
       });
     },
@@ -441,7 +442,6 @@ export default new Vuex.Store({
           }
         })
         .catch((error) => {
-          // console.log('Unable to fetch Ticket');
           commit('set_snackBarShow', error);
         });
     },
@@ -509,9 +509,25 @@ export default new Vuex.Store({
           const data = projects.map((pro) => pro.Project);
           commit('set_currPmPros', data);
         }
+      }).catch((error) => {
+        // console.log('User not found');
+        commit('set_snackBarShow', error);
+      });
+    },
+    async fetchCurrentUserTasks({ commit }, payload) {
+      return Vue.$apolloClient.query({
+        query: gqlQueries.USER_TASKS,
+        variables: payload,
+        fetchPolicy: 'no-cache',
       })
+        .then((response) => {
+          const { projects } = response.data.User[0];
+          if (projects.length > 0) {
+            commit('set_currentUserTasks', projects.map((pro) => pro.Project));
+          }
+        })
         .catch((error) => {
-          // console.log('User not found');
+          // console.log('Unable to fetch User Data');
           commit('set_snackBarShow', error);
         });
     },
@@ -610,9 +626,6 @@ export default new Vuex.Store({
     nProDialogShow({ commit }, val) {
       commit('set_nProDialog', val);
     },
-    setUser({ commit }, value) {
-      commit('set_currentUser', value);
-    },
     onTabChange({ commit }, value) {
       commit('set_proLstTabModel', value);
     },
@@ -691,6 +704,9 @@ export default new Vuex.Store({
       .map((tick) => tick.id),
     getMemberById: (state) => (memberId) => state.currProElements.members
       .find((member) => member.User.id === memberId).User,
+    // get members of current project, apart from currently logged in PM
+    getProMembers_ex_pm: (state) => state.currProElements.members
+      .filter((member) => member.User.id !== state.currentUser.id),
   },
   modules: {
   },

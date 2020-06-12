@@ -10,6 +10,7 @@ const jwt = require('jsonwebtoken');
 const md5 = require('md5');
 const typeDefs = fs.readFileSync(path.join(__dirname, 'schema.graphql')).toString('utf-8');
 
+require('dotenv').config();
 
 const idListScalar = new GraphQLObjectType({
     name: 'ids',
@@ -18,21 +19,37 @@ const idListScalar = new GraphQLObjectType({
     }),
 });
 
-async function createUserToken(user, exp) {
-    const {username, id, type} = user;
-    const token = jwt.sign({exp, username, id, role: type}, process.env.JWT_SECRET);
-    // add jwt token to db, with a 'time to live' configuration that deletes the token at exp time
-    return await neode.cypher('MATCH (u:User { username: $username}) CREATE (u)-[rel:JWT]->(t: Token {token:$token}) WITH u, rel, t' +
-        ' CALL apoc.ttl.expire(t, $ttl, \'s\') RETURN t.token',
-    {username, token, ttl: exp})
-        .then((resultToken) => {
-            return resultToken.records[0].get(0);
-        })
-        .catch(e => {
+async function validatePass(username, password) {
+    return neode.cypher('MATCH (u:User {username: $username}) RETURN u', {username})
+        .then(async (result) => {
+            const user = result.records[0].get('u').properties;
+            return await bcrypt.compare(password, user.password);
+        }).catch(e => {
             throw new Error(e);
         });
 }
-
+async function createUserToken(username, resetPass) {
+    return neode.cypher('MATCH (u:User {username: $username}) RETURN u', {username})
+        .then(async (result) => {
+            const user = result.records[0].get('u').properties;
+            const {username, id, type} = user;
+            let exp;
+            if (user.passwordUpdate === true) {
+                if (resetPass) {
+                    //  token expiration, one hour from current time
+                    exp = Math.floor(Date.now() / 1000) + (60 * 60);
+                } else {
+                    //  token expiration, 5min from current time
+                    exp = Math.floor(Date.now() / 1000) + (5 * 60);
+                }
+            } else {
+                exp = Math.floor(Date.now() / 1000) + (60 * 60);
+            }
+            return { token: jwt.sign({exp, username, id, role: type}, process.env.JWT_SECRET), exp };
+        }).catch(e => {
+            throw new Error(e);
+        });
+}
 const resolveFunctions = {
     JSON: GraphQLJSON,
     idList: idListScalar,
@@ -388,88 +405,57 @@ const resolveFunctions = {
                 throw new Error(e);
             }
         },
-        CreateUser: async (_, {id, firstName, lastName, username, email, password, passwordUpdate}) => {
+        CreateUser: async (object, params, ctx, resolveInfo) => {
             try {
                 const salt = bcrypt.genSaltSync(Number(process.env.BCRYPTHASHCOST));
-                const passHash = bcrypt.hashSync(password, salt);
-                const avatarHash = await md5(username);
-                return neode.cypher('CREATE (u:User{' +
-                    ' id : $id,' +
-                    ' firstName : $firstName,' +
-                    ' lastName : $lastName,' +
-                    ' username : $username,' +
-                    ' email : $email,' +
-                    ' password: $passHash,' +
-                    ' passwordUpdate: $passwordUpdate,' +
-                    ' avatar: $avatarHash' +
-                    ' }) RETURN u',
-                {id, firstName, lastName, username, email, passHash, passwordUpdate, avatarHash})
-                    .then((result) => {
-                        return result.records[0].get('u').properties;
-                    })
-                    .catch(e => {
-                        throw e;
-                    });
+                // update params that will be inserted into db
+                Object.assign(params, {
+                    password: bcrypt.hashSync(params.password, salt),
+                    avatarHash: await md5(params.username)
+                });
+                return await neo4jgraphql(object, params, ctx, resolveInfo);
             }catch (e) {
                 throw new Error(e);
             }
         },
-        loginUser: (_, {username, password}) => {
-            return neode.cypher('MATCH (u:User {username: $username}) RETURN u', {username})
-                .then(async (result) => {
-                    const user = result.records[0].get('u').properties;
-                    const passValid = await bcrypt.compare(password, user.password);
+        loginUser: async (object, params, ctx, resolveInfo) => {
+            try {
+                const passValid = await validatePass(params.username, params.password);
                     if (passValid) {
-                        // if password reset is required give user a short lived token (5mins.)
-                        if(user.passwordUpdate === true){
-                            const exp = Math.floor(Date.now() / 1000) + (5 * 60);
-                            const token = await createUserToken(user, exp);
-                            return {token: token};
-                        }
-                        const exp = Math.floor(Date.now() / 1000) + (60 * 60);
-                        const token = await createUserToken(user, exp);
-                        return {token: token};
+                        const { token, exp } = await createUserToken(params.username, false);
+                        // update params that will be inserted into db
+                        Object.assign(params, {
+                            token,
+                            exp
+                        });
+                        return await neo4jgraphql(object, params, ctx, resolveInfo);
                     }
                     else {
                         throw 'pass';
                     }
-                })
-                .catch(e => {
-                    if(e === 'pass'){
-                        throw new Error('Password invalid');
-                    }
-                    throw new Error('Username invalid');
-                });
+                // jwt token added to db, with a 'time to live' configuration that deletes the token at exp time
+            } catch (e) {
+                if(e === 'pass'){
+                 throw new Error('Username/Password invalid');
+                }
+                throw new Error(`Unable to Login: ${e}`);
+            }
         },
-        resetPassword:(_, {username, newPassword}) => {
-            return neode.cypher('MATCH (u:User {username: $username}) RETURN u', {username})
-                .then(async (result) => {
-                    const user = result.records[0].get('u').properties;
-                    if(user.passwordUpdate === true){
-                        try {
-                            const salt = bcrypt.genSaltSync(Number(process.env.BCRYPTHASHCOST));
-                            const hash = bcrypt.hashSync(newPassword, salt);
-                            await neode.cypher('MATCH (u:User {username: $username}) SET u.password = $hash SET u.passwordUpdate = false RETURN u', {username, hash});
-
-                            //  token expiration, one hour from current time
-                            const exp = Math.floor(Date.now() / 1000) + (60 * 60);
-                            const token = await createUserToken(user, exp);
-                            return {token: token};
-                        }catch (e) {
-                            throw new Error(e);
-                        }
-                    }
-                    else {
-                        throw 'passReset';
-                    }
-                })
-                .catch(e => {
-                    console.log(e);
-                    if(e === 'passReset'){
-                        throw new Error('Invalid Reset attempt, contact admin');
-                    }
-                    throw new Error('Password reset Failed, try again later');
+        resetPassword: async (object, params, ctx, resolveInfo) => {
+            try {
+                const salt = bcrypt.genSaltSync(Number(process.env.BCRYPTHASHCOST));
+                const hash = bcrypt.hashSync(params.newPassword, salt);
+                const { token, exp } = await createUserToken(params.username, true);
+                Object.assign(params, {
+                    token,
+                    exp,
+                    newPassword: hash
                 });
+                // jwt token added to db, with a 'time to live' configuration that deletes the token at exp time
+                return await neo4jgraphql(object, params, ctx, resolveInfo);
+            } catch (e) {
+                throw new Error(`Invalid Reset attempt, contact admin: ${e}`);
+            }
         }
     },
     Subscription: {
