@@ -11,7 +11,7 @@ import { onError } from 'apollo-link-error';
 import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 
-
+//  uri: `${window.location.origin}:7000/graphql`
 const httpLink = new HttpLink({
   uri: 'http://localhost:7000/graphql',
 });

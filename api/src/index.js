@@ -31,9 +31,6 @@ const pubSub = new PubSub();
 
 const server = new ApolloServer({
     schema,
-    // context: async ({req}) => {
-    //     return {driver, req, pubSub};
-    // },
     context: async ({req, connection}) => {
         if (connection) {
             return { ...connection.context, pubSub};
@@ -43,7 +40,6 @@ const server = new ApolloServer({
     },
     subscriptions: {
         onConnect: async(connectionParams) => {
-            console.log(connectionParams.authToken);
             if (connectionParams.authToken) {
                 return {currentUser: await verifyToken(connectionParams.authToken)};
             }
