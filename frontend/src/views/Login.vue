@@ -126,13 +126,14 @@ export default {
     },
     async loginUser() {
       localStorage.setItem('catulam_token', '');
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SignInUser,
+      await Vue.$apolloClient.query({
+        query: gqlQueries.SignInUser,
         fetchPolicy: 'no-cache',
         variables: { username: this.username, password: this.password },
       }).then((response) => {
+        console.log(response);
         const { loginUser } = response.data;
-        localStorage.setItem('catulam_token', loginUser.token);
+        localStorage.setItem('catulam_token', loginUser);
         this.$router.go();
       }).catch((error) => {
         this.snackBarOn({

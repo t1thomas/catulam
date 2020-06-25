@@ -374,7 +374,7 @@ const gqlQueries = {
                 fullName
                 avatar
               }
-              type
+              role
             }
           }
         }
@@ -406,11 +406,10 @@ const gqlQueries = {
       token
     }
   }`,
-  SignInUser: gql`mutation($username: String!, $password: String!) {
-      loginUser(username: $username, password: $password){
-        token
-      }
+  SignInUser: gql`query($username: String!, $password: String!) {
+      loginUser(username: $username, password: $password)
     }`,
+  // deletetoken is auto gen
   DeleteToken: gql`mutation($token: String!) {
     DeleteToken(token: $token){
       token
@@ -434,7 +433,7 @@ const gqlQueries = {
       email
       passwordUpdate
       avatar
-      type
+      role
     }
   }`,
   Tickets: gql`query{

@@ -102,9 +102,9 @@ export default {
       });
     // console.log(this.currentUser);
     if (this.currentUser) {
-      if (this.currentUser.type === 'pm') {
+      if (this.currentUser.role === 'pm') {
         await this.fetchPmPros({ username: this.currentUser.username });
-      } else if (this.currentUser.type === 'dev') {
+      } else if (this.currentUser.role === 'dev') {
         await this.fetchCurrentUserTasks({ username: this.currentUser.username });
       }
       await this.fetchAllUserList();

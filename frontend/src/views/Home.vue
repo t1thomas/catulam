@@ -21,7 +21,7 @@ export default {
       'getCurrentUser',
     ]),
     userType() {
-      return this.getCurrentUser.type;
+      return this.getCurrentUser.role;
     },
   },
   mounted() {

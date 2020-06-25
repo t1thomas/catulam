@@ -1,282 +1,267 @@
-    scalar JSON
-    scalar idList
+scalar JSON
+scalar idList
 
-    enum Role {
-        dev
-        admin
-        pm
-    }
+enum Role {
+    dev
+    admin
+    pm
+}
 
-    type Token {
-        token: String!
-        ttl: Int!
-    }
+type UserStory {
+    id: ID!
+    storyText: String!
+    issueNumber: Int!
+    tickets: [Ticket] @relation(name: "SUB_TASK", direction: IN)
+    ticketIds: idList
+    @cypher(statement: """
+    MATCH (this)<-[:SUB_TASK]-(rec:Ticket)
+    RETURN collect(rec.id) AS ids
+    """)
+    project: Project @relation(name: "USER_STORY", direction: OUT)
+}
 
-    type UserStory {
-        id: ID!
-        storyText: String!
-        issueNumber: Int!
-        tickets: [Ticket] @relation(name: "SUB_TASK", direction: IN)
-        ticketIds: idList
-          @cypher(statement: """
-              MATCH (this)<-[:SUB_TASK]-(rec:Ticket)
-              RETURN collect(rec.id) AS ids
-         """)
-        project: Project @relation(name: "USER_STORY", direction: OUT)
-    }
+type User {
+    id: ID!
+    firstName: String!
+    lastName: String!
+    fullName: String
+    username: String!
+    email: String!
+    password: String! @hasRole(roles:[admin])
+    passwordUpdate: Boolean!
+    projects: [Member]
+    userStories: [UserStory] @relation(name: "ASSIGNED_TASK", direction: OUT)
+    tickets: [Ticket] @relation(name: "ASSIGNED_TASK", direction: OUT)
+    created: [Created]
+    avatar: String
+    role: Role!
+}
 
-    type User {
-        id: ID!
-        firstName: String!
-        lastName: String!
-        fullName: String
-        username: String!
-        email: String!
-        password: String! @hasRole(roles:[admin])
-        passwordUpdate: Boolean!
-        tokens: [Token] @relation(name: "JWT", direction: OUT)
-        projects: [Member]
-        userStories: [UserStory] @relation(name: "ASSIGNED_TASK", direction: OUT)
-        tickets: [Ticket] @relation(name: "ASSIGNED_TASK", direction: OUT)
-        created: [Created]
-        avatar: String
-        type: Role!
-    }
+type Created @relation(name: "CREATED") {
+    from: User
+    to: Ticket
+    timestamp: String!
+}
 
-    type Created @relation(name: "CREATED") {
-        from: User
-        to: Ticket
-        timestamp: String!
-    }
+type Member @relation(name: "TEAM_MEMBER") {
+    from: User
+    to: Project
+    role: Role!
+}
 
-    type Member @relation(name: "TEAM_MEMBER") {
-        from: User
-        to: Project
-        type: Role!
-    }
+type Project {
+    id: ID!
+    title: String!
+    desc: String
+    label: String!
+    startDate: String!
+    endDate: String!
+    members: [Member]
+    userStories: [UserStory] @relation(name: "USER_STORY", direction: IN)
+    tickets: [Ticket] @relation(name: "TICKET", direction: IN)
+    sprints: [Sprint] @relation(name: "SPRINT", direction: IN)
+}
 
-    type Project {
-        id: ID!
-        title: String!
-        desc: String
-        label: String!
-        startDate: String!
-        endDate: String!
-        members: [Member]
-        userStories: [UserStory] @relation(name: "USER_STORY", direction: IN)
-        tickets: [Ticket] @relation(name: "TICKET", direction: IN)
-        sprints: [Sprint] @relation(name: "SPRINT", direction: IN)
-    }
+type Ticket {
+    id: ID!
+    issueNumber: Int
+    hourEstimate: Int
+    sprintPos: Int!
+    userStory: UserStory @relation(name: "SUB_TASK", direction: OUT)
+    title: String!
+    desc: String
+    done: Boolean
+    sprint: Sprint @relation(name: "SPRINT_TASK", direction: OUT)
+    project: Project @relation(name: "TICKET", direction: OUT)
+    assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
+    creator: Created
+}
 
-    type Ticket {
-        id: ID!
-        issueNumber: Int
-        hourEstimate: Int
-        sprintPos: Int!
-        userStory: UserStory @relation(name: "SUB_TASK", direction: OUT)
-        title: String!
-        desc: String
-        done: Boolean
-        sprint: Sprint @relation(name: "SPRINT_TASK", direction: OUT)
-        project: Project @relation(name: "TICKET", direction: OUT)
-        assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
-        creator: Created
-    }
+type Sprint {
+    id: ID!
+    sprintNo: Int!
+    active: Boolean!
+    startDate: String!
+    endDate: String!
+    tickets: [Ticket] @relation(name: "SPRINT_TASK", direction: IN)
+    project: Project @relation(name: "SPRINT", direction: OUT)
+}
 
-    type Sprint {
-        id: ID!
-        sprintNo: Int!
-        active: Boolean!
-        startDate: String!
-        endDate: String!
-        tickets: [Ticket] @relation(name: "SPRINT_TASK", direction: IN)
-        project: Project @relation(name: "SPRINT", direction: OUT)
-    }
+type Query {
+    getCurrentUser: User @cypher(statement: """
+    MATCH (u:User {id: $cypherParams.id})
+    RETURN u
+    """)
+    loginUser(username: String!, password: String!): String
+    adminToken: String
+    UserStory: [UserStory]
+    Project: [Project]
+    Ticket: [Ticket]
+    Sprint: [Sprint]
+}
 
-    type Query {
-        ticketsAsMap: JSON
-          @cypher (statement: """
-           Match (n:Ticket)
-           WITH n.id as key, apoc.map.removeKey(n {.*}, 'id')  as value
-           RETURN apoc.map.fromPairs(collect([key, value]))
-        """)
-        getCurrentUser: User
-    }
+type Subscription {
+    update(proId:String!): String
+}
+type Mutation {
+    UpdateTicketAssignee(tick: _TicketInput!, remUser: _UserInput, addUser: _UserInput, project: _ProjectInput!): User
+    UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
+    UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
 
-    type Subscription {
-        update(proId:String!): String
-    }
-    type Mutation {
-        UpdateTicketAssignee(tick: _TicketInput!, remUser: _UserInput, addUser: _UserInput, project: _ProjectInput!): User
-        UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
-        UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
+    resetPassword(username: String!, newPassword: String!): String!
+    @cypher(statement:"""
+    MATCH(u:User{username: $username})
+    SET u.password = $newPassword
+    SET u.passwordUpdate = false
+    RETURN u
+    """)
 
-        loginUser(username: String!, password: String!): Token!
-            @cypher(statement:"""
-            MATCH(u:User{username: $username})
-            CREATE (u)-[rel:JWT]->(t: Token {token: $token})
-            WITH t
-            CALL apoc.ttl.expire(t, $exp, 's')
-            RETURN t
-            """)
+    CreateUser(firstName: String!, lastName: String, username: String!, email: String!, password: String!, role: Role!): User
+    @hasScope(scopes:["User:Create"])
+    @cypher(statement:"""
+    CREATE (u:User {
+    id : apoc.create.uuid(),
+    firstName : $firstName,
+    lastName : $lastName,
+    username : $username,
+    email : $email,
+    password: $password,
+    passwordUpdate: false,
+    avatar: $avatarHash,
+    role: $role })
+    RETURN u
+    """)
 
-        resetPassword(username: String!, newPassword: String!): Token!
-            @cypher(statement:"""
-            MATCH(u:User{username: $username})
-            SET u.password = $newPassword
-            SET u.passwordUpdate = false
-            WITH u
-            CREATE (u)-[rel:JWT]->(t: Token {token: $token})
-            WITH t
-            CALL apoc.ttl.expire(t, $exp, 's')
-            RETURN t
-            """)
+    StartToSprint(ticket: _TicketInput!, sprintAdd: _SprintInput! ): Ticket
+    @cypher(statement:"""
+    MATCH (t:Ticket),(s:Sprint)
+    WHERE t.id = $ticket.id AND s.id = $sprintAdd.id
+    CREATE (t)-[rel:SPRINT_TASK]->(s)
+    RETURN t
+    """)
 
-        CreateUser(firstName: String!, lastName: String, username: String!, email: String!, password: String!, type: Role!): User
-            @cypher(statement:"""
-            CREATE (u:User {
-            id : apoc.create.uuid(),
-            firstName : $firstName,
-            lastName : $lastName,
-            username : $username,
-            email : $email,
-            password: $password,
-            passwordUpdate: true,
-            avatar: $avatarHash,
-            type: $type })
-            RETURN u
-            """)
+    TicToToDo(ticket: _TicketInput!, from: String!): Ticket
+    @cypher(statement:"""
+    CALL apoc.do.when($from = 'done',
+    'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 0  SET t.done = false RETURN t',
+    'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 0 RETURN t', {ticket: $ticket})
+    YIELD value
+    RETURN value.t
+    """)
 
-        StartToSprint(ticket: _TicketInput!, sprintAdd: _SprintInput! ): Ticket
-            @cypher(statement:"""
-            MATCH (t:Ticket),(s:Sprint)
-            WHERE t.id = $ticket.id AND s.id = $sprintAdd.id
-            CREATE (t)-[rel:SPRINT_TASK]->(s)
-            RETURN t
-            """)
+    TicToDoing(ticket: _TicketInput!, from: String!): Ticket
+    @cypher(statement:"""
+    CALL apoc.do.when($from = 'done',
+    'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 1  SET t.done = false RETURN t',
+    'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 1 RETURN t', {ticket: $ticket})
+    YIELD value
+    RETURN value.t
+    """)
 
-        TicToToDo(ticket: _TicketInput!, from: String!): Ticket
-            @cypher(statement:"""
-            CALL apoc.do.when($from = 'done',
-            'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 0  SET t.done = false RETURN t',
-            'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 0 RETURN t', {ticket: $ticket})
-            YIELD value
-            RETURN value.t
-            """)
+    TicToDone(ticket: _TicketInput!): Ticket
+    @cypher(statement:"""
+    MATCH (t:Ticket)
+    WHERE t.id = $ticket.id
+    SET t.sprintPos = 2
+    SET t.done = true
+    RETURN t
+    """)
 
-        TicToDoing(ticket: _TicketInput!, from: String!): Ticket
-            @cypher(statement:"""
-            CALL apoc.do.when($from = 'done',
-            'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 1  SET t.done = false RETURN t',
-            'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 1 RETURN t', {ticket: $ticket})
-            YIELD value
-            RETURN value.t
-            """)
+    SprintToStart(ticket: _TicketInput!, sprintRemove: _SprintInput! ): Ticket
+    @cypher(statement:"""
+    MATCH (t:Ticket {id:$ticket.id})-[rel1:SPRINT_TASK]->(s:Sprint{id:$sprintRemove.id})
+    WITH t, rel1
+    DELETE rel1
+    RETURN t
+    """)
 
-        TicToDone(ticket: _TicketInput!): Ticket
-            @cypher(statement:"""
-            MATCH (t:Ticket)
-            WHERE t.id = $ticket.id
-            SET t.sprintPos = 2
-            SET t.done = true
-            RETURN t
-            """)
+    SwitchSprint(ticket: _TicketInput!, sprintAdd: _SprintInput!, sprintRemove: _SprintInput! ): Ticket
+    @cypher(statement:"""
+    MATCH (t:Ticket{id:$ticket.id})-[rel:SPRINT_TASK]->(s1:Sprint {id:$sprintRemove.id})
+    MATCH (s2:Sprint {id:$sprintAdd.id})
+    CALL apoc.refactor.to(rel, s2)
+    YIELD input, output, error
+    WITH t
+    RETURN t
+    """)
 
-        SprintToStart(ticket: _TicketInput!, sprintRemove: _SprintInput! ): Ticket
-            @cypher(statement:"""
-            MATCH (t:Ticket {id:$ticket.id})-[rel1:SPRINT_TASK]->(s:Sprint{id:$sprintRemove.id})
-            WITH t, rel1
-            DELETE rel1
-            RETURN t
-            """)
+    CreateProject(title: String!, desc: String, label: String!, startDate: String!, endDate: String!, members: [_UserInput]!): Project
+    @cypher(statement:"""
+    CREATE (p:Project{id: apoc.create.uuid(), title:$title,
+    label:$label, startDate:$startDate, endDate:$endDate, desc:$desc })
+    WITH $members AS users, p
+    UNWIND users AS user
+    MATCH (u:User)
+    WHERE u.id = user.id
+    CREATE (p)<-[:TEAM_MEMBER {role: u.role}]-(u)
+    RETURN p
+    """)
+    AddProjectMembers(members: [_UserInput]!, project: _ProjectInput!): Project
+    @cypher(statement:"""
+    MATCH (p:Project)
+    WHERE p.id = $project.id
+    WITH $members AS users, p
+    UNWIND users AS user
+    MATCH (u:User)
+    WHERE u.id = user.id
+    CREATE (p)<-[:TEAM_MEMBER {role: u.role}]-(u)
+    RETURN p
+    """)
+    RemoveProjectMembers(members: [_UserInput]!, project: _ProjectInput!): Project
+    @cypher(statement:"""
+    MATCH (p:Project)
+    WHERE p.id = $project.id
+    WITH $members AS users, p
+    UNWIND users AS user
+    MATCH (p)<-[rel:TEAM_MEMBER {role: u.role}]-(u:User)
+    WHERE u.id = user.id
+    DELETE rel
+    RETURN p
+    """)
 
-        SwitchSprint(ticket: _TicketInput!, sprintAdd: _SprintInput!, sprintRemove: _SprintInput! ): Ticket
-            @cypher(statement:"""
-            MATCH (t:Ticket{id:$ticket.id})-[rel:SPRINT_TASK]->(s1:Sprint {id:$sprintRemove.id})
-            MATCH (s2:Sprint {id:$sprintAdd.id})
-            CALL apoc.refactor.to(rel, s2)
-            YIELD input, output, error
-            WITH t
-            RETURN t
-            """)
+    CreateSprint(sprintNo: Int!, active: Boolean!, startDate: String!, endDate: String!, project: _ProjectInput!): Sprint
+    @cypher(statement:"""
+    CREATE (s:Sprint{
+    id : apoc.create.uuid(),
+    sprintNo: $sprintNo,
+    active: $active,
+    startDate: $startDate,
+    endDate: $endDate
+    })
+    WITH s
+    MATCH (p:Project) WHERE p.id = $project.id
+    CREATE (s)-[r:SPRINT]->(p)
+    RETURN s
+    """)
 
-        CreateProject(title: String!, desc: String, label: String!, startDate: String!, endDate: String!, members: [_UserInput]!): Project
-            @cypher(statement:"""
-            CREATE (p:Project{id: apoc.create.uuid(), title:$title,
-            label:$label, startDate:$startDate, endDate:$endDate, desc:$desc })
-            WITH $members AS users, p
-            UNWIND users AS user
-            MATCH (u:User)
-            WHERE u.id = user.id
-            CREATE (p)<-[:TEAM_MEMBER {type: u.type}]-(u)
-            RETURN p
-            """)
-        AddProjectMembers(members: [_UserInput]!, project: _ProjectInput!): Project
-            @cypher(statement:"""
-            MATCH (p:Project)
-            WHERE p.id = $project.id
-            WITH $members AS users, p
-            UNWIND users AS user
-            MATCH (u:User)
-            WHERE u.id = user.id
-            CREATE (p)<-[:TEAM_MEMBER {type: u.type}]-(u)
-            RETURN p
-            """)
-        RemoveProjectMembers(members: [_UserInput]!, project: _ProjectInput!): Project
-            @cypher(statement:"""
-            MATCH (p:Project)
-            WHERE p.id = $project.id
-            WITH $members AS users, p
-            UNWIND users AS user
-            MATCH (p)<-[rel:TEAM_MEMBER {type: u.type}]-(u:User)
-            WHERE u.id = user.id
-            DELETE rel
-            RETURN p
-            """)
+    CreateTicket(hourEstimate: Int, title: String!, desc: String, project: _ProjectInput!, user: _UserInput!): Ticket
+    @cypher(statement:"""
+    MATCH (p:Project),(u:User)
+    WHERE p.id = $project.id AND u.id = $user.id
+    CREATE (p)<-[:TICKET]-(t: Ticket {
+    id:apoc.create.uuid(),
+    title:$title,
+    hourEstimate:$hourEstimate,
+    sprintPos: 0,
+    desc:$desc,
+    done:false
+    })<-[:CREATED {timestamp: apoc.date.currentTimestamp()}]-(u)
+    WITH p, t
+    MATCH (p)<-[r1:TICKET]-(:Ticket)
+    WITH COUNT(r1) AS issNo, t
+    SET t.issueNumber = issNo
+    RETURN t
+    """)
 
-        CreateSprint(sprintNo: Int!, active: Boolean!, startDate: String!, endDate: String!, project: _ProjectInput!): Sprint
-            @cypher(statement:"""
-            CREATE (s:Sprint{
-            id : apoc.create.uuid(),
-            sprintNo: $sprintNo,
-            active: $active,
-            startDate: $startDate,
-            endDate: $endDate
-            })
-            WITH s
-            MATCH (p:Project) WHERE p.id = $project.id
-            CREATE (s)-[r:SPRINT]->(p)
-            RETURN s
-            """)
-
-        CreateTicket(hourEstimate: Int, title: String!, desc: String, project: _ProjectInput!, user: _UserInput!): Ticket
-            @cypher(statement:"""
-            MATCH (p:Project),(u:User)
-            WHERE p.id = $project.id AND u.id = $user.id
-            CREATE (p)<-[:TICKET]-(t: Ticket {
-            id:apoc.create.uuid(),
-            title:$title,
-            hourEstimate:$hourEstimate,
-            sprintPos: 0,
-            desc:$desc,
-            done:false
-            })<-[:CREATED {timestamp: apoc.date.currentTimestamp()}]-(u)
-            WITH p, t
-            MATCH (p)<-[r1:TICKET]-(:Ticket)
-            WITH COUNT(r1) AS issNo, t
-            SET t.issueNumber = issNo
-            RETURN t
-            """)
-
-        CreateUserStory(storyText: String!, project: _ProjectInput!): UserStory
-            @cypher(statement:"""
-            MATCH (p:Project)
-            WHERE p.id = $project.id
-            CREATE (p)<-[:USER_STORY]-(us: UserStory { id: apoc.create.uuid(), storyText: $storyText })
-            WITH p, us
-            MATCH (p)<-[r1:USER_STORY]-(:UserStory)
-            WITH COUNT(r1) AS issNo, us
-            SET us.issueNumber = issNo
-            RETURN us
-            """)
-    }
+    CreateUserStory(storyText: String!, project: _ProjectInput!): UserStory
+    @cypher(statement:"""
+    MATCH (p:Project)
+    WHERE p.id = $project.id
+    CREATE (p)<-[:USER_STORY]-(us: UserStory { id: apoc.create.uuid(), storyText: $storyText })
+    WITH p, us
+    MATCH (p)<-[r1:USER_STORY]-(:UserStory)
+    WITH COUNT(r1) AS issNo, us
+    SET us.issueNumber = issNo
+    RETURN us
+    """)
+}

@@ -375,6 +375,7 @@ export default new Vuex.Store({
       }).then((response) => {
         const { getCurrentUser } = response.data;
         commit('set_currentUser', getCurrentUser);
+        console.log(getCurrentUser);
         return getCurrentUser;
         // eslint-disable-next-line no-unused-vars
       }).catch((error) => {

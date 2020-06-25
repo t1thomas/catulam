@@ -1,5 +1,5 @@
 const gql = require('graphql-tag');
-
+// three test users created with one mutation
 module.exports = gql`
     mutation {
         u1: CreateUser(
@@ -8,7 +8,7 @@ module.exports = gql`
             username: "user1"
             email: "test1@gmail.com"
             password: "test1"
-            type: dev
+            role: dev
         ) {
             id
         }
@@ -18,7 +18,7 @@ module.exports = gql`
             username: "user2"
             email: "test2@gmail.com"
             password: "test2"
-            type: dev
+            role: dev
         ) {
             id
         }
@@ -28,7 +28,7 @@ module.exports = gql`
             username: "pm"
             email: "test3@gmail.com"
             password: "test3"
-            type: pm
+            role: pm
         ) {
             id
         }

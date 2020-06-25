@@ -97,7 +97,7 @@ export default {
       pmProjects: 'currPmProjects',
     }),
     projects() {
-      if (this.currUser.type === 'pm') {
+      if (this.currUser.role === 'pm') {
         return this.pmProjects;
       }
       return this.devTasks;

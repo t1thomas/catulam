@@ -36,6 +36,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
     });
   }
   Vue.$store.dispatch('snackBarOn', `[Network error]: ${networkError}`);
+  // add logout function, which logs-out user on error
 });
 
 
