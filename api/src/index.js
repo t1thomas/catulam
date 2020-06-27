@@ -3,6 +3,7 @@ const { ApolloServer, AuthenticationError, PubSub } = require('apollo-server-exp
 const http = require('http');
 const bodyParser = require('body-parser');
 const jwt = require('jsonwebtoken');
+const cookieParser = require('cookie-parser');
 const driver = require('./neo4jDriver');
 const schema = require('./graphQL-schema');
 // set environment variables from ../.env
@@ -11,9 +12,17 @@ require('dotenv').config();
 
 const PORT = process.env.GRAPHQL_LISTEN_PORT;
 const app = express();
+
 app.use(bodyParser.json());
 
+app.use(cookieParser());
 // verify JWT sent from client
+// enable cors
+const corsOptions = {
+  origin: 'http://localhost:8080',
+  credentials: true, // <-- REQUIRED backend setting
+};
+// app.use(cors(corsOptions));
 
 async function verifyToken(token) {
   if (token) {
@@ -28,7 +37,7 @@ const pubSub = new PubSub();
 
 const server = new ApolloServer({
   schema,
-  context: async ({ req, connection }) => {
+  context: async ({ req, res,connection }) => {
     if (connection) {
       return { ...connection.context, pubSub };
     }
@@ -36,6 +45,7 @@ const server = new ApolloServer({
       driver,
       cypherParams: await verifyToken(req.headers.authorization),
       req,
+      res,
       pubSub,
     };
   },
@@ -49,7 +59,7 @@ const server = new ApolloServer({
   },
 });
 
-server.applyMiddleware({ app });
+server.applyMiddleware({ app, cors: corsOptions });
 
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);

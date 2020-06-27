@@ -7,6 +7,11 @@ enum Role {
     pm
 }
 
+type Token {
+    token: String!
+    ttl: String!
+}
+
 type UserStory {
     id: ID!
     storyText: String!
@@ -92,23 +97,33 @@ type Query {
     MATCH (u:User {id: $cypherParams.id})
     RETURN u
     """)
-    loginUser(username: String!, password: String!): String
-    adminToken: String
-    UserStory: [UserStory]
-    Project: [Project]
-    Ticket: [Ticket]
-    Sprint: [Sprint]
+    UserStory: [UserStory] @hasScope(scopes:["UserStory:read"])
+    Project: [Project] @hasScope(scopes:["Project:read"])
+    Ticket: [Ticket] @hasScope(scopes:["Ticket:read"])
+    Sprint: [Sprint] @hasScope(scopes:["Sprint:read"])
+    User: [User] @hasScope(scopes:["User:read"])
 }
 
 type Subscription {
     update(proId:String!): String
 }
+
 type Mutation {
+    getNewTokens(token: _TokenInput): String
     UpdateTicketAssignee(tick: _TicketInput!, remUser: _UserInput, addUser: _UserInput, project: _ProjectInput!): User
     UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
     UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
 
-    resetPassword(username: String!, newPassword: String!): String!
+    loginUser(username: String!, password: String!): Token
+    @cypher(statement:"""
+    MATCH(u:User{username: $username})
+    CREATE (u)-[rel:JWT]->(t: Token {token: $token})
+    WITH t
+    CALL apoc.ttl.expire(t, $exp, 's')
+    RETURN t
+    """)
+
+    resetPassword(username: String!, newPassword: String!): String
     @cypher(statement:"""
     MATCH(u:User{username: $username})
     SET u.password = $newPassword

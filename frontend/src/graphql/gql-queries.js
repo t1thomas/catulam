@@ -406,8 +406,11 @@ const gqlQueries = {
       token
     }
   }`,
-  SignInUser: gql`query($username: String!, $password: String!) {
-      loginUser(username: $username, password: $password)
+  SignInUser: gql`mutation($username: String!, $password: String!) {
+      loginUser(username: $username, password: $password) {
+        token
+        ttl
+      }
     }`,
   // deletetoken is auto gen
   DeleteToken: gql`mutation($token: String!) {

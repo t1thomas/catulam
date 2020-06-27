@@ -8,6 +8,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const md5 = require('md5');
 const neode = require('./neode');
+const authScopes = require('./authScopes');
 
 const typeDefs = fs.readFileSync(path.join(__dirname, 'schema.graphql')).toString('utf-8');
 
@@ -19,9 +20,12 @@ const idListScalar = new GraphQLObjectType({
     ids: { type: new GraphQLList(GraphQLString) },
   }),
 });
+// name of the cookie that will be set as refresh token
+const cookieName = 'catulam_token';
 
-function createUserToken(user, resetPass) {
-  try {
+function createRefreshToken(user, resetPass) {
+  return new Promise((resolve, reject) => {
+    // gather id and role property from user object
     const { id, role } = user;
     let exp;
     if (user.passwordUpdate === true) {
@@ -35,14 +39,13 @@ function createUserToken(user, resetPass) {
     } else {
       exp = Math.floor(Date.now() / 1000) + (60 * 60);
     }
-    const scope = 'User:Read';
+    // get scopes based on user role
+    const scope = authScopes[role]();
     // returns token string
-    return jwt.sign({
+    resolve(jwt.sign({
       exp, id, role, scope,
-    }, process.env.JWT_SECRET);
-  } catch (e) {
-    throw new Error(e);
-  }
+    }, process.env.JWT_SECRET));
+  });
 }
 function validatePass(pass, user) {
   return new Promise((resolve, reject) => {
@@ -64,14 +67,8 @@ const resolveFunctions = {
     },
   },
   Query: {
-    adminToken: () => {
-      //  token expiration, 2min from current time
-      const exp = Math.floor(Date.now() / 1000) + (30 * 60);
-      const roles = 'admin';
-      const scope = 'User:Create';
-      return jwt.sign({ exp, scope, roles }, process.env.JWT_SECRET);
-    },
     getCurrentUser: async (object, params, ctx, resolveInfo) => {
+      console.log(ctx.req);
       if (!ctx.cypherParams) {
         return null;
       }
@@ -81,18 +78,31 @@ const resolveFunctions = {
         throw new Error('Unable to authenticate, Sign in again ');
       }
     },
-    loginUser: async (_, { username, password }) => neode.cypher(
-      'MATCH (u:User {username: $username}) RETURN u', { username },
-    )
-      .then((result) => result.records[0].get('u').properties)
-      .then((user) => validatePass(password, user))
-      .then((user) => createUserToken(user, false))
-      .catch(() => {
-        throw new Error('Unable to login, username/password invalid');
-      })
-    ,
   },
   Mutation: {
+    loginUser: async (object, params, ctx, resolveInfo) => neode.cypher(
+      'MATCH (u:User {username: $username}) RETURN u', { username: params.username },
+    )
+      .then((result) => result.records[0].get('u').properties)
+      .then((user) => validatePass(params.password, user))
+      .then((user) => createRefreshToken(user, false))
+      .then((token) => {
+        // update the params so, cypher query contains token and exp date
+        Object.assign(params, {
+          token,
+          // get the expiry date from token by decoding it
+          exp: jwt.decode(token).exp,
+        });
+        ctx.res.cookie(cookieName, token, {
+          httpOnly: true,
+          maxAge: 24 * 60 * 60 * 1000 * 7, // 7 days
+        });
+        return neo4jgraphql(object, params, ctx, resolveInfo);
+      })
+      .catch((e) => {
+        console.log(e);
+        throw new Error(e);
+      }),
     StartToSprint: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
