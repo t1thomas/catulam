@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');
 const md5 = require('md5');
 const neode = require('./neode');
 const authScopes = require('./authScopes');
+const verifyToken = require('./authenticate');
 
 const typeDefs = fs.readFileSync(path.join(__dirname, 'schema.graphql')).toString('utf-8');
 
@@ -23,28 +24,41 @@ const idListScalar = new GraphQLObjectType({
 // name of the cookie that will be set as refresh token
 const cookieName = 'catulam_token';
 
-function createRefreshToken(user, resetPass) {
-  return new Promise((resolve, reject) => {
+function createAccessToken(id, role) {
+  //  token expiration, one hour from current time
+  const exp = Math.floor(Date.now() / 1000) + (60 * 60);
+
+  // get scopes based on user role
+  const scope = authScopes[role]();
+  // returns token string
+  return ({
+    token: jwt.sign({
+      exp, id, role, scope,
+    }, process.env.JWT_SECRET),
+    exp,
+  });
+}
+function createRefreshToken(id) {
+  //  token expiration, 7 days from current time
+  const exp = Math.floor(Date.now() / 1000) + (60 * 60 * 24 * 7);
+  // returns token string
+  return ({
+    token: jwt.sign({
+      exp, id,
+    }, process.env.JWT_SECRET),
+    exp,
+  });
+}
+
+function generateTokens(user) {
+  return new Promise((resolve) => {
     // gather id and role property from user object
     const { id, role } = user;
-    let exp;
-    if (user.passwordUpdate === true) {
-      if (resetPass) {
-        //  token expiration, one hour from current time
-        exp = Math.floor(Date.now() / 1000) + (60 * 60);
-      } else {
-        //  token expiration, 5min from current time
-        exp = Math.floor(Date.now() / 1000) + (5 * 60);
-      }
-    } else {
-      exp = Math.floor(Date.now() / 1000) + (60 * 60);
-    }
-    // get scopes based on user role
-    const scope = authScopes[role]();
+    //  token expiration, 7 days from current time
+    const refToken = createRefreshToken(id);
+    const accToken = createAccessToken(id, role);
     // returns token string
-    resolve(jwt.sign({
-      exp, id, role, scope,
-    }, process.env.JWT_SECRET));
+    resolve({ refToken, accToken });
   });
 }
 function validatePass(pass, user) {
@@ -66,9 +80,13 @@ const resolveFunctions = {
       return `${obj.firstName} ${obj.lastName}`;
     },
   },
+  Token: {
+    ttl(obj) {
+      return obj.ttl / 1000;
+    },
+  },
   Query: {
     getCurrentUser: async (object, params, ctx, resolveInfo) => {
-      console.log(ctx.req);
       if (!ctx.cypherParams) {
         return null;
       }
@@ -80,22 +98,55 @@ const resolveFunctions = {
     },
   },
   Mutation: {
+    refreshAccess: async (object, params, ctx, resolveInfo) => {
+      try {
+        const oldTokenString = ctx.req.cookies[cookieName];
+        const { id } = await verifyToken(oldTokenString);
+        return neode.cypher(
+          'MATCH (u:User {id: $id})-[rel:JWT]->(t: Token {token: $oldTokenString}) RETURN u', { id, oldTokenString },
+        ).then((result) => result.records[0].get('u').properties)
+          .then((user) => generateTokens(user))
+          .then((tokens) => {
+            const { refToken, accToken } = tokens;
+            // update the params so, cypher query contains token and exp date to insert in db
+            Object.assign(params, {
+              oldTokenString,
+              id,
+              refTokenString: refToken.token,
+              refTokenExp: refToken.exp,
+              accTokenObj: accToken,
+            });
+            // set refresh token in response header
+            ctx.res.cookie(cookieName, refToken.token, {
+              httpOnly: true,
+              // set cookie expires in response header
+              expires: new Date(refToken.exp * 1000), // * 1000 as time in milliseconds is required
+            });
+            return neo4jgraphql(object, params, ctx, resolveInfo);
+          });
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
     loginUser: async (object, params, ctx, resolveInfo) => neode.cypher(
       'MATCH (u:User {username: $username}) RETURN u', { username: params.username },
     )
       .then((result) => result.records[0].get('u').properties)
       .then((user) => validatePass(params.password, user))
-      .then((user) => createRefreshToken(user, false))
-      .then((token) => {
-        // update the params so, cypher query contains token and exp date
+      .then((user) => generateTokens(user))
+      .then((tokens) => {
+        const { refToken, accToken } = tokens;
+        // update the params so, cypher query contains token and exp date to insert in db
         Object.assign(params, {
-          token,
-          // get the expiry date from token by decoding it
-          exp: jwt.decode(token).exp,
+          refTokenString: refToken.token,
+          refTokenExp: refToken.exp,
+          accTokenObj: accToken,
         });
-        ctx.res.cookie(cookieName, token, {
+        // set refresh token in response header
+        ctx.res.cookie(cookieName, refToken.token, {
           httpOnly: true,
-          maxAge: 24 * 60 * 60 * 1000 * 7, // 7 days
+          // set cookie expires in response header
+          expires: new Date(refToken.exp * 1000), // * 1000 as time in milliseconds is required
         });
         return neo4jgraphql(object, params, ctx, resolveInfo);
       })

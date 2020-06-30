@@ -9,7 +9,7 @@ enum Role {
 
 type Token {
     token: String!
-    ttl: String!
+    ttl: Int!
 }
 
 type UserStory {
@@ -114,13 +114,24 @@ type Mutation {
     UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
     UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
 
-    loginUser(username: String!, password: String!): Token
+    loginUser(username: String!, password: String!): JSON
     @cypher(statement:"""
     MATCH(u:User{username: $username})
-    CREATE (u)-[rel:JWT]->(t: Token {token: $token})
+    CREATE (u)-[rel:JWT]->(t: Token {token: $refTokenString})
     WITH t
-    CALL apoc.ttl.expire(t, $exp, 's')
-    RETURN t
+    CALL apoc.ttl.expire(t, $refTokenExp, 's')
+    RETURN $accTokenObj
+    """)
+
+    refreshAccess: JSON
+    @cypher(statement:"""
+    MATCH(u:User{id: $id})-[rel:JWT]->(oldT: Token {token: $oldTokenString})
+    WITH u, oldT
+    DETACH DELETE oldT
+    CREATE (u)-[rel:JWT]->(newT: Token {token: $refTokenString})
+    WITH newT
+    CALL apoc.ttl.expire(newT, $refTokenExp, 's')
+    RETURN $accTokenObj
     """)
 
     resetPassword(username: String!, newPassword: String!): String

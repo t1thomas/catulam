@@ -54,6 +54,10 @@ export default new Vuex.Store({
       show: false,
       userStoryId: null,
     },
+    jwt: {
+      exp: null,
+      token: null,
+    },
     detDrawerUStory: {
       show: false,
       userStoryId: null,
@@ -70,6 +74,11 @@ export default new Vuex.Store({
     currPmProjects: [],
   },
   mutations: {
+    set_jwt(state, obj) {
+      // state.jwt.token = obj.token;
+      // state.jwt.exp = obj.exp;
+      state.jwt = { ...obj };
+    },
     set_proLstTabModel(state, obj) {
       state.proListTabsModel = obj;
     },
@@ -289,6 +298,19 @@ export default new Vuex.Store({
     snackBarOn({ commit }, payload) {
       commit('set_snackBarShow', payload);
     },
+    async loginUser({ commit }, payload) {
+      console.log('loginUserAction');
+      return Vue.$apolloClient.mutate({
+        mutation: gqlQueries.SignInUser,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { loginUser } = response.data;
+        commit('set_jwt', loginUser);
+      }).catch((error) => {
+        commit('set_snackBarShow', error);
+      });
+    },
     async fetchSprints({ commit }) {
       await Vue.$apolloClient.query({
         query: gqlQueries.Sprints,
@@ -369,6 +391,7 @@ export default new Vuex.Store({
         });
     },
     async fetchCurrentUser({ commit }) {
+      console.log('fetchCurrentUser');
       return Vue.$apolloClient.query({
         query: gqlQueries.CurrentUser,
         fetchPolicy: 'no-cache',
@@ -376,8 +399,7 @@ export default new Vuex.Store({
         const { getCurrentUser } = response.data;
         commit('set_currentUser', getCurrentUser);
         console.log(getCurrentUser);
-        return getCurrentUser;
-        // eslint-disable-next-line no-unused-vars
+        // return getCurrentUser;
       }).catch((error) => {
         commit('set_currentUser', null);
         commit('set_snackBarShow', error);
@@ -632,6 +654,7 @@ export default new Vuex.Store({
     },
   },
   getters: {
+    getJwt: (state) => state.jwt,
     // gets users apart from currentUser logged in
     getUserSelection: (state) => (id) => state.allUserList
       .filter((user) => user.id !== id)

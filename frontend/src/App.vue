@@ -56,7 +56,7 @@
 
 <script>
 
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import snackbar from './components/snackbar.vue';
 import navDrawItems from './components/appMain/navDrawItems.vue';
 
@@ -75,7 +75,11 @@ export default {
     },
     ...mapState({
       currentUser: 'currentUser',
+      jwt: 'jwt',
     }),
+    ...mapGetters([
+      'getJwt',
+    ]),
     fullName() {
       return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
     },
@@ -91,24 +95,32 @@ export default {
       ];
     },
   },
+  watch: {
+    async getJwt(value) {
+      if (value.exp !== null && value.token !== null) {
+        console.log('fetch user when we get JWT');
+        await this.$store.dispatch('fetchCurrentUser');
+      }
+    },
+  },
   async created() {
     this.$vuetify.theme.dark = true;
-    await this.$store.dispatch('fetchCurrentUser')
-      .catch((e) => {
-        this.snackBarOn({
-          message: e,
-          type: 'error',
-        });
-      });
+    // await this.$store.dispatch('fetchCurrentUser')
+    //   .catch((e) => {
+    //     this.snackBarOn({
+    //       message: e,
+    //       type: 'error',
+    //     });
+    //   });
     // console.log(this.currentUser);
-    if (this.currentUser) {
-      if (this.currentUser.role === 'pm') {
-        await this.fetchPmPros({ username: this.currentUser.username });
-      } else if (this.currentUser.role === 'dev') {
-        await this.fetchCurrentUserTasks({ username: this.currentUser.username });
-      }
-      await this.fetchAllUserList();
-    }
+    // if (this.currentUser) {
+    //   if (this.currentUser.role === 'pm') {
+    //     await this.fetchPmPros({ username: this.currentUser.username });
+    //   } else if (this.currentUser.role === 'dev') {
+    //     await this.fetchCurrentUserTasks({ username: this.currentUser.username });
+    //   }
+    //   await this.fetchAllUserList();
+    // }
   },
   methods: {
     ...mapActions([

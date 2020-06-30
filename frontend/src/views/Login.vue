@@ -64,11 +64,9 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
-import Vue from 'vue';
+import { mapActions, mapGetters } from 'vuex';
 import { validationMixin } from 'vuelidate';
 import { required } from 'vuelidate/lib/validators';
-import gqlQueries from '../graphql/gql-queries';
 
 export default {
   name: 'Login',
@@ -100,6 +98,10 @@ export default {
       }
       return errors;
     },
+    ...mapGetters([
+      'getCurrentUser',
+      'getJwt',
+    ]),
   },
   watch: {
     getCurrentUser(value) {
@@ -115,32 +117,13 @@ export default {
   },
   methods: {
     ...mapActions([
-      'fetchCurrentUser',
       'snackBarOn',
     ]),
-    onSubmit() {
+    async onSubmit() {
       this.$v.$touch();
       if (!this.$v.$invalid) {
-        this.loginUser();
+        await this.$store.dispatch('loginUser', { username: this.username, password: this.password });
       }
-    },
-    async loginUser() {
-      localStorage.setItem('catulam_token', '');
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SignInUser,
-        fetchPolicy: 'no-cache',
-        variables: { username: this.username, password: this.password },
-      }).then((response) => {
-        console.log(response);
-        const { token } = response.data.loginUser;
-        localStorage.setItem('catulam_token', token);
-        // this.$router.go();
-      }).catch((error) => {
-        this.snackBarOn({
-          message: error,
-          type: 'error',
-        });
-      });
     },
   },
 };

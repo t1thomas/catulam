@@ -26,6 +26,7 @@ export default {
   },
   mounted() {
     if (this.getCurrentUser === null) {
+      console.log('push to login');
       this.$router.push('/');
     }
   },

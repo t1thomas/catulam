@@ -1,11 +1,11 @@
 const express = require('express');
-const { ApolloServer, AuthenticationError, PubSub } = require('apollo-server-express');
+const { ApolloServer, PubSub } = require('apollo-server-express');
 const http = require('http');
 const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
 const driver = require('./neo4jDriver');
 const schema = require('./graphQL-schema');
+const verifyToken = require('./authenticate');
 // set environment variables from ../.env
 
 require('dotenv').config();
@@ -24,20 +24,22 @@ const corsOptions = {
 };
 // app.use(cors(corsOptions));
 
-async function verifyToken(token) {
-  if (token) {
-    try {
-      return await jwt.verify(token, process.env.JWT_SECRET);
-    } catch (e) {
-      throw new AuthenticationError('Please sign in again');
-    }
-  }
-}
+// async function verifyToken(token) {
+//   if (token) {
+//     try {
+//       return await jwt.verify(token, process.env.JWT_SECRET);
+//     } catch (e) {
+//       throw new AuthenticationError('Please sign in again');
+//     }
+//   } else {
+//     return null;
+//   }
+// }
 const pubSub = new PubSub();
 
 const server = new ApolloServer({
   schema,
-  context: async ({ req, res,connection }) => {
+  context: async ({ req, res, connection }) => {
     if (connection) {
       return { ...connection.context, pubSub };
     }
