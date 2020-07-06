@@ -1,7 +1,7 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import gqlQueries from '../graphql/gql-queries';
-import router from '../router/index';
+import { apolloClient } from '../vue-apollo';
 
 Vue.use(Vuex);
 
@@ -54,10 +54,10 @@ export default new Vuex.Store({
       show: false,
       userStoryId: null,
     },
-    jwt: {
-      exp: null,
-      token: null,
-    },
+    // jwt: {
+    //   exp: null,
+    //   token: null,
+    // },
     detDrawerUStory: {
       show: false,
       userStoryId: null,
@@ -74,11 +74,11 @@ export default new Vuex.Store({
     currPmProjects: [],
   },
   mutations: {
-    set_jwt(state, obj) {
-      // state.jwt.token = obj.token;
-      // state.jwt.exp = obj.exp;
-      state.jwt = { ...obj };
-    },
+    // set_jwt(state, obj) {
+    //   // state.jwt.token = obj.token;
+    //   // state.jwt.exp = obj.exp;
+    //   state.jwt = { ...obj };
+    // },
     set_proLstTabModel(state, obj) {
       state.proListTabsModel = obj;
     },
@@ -298,21 +298,21 @@ export default new Vuex.Store({
     snackBarOn({ commit }, payload) {
       commit('set_snackBarShow', payload);
     },
-    async loginUser({ commit }, payload) {
-      console.log('loginUserAction');
-      return Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SignInUser,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { loginUser } = response.data;
-        commit('set_jwt', loginUser);
-      }).catch((error) => {
-        commit('set_snackBarShow', error);
-      });
-    },
+    // async loginUser({ commit }, payload) {
+    //   console.log('loginUserAction');
+    //   apolloClient.mutate({
+    //     mutation: gqlQueries.SignInUser,
+    //     fetchPolicy: 'no-cache',
+    //     variables: payload,
+    //   }).then((response) => {
+    //     const { loginUser } = response.data;
+    //     commit('set_jwt', loginUser);
+    //   }).catch((error) => {
+    //     commit('set_snackBarShow', error);
+    //   });
+    // },
     async fetchSprints({ commit }) {
-      await Vue.$apolloClient.query({
+      await apolloClient.query({
         query: gqlQueries.Sprints,
         fetchPolicy: 'no-cache',
       }).then((response) => {
@@ -323,7 +323,7 @@ export default new Vuex.Store({
       });
     },
     async fetchSPlannerData({ commit }, id) {
-      await Vue.$apolloClient.query({
+      await apolloClient.query({
         query: gqlQueries.S_PLANNER_DATA,
         fetchPolicy: 'no-cache',
         variables: { id },
@@ -335,7 +335,7 @@ export default new Vuex.Store({
       });
     },
     async fetchCurrProElements({ commit }, id) {
-      await Vue.$apolloClient.query({
+      await apolloClient.query({
         query: gqlQueries.CURR_PROJECT_ELEMENTS,
         fetchPolicy: 'no-cache',
         variables: { id },
@@ -353,7 +353,7 @@ export default new Vuex.Store({
         });
     },
     async fetchBackLogData({ commit }, id) {
-      await Vue.$apolloClient.query({
+      await apolloClient.query({
         query: gqlQueries.BACKLOG_DATA,
         fetchPolicy: 'no-cache',
         variables: { id },
@@ -372,7 +372,7 @@ export default new Vuex.Store({
         });
     },
     async fetchSprintBoardData({ commit }, id) {
-      await Vue.$apolloClient.query({
+      await apolloClient.query({
         query: gqlQueries.SPRINT_BOARD_DATA,
         fetchPolicy: 'no-cache',
         variables: { id },
@@ -392,7 +392,7 @@ export default new Vuex.Store({
     },
     async fetchCurrentUser({ commit }) {
       console.log('fetchCurrentUser');
-      return Vue.$apolloClient.query({
+      apolloClient.query({
         query: gqlQueries.CurrentUser,
         fetchPolicy: 'no-cache',
       }).then((response) => {
@@ -405,21 +405,24 @@ export default new Vuex.Store({
         commit('set_snackBarShow', error);
       });
     },
+    removeUser({ commit }) {
+      // set current user to null
+      commit('set_currentUser', null);
+      // and force user to login
+      Vue.$router.push('/');
+    },
     async logoutUser({ commit }) {
-      /* remove token right away, s even if the database
-      operation fails the client no longer has a token
-       */
-      const tokenq = localStorage.getItem('catulam_token');
-      localStorage.setItem('catulam_token', '');
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.DeleteToken,
+      await apolloClient.mutate({
+        mutation: gqlQueries.logout,
         fetchPolicy: 'no-cache',
-        variables: { token: tokenq },
       }).then(() => {
-        Vue.$apolloClient.resetStore();
         commit('set_currentUser', null);
-        router.push('/');
+        // and force user to login
+        Vue.$router.push('/');
       }).catch((error) => {
+        commit('set_currentUser', null);
+        // and force user to login
+        Vue.$router.push('/');
         commit('set_snackBarShow', error);
       });
     },
@@ -427,13 +430,13 @@ export default new Vuex.Store({
       /* Delete temp token which has a 5min lifespan */
       const token1 = localStorage.getItem('catulam_token');
       localStorage.setItem('catulam_token', '');
-      await Vue.$apolloClient.mutate({
+      await apolloClient.mutate({
         mutation: gqlQueries.DeleteToken,
         fetchPolicy: 'no-cache',
         variables: { token: token1 },
       });
       /* -------------------------------------------- */
-      await Vue.$apolloClient.mutate({
+      await apolloClient.mutate({
         mutation: gqlQueries.RESET_PASS,
         fetchPolicy: 'no-cache',
         variables: payload,
@@ -451,7 +454,7 @@ export default new Vuex.Store({
       });
     },
     async fetchCurrTicket({ commit }, id) {
-      await Vue.$apolloClient.query({
+      await apolloClient.query({
         query: gqlQueries.CURRENT_TICKET,
         fetchPolicy: 'no-cache',
         variables: { id },
@@ -469,7 +472,7 @@ export default new Vuex.Store({
         });
     },
     async fetchAllUserList({ commit }, id) {
-      await Vue.$apolloClient.query({
+      await apolloClient.query({
         query: gqlQueries.ALL_USERS,
         fetchPolicy: 'no-cache',
         variables: { id },
@@ -488,7 +491,7 @@ export default new Vuex.Store({
         });
     },
     async updateTicketHours({ commit }, payload) {
-      await Vue.$apolloClient.mutate({
+      await apolloClient.mutate({
         mutation: gqlQueries.UPDATE_TICKET_ETIME,
         fetchPolicy: 'no-cache',
         variables: payload,
@@ -504,7 +507,7 @@ export default new Vuex.Store({
       });
     },
     async updateTicketAssignee({ commit }, payload) {
-      await Vue.$apolloClient.mutate({
+      await apolloClient.mutate({
         mutation: gqlQueries.UPDATE_TICKET_ASSIGNEE,
         name: 'update',
         fetchPolicy: 'no-cache',
@@ -522,7 +525,7 @@ export default new Vuex.Store({
       });
     },
     async fetchPmPros({ commit }, payload) {
-      await Vue.$apolloClient.query({
+      await apolloClient.query({
         query: gqlQueries.PM_PROJECTS,
         fetchPolicy: 'no-cache',
         variables: payload,
@@ -538,7 +541,7 @@ export default new Vuex.Store({
       });
     },
     async fetchCurrentUserTasks({ commit }, payload) {
-      return Vue.$apolloClient.query({
+      apolloClient.query({
         query: gqlQueries.USER_TASKS,
         variables: payload,
         fetchPolicy: 'no-cache',
@@ -558,7 +561,7 @@ export default new Vuex.Store({
       if (!payload.show) {
         commit('set_sPlanShow', payload);
       } else {
-        await Vue.$apolloClient.query({
+        await apolloClient.query({
           query: gqlQueries.S_PLANNER_DATA,
           fetchPolicy: 'no-cache',
           variables: { id: payload.proId },

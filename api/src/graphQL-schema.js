@@ -52,6 +52,7 @@ function createRefreshToken(id) {
 
 function generateTokens(user) {
   return new Promise((resolve) => {
+    console.log('generateTokens');
     // gather id and role property from user object
     const { id, role } = user;
     //  token expiration, 7 days from current time
@@ -63,6 +64,7 @@ function generateTokens(user) {
 }
 function validatePass(pass, user) {
   return new Promise((resolve, reject) => {
+    console.log('validatePass');
     bcrypt.compare(pass, user.password, (error, res) => {
       if (error || res === false) {
         reject(new Error());
@@ -87,20 +89,29 @@ const resolveFunctions = {
   },
   Query: {
     getCurrentUser: async (object, params, ctx, resolveInfo) => {
-      if (!ctx.cypherParams) {
+      console.log('getCurrentUser');
+      const accessToken = ctx.req.headers.authorization;
+      if (!accessToken) {
         return null;
       }
-      try {
-        return neo4jgraphql(object, params, ctx, resolveInfo);
-      } catch (e) {
-        throw new Error('Unable to authenticate, Sign in again ');
-      }
+      const { id } = await verifyToken(accessToken);
+      // update the params so, cypher query contains id extracted from access token.
+      Object.assign(params, {
+        id,
+      });
+      return neo4jgraphql(object, params, ctx, resolveInfo);
     },
   },
   Mutation: {
     refreshAccess: async (object, params, ctx, resolveInfo) => {
+      console.log('refreshAccess');
       try {
+        // get refresh token from cookie
         const oldTokenString = ctx.req.cookies[cookieName];
+        if (oldTokenString === undefined) {
+          // return nothing (silent refresh) if no token was found
+          return null;
+        }
         const { id } = await verifyToken(oldTokenString);
         return neode.cypher(
           'MATCH (u:User {id: $id})-[rel:JWT]->(t: Token {token: $oldTokenString}) RETURN u', { id, oldTokenString },
@@ -125,6 +136,35 @@ const resolveFunctions = {
             return neo4jgraphql(object, params, ctx, resolveInfo);
           });
       } catch (e) {
+        console.log(e);
+        throw new Error(e);
+      }
+    },
+    logout: async (object, params, ctx, resolveInfo) => {
+      console.log('logout');
+      try {
+        // get refresh token from cookie
+        const oldTokenString = ctx.req.cookies[cookieName];
+        if (oldTokenString === undefined) {
+          console.log('logout undefined');
+          // return nothing (silent refresh) if no token was found
+          return false;
+        }
+        const { id } = await verifyToken(oldTokenString);
+        Object.assign(params, {
+          oldTokenString,
+          id,
+        });
+        // reset the cookie in response as null
+        ctx.res.cookie(cookieName, null, {
+          httpOnly: true,
+          // set cookie expires in response header
+          expires: new Date('1970-01-01T00:00:00'), // date in the past
+        });
+        // remove the token from db
+        return neo4jgraphql(object, params, ctx, resolveInfo);
+      } catch (e) {
+        console.log(e);
         throw new Error(e);
       }
     },
@@ -154,6 +194,7 @@ const resolveFunctions = {
         console.log(e);
         throw new Error(e);
       }),
+
     StartToSprint: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);

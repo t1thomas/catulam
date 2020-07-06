@@ -16,25 +16,12 @@ const app = express();
 app.use(bodyParser.json());
 
 app.use(cookieParser());
-// verify JWT sent from client
 // enable cors
 const corsOptions = {
   origin: 'http://localhost:8080',
   credentials: true, // <-- REQUIRED backend setting
 };
-// app.use(cors(corsOptions));
 
-// async function verifyToken(token) {
-//   if (token) {
-//     try {
-//       return await jwt.verify(token, process.env.JWT_SECRET);
-//     } catch (e) {
-//       throw new AuthenticationError('Please sign in again');
-//     }
-//   } else {
-//     return null;
-//   }
-// }
 const pubSub = new PubSub();
 
 const server = new ApolloServer({
@@ -45,7 +32,6 @@ const server = new ApolloServer({
     }
     return {
       driver,
-      cypherParams: await verifyToken(req.headers.authorization),
       req,
       res,
       pubSub,

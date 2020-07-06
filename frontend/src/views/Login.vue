@@ -67,6 +67,8 @@
 import { mapActions, mapGetters } from 'vuex';
 import { validationMixin } from 'vuelidate';
 import { required } from 'vuelidate/lib/validators';
+import { onLogin } from '../vue-apollo';
+import gqlQueries from '../graphql/gql-queries';
 
 export default {
   name: 'Login',
@@ -110,11 +112,6 @@ export default {
       }
     },
   },
-  mounted() {
-    if (this.getCurrentUser !== null) {
-      this.$router.push('/home');
-    }
-  },
   methods: {
     ...mapActions([
       'snackBarOn',
@@ -122,7 +119,21 @@ export default {
     async onSubmit() {
       this.$v.$touch();
       if (!this.$v.$invalid) {
-        await this.$store.dispatch('loginUser', { username: this.username, password: this.password });
+        // await this.$store.dispatch('loginUser',
+        // { username: this.username, password: this.password });
+        await this.$apollo.mutate({
+          mutation: gqlQueries.SignInUser,
+          fetchPolicy: 'no-cache',
+          variables: { username: this.username, password: this.password },
+        }).then((response) => {
+          const { loginUser } = response.data;
+          console.log(loginUser);
+          onLogin(this.$apollo.provider.defaultClient, loginUser.token);
+          this.$router.go();
+        }).catch((error) => {
+          console.error(error);
+          // commit('set_snackBarShow', error);
+        });
       }
     },
   },

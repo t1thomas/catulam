@@ -94,7 +94,7 @@ type Sprint {
 
 type Query {
     getCurrentUser: User @cypher(statement: """
-    MATCH (u:User {id: $cypherParams.id})
+    MATCH (u:User {id: $id})
     RETURN u
     """)
     UserStory: [UserStory] @hasScope(scopes:["UserStory:read"])
@@ -121,6 +121,14 @@ type Mutation {
     WITH t
     CALL apoc.ttl.expire(t, $refTokenExp, 's')
     RETURN $accTokenObj
+    """)
+
+    logout: Boolean
+    @cypher(statement:"""
+    OPTIONAL MATCH(u:User{id: $id})-[rel:JWT]->(oldT: Token {token: $oldTokenString})
+    WITH u, oldT, EXISTS ((u)-[rel]->(oldT)) AS is_exists
+    DETACH DELETE oldT
+    RETURN is_exists
     """)
 
     refreshAccess: JSON

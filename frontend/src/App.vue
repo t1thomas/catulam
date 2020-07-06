@@ -57,8 +57,10 @@
 <script>
 
 import { mapActions, mapGetters, mapState } from 'vuex';
+import { onLogout } from './vue-apollo';
 import snackbar from './components/snackbar.vue';
 import navDrawItems from './components/appMain/navDrawItems.vue';
+
 
 export default {
   name: 'LayoutDefault',
@@ -105,6 +107,7 @@ export default {
   },
   async created() {
     this.$vuetify.theme.dark = true;
+    await this.fetchUser();
     // await this.$store.dispatch('fetchCurrentUser')
     //   .catch((e) => {
     //     this.snackBarOn({
@@ -113,14 +116,6 @@ export default {
     //     });
     //   });
     // console.log(this.currentUser);
-    // if (this.currentUser) {
-    //   if (this.currentUser.role === 'pm') {
-    //     await this.fetchPmPros({ username: this.currentUser.username });
-    //   } else if (this.currentUser.role === 'dev') {
-    //     await this.fetchCurrentUserTasks({ username: this.currentUser.username });
-    //   }
-    //   await this.fetchAllUserList();
-    // }
   },
   methods: {
     ...mapActions([
@@ -131,7 +126,18 @@ export default {
       'snackBarOn',
     ]),
     async logout() {
-      await this.logoutUser();
+      await onLogout(this.$apollo.provider.defaultClient);
+    },
+    async fetchUser() {
+      await this.$store.dispatch('fetchCurrentUser');
+      if (this.currentUser !== null) {
+        if (this.currentUser.role === 'pm') {
+          await this.fetchPmPros({ username: this.currentUser.username });
+        } else if (this.currentUser.role === 'dev') {
+          await this.fetchCurrentUserTasks({ username: this.currentUser.username });
+        }
+        await this.fetchAllUserList();
+      }
     },
   },
 };

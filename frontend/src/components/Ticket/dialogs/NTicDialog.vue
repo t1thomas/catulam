@@ -86,7 +86,6 @@
 </template>
 <script>
 import { mapActions, mapState } from 'vuex';
-import Vue from 'vue';
 import gqlQueries from '../../../graphql/gql-queries';
 
 export default {
@@ -131,7 +130,7 @@ export default {
     async onCreate() {
       if (this.$refs.ticForm.validate()) {
         this.setSaving();
-        await Vue.$apolloClient.mutate({
+        await this.$apollo.mutate({
           mutation: gqlQueries.CREATE_TICKET,
           fetchPolicy: 'no-cache',
           variables: {

@@ -81,7 +81,7 @@
                 </v-btn>
               </v-col>
               <v-col cols="12">
-                <mem-list @savingAnimation="setSaving"/>
+                <mem-list @savingAnimation="setSaving" />
               </v-col>
             </v-row>
           </v-form>
@@ -103,7 +103,6 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
-import Vue from 'vue';
 import currMemList from './currMemList.vue';
 import gqlQueries from '../../../../graphql/gql-queries';
 
@@ -156,7 +155,7 @@ export default {
     },
     async addMembers() {
       this.setSaving();
-      await Vue.$apolloClient.mutate({
+      await this.$apollo.mutate({
         mutation: gqlQueries.ADD_PROJECT_MEMBER,
         fetchPolicy: 'no-cache',
         variables: {

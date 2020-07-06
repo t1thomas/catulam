@@ -63,7 +63,6 @@
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import Vue from 'vue';
 import gqlQueries from '../../../graphql/gql-queries';
 
 export default {
@@ -178,7 +177,7 @@ export default {
       this.USDialogSwitcher();
     },
     async dataMutation(payload) {
-      await Vue.$apolloClient.mutate({
+      await this.$apollo.mutate({
         mutation: gqlQueries.SwitchUserStory.USTORY_TICKET_SWITCH,
         fetchPolicy: 'no-cache',
         variables: payload,

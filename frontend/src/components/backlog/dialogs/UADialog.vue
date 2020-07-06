@@ -78,7 +78,6 @@
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import Vue from 'vue';
 import gqlQueries from '../../../graphql/gql-queries';
 
 export default {
@@ -220,7 +219,7 @@ export default {
     async sprintSwitch() {
       switch (true) {
         case this.selectedOption.value === 0:
-          await Vue.$apolloClient.mutate({
+          await this.$apollo.mutate({
             mutation: gqlQueries.SwitchStartSprint.TIC_REMOVE_SPRINT,
             fetchPolicy: 'no-cache',
             variables: {
@@ -249,7 +248,7 @@ export default {
             });
           break;
         case this.removedFrom.sprintId !== this.selectedOption.id:
-          await Vue.$apolloClient.mutate({
+          await this.$apollo.mutate({
             mutation: gqlQueries.SwitchStartSprint.TIC_CHANGE_SPRINT,
             fetchPolicy: 'no-cache',
             variables: {
@@ -286,7 +285,7 @@ export default {
       if (this.selectedOption.value === 0) {
         this.switchBack();
       } else {
-        await Vue.$apolloClient.mutate({
+        await this.$apollo.mutate({
           mutation: gqlQueries.SwitchStartSprint.TIC_ADD_SPRINT,
           variables: {
             project: { id: this.proId },
@@ -360,7 +359,7 @@ export default {
       }
     },
     async dataMutation(payload) {
-      await Vue.$apolloClient.mutate({
+      await this.$apollo.mutate({
         mutation: gqlQueries.SwitchUnassigned.UNASSIGNED_TICK_SWITCH,
         fetchPolicy: 'no-cache',
         variables: payload,

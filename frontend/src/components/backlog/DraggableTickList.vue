@@ -29,7 +29,6 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import draggable from 'vuedraggable';
-import Vue from 'vue';
 import ticketCardSlim from '../Ticket/card/ticketCardSlim.vue';
 import gqlQueries from '../../graphql/gql-queries';
 
@@ -132,7 +131,7 @@ export default {
       this.USDialogSwitcher();
     },
     async sprintToStart(ticketId, sprintId, evt) {
-      await Vue.$apolloClient.mutate({
+      await this.$apollo.mutate({
         mutation: gqlQueries.SwitchStartSprint.TIC_REMOVE_SPRINT,
         fetchPolicy: 'no-cache',
         variables: {
@@ -160,7 +159,7 @@ export default {
       });
     },
     async startToSprint(ticketId, sprintId, evt) {
-      await Vue.$apolloClient.mutate({
+      await this.$apollo.mutate({
         mutation: gqlQueries.SwitchStartSprint.TIC_ADD_SPRINT,
         variables: {
           project: { id: this.proId },

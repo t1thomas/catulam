@@ -43,7 +43,7 @@ export default {
   },
   methods: {
     async print() {
-      // await Vue.$apolloClient.query({
+      // await this.$apollo.query({
       //   query: gqlQueries.ALL_USERS,
       //   fetchPolicy: 'no-cache',
       // }).then((response) => {

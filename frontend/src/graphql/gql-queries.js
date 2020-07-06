@@ -410,10 +410,8 @@ const gqlQueries = {
       loginUser(username: $username, password: $password)
     }`,
   // deletetoken is auto gen
-  DeleteToken: gql`mutation($token: String!) {
-    DeleteToken(token: $token){
-      token
-    }
+  logout: gql`mutation {
+    logout
   }
   `,
   USWithTickIds: gql`query{

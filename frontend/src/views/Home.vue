@@ -1,5 +1,5 @@
 <template>
-  <v-content>
+  <v-content v-if="getCurrentUser !== null">
     <DevHome v-if="userType==='dev'" />
     <PMHome v-if="userType==='pm'" />
   </v-content>
@@ -24,11 +24,11 @@ export default {
       return this.getCurrentUser.role;
     },
   },
-  mounted() {
-    if (this.getCurrentUser === null) {
-      console.log('push to login');
-      this.$router.push('/');
-    }
-  },
+  // mounted() {
+  //   if (this.getCurrentUser === null) {
+  //     console.log('push to login');
+  //     this.$router.push('/');
+  //   }
+  // },
 };
 </script>

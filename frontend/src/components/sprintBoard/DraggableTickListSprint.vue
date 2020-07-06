@@ -30,7 +30,6 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import draggable from 'vuedraggable';
-import Vue from 'vue';
 import ticketCard from '../Ticket/card/ticketCard.vue';
 import gqlQueries from '../../graphql/gql-queries';
 
@@ -110,7 +109,7 @@ export default {
       this.sBoardClear();
     },
     async moveToToDo() {
-      await Vue.$apolloClient.mutate({
+      await this.$apollo.mutate({
         mutation: gqlQueries.sBoardTicMove.MOVE_TO_TODO,
         fetchPolicy: 'no-cache',
         variables: {
@@ -138,7 +137,7 @@ export default {
       });
     },
     async moveToDoing() {
-      await Vue.$apolloClient.mutate({
+      await this.$apollo.mutate({
         mutation: gqlQueries.sBoardTicMove.MOVE_TO_DOING,
         fetchPolicy: 'no-cache',
         variables: {
@@ -166,7 +165,7 @@ export default {
       });
     },
     async moveToDone() {
-      await Vue.$apolloClient.mutate({
+      await this.$apollo.mutate({
         mutation: gqlQueries.sBoardTicMove.MOVE_TO_DONE,
         fetchPolicy: 'no-cache',
         variables: {

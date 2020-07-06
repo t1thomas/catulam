@@ -49,7 +49,6 @@
 
 <script>
 import { mapState } from 'vuex';
-import Vue from 'vue';
 import gqlQueries from '../../../graphql/gql-queries';
 
 export default {
@@ -68,7 +67,7 @@ export default {
       this.$store.dispatch('delUSDialogShow', { show: false });
     },
     async onDelete() {
-      await Vue.$apolloClient.mutate({
+      await this.$apollo.mutate({
         mutation: gqlQueries.DELETE_USER_STORY,
         fetchPolicy: 'no-cache',
         variables: { id: this.userStoryId },
