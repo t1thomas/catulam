@@ -1,5 +1,5 @@
 const express = require('express');
-const { ApolloServer, PubSub } = require('apollo-server-express');
+const { ApolloServer } = require('apollo-server-express');
 const http = require('http');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
@@ -22,27 +22,32 @@ const corsOptions = {
   credentials: true, // <-- REQUIRED backend setting
 };
 
-const pubSub = new PubSub();
-
 const server = new ApolloServer({
-  schema,
   context: async ({ req, res, connection }) => {
     if (connection) {
-      return { ...connection.context, pubSub };
+      const { token } = connection.context;
+      console.log(token);
+      return {
+        currentUser: await verifyToken(token),
+      };
     }
+    const token = req.headers.authorization;
     return {
+      currentUser: await verifyToken(token),
       driver,
       req,
       res,
-      pubSub,
     };
   },
+  schema,
   subscriptions: {
     onConnect: async (connectionParams) => {
-      if (connectionParams.authToken) {
-        return { currentUser: await verifyToken(connectionParams.authToken) };
-      }
-      throw new Error('Missing auth token!');
+      const token = connectionParams.Authorization;
+      return { token };
+      // if (connectionParams.Authorization) {
+      //
+      // }
+      // throw new Error('Missing auth token!');
     },
   },
 });

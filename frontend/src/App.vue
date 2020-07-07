@@ -56,7 +56,7 @@
 
 <script>
 
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import { onLogout } from './vue-apollo';
 import snackbar from './components/snackbar.vue';
 import navDrawItems from './components/appMain/navDrawItems.vue';
@@ -75,12 +75,8 @@ export default {
     gravatar() {
       return `https://gravatar.com/avatar/${this.currentUser.avatar}?d=identicon`;
     },
-    ...mapState({
-      currentUser: 'currentUser',
-      jwt: 'jwt',
-    }),
-    ...mapGetters([
-      'getJwt',
+    ...mapState([
+      'currentUser',
     ]),
     fullName() {
       return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
@@ -98,24 +94,20 @@ export default {
     },
   },
   watch: {
-    async getJwt(value) {
-      if (value.exp !== null && value.token !== null) {
-        console.log('fetch user when we get JWT');
-        await this.$store.dispatch('fetchCurrentUser');
+    async currentUser(value) {
+      if (value !== null) {
+        if (this.currentUser.role === 'pm') {
+          await this.fetchPmPros({ username: this.currentUser.username });
+        } else if (this.currentUser.role === 'dev') {
+          await this.fetchCurrentUserTasks({ username: this.currentUser.username });
+        }
+        await this.fetchAllUserList();
       }
     },
   },
   async created() {
     this.$vuetify.theme.dark = true;
-    await this.fetchUser();
-    // await this.$store.dispatch('fetchCurrentUser')
-    //   .catch((e) => {
-    //     this.snackBarOn({
-    //       message: e,
-    //       type: 'error',
-    //     });
-    //   });
-    // console.log(this.currentUser);
+    await this.$store.dispatch('fetchCurrentUser');
   },
   methods: {
     ...mapActions([
@@ -127,17 +119,6 @@ export default {
     ]),
     async logout() {
       await onLogout(this.$apollo.provider.defaultClient);
-    },
-    async fetchUser() {
-      await this.$store.dispatch('fetchCurrentUser');
-      if (this.currentUser !== null) {
-        if (this.currentUser.role === 'pm') {
-          await this.fetchPmPros({ username: this.currentUser.username });
-        } else if (this.currentUser.role === 'dev') {
-          await this.fetchCurrentUserTasks({ username: this.currentUser.username });
-        }
-        await this.fetchAllUserList();
-      }
     },
   },
 };

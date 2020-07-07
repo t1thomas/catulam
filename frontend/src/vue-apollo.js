@@ -166,12 +166,11 @@ const errorLink = onError(({
         // Retry last failed request
         forward(operation).subscribe(subscriber);
       }).catch(async (error) => {
-        // If request for refresh token fails, we set currentUser state to null
-        await Vue.$store.dispatch('removeUser');
+        // If request for refresh token fails,
+        // we set currentUser state to null
+        // and force user to login page
         // and remove invalid access token
-        if (typeof localStorage !== 'undefined') {
-          localStorage.removeItem(AUTH_TOKEN);
-        }
+        await Vue.$store.dispatch('removeUser');
         observer.error(error);
       });
     });

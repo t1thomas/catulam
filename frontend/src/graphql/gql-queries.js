@@ -1,6 +1,10 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
+  REFRESH_TOKEN: gql`
+    mutation {
+      refreshAccess
+    }`,
   SUB_BACKLOG_UPDATE: gql`
     subscription($proId: String!) {
       update(proId: $proId)
@@ -401,11 +405,6 @@ const gqlQueries = {
         title
       }
     }`,
-  RESET_PASS: gql`mutation($username: String!, $newPassword: String!) {
-    resetPassword(username: $username, newPassword: $newPassword) {
-      token
-    }
-  }`,
   SignInUser: gql`mutation($username: String!, $password: String!) {
       loginUser(username: $username, password: $password)
     }`,
@@ -429,7 +428,6 @@ const gqlQueries = {
       fullName
       username
       email
-      passwordUpdate
       avatar
       role
     }

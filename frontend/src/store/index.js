@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
+import jwtDecode from 'jwt-decode';
 import gqlQueries from '../graphql/gql-queries';
 import { apolloClient } from '../vue-apollo';
 
@@ -72,6 +73,7 @@ export default new Vuex.Store({
     currProElements: null,
     allUserList: null,
     currPmProjects: [],
+    refreshTask: null,
   },
   mutations: {
     // set_jwt(state, obj) {
@@ -284,8 +286,48 @@ export default new Vuex.Store({
         // state.detailsDrawer.ticketId = obj.ticketId;
       }
     },
+    set_RefreshTask(state, obj) {
+      if (obj === null) {
+        state.refreshTask = null;
+      } else {
+        state.refreshTask = obj;
+      }
+    },
   },
   actions: {
+    async getRefreshTokens({ dispatch, commit }) {
+      await apolloClient.mutate({
+        mutation: gqlQueries.REFRESH_TOKEN,
+        fetchPolicy: 'no-cache',
+      }).then((response) => {
+        const { token } = response.data.refreshAccess;
+        // store token in local storage
+        if (typeof localStorage !== 'undefined') {
+          localStorage.setItem('catulam_token', token);
+        }
+        // update currentUser State
+        dispatch('fetchCurrentUser');
+      }).catch((error) => {
+        commit('set_snackBarShow', error);
+      });
+    },
+    autoRefresh({ dispatch, commit }) {
+      if (typeof localStorage !== 'undefined') {
+        // get token stored in localStorage and decode expiry
+        const token = localStorage.getItem('catulam_token');
+        const { exp } = jwtDecode(token);
+        // get Datetime 15 min before token expiry
+        const MinFromExp = Vue.$moment.unix(exp).subtract(15, 'minutes');
+        // get current DateTime
+        const now = Vue.$moment();
+        // Calculate difference in milliseconds
+        const diff = MinFromExp.diff(now, 'milliseconds');
+        // setTimeout to request for refresh token 15min before exp
+        const refreshTask = setTimeout(() => dispatch('getRefreshTokens'), diff);
+        // commit task to store, so it can be cleared on logout
+        commit('set_RefreshTask', refreshTask);
+      }
+    },
     showEditMemDialog({ commit }, obj) {
       commit('set_editMemDialog', obj);
     },
@@ -311,17 +353,17 @@ export default new Vuex.Store({
     //     commit('set_snackBarShow', error);
     //   });
     // },
-    async fetchSprints({ commit }) {
-      await apolloClient.query({
-        query: gqlQueries.Sprints,
-        fetchPolicy: 'no-cache',
-      }).then((response) => {
-        const { Sprint } = response.data;
-        commit('set_sprintList', Sprint);
-      }).catch((error) => {
-        commit('set_snackBarShow', error);
-      });
-    },
+    // async fetchSprints({ commit }) {
+    //   await apolloClient.query({
+    //     query: gqlQueries.Sprints,
+    //     fetchPolicy: 'no-cache',
+    //   }).then((response) => {
+    //     const { Sprint } = response.data;
+    //     commit('set_sprintList', Sprint);
+    //   }).catch((error) => {
+    //     commit('set_snackBarShow', error);
+    //   });
+    // },
     async fetchSPlannerData({ commit }, id) {
       await apolloClient.query({
         query: gqlQueries.S_PLANNER_DATA,
@@ -390,7 +432,7 @@ export default new Vuex.Store({
           commit('set_snackBarShow', 'Unable to fetch Sprint Data project');
         });
     },
-    async fetchCurrentUser({ commit }) {
+    async fetchCurrentUser({ commit, dispatch }) {
       console.log('fetchCurrentUser');
       apolloClient.query({
         query: gqlQueries.CurrentUser,
@@ -399,7 +441,7 @@ export default new Vuex.Store({
         const { getCurrentUser } = response.data;
         commit('set_currentUser', getCurrentUser);
         console.log(getCurrentUser);
-        // return getCurrentUser;
+        dispatch('autoRefresh');
       }).catch((error) => {
         commit('set_currentUser', null);
         commit('set_snackBarShow', error);
@@ -410,6 +452,10 @@ export default new Vuex.Store({
       commit('set_currentUser', null);
       // and force user to login
       Vue.$router.push('/');
+      // and remove invalid access token
+      if (typeof localStorage !== 'undefined') {
+        localStorage.removeItem('catulam');
+      }
     },
     async logoutUser({ commit }) {
       await apolloClient.mutate({
@@ -417,6 +463,7 @@ export default new Vuex.Store({
         fetchPolicy: 'no-cache',
       }).then(() => {
         commit('set_currentUser', null);
+        commit('set_RefreshTask', null);
         // and force user to login
         Vue.$router.push('/');
       }).catch((error) => {
@@ -424,33 +471,7 @@ export default new Vuex.Store({
         // and force user to login
         Vue.$router.push('/');
         commit('set_snackBarShow', error);
-      });
-    },
-    async resetPass({ commit }, payload) {
-      /* Delete temp token which has a 5min lifespan */
-      const token1 = localStorage.getItem('catulam_token');
-      localStorage.setItem('catulam_token', '');
-      await apolloClient.mutate({
-        mutation: gqlQueries.DeleteToken,
-        fetchPolicy: 'no-cache',
-        variables: { token: token1 },
-      });
-      /* -------------------------------------------- */
-      await apolloClient.mutate({
-        mutation: gqlQueries.RESET_PASS,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { resetPassword } = response.data;
-        localStorage.setItem('catulam_token', resetPassword.token);
-        // router.push('/backlog');
-        /* reloads the vue instance causing the created hook at main.js to
-           run which in turn sets the current user state
-        */
-      }).catch((error) => {
-        localStorage.setItem('catulam_token', '');
-        commit('set_snackBarShow', error);
-        commit('set_currentUser', null);
+        commit('set_RefreshTask', null);
       });
     },
     async fetchCurrTicket({ commit }, id) {
@@ -472,6 +493,7 @@ export default new Vuex.Store({
         });
     },
     async fetchAllUserList({ commit }, id) {
+      console.log('fetchAllUserList');
       await apolloClient.query({
         query: gqlQueries.ALL_USERS,
         fetchPolicy: 'no-cache',
@@ -657,7 +679,6 @@ export default new Vuex.Store({
     },
   },
   getters: {
-    getJwt: (state) => state.jwt,
     // gets users apart from currentUser logged in
     getUserSelection: (state) => (id) => state.allUserList
       .filter((user) => user.id !== id)

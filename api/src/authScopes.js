@@ -1,6 +1,6 @@
 module.exports = {
-  pm: () => ['UserStory:read', 'Project:read', 'Ticket:read', 'Sprint:read', 'User:read'],
-  dev: () => ['UserStory:read', 'Project:read', 'Ticket:read', 'Sprint:read', 'User:read'],
+  pm: () => ['UserStory:Read', 'UserStory:Create', 'Project:Read', 'Ticket:Read', 'Ticket:Edit', 'Ticket:Create', 'Sprint:Edit', 'Sprint:Create', 'Sprint:Read', 'User:Read', 'Project:Create', 'Project:EditMembers'],
+  dev: () => ['UserStory:Read', 'UserStory:Create', 'Project:Read', 'Ticket:Read', 'Ticket:Edit', 'Ticket:Create', 'Sprint:Edit', 'Sprint:Read', 'User:Read'],
   admin: () => ['User:Create'],
 };
 // return authentication scopes to be added to JWT for each user role type.
