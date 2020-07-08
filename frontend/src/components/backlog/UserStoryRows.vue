@@ -257,7 +257,6 @@ export default {
         await self.updateSPlanData();
       },
       error(error) {
-        console.log(error);
         self.snackBarOn({
           message: error,
           type: 'error',

@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 // enable cors
 const corsOptions = {
-  origin: 'http://localhost:8080',
+  origin: 'http://localhost',
   credentials: true, // <-- REQUIRED backend setting
 };
 
@@ -44,10 +44,6 @@ const server = new ApolloServer({
     onConnect: async (connectionParams) => {
       const token = connectionParams.Authorization;
       return { token };
-      // if (connectionParams.Authorization) {
-      //
-      // }
-      // throw new Error('Missing auth token!');
     },
   },
 });

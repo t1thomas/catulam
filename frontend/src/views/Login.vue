@@ -127,12 +127,13 @@ export default {
           variables: { username: this.username, password: this.password },
         }).then((response) => {
           const { loginUser } = response.data;
-          console.log(loginUser);
           onLogin(this.$apollo.provider.defaultClient, loginUser.token);
           this.$router.go();
         }).catch((error) => {
-          console.error(error);
-          // commit('set_snackBarShow', error);
+          this.$store.dispatch('snackBarOn', {
+            message: error,
+            type: 'error',
+          });
         });
       }
     },

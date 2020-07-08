@@ -104,26 +104,29 @@ import Vue from 'vue';
 import VueApollo from 'vue-apollo';
 import { createApolloClient, restartWebsockets } from 'vue-cli-plugin-apollo/graphql-client';
 import { onError } from 'apollo-link-error';
-// eslint-disable-next-line no-unused-vars
 import { Observable } from 'apollo-link';
 
 // Install the vue plugin
 Vue.use(VueApollo);
 
 // Name of the localStorage item
-const AUTH_TOKEN = 'catulam_token';
+const AUTH_TOKEN = process.env.VUE_APP_AUTH_TOKEN;
+console.log(process.env.VUE_APP_GRAPHQL_HTTP);
+console.log(process.env.VUE_APP_GRAPHQL_WS);
+console.log(process.env.VUE_APP_AUTH_TOKEN);
+console.log('hello');
 
 // Http endpoint
-const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || 'http://localhost:7000/graphql';
+const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP;
 // Files URL root
 export const filesRoot = process.env.VUE_APP_FILES_ROOT || httpEndpoint.substr(0, httpEndpoint.indexOf('/graphql'));
 
 Vue.prototype.$filesRoot = filesRoot;
-
+// http://${window.location.hostname}:7000/graphql`
 // eslint-disable-next-line no-unused-vars
 async function getNewToken() {
   // use fetch API to get refresh token
-  return fetch('http://localhost:7000/graphql', {
+  return fetch(process.env.VUE_APP_GRAPHQL_HTTP, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -172,15 +175,22 @@ const errorLink = onError(({
         // and remove invalid access token
         await Vue.$store.dispatch('removeUser');
         observer.error(error);
+        await Vue.$store.dispatch('snackBarOn', error);
       });
     });
   }
   if (networkError) {
-    console.error(`[Network error]: ${networkError}`);
+    Vue.$store.dispatch('snackBarOn', {
+      message: `[Network error]: ${networkError}`,
+      type: 'error',
+    });
   }
   if (graphQLErrors) {
     graphQLErrors.forEach((err) => {
-      console.error(err);
+      Vue.$store.dispatch('snackBarOn', {
+        message: err,
+        type: 'error',
+      });
     });
   }
 });
@@ -191,7 +201,7 @@ const defaultOptions = {
   httpEndpoint,
   // You can use `wss` for secure connection (recommended in production)
   // Use `null` to disable subscriptions
-  wsEndpoint: process.env.VUE_APP_GRAPHQL_WS || 'ws://localhost:7000/graphql',
+  wsEndpoint: process.env.VUE_APP_GRAPHQL_WS,
   // LocalStorage token
   tokenName: AUTH_TOKEN,
   // Enable Automatic Query persisting with Apollo Engine
@@ -253,8 +263,10 @@ export async function onLogin(client, token) {
   try {
     await apolloClient.resetStore();
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log('%cError on cache reset (login)', 'color: orange;', e.message);
+    Vue.$store.dispatch('snackBarOn', {
+      message: e,
+      type: 'error',
+    });
   }
 }
 
@@ -274,7 +286,9 @@ operation fails the client no longer has a token
   try {
     await apolloClient.resetStore();
   } catch (e) {
-    // eslint-disable-next-line no-console
-    console.log('%cError on cache reset (logout)', 'color: orange;', e.message);
+    Vue.$store.dispatch('snackBarOn', {
+      message: e,
+      type: 'error',
+    });
   }
 }

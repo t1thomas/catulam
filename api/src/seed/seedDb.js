@@ -15,10 +15,10 @@ require('dotenv').config();
 function generateAdminToken() {
   //  token expiration, 2min from current time
   const exp = Math.floor(Date.now() / 1000) + (2 * 60);
-  const roles = 'admin';
+  const role = 'admin';
   // get scopes based on user role 'admin'
   const scope = authScopes.admin();
-  return jwt.sign({ exp, scope, roles }, process.env.JWT_SECRET);
+  return jwt.sign({ exp, scope, role }, process.env.JWT_SECRET);
 }
 const httpLink = createHttpLink({
   uri: process.env.GRAPHQL_URI,

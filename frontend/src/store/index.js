@@ -303,7 +303,7 @@ export default new Vuex.Store({
         const { token } = response.data.refreshAccess;
         // store token in local storage
         if (typeof localStorage !== 'undefined') {
-          localStorage.setItem('catulam_token', token);
+          localStorage.setItem(process.env.VUE_APP_AUTH_TOKEN, token);
         }
         // update currentUser State
         dispatch('fetchCurrentUser');
@@ -314,7 +314,7 @@ export default new Vuex.Store({
     autoRefresh({ dispatch, commit }) {
       if (typeof localStorage !== 'undefined') {
         // get token stored in localStorage and decode expiry
-        const token = localStorage.getItem('catulam_token');
+        const token = localStorage.getItem(process.env.VUE_APP_AUTH_TOKEN);
         const { exp } = jwtDecode(token);
         // get Datetime 15 min before token expiry
         const MinFromExp = Vue.$moment.unix(exp).subtract(15, 'minutes');
@@ -433,14 +433,12 @@ export default new Vuex.Store({
         });
     },
     async fetchCurrentUser({ commit, dispatch }) {
-      console.log('fetchCurrentUser');
       apolloClient.query({
         query: gqlQueries.CurrentUser,
         fetchPolicy: 'no-cache',
       }).then((response) => {
         const { getCurrentUser } = response.data;
         commit('set_currentUser', getCurrentUser);
-        console.log(getCurrentUser);
         dispatch('autoRefresh');
       }).catch((error) => {
         commit('set_currentUser', null);
@@ -454,7 +452,7 @@ export default new Vuex.Store({
       Vue.$router.push('/');
       // and remove invalid access token
       if (typeof localStorage !== 'undefined') {
-        localStorage.removeItem('catulam');
+        localStorage.removeItem(process.env.VUE_APP_AUTH_TOKEN);
       }
     },
     async logoutUser({ commit }) {
@@ -493,7 +491,6 @@ export default new Vuex.Store({
         });
     },
     async fetchAllUserList({ commit }, id) {
-      console.log('fetchAllUserList');
       await apolloClient.query({
         query: gqlQueries.ALL_USERS,
         fetchPolicy: 'no-cache',
@@ -563,6 +560,9 @@ export default new Vuex.Store({
       });
     },
     async fetchCurrentUserTasks({ commit }, payload) {
+      console.log(process.env.VUE_APP_GRAPHQL_HTTP);
+      console.log(process.env.VUE_APP_GRAPHQL_WS);
+      console.log(process.env.VUE_APP_AUTH_TOKEN);
       apolloClient.query({
         query: gqlQueries.USER_TASKS,
         variables: payload,
