@@ -8,6 +8,8 @@ RUN npm run build
 
 # production stage
 FROM nginx:stable-alpine as production-stage
-COPY --from=build-stage /frontend/dist /usr/share/nginx/html
+RUN mkdir /frontend
+COPY --from=build-stage /frontend/dist /frontend
+COPY nginx.conf /etc/nginx/nginx.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
