@@ -1,0 +1,14 @@
+sudo: required
+
+services:
+    - docker
+
+before_install:
+  - docker build -t timt1/catulam .
+
+script:
+  - echo "skipping tests"
+
+after_success:
+  - echo "$DOCKER_PASS" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push timt1/catulam
