@@ -31,7 +31,7 @@
     },
     {
       "name": "catulam-api",
-      "image": "catulam-api",
+      "image": "timt1/catulam-api",
       "portMappings": [
         {
           "hostPort": 7000,
@@ -55,7 +55,7 @@
     },
     {
       "name": "catulam-frontend",
-      "image": "catulam-frontend",
+      "image": "timt1/catulam-frontend",
       "portMappings": [
         {
           "hostPort": 80,
