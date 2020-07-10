@@ -11,6 +11,4 @@ script:
 
 after_success:
   - echo "$DOCKER_PASS" | docker login -u "$DOCKER_ID" --password-stdin
-  - docker push catulam-frontend
-  - docker push catulam-api
-  - docker push catulam-db
+  - docker-compose push

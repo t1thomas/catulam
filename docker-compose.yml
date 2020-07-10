@@ -7,6 +7,7 @@ services:
   neo4j:
     container_name: catulam-db
     build: ./neo4j
+    image: timt1/catulam-db
     ports:
       - 7474:7474
       - 7687:7687
@@ -24,6 +25,7 @@ services:
   api:
     container_name: catulam-api
     build: ./api
+    image: timt1/catulam-api
     ports:
       - 7000:7000
     environment:
@@ -43,6 +45,7 @@ services:
       - catLink
   frontend:
     container_name: catulam-frontend
+    image: timt1/catulam-frontend
     build: ./frontend
     ports:
       - 80:80
