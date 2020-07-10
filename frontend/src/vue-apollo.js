@@ -106,18 +106,28 @@ import { createApolloClient, restartWebsockets } from 'vue-cli-plugin-apollo/gra
 import { onError } from 'apollo-link-error';
 import { Observable } from 'apollo-link';
 
-// Install the vue plugin
 Vue.use(VueApollo);
 
 // Name of the localStorage item
+// const AUTH_TOKEN = authToken;
 const AUTH_TOKEN = process.env.VUE_APP_AUTH_TOKEN;
-console.log(process.env.VUE_APP_GRAPHQL_HTTP);
-console.log(process.env.VUE_APP_GRAPHQL_WS);
+
+
+// const AUTH_TOKEN = process.env.VUE_APP_AUTH_TOKEN;
+// console.log(process.env.VUE_APP_GRAPHQL_HTTP);
+// console.log(process.env.VUE_APP_GRAPHQL_WS);
 console.log(process.env.VUE_APP_AUTH_TOKEN);
+
+// console.log(graphqlUri);
+// console.log(graphqlWs);
+console.log(`http://${window.location.hostname}:7000/graphql`);
 console.log('hello');
 
 // Http endpoint
-const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP;
+// const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP;
+// const httpEndpoint = graphqlUri;
+const httpEndpoint = `http://${window.location.hostname}:7000/graphql`;
+
 // Files URL root
 export const filesRoot = process.env.VUE_APP_FILES_ROOT || httpEndpoint.substr(0, httpEndpoint.indexOf('/graphql'));
 
@@ -201,7 +211,7 @@ const defaultOptions = {
   httpEndpoint,
   // You can use `wss` for secure connection (recommended in production)
   // Use `null` to disable subscriptions
-  wsEndpoint: process.env.VUE_APP_GRAPHQL_WS,
+  wsEndpoint: `ws://${window.location.hostname}:7000/graphql`,
   // LocalStorage token
   tokenName: AUTH_TOKEN,
   // Enable Automatic Query persisting with Apollo Engine
