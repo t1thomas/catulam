@@ -7,7 +7,6 @@ module.exports = async function verifyToken(token) {
       // return await jwt.verify(token, process.env.JWT_SECRET);
       return await jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
     } catch (e) {
-      console.log('here');
       throw new AuthenticationError('Session ended, Please login again');
     }
   } else {

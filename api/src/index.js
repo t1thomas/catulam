@@ -26,7 +26,6 @@ const server = new ApolloServer({
   context: async ({ req, res, connection }) => {
     if (connection) {
       const { token } = connection.context;
-      console.log(token);
       return {
         currentUser: await verifyToken(token),
       };

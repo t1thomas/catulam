@@ -116,12 +116,12 @@ const AUTH_TOKEN = process.env.VUE_APP_AUTH_TOKEN;
 // const AUTH_TOKEN = process.env.VUE_APP_AUTH_TOKEN;
 // console.log(process.env.VUE_APP_GRAPHQL_HTTP);
 // console.log(process.env.VUE_APP_GRAPHQL_WS);
-console.log(process.env.VUE_APP_AUTH_TOKEN);
+// console.log(process.env.VUE_APP_AUTH_TOKEN);
 
 // console.log(graphqlUri);
 // console.log(graphqlWs);
-console.log(`http://${window.location.hostname}:7000/graphql`);
-console.log('hello');
+// console.log(`http://${window.location.hostname}:7000/graphql`);
+// console.log('hello');
 
 // Http endpoint
 // const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP;

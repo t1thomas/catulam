@@ -55,7 +55,7 @@ function createRefreshToken(id) {
 
 function generateTokens(user) {
   return new Promise((resolve) => {
-    console.log('generateTokens');
+    // console.log('generateTokens');
     // gather id and role property from user object
     const { id, role } = user;
     //  token expiration, 7 days from current time
@@ -67,7 +67,7 @@ function generateTokens(user) {
 }
 function validatePass(pass, user) {
   return new Promise((resolve, reject) => {
-    console.log('validatePass');
+    // console.log('validatePass');
     bcrypt.compare(pass, user.password, (error, res) => {
       if (error || res === false) {
         reject(new Error());
@@ -105,7 +105,7 @@ const resolveFunctions = {
   },
   Mutation: {
     refreshAccess: async (object, params, ctx, resolveInfo) => {
-      console.log('refreshAccess');
+      // console.log('refreshAccess');
       try {
         // get refresh token from cookie
         const oldTokenString = ctx.req.cookies[cookieName];
@@ -137,17 +137,14 @@ const resolveFunctions = {
             return neo4jgraphql(object, params, ctx, resolveInfo);
           });
       } catch (e) {
-        console.log(e);
         throw new Error(e);
       }
     },
     logout: async (object, params, ctx, resolveInfo) => {
-      console.log('logout');
       try {
         // get refresh token from cookie
         const oldTokenString = ctx.req.cookies[cookieName];
         if (oldTokenString === undefined) {
-          console.log('logout undefined');
           // return nothing (silent refresh) if no token was found
           return false;
         }
@@ -165,7 +162,6 @@ const resolveFunctions = {
         // remove the token from db
         return neo4jgraphql(object, params, ctx, resolveInfo);
       } catch (e) {
-        console.log(e);
         throw new Error(e);
       }
     },
@@ -192,7 +188,6 @@ const resolveFunctions = {
         return neo4jgraphql(object, params, ctx, resolveInfo);
       })
       .catch((e) => {
-        console.log(e);
         throw new Error(e);
       }),
 
@@ -573,7 +568,6 @@ const resolveFunctions = {
     update: {
       subscribe: withFilter(() => pubSub.asyncIterator('project'),
         (payload, variables) => {
-          console.log(payload);
           return payload.update === variables.proId;
         }),
     },

@@ -560,9 +560,6 @@ export default new Vuex.Store({
       });
     },
     async fetchCurrentUserTasks({ commit }, payload) {
-      console.log(process.env.VUE_APP_GRAPHQL_HTTP);
-      console.log(process.env.VUE_APP_GRAPHQL_WS);
-      console.log(process.env.VUE_APP_AUTH_TOKEN);
       apolloClient.query({
         query: gqlQueries.USER_TASKS,
         variables: payload,
