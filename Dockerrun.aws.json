@@ -10,7 +10,7 @@
           "containerPort": 80
         }
       ],
-      "essential": false,
+      "essential": true,
       "memory": 128
     }
   ]
