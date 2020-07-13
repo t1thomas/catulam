@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 // enable cors
 const corsOptions = {
-  origin: ['http://localhost', 'http://localhost:8080'],
+  origin: process.env.CORS_ORIGIN,
   credentials: true, // <-- REQUIRED backend setting
 };
 

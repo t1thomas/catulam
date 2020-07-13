@@ -1,99 +1,120 @@
 {
-  "AWSEBDockerrunVersion": 2,
-  "containerDefinitions": [
+  "AWSEBDockerrunVersion":2,
+  "containerDefinitions":[
     {
-      "name": "catulam-db",
-      "image": "timt1/catulam-db",
-      "portMappings": [
+      "name":"catulam-db",
+      "image":"timt1/catulam-db",
+      "portMappings":[
         {
-          "hostPort": 7474,
-          "containerPort": 7474
+          "hostPort":7474,
+          "containerPort":7474
         },
         {
-          "hostPort": 7687,
-          "containerPort": 7687
+          "hostPort":7687,
+          "containerPort":7687
         }
       ],
-      "environment": [
+      "environment":[
         {
-          "name": "NEO4J_AUTH",
-          "value": "neo4j/letmein"
+          "name":"NEO4J_AUTH",
+          "value":"neo4j/letmein"
         },
         {
-          "name": "NEO4J_dbms_security_procedures_unrestricted",
-          "value": "apoc.*"
-        },        {
-          "name": "NEO4J_apoc_import_file_enabled",
-          "value": true
-        },        {
-          "name": "NEO4J_apoc_export_file_enabled",
-          "value": true
-        },        {
-          "name": "NEO4J_dbms_shell_enabled",
-          "value": true
-        },        {
-          "name": "NEO4J_apoc_ttl_enabled",
-          "value": true
-        },        {
-          "name": "NEO4J_apoc_ttl_schedule",
-          "value": 10
+          "name":"NEO4J_dbms_security_procedures_unrestricted",
+          "value":"apoc.*"
         },
         {
-          "name": "NEO4JLABS_PLUGINS",
-          "value": "[\"apoc\"]"
+          "name":"NEO4J_apoc_import_file_enabled",
+          "value":true
+        },
+        {
+          "name":"NEO4J_apoc_export_file_enabled",
+          "value":true
+        },
+        {
+          "name":"NEO4J_dbms_shell_enabled",
+          "value":true
+        },
+        {
+          "name":"NEO4J_apoc_ttl_enabled",
+          "value":true
+        },
+        {
+          "name":"NEO4J_apoc_ttl_schedule",
+          "value":10
+        },
+        {
+          "name":"NEO4JLABS_PLUGINS",
+          "value":"[\"apoc\"]"
         }
       ],
-      "essential": true,
-      "memory": 128
+      "essential":true,
+      "memory":128
     },
     {
-      "name": "catulam-api",
-      "image": "timt1/catulam-api",
-      "portMappings": [
+      "name":"catulam-api",
+      "image":"timt1/catulam-api",
+      "portMappings":[
         {
-          "hostPort": 7000,
-          "containerPort": 7000
+          "hostPort":7000,
+          "containerPort":7000
         }
       ],
-      "environment":[{
-        "name": "NEO4J_URI",
-        "value": "bolt://neo4j:7687"
-      },{
-        "name": "NEO4J_USER",
-        "value": "neo4j"
-      },{
-        "name": "NEO4J_PASSWORD",
-        "value": "letmein"
-      },{
-        "name": "GRAPHQL_LISTEN_PORT",
-        "value": 7000
-      },{
-        "name": "GRAPHQL_URI",
-        "value": "http://api:7000/graphql"
-      },{
-        "name": "JWT_SECRET",
-        "value": "catulam2A34iaeDwefdAaawe12s0wfha048"
-      },{
-        "name": "BCRYPTHASHCOST",
-        "value": 10
-      },{
-        "name": "NODE_ENV",
-        "value": "product"
-      }],
-      "essential": false,
-      "memory": 128
+      "environment":[
+        {
+          "name":"NEO4J_URI",
+          "value":"bolt://neo4j:7687"
+        },
+        {
+          "name":"NEO4J_USER",
+          "value":"neo4j"
+        },
+        {
+          "name":"NEO4J_PASSWORD",
+          "value":"letmein"
+        },
+        {
+          "name":"GRAPHQL_LISTEN_PORT",
+          "value":7000
+        },
+        {
+          "name":"GRAPHQL_URI",
+          "value":"http://api:7000/graphql"
+        },
+        {
+          "name":"JWT_SECRET",
+          "value":"catulam2A34iaeDwefdAaawe12s0wfha048"
+        },
+        {
+          "name":"BCRYPTHASHCOST",
+          "value":10
+        },
+        {
+          "name":"NODE_ENV",
+          "value":"product"
+        },
+        {
+          "name":"NODE_ENV",
+          "value":"product"
+        },
+        { "name": "CORS_ORIGIN",
+          "value": "http://catualmdemo-env.eba-qisf6tt2.eu-west-2.elasticbeanstalk.com"
+        }
+      ],
+      "essential":false,
+      "memory":128
     },
     {
-      "name": "catulam-frontend",
-      "image": "timt1/catulam-frontend",
-      "portMappings": [
+      "name":"catulam-frontend",
+      "image":"timt1/catulam-frontend",
+      "portMappings":[
         {
-          "hostPort": 80,
-          "containerPort": 80
+          "hostPort":80,
+          "containerPort":80
         }
       ],
-      "essential": false,
-      "memory": 128
+      "essential":false,
+      "memory":128
     }
   ]
 }
