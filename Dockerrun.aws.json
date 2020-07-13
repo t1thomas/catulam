@@ -14,17 +14,35 @@
           "containerPort": 7687
         }
       ],
-      "environment": {
-          "NEO4J_AUTH":"neo4j/letmein",
-          "NEO4J_dbms_security_procedures_unrestricted": "apoc.*",
-          "NEO4J_apoc_import_file_enabled": true,
-          "NEO4J_apoc_export_file_enabled": true,
-          "NEO4J_dbms_shell_enabled": true,
-          "NEO4J_apoc_ttl_enabled": true,
-          "NEO4J_apoc_ttl_schedule": 10,
-          "NEO4J_dbms_memory_pagecache_size": "2G",
-          "NEO4JLABS_PLUGINS":["apoc"]
-       },
+      "environment": [
+        {
+          "name": "NEO4J_AUTH",
+          "value": "neo4j/letmein"
+        },
+        {
+          "name": "NEO4J_dbms_security_procedures_unrestricted",
+          "value": "apoc.*"
+        },        {
+          "name": "NEO4J_apoc_import_file_enabled",
+          "value": true
+        },        {
+          "name": "NEO4J_apoc_export_file_enabled",
+          "value": true
+        },        {
+          "name": "NEO4J_dbms_shell_enabled",
+          "value": true
+        },        {
+          "name": "NEO4J_apoc_ttl_enabled",
+          "value": true
+        },        {
+          "name": "NEO4J_apoc_ttl_schedule",
+          "value": 10
+        },
+        {
+          "name": "NEO4JLABS_PLUGINS",
+          "value": ["apoc"]
+        }
+      ],
       "essential": true,
       "memory": 128
     },
@@ -37,16 +55,31 @@
           "containerPort": 7000
         }
       ],
-      "environment": {
-          "NEO4J_URI": "bolt://neo4j:7687",
-          "NEO4J_USER": "neo4j",
-          "NEO4J_PASSWORD": "letmein",
-          "GRAPHQL_LISTEN_PORT": 7000,
-          "GRAPHQL_URI": "http://api:7000/graphql",
-          "JWT_SECRET": "catulam2A34iaeDwefdAaawe12s0wfha048",
-          "BCRYPTHASHCOST": 10,
-          "NODE_ENV": "production"
-        },
+      "environment":[{
+        "name": "NEO4J_URI",
+        "value": "bolt://neo4j:7687"
+      },{
+        "name": "NEO4J_USER",
+        "value": "neo4j"
+      },{
+        "name": "NEO4J_PASSWORD",
+        "value": "letmein"
+      },{
+        "name": "GRAPHQL_LISTEN_PORT",
+        "value": 7000
+      },{
+        "name": "GRAPHQL_URI",
+        "value": "http://api:7000/graphql"
+      },{
+        "name": "JWT_SECRET",
+        "value": "catulam2A34iaeDwefdAaawe12s0wfha048"
+      },{
+        "name": "BCRYPTHASHCOST",
+        "value": 10
+      },{
+        "name": "NODE_ENV",
+        "value": "product"
+      }],
       "essential": false,
       "memory": 128
     },
