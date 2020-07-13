@@ -16,10 +16,10 @@ script:
 deploy:
   provider: elasticbeanstalk
   region: "eu-west-2"
-  app: "Catulam"
-  env: "Catulam-env"
+  app: "catulam-v1"
+  env: "catulamV1-env"
   bucket_name: "elasticbeanstalk-eu-west-2-553268653483"
-  bucket_path: "Catulam"
+  bucket_path: "catulam-v1"
   on:
     branch: 004-login-auth-feat
   access_key_id: $AWS_ACCESS_KEY
