@@ -22,25 +22,6 @@
         {
           "name": "NEO4J_dbms_security_procedures_unrestricted",
           "value": "apoc.*"
-        },        {
-          "name": "NEO4J_apoc_import_file_enabled",
-          "value": true
-        },        {
-          "name": "NEO4J_apoc_export_file_enabled",
-          "value": true
-        },        {
-          "name": "NEO4J_dbms_shell_enabled",
-          "value": true
-        },        {
-          "name": "NEO4J_apoc_ttl_enabled",
-          "value": true
-        },        {
-          "name": "NEO4J_apoc_ttl_schedule",
-          "value": 10
-        },
-        {
-          "name": "NEO4JLABS_PLUGINS",
-          "value": ["apoc"]
         }
       ],
       "essential": true,
