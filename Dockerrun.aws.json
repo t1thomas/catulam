@@ -98,10 +98,10 @@
           "value":"product"
         },
         { "name": "CORS_ORIGIN",
-          "value": "http://catulam-demo.eu-west-2.elasticbeanstalk.com"
+          "value": "http://localhost"
         },
         { "name": "GRAPHQL_URI",
-          "value": "http://catulam-demo.eu-west-2.elasticbeanstalk.com:7000/graphql"
+          "value": "http://localhost:7000/graphql"
         }
       ],
       "essential":false,
