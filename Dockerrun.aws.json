@@ -2,6 +2,35 @@
   "AWSEBDockerrunVersion": 2,
   "containerDefinitions": [
     {
+      "name": "catulam-db",
+      "image": "timt1/catulam-db",
+      "portMappings": [
+        {
+          "hostPort": 7474,
+          "containerPort": 7474
+        },
+        {
+          "hostPort": 7687,
+          "containerPort": 7687
+        }
+      ],
+      "environment": [
+        {
+          "NEO4J_AUTH":"neo4j/letmein",
+          "NEO4J_dbms_security_procedures_unrestricted": "apoc.*",
+          "NEO4J_apoc_import_file_enabled": true,
+          "NEO4J_apoc_export_file_enabled": true,
+          "NEO4J_dbms_shell_enabled": true,
+          "NEO4J_apoc_ttl_enabled": true,
+          "NEO4J_apoc_ttl_schedule": 10,
+          "NEO4J_dbms_memory_pagecache_size": "2G",
+          "NEO4JLABS_PLUGINS":["apoc"]
+        }
+      ],
+      "essential": true,
+      "memory": 128
+    },
+    {
       "name": "catulam-frontend",
       "image": "timt1/catulam-frontend",
       "portMappings": [
@@ -10,7 +39,7 @@
           "containerPort": 80
         }
       ],
-      "essential": true,
+      "essential": false,
       "memory": 128
     }
   ]
