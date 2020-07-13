@@ -105,7 +105,7 @@
         }
       ],
       "essential":false,
-      "memory":500
+      "memory":128
     },
     {
       "name":"catulam-frontend",
@@ -117,7 +117,7 @@
         }
       ],
       "essential":false,
-      "memory":500
+      "memory":128
     }
   ]
 }
