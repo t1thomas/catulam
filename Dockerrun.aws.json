@@ -49,7 +49,7 @@
         }
       ],
       "essential":true,
-      "memory":128
+      "memory":500
     },
     {
       "name":"catulam-api",
@@ -98,11 +98,14 @@
           "value":"product"
         },
         { "name": "CORS_ORIGIN",
-          "value": "http://catualmdemo-env.eba-qisf6tt2.eu-west-2.elasticbeanstalk.com"
+          "value": "http://catulam.eu-west-2.elasticbeanstalk.com/graphql"
+        },
+        { "name": "GRAPHQL_URI",
+          "value": "http://catulam.eu-west-2.elasticbeanstalk.com:7000/graphql"
         }
       ],
       "essential":false,
-      "memory":128
+      "memory":500
     },
     {
       "name":"catulam-frontend",
@@ -114,7 +117,7 @@
         }
       ],
       "essential":false,
-      "memory":128
+      "memory":500
     }
   ]
 }
