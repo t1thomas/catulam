@@ -9,9 +9,9 @@ before_install:
 script:
   - echo "skipping tests"
 
-after_success:
-  - echo "$DOCKER_PASS" | docker login -u "$DOCKER_ID" --password-stdin
-  - docker-compose push
+#after_success:
+#  - echo "$DOCKER_PASS" | docker login -u "$DOCKER_ID" --password-stdin
+#  - docker-compose push
 
 deploy:
   provider: elasticbeanstalk
