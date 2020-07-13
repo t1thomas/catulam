@@ -104,7 +104,8 @@
           "value": "http://catulam.eu-west-2.elasticbeanstalk.com:7000/graphql"
         }
       ],
-      "essential":false
+      "essential":false,
+      "memory":128
     },
     {
       "name":"catulam-frontend",
