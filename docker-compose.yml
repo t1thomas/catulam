@@ -15,7 +15,6 @@ services:
       - NEO4J_dbms_shell_enabled=true
       - NEO4J_apoc_ttl_enabled=true
       - NEO4J_apoc_ttl_schedule=10
-      - NEO4J_dbms_memory_pagecache_size=2G
       - NEO4JLABS_PLUGINS=["apoc"]
   api:
     build: ./api
@@ -30,7 +29,7 @@ services:
       - JWT_SECRET=catulam2A34iaeDwefdAaawe12s0wfha048
       - BCRYPTHASHCOST=10
       - NODE_ENV=production
-      - CORS_ORIGIN=http://localhost/graphql
+      - CORS_ORIGIN=http://localhost
       - GRAPHQL_URI=http://localhost:7000/graphql
     links:
       - neo4j
