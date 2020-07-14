@@ -18,8 +18,8 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 // enable cors
 const corsOptions = {
-  origin: '*',
-  credentials: true, // <-- REQUIRED backend setting
+  origin: process.env.CORS_ORIGIN,
+  credentials: true,
 };
 
 const server = new ApolloServer({
