@@ -25,8 +25,8 @@ const httpLink = createHttpLink({
   fetch,
 });
 
-const authLink = setContext((_, { headers }) => {
-  const token = generateAdminToken();
+const authLink = setContext(async (_, { headers }) => {
+  const token = await generateAdminToken();
   // return the headers to the context so httpLink can read them
   return {
     headers: {
