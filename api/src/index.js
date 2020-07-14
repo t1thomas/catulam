@@ -54,7 +54,7 @@ server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen(PORT, () => {
   console.log('qweasd');
-  console.log(`cor: ${corsOptions}`);
+  console.log(corsOptions);
   console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
   console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${server.subscriptionsPath}`);
 });
