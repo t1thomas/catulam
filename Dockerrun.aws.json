@@ -10,6 +10,10 @@
           "containerPort":7474
         },
         {
+          "hostPort":7473,
+          "containerPort":7473
+        },
+        {
           "hostPort":7687,
           "containerPort":7687
         }
