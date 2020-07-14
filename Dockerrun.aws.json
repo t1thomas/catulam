@@ -67,7 +67,7 @@
       "environment":[
         {
           "name":"NEO4J_URI",
-          "value":"bolt://0.0.0.0:7687"
+          "value":"bolt://neo4j:7687"
         },
         {
           "name":"NEO4J_USER",
@@ -93,7 +93,7 @@
           "value": "http://catulam-demo.eu-west-2.elasticbeanstalk.com"
         },
         { "name": "GRAPHQL_URI",
-          "value": "http://catulam-demo.eu-west-2.elasticbeanstalk.com:4000/graphql"
+          "value": "http://api:4000/graphql"
         },
         { "name": "NODE_ENV",
           "value": "production"
