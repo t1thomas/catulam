@@ -15,13 +15,13 @@ const PORT = process.env.GRAPHQL_LISTEN_PORT;
 const app = express();
 
 app.use(bodyParser.json());
-app.use(cors({ credentials: true, origin: 'http://catulam-demo.eu-west-2.elasticbeanstalk.com' }));
 app.use(cookieParser());
 // enable cors
-// const corsOptions = {
-//   origin: '*',
-//   credentials: true,
-// };
+const corsOptions = {
+  origin: 'http://catulam-demo.eu-west-2.elasticbeanstalk.com',
+  credentials: true,
+};
+app.use(cors(corsOptions));
 
 const server = new ApolloServer({
   context: async ({ req, res, connection }) => {
@@ -55,7 +55,7 @@ server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen(PORT, () => {
   console.log('latest deployment');
-  // console.log(corsOptions);
+  console.log(corsOptions);
   console.log(process.env.GRAPHQL_LISTEN_PORT);
   console.log(process.env.CORS_ORIGIN);
   console.log(process.env.GRAPHQL_URI);
