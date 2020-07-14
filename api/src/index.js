@@ -51,8 +51,9 @@ server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen(PORT, () => {
   if (process.env.CORS_ORIGIN) {
-    console.log(`🚀 Server ready at ${process.env.CORS_ORIGIN}${PORT}${server.graphqlPath}`);
-    console.log(`🚀 Subscriptions ready at ${process.env.CORS_ORIGIN.replace('http', 'ws')}${PORT}${server.subscriptionsPath}`);
+    console.log('18:35');
+    console.log(`🚀 Server ready at ${process.env.CORS_ORIGIN}:${PORT}${server.graphqlPath}`);
+    console.log(`🚀 Subscriptions ready at ${process.env.CORS_ORIGIN.replace('http', 'ws')}:${PORT}${server.subscriptionsPath}`);
   } else {
     console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
     console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${server.subscriptionsPath}`);
