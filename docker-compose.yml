@@ -1,5 +1,8 @@
 version: '3'
 
+networks:
+  catLink:
+    driver: bridge
 services:
   neo4j:
     build: ./neo4j
@@ -17,6 +20,8 @@ services:
       - NEO4J_apoc_ttl_enabled=true
       - NEO4J_apoc_ttl_schedule=10
       - NEO4JLABS_PLUGINS=["apoc"]
+    networks:
+          - catLink
   api:
     build: ./api
     image: timt1/catulam-api
@@ -36,6 +41,8 @@ services:
       - neo4j
     depends_on:
       - neo4j
+    networks:
+      - catLink
   frontend:
     image: timt1/catulam-frontend
     build: ./frontend
@@ -46,3 +53,5 @@ services:
     depends_on:
       - neo4j
       - api
+    networks:
+      - catLink

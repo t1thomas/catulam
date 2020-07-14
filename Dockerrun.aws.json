@@ -67,7 +67,7 @@
       "environment":[
         {
           "name":"NEO4J_URI",
-          "value":"bolt://catulam-demo.eu-west-2.elasticbeanstalk.com:7687"
+          "value":"bolt://neo4j:7687"
         },
         {
           "name":"NEO4J_USER",
