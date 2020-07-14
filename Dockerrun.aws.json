@@ -56,8 +56,8 @@
       "image":"timt1/catulam-api",
       "portMappings":[
         {
-          "hostPort":7000,
-          "containerPort":7000
+          "hostPort":4000,
+          "containerPort":4000
         }
       ],
       "environment":[
@@ -75,11 +75,7 @@
         },
         {
           "name":"GRAPHQL_LISTEN_PORT",
-          "value":7000
-        },
-        {
-          "name":"GRAPHQL_URI",
-          "value":"http://api:7000/graphql"
+          "value":4000
         },
         {
           "name":"JWT_SECRET",
@@ -97,7 +93,7 @@
           "value": "http://catulam-demo.eu-west-2.elasticbeanstalk.com"
         },
         { "name": "GRAPHQL_URI",
-          "value": "http://catulam-demo.eu-west-2.elasticbeanstalk.com/graphql"
+          "value": "http://catulam-demo.eu-west-2.elasticbeanstalk.com:4000/graphql"
         }
       ],
       "essential":false,

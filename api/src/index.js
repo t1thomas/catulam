@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 // enable cors
 const corsOptions = {
-  origin: true,
+  origin: '*',
   credentials: true, // <-- REQUIRED backend setting
 };
 

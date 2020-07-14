@@ -112,28 +112,13 @@ Vue.use(VueApollo);
 // const AUTH_TOKEN = authToken;
 const AUTH_TOKEN = process.env.VUE_APP_AUTH_TOKEN;
 
-
-// const AUTH_TOKEN = process.env.VUE_APP_AUTH_TOKEN;
-// console.log(process.env.VUE_APP_GRAPHQL_HTTP);
-// console.log(process.env.VUE_APP_GRAPHQL_WS);
-// console.log(process.env.VUE_APP_AUTH_TOKEN);
-
-// console.log(graphqlUri);
-// console.log(graphqlWs);
-// console.log(`http://${window.location.hostname}:7000/graphql`);
-// console.log('hello');
-
-// Http endpoint
-// const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP;
-// const httpEndpoint = graphqlUri;
-const httpEndpoint = `${window.location.origin}:7000/graphql`;
+const httpEndpoint = `${window.location.origin}:4000/graphql`;
 
 // Files URL root
 export const filesRoot = process.env.VUE_APP_FILES_ROOT || httpEndpoint.substr(0, httpEndpoint.indexOf('/graphql'));
 
 Vue.prototype.$filesRoot = filesRoot;
-// http://${window.location.hostname}:7000/graphql`
-// eslint-disable-next-line no-unused-vars
+
 async function getNewToken() {
   // use fetch API to get refresh token
   return fetch(process.env.VUE_APP_GRAPHQL_HTTP, {
@@ -211,7 +196,7 @@ const defaultOptions = {
   httpEndpoint,
   // You can use `wss` for secure connection (recommended in production)
   // Use `null` to disable subscriptions
-  wsEndpoint: `ws://${window.location.host}:7000/graphql`,
+  wsEndpoint: `ws://${window.location.host}:4000/graphql`,
   // LocalStorage token
   tokenName: AUTH_TOKEN,
   // Enable Automatic Query persisting with Apollo Engine
@@ -227,23 +212,6 @@ const defaultOptions = {
   httpLinkOptions: {
     credentials: 'include',
   },
-
-  // Override default cache
-  // cache: myCache
-
-  // Override the way the Authorization header is set
-  // getAuth: (tokenName) => ...
-  // getAuth: () => localStorage.getItem(AUTH_TOKEN) || '',
-
-  // getAuth: () => {
-  //   const token = localStorage.getItem(AUTH_TOKEN) || '';
-  //   console.log(token);
-  //   return token;
-  // },
-  // Additional ApolloClient options
-  // apollo: { ... },
-  // Client local data (see apollo-link-state)
-  // clientState: { resolvers: { ... }, defaults: { ... } }
 };
 
 // Create apollo client
