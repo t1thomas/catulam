@@ -16,10 +16,10 @@ after_success:
 deploy:
   provider: elasticbeanstalk
   region: "eu-west-2"
-  app: "catulam-v1"
-  env: "catulamV1-env"
+  app: "catulam1"
+  env: "catulam1-env"
   bucket_name: "elasticbeanstalk-eu-west-2-553268653483"
-  bucket_path: "catulam-v1"
+  bucket_path: "catulam1"
   on:
     branch: 004-login-auth-feat
   access_key_id: $AWS_ACCESS_KEY
