@@ -23,6 +23,7 @@ function generateAdminToken() {
 const httpLink = createHttpLink({
   uri: process.env.GRAPHQL_URI,
   fetch,
+  credentials: 'include',
 });
 
 const authLink = setContext(async (_, { headers }) => {
