@@ -3,7 +3,7 @@ const { ApolloServer } = require('apollo-server-express');
 const http = require('http');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const cors = require('cors');
+// const cors = require('cors');
 const driver = require('./neo4jDriver');
 const schema = require('./graphQL-schema');
 const verifyToken = require('./authenticate');
@@ -21,7 +21,7 @@ const corsOptions = {
   origin: 'http://catulam-demo.eu-west-2.elasticbeanstalk.com',
   credentials: true,
 };
-app.use(cors(corsOptions));
+// app.use(cors(corsOptions));
 
 const server = new ApolloServer({
   context: async ({ req, res, connection }) => {
@@ -48,14 +48,12 @@ const server = new ApolloServer({
   },
 });
 
-server.applyMiddleware({ app });
-
+server.applyMiddleware({ app, cors: corsOptions });
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen(PORT, () => {
-  console.log('latest deployment 15:52');
-  console.log(corsOptions);
+  console.log('latest deployment 16:05');
   console.log(process.env.GRAPHQL_LISTEN_PORT);
   console.log(process.env.CORS_ORIGIN);
   console.log(process.env.GRAPHQL_URI);
