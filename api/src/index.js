@@ -3,6 +3,7 @@ const { ApolloServer } = require('apollo-server-express');
 const http = require('http');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const driver = require('./neo4jDriver');
 const schema = require('./graphQL-schema');
 const verifyToken = require('./authenticate');
@@ -14,13 +15,13 @@ const PORT = process.env.GRAPHQL_LISTEN_PORT;
 const app = express();
 
 app.use(bodyParser.json());
-
+app.use(cors());
 app.use(cookieParser());
 // enable cors
-const corsOptions = {
-  origin: '*',
-  credentials: true,
-};
+// const corsOptions = {
+//   origin: '*',
+//   credentials: true,
+// };
 
 const server = new ApolloServer({
   context: async ({ req, res, connection }) => {
@@ -47,14 +48,14 @@ const server = new ApolloServer({
   },
 });
 
-server.applyMiddleware({ app, cors: corsOptions });
+server.applyMiddleware({ app});
 
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen(PORT, () => {
   console.log('latest deployment');
-  console.log(corsOptions);
+  // console.log(corsOptions);
   console.log(process.env.GRAPHQL_LISTEN_PORT);
   console.log(process.env.CORS_ORIGIN);
   console.log(process.env.GRAPHQL_URI);
