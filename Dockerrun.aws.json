@@ -89,10 +89,6 @@
           "name":"BCRYPTHASHCOST",
           "value":10
         },
-        {
-          "name":"NODE_ENV",
-          "value":"production"
-        },
         { "name": "CORS_ORIGIN",
           "value": "http://catulam-demo.eu-west-2.elasticbeanstalk.com"
         },
