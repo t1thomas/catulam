@@ -91,17 +91,13 @@
         },
         {
           "name":"NODE_ENV",
-          "value":"product"
-        },
-        {
-          "name":"NODE_ENV",
-          "value":"product"
+          "value":"production"
         },
         { "name": "CORS_ORIGIN",
           "value": "http://catulam-demo.eu-west-2.elasticbeanstalk.com"
         },
         { "name": "GRAPHQL_URI",
-          "value": "http://localhost:7000/graphql"
+          "value": "http://catulam-demo.eu-west-2.elasticbeanstalk.com/graphql"
         }
       ],
       "essential":false,
