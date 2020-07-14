@@ -15,7 +15,7 @@ const PORT = process.env.GRAPHQL_LISTEN_PORT;
 const app = express();
 
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({ credentials: true, origin: 'http://catulam-demo.eu-west-2.elasticbeanstalk.com' }));
 app.use(cookieParser());
 // enable cors
 // const corsOptions = {
@@ -48,7 +48,7 @@ const server = new ApolloServer({
   },
 });
 
-server.applyMiddleware({ app});
+server.applyMiddleware({ app });
 
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
