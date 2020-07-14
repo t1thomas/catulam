@@ -53,7 +53,7 @@ const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen(PORT, () => {
-  console.log('12:26');
+  console.log('latest deployment');
   console.log(corsOptions);
   console.log(process.env.GRAPHQL_LISTEN_PORT);
   console.log(process.env.CORS_ORIGIN);
