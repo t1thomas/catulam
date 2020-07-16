@@ -95,8 +95,8 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
 import Vue from 'vue';
+import { mapActions, mapState } from 'vuex';
 import gqlQueries from '../../../../graphql/gql-queries';
 
 export default {
@@ -167,7 +167,7 @@ export default {
     async onCreate() {
       if (this.$refs.sprintForm.validate()) {
         this.setSaving();
-        await Vue.$apolloClient.mutate({
+        await this.$apollo.mutate({
           mutation: gqlQueries.CREATE_SPRINT,
           fetchPolicy: 'no-cache',
           variables: {

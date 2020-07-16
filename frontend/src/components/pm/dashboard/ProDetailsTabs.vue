@@ -81,7 +81,7 @@
                       </v-avatar>
                       {{ member.fullName }}
                       <v-chip
-                        v-if="member.type === 'pm'"
+                        v-if="member.role === 'pm'"
                         class="ml-2"
                         x-small
                         color="orange"

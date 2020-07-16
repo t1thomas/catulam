@@ -1,0 +1,26 @@
+sudo: required
+
+services:
+    - docker
+
+before_install:
+  - docker-compose build
+
+script:
+  - echo "skipping tests!!"
+
+after_success:
+  - echo "$DOCKER_PASS" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker-compose push
+
+deploy:
+  provider: elasticbeanstalk
+  region: "eu-west-2"
+  app: "catulam1"
+  env: "catulam1-env"
+  bucket_name: "elasticbeanstalk-eu-west-2-553268653483"
+  bucket_path: "catulam1"
+  on:
+    branch: 004-login-auth-feat
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY

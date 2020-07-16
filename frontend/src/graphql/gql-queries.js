@@ -1,6 +1,10 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
+  REFRESH_TOKEN: gql`
+    mutation {
+      refreshAccess
+    }`,
   SUB_BACKLOG_UPDATE: gql`
     subscription($proId: String!) {
       update(proId: $proId)
@@ -374,7 +378,7 @@ const gqlQueries = {
                 fullName
                 avatar
               }
-              type
+              role
             }
           }
         }
@@ -401,20 +405,12 @@ const gqlQueries = {
         title
       }
     }`,
-  RESET_PASS: gql`mutation($username: String!, $newPassword: String!) {
-    resetPassword(username: $username, newPassword: $newPassword) {
-      token
-    }
-  }`,
   SignInUser: gql`mutation($username: String!, $password: String!) {
-      loginUser(username: $username, password: $password){
-        token
-      }
+      loginUser(username: $username, password: $password)
     }`,
-  DeleteToken: gql`mutation($token: String!) {
-    DeleteToken(token: $token){
-      token
-    }
+  // deletetoken is auto gen
+  logout: gql`mutation {
+    logout
   }
   `,
   USWithTickIds: gql`query{
@@ -432,9 +428,8 @@ const gqlQueries = {
       fullName
       username
       email
-      passwordUpdate
       avatar
-      type
+      role
     }
   }`,
   Tickets: gql`query{

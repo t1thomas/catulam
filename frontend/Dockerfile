@@ -1,24 +1,15 @@
-FROM node:lts-alpine as build
-
-WORKDIR /catulam-frontend
-
-# copy both 'package.json' and 'package-lock.json' (if available)
+# build stage
+FROM node:lts-alpine as build-stage
+WORKDIR /frontend
 COPY package*.json ./
-COPY ./nginx ./
-
-# install project dependencies
 RUN npm install
-
-RUN npm install @vue/cli -g
-
-COPY ./ .
-
+COPY . .
 RUN npm run build
 
-FROM nginx:1.17.6-alpine
-
-# copy project files and folders to the nginx directory (i.e. 'catulam' folder)
-COPY --from=build /catulam-frontend/dist /var/www/catulam
-COPY --from=build /catulam-frontend/nginx/conf /etc/nginx
-
+# production stage
+FROM nginx:stable-alpine as production-stage
+RUN mkdir /frontend
+COPY --from=build-stage /frontend/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/nginx.conf
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

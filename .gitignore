@@ -11,6 +11,7 @@ api/node_modules/
 /tests/e2e/screenshots/
 
 # local env files
+/api/.env
 .env.local
 .env.*.local
 
@@ -28,3 +29,8 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

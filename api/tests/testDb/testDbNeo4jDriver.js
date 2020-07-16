@@ -6,10 +6,9 @@ require('dotenv').config();
  * with fallback to defaults
  */
 module.exports = new neo4j.driver(
-    process.env.NEO4J_testDb_URI || 'bolt://localhost:7687',
-    neo4j.auth.basic(
-        process.env.NEO4J_testDb_USER || 'neo4j',
-        process.env.NEO4J_testDb_PASSWORD || 'test',
-    ),
+  process.env.NEO4J_testDb_URI || 'bolt://localhost:7687',
+  neo4j.auth.basic(
+    process.env.NEO4J_testDb_USER || 'neo4j',
+    process.env.NEO4J_testDb_PASSWORD || 'test',
+  ),
 );
-

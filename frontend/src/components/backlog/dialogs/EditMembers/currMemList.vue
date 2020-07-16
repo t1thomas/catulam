@@ -65,7 +65,6 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
-import Vue from 'vue';
 import gqlQueries from '../../../../graphql/gql-queries';
 
 export default {
@@ -101,7 +100,7 @@ export default {
     },
     async confirmRemoval() {
       this.$emit('savingAnimation');
-      await Vue.$apolloClient.mutate({
+      await this.$apollo.mutate({
         mutation: gqlQueries.REMOVE_PROJECT_MEMBER,
         fetchPolicy: 'no-cache',
         variables: {

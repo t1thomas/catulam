@@ -242,7 +242,7 @@ export default {
       return this.$route.query.proId;
     },
     isPm() {
-      return this.currUser.type === 'pm';
+      return this.currUser.role === 'pm';
     },
   },
   mounted() {

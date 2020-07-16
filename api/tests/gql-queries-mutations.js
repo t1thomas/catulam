@@ -1,13 +1,7 @@
 const gql = require('graphql-tag');
 
 const gqlQueries = {
-    DELETE_TOKEN: gql`mutation($token: String!) {
-        DeleteToken(token: $token){
-            token
-        }
-    }
-    `,
-    ADD_USER_PROJECT: gql`
+  ADD_USER_PROJECT: gql`
         mutation {
             AddUserProjects(from: { id: "user1test" }, to: { id: "p1test" }) {
                 from {
@@ -18,7 +12,7 @@ const gqlQueries = {
                 }
             }
         }`,
-    ADD_PROJECT_DATA: gql`
+  ADD_PROJECT_DATA: gql`
         mutation {
             AddSprintProject(from: { id: "sp1test" }, to: { id: "p1test" }) {
                 from {
@@ -45,7 +39,7 @@ const gqlQueries = {
                 }
             }
         }`,
-    CREATE_PROJECTS: gql`
+  CREATE_PROJECTS: gql`
         mutation {
             prog1: CreateProject(
                 id: "p1test"
@@ -81,7 +75,7 @@ const gqlQueries = {
                 label
             }
         }`,
-    CURRENT_USER: gql`query {
+  CURRENT_USER: gql`query {
         getCurrentUser {
             id
             firstName
@@ -89,10 +83,9 @@ const gqlQueries = {
             username
             email
             password
-            passwordUpdate
         }
     }`,
-    CREATE_USER: gql`
+  CREATE_USER: gql`
         mutation(
             $id: ID
             $firstName: String!
@@ -100,7 +93,6 @@ const gqlQueries = {
             $username: String!
             $email: String!
             $password: String!
-            $passwordUpdate: Boolean!
         ) {
             CreateUser(
                 id: $id
@@ -109,7 +101,6 @@ const gqlQueries = {
                 username: $username
                 email: $email
                 password: $password
-                passwordUpdate: $passwordUpdate
             ){
                 id
                 firstName
@@ -117,10 +108,9 @@ const gqlQueries = {
                 username
                 email
                 password
-                passwordUpdate
             }
         }`,
-    CREATE_TICKETS: gql`
+  CREATE_TICKETS: gql`
         mutation {
             tick1: CreateTicket(
                 id: "t1test"
@@ -168,7 +158,7 @@ const gqlQueries = {
                 desc
             }
         }`,
-    CREATE_USER_STORY: gql`
+  CREATE_USER_STORY: gql`
         mutation {
             uStory1: CreateUserStory(storyText: "As a User I want to be able to first see a dashboard on my landing page", id: "us1test", issueNumber: 4) {
                 storyText
@@ -186,7 +176,7 @@ const gqlQueries = {
                 issueNumber
             }
         }`,
-    CREATE_SPRINTS: gql`
+  CREATE_SPRINTS: gql`
         mutation {
             sprint1: CreateSprint(id: "sp1test", sprintNo: 1) {
                 sprintNo
@@ -201,7 +191,7 @@ const gqlQueries = {
                 id
             }
         }`,
-    ADD_USER_STORY_TICKETS: gql`
+  ADD_USER_STORY_TICKETS: gql`
         mutation {
             UStoryTic1: AddUserStoryTickets(
                 from: { id: "t1test" }
@@ -237,7 +227,7 @@ const gqlQueries = {
                 }
             }
         }`,
-    ADD_SPRINT_TICKETS:gql`
+  ADD_SPRINT_TICKETS: gql`
         mutation {
             SprintTic1: AddSprintTickets(
                 from: { id: "t1test" }
@@ -273,7 +263,7 @@ const gqlQueries = {
                 }
             }
         }`,
-    LOGIN_USER: gql`
+  LOGIN_USER: gql`
         mutation($username: String!, $password: String!) {
             loginUser(username: $username, password: $password) {
                 token

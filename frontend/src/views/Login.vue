@@ -64,10 +64,10 @@
 </template>
 
 <script>
-import { mapActions } from 'vuex';
-import Vue from 'vue';
+import { mapActions, mapGetters } from 'vuex';
 import { validationMixin } from 'vuelidate';
 import { required } from 'vuelidate/lib/validators';
+import { onLogin } from '../vue-apollo';
 import gqlQueries from '../graphql/gql-queries';
 
 export default {
@@ -100,6 +100,10 @@ export default {
       }
       return errors;
     },
+    ...mapGetters([
+      'getCurrentUser',
+      'getJwt',
+    ]),
   },
   watch: {
     getCurrentUser(value) {
@@ -108,38 +112,30 @@ export default {
       }
     },
   },
-  mounted() {
-    if (this.getCurrentUser !== null) {
-      this.$router.push('/home');
-    }
-  },
   methods: {
     ...mapActions([
-      'fetchCurrentUser',
       'snackBarOn',
     ]),
-    onSubmit() {
+    async onSubmit() {
       this.$v.$touch();
       if (!this.$v.$invalid) {
-        this.loginUser();
-      }
-    },
-    async loginUser() {
-      localStorage.setItem('catulam_token', '');
-      await Vue.$apolloClient.mutate({
-        mutation: gqlQueries.SignInUser,
-        fetchPolicy: 'no-cache',
-        variables: { username: this.username, password: this.password },
-      }).then((response) => {
-        const { loginUser } = response.data;
-        localStorage.setItem('catulam_token', loginUser.token);
-        this.$router.go();
-      }).catch((error) => {
-        this.snackBarOn({
-          message: error,
-          type: 'error',
+        // await this.$store.dispatch('loginUser',
+        // { username: this.username, password: this.password });
+        await this.$apollo.mutate({
+          mutation: gqlQueries.SignInUser,
+          fetchPolicy: 'no-cache',
+          variables: { username: this.username, password: this.password },
+        }).then((response) => {
+          const { loginUser } = response.data;
+          onLogin(this.$apollo.provider.defaultClient, loginUser.token);
+          this.$router.go();
+        }).catch((error) => {
+          this.$store.dispatch('snackBarOn', {
+            message: error,
+            type: 'error',
+          });
         });
-      });
+      }
     },
   },
 };

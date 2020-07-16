@@ -74,7 +74,6 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
-import Vue from 'vue';
 import gqlQueries from '../../../graphql/gql-queries';
 
 export default {
@@ -125,7 +124,7 @@ export default {
       // starts saving animation
       this.savingProgress();
       this.disabled = true;
-      await Vue.$apolloClient.mutate({
+      await this.apollo.mutate({
         mutation: gqlQueries.UPDATE_TICKET_DESC,
         fetchPolicy: 'no-cache',
         variables: { id: this.ticket.id, desc: this.text },

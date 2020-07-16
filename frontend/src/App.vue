@@ -57,8 +57,10 @@
 <script>
 
 import { mapActions, mapState } from 'vuex';
+import { onLogout } from './vue-apollo';
 import snackbar from './components/snackbar.vue';
 import navDrawItems from './components/appMain/navDrawItems.vue';
+
 
 export default {
   name: 'LayoutDefault',
@@ -73,9 +75,9 @@ export default {
     gravatar() {
       return `https://gravatar.com/avatar/${this.currentUser.avatar}?d=identicon`;
     },
-    ...mapState({
-      currentUser: 'currentUser',
-    }),
+    ...mapState([
+      'currentUser',
+    ]),
     fullName() {
       return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
     },
@@ -91,24 +93,21 @@ export default {
       ];
     },
   },
+  watch: {
+    async currentUser(value) {
+      if (value !== null) {
+        if (this.currentUser.role === 'pm') {
+          await this.fetchPmPros({ username: this.currentUser.username });
+        } else if (this.currentUser.role === 'dev') {
+          await this.fetchCurrentUserTasks({ username: this.currentUser.username });
+        }
+        await this.fetchAllUserList();
+      }
+    },
+  },
   async created() {
     this.$vuetify.theme.dark = true;
-    await this.$store.dispatch('fetchCurrentUser')
-      .catch((e) => {
-        this.snackBarOn({
-          message: e,
-          type: 'error',
-        });
-      });
-    // console.log(this.currentUser);
-    if (this.currentUser) {
-      if (this.currentUser.type === 'pm') {
-        await this.fetchPmPros({ username: this.currentUser.username });
-      } else if (this.currentUser.type === 'dev') {
-        await this.fetchCurrentUserTasks({ username: this.currentUser.username });
-      }
-      await this.fetchAllUserList();
-    }
+    await this.$store.dispatch('fetchCurrentUser');
   },
   methods: {
     ...mapActions([
@@ -119,7 +118,7 @@ export default {
       'snackBarOn',
     ]),
     async logout() {
-      await this.logoutUser();
+      await onLogout(this.$apollo.provider.defaultClient);
     },
   },
 };

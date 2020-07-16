@@ -1,59 +1,61 @@
 const express = require('express');
-const { ApolloServer, AuthenticationError, PubSub } = require('apollo-server-express');
-const schema = require('./graphQL-schema');
-const driver = require('./neo4jDriver');
+const { ApolloServer } = require('apollo-server-express');
 const http = require('http');
 const bodyParser = require('body-parser');
-const jwt = require('jsonwebtoken');
-// set environment variables from ../.env
+const cookieParser = require('cookie-parser');
+const driver = require('./neo4jDriver');
+const schema = require('./graphQL-schema');
+const verifyToken = require('./authenticate');
 
 require('dotenv').config();
 
 const PORT = process.env.GRAPHQL_LISTEN_PORT;
 const app = express();
+
 app.use(bodyParser.json());
+app.use(cookieParser());
 
-
-
-// verify JWT sent from client
-
-async function verifyToken(token) {
-    if(token){
-        try {
-            return await jwt.verify(token, process.env.JWT_SECRET);
-        }
-        catch (e) {
-            throw new AuthenticationError('Please sign in again');
-        }
-    }
-}
-const pubSub = new PubSub();
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:8080',
+  credentials: true,
+};
 
 const server = new ApolloServer({
-    schema,
-    context: async ({req, connection}) => {
-        if (connection) {
-            return { ...connection.context, pubSub};
-        } else {
-            return {driver, currentUser: await verifyToken(req.headers['authorization']), req, pubSub};
-        }
+  context: async ({ req, res, connection }) => {
+    if (connection) {
+      const { token } = connection.context;
+      return {
+        currentUser: await verifyToken(token),
+      };
+    }
+    const token = req.headers.authorization;
+    return {
+      currentUser: await verifyToken(token),
+      driver,
+      req,
+      res,
+    };
+  },
+  schema,
+  subscriptions: {
+    onConnect: async (connectionParams) => {
+      const token = connectionParams.Authorization;
+      return { token };
     },
-    subscriptions: {
-        onConnect: async(connectionParams) => {
-            if (connectionParams.authToken) {
-                return {currentUser: await verifyToken(connectionParams.authToken)};
-            }
-            throw new Error('Missing auth token!');
-        },
-    },
+  },
 });
 
-server.applyMiddleware({ app });
-
+server.applyMiddleware({ app, cors: corsOptions });
 const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen(PORT, () => {
+  if (process.env.CORS_ORIGIN) {
+    console.log('20:11');
+    console.log(`🚀 Server ready at ${process.env.CORS_ORIGIN}:${PORT}${server.graphqlPath}`);
+    console.log(`🚀 Subscriptions ready at ${process.env.CORS_ORIGIN.replace('http', 'ws')}:${PORT}${server.subscriptionsPath}`);
+  } else {
     console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
     console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${server.subscriptionsPath}`);
+  }
 });
