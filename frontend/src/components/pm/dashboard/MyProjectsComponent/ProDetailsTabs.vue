@@ -264,7 +264,7 @@
 
 <script>
 import { mapActions } from 'vuex';
-import NotFoundCard from '../../NotFoundCard.vue';
+import NotFoundCard from '../../../NotFoundCard.vue';
 
 export default {
   name: 'ProDetailsTabs',

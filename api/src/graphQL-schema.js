@@ -220,7 +220,7 @@ const resolveFunctions = {
     },
     UStoryTicketSwitch: async (_, {
       project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd,
-    }, { pubSub }) => {
+    }) => {
       try {
         let query = '';
         let params;
@@ -298,7 +298,7 @@ const resolveFunctions = {
     },
     UnassignedTicketSwitch: async (_, {
       project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd,
-    }, { pubSub }) => {
+    }) => {
       try {
         let query = '';
         let params;
@@ -426,7 +426,7 @@ const resolveFunctions = {
     },
     UpdateTicketAssignee: async (_, {
       tick, remUser, addUser, project,
-    }, { pubSub }) => {
+    }) => {
       if (remUser && !addUser) {
         try {
           return neode.cypher(
@@ -567,9 +567,7 @@ const resolveFunctions = {
   Subscription: {
     update: {
       subscribe: withFilter(() => pubSub.asyncIterator('project'),
-        (payload, variables) => {
-          return payload.update === variables.proId;
-        }),
+        (payload, variables) => payload.update === variables.proId),
     },
   },
 };

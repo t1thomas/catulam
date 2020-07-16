@@ -53,6 +53,8 @@ export default {
           return { title: '0 User Stories Found', subtitle: 'Add new User Story (Open BackLog)' };
         case 'Ticket':
           return { title: '0 Tickets Found', subtitle: 'Add new Ticket (Open BackLog)' };
+        case 'Project':
+          return { title: '0 Projects Found', subtitle: 'Create New Project' };
         default:
           return null;
       }
@@ -64,8 +66,3 @@ export default {
 <style scoped>
 
 </style>
-<!--sPlanDialog-->
-<!--set_sPlanShow-->
-<!--sPlannerShow-->
-
-<!--sPlanShow-->

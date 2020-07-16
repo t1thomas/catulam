@@ -8,27 +8,37 @@
       :elevation="hover ? 12 : 2"
       width="100%"
     >
-      <v-row no-gutters>
-        <v-col style="text-align: center">
+      <div class="d-flex flex-no-wrap justify-space-between">
+        <div class="pl-2">
           <span class="font-weight-medium body-2">
             {{ ticket.title }}    #{{ ticket.issueNumber }}
           </span>
+        </div>
+
+        <div>
           <v-chip
+            style="padding-left: 0"
             x-small
             color="dark-grey"
             text-color="white"
           >
-            <v-avatar left>
-              <v-icon>mdi-progress-clock</v-icon>
+            <v-avatar
+              left
+              style="margin-left: 0"
+            >
+              <v-icon small>
+                mdi-progress-clock
+              </v-icon>
             </v-avatar>
             {{ ticket.hourEstimate }}hr
           </v-chip>
           <v-chip
+            style="padding-left: 0"
             x-small
-            pill
             class="ml-2"
           >
             <v-avatar
+              style="margin-left: 0"
               left
               tile
             >
@@ -38,6 +48,7 @@
               />
               <v-icon
                 v-else
+                small
                 dark
               >
                 mdi-help-circle
@@ -45,8 +56,8 @@
             </v-avatar>
             {{ fullName }}
           </v-chip>
-        </v-col>
-      </v-row>
+        </div>
+      </div>
     </v-card>
   </v-hover>
 </template>

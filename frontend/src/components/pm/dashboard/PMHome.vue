@@ -29,27 +29,19 @@
         <project-list />
       </v-col>
     </v-row>
-    <n-pro-dialog v-if="showNProDialog" />
+    <n-pro-dialog/>
   </v-container>
 </template>
 
 <script>
-import { mapState } from 'vuex';
-import NProDialog from './NProDialog.vue';
-import ProjectList from './ProjectList.vue';
+import NProDialog from './dialogs/NProDialog.vue';
+import ProjectList from './MyProjectsComponent/ProjectList.vue';
 
 export default {
   name: 'Home',
   components: {
     NProDialog,
     ProjectList,
-  },
-  computed: {
-    ...mapState({
-      currUser: (state) => state.currentUser,
-      showNProDialog: (state) => state.nProDialog.show,
-      showSPlanDialog: (state) => state.sPlanDialog.show,
-    }),
   },
 };
 </script>
