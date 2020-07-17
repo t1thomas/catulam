@@ -34,7 +34,10 @@
           </v-card-actions>
         </template>
       </v-col>
-      <v-col class="pa-0">
+      <v-col
+        class="pa-0"
+        cols="8"
+      >
         <draggable-tick-list
           v-if="!noUs"
           :list-properties="tickListConfig"

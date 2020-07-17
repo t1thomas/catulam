@@ -32,7 +32,7 @@
           </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
-      <v-card-actions class="pt-1 pb-0">
+      <v-card-actions class="pt-1 pb-0 card-bottom">
         <v-spacer />
         <v-chip
           small

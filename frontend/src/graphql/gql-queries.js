@@ -161,6 +161,7 @@ const gqlQueries = {
           issueNumber
           desc
           hourEstimate
+          done
           sprint {
             id
           }
