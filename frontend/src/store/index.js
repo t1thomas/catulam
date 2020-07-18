@@ -74,8 +74,24 @@ export default new Vuex.Store({
     allUserList: null,
     currPmProjects: [],
     refreshTask: null,
+    projects: null,
+    tickets: null,
+    userStories: null,
+    sprints: null,
   },
   mutations: {
+    set_projects(state, obj) {
+      state.projects = obj;
+    },
+    set_tickets(state, obj) {
+      state.tickets = obj;
+    },
+    set_userStories(state, obj) {
+      state.userStories = obj;
+    },
+    set_sprints(state, obj) {
+      state.sprints = obj;
+    },
     // set_jwt(state, obj) {
     //   // state.jwt.token = obj.token;
     //   // state.jwt.exp = obj.exp;
@@ -297,6 +313,68 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    // Projects associated with currentUser
+    async fetchProjects({ commit }, payload) {
+      await apolloClient.query({
+        query: gqlQueries.PROJECTS,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { Project } = response.data;
+        if (Project.length > 0) {
+          commit('set_projects', Project);
+        }
+      }).catch((error) => {
+        // console.log('User not found');
+        commit('set_snackBarShow', error);
+      });
+    },
+    // All Tickets from projects that currentUser is member of
+    async fetchTickets({ commit }, payload) {
+      await apolloClient.query({
+        query: gqlQueries.TICKETS,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { Ticket } = response.data;
+        if (Ticket.length > 0) {
+          commit('set_tickets', Ticket);
+        }
+      }).catch((error) => {
+        commit('set_snackBarShow', error);
+      });
+    },
+    // set_userStories
+    // All UserStories from projects that currentUser is member of
+    async fetchUserStories({ commit }, payload) {
+      await apolloClient.query({
+        query: gqlQueries.USER_STORIES,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { UserStory } = response.data;
+        if (UserStory.length > 0) {
+          commit('set_tickets', UserStory);
+        }
+      }).catch((error) => {
+        commit('set_snackBarShow', error);
+      });
+    },
+    // All UserStories from projects that currentUser is member of
+    async fetchSprints({ commit }, payload) {
+      await apolloClient.query({
+        query: gqlQueries.SPRINTS,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { Sprint } = response.data;
+        if (Sprint.length > 0) {
+          commit('set_sprints', Sprint);
+        }
+      }).catch((error) => {
+        commit('set_snackBarShow', error);
+      });
+    },
     async getRefreshTokens({ dispatch, commit }) {
       await apolloClient.mutate({
         mutation: gqlQueries.REFRESH_TOKEN,
@@ -552,6 +630,7 @@ export default new Vuex.Store({
         variables: payload,
       }).then((response) => {
         const { projects } = response.data.User[0];
+        console.log(projects);
         if (projects.length > 0) {
           const data = projects.map((pro) => pro.Project);
           commit('set_currPmPros', data);

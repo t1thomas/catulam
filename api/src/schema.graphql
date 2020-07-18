@@ -17,11 +17,6 @@ type UserStory {
     storyText: String!
     issueNumber: Int!
     tickets: [Ticket] @relation(name: "SUB_TASK", direction: IN)
-    ticketIds: idList
-    @cypher(statement: """
-    MATCH (this)<-[:SUB_TASK]-(rec:Ticket)
-    RETURN collect(rec.id) AS ids
-    """)
     project: Project @relation(name: "USER_STORY", direction: OUT)
 }
 

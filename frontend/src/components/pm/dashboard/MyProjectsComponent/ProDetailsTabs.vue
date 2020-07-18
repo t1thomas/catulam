@@ -237,9 +237,6 @@ export default {
       this.navBacklog();
       this.sPlannerShow({ show: true, proId: this.currProject.id });
     },
-    memberByID(id) {
-      return this.proMembers.find((member) => member.id === id);
-    },
     gravatar(member) {
       return `https://gravatar.com/avatar/${member.avatar}?d=identicon`;
     },
@@ -256,12 +253,6 @@ export default {
     unCompTicksCountSprint(sprint) {
       const unComplete = sprint.tickets.filter((tick) => tick.done === false);
       return unComplete.length;
-    },
-    tickNavigation(ticket) {
-      this.$router.push({
-        path: '/ticket',
-        query: { tickId: ticket.id, proId: this.currProject.id },
-      });
     },
     sprintNavigation(sprint) {
       this.$router.push({

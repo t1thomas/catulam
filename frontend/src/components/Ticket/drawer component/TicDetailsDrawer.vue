@@ -56,9 +56,6 @@ export default {
     overlay: false,
   }),
   computed: {
-    proId() {
-      return this.$route.query.proId;
-    },
     dataLoaded() {
       return this.ticket !== null;
     },

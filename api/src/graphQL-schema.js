@@ -497,6 +497,7 @@ const resolveFunctions = {
     DeleteTicket: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        console.log(result);
         await pubSub.publish('project', { update: params.project.id });
         return result;
       } catch (e) {

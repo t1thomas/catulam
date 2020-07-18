@@ -341,6 +341,65 @@ const gqlQueries = {
         }
       }
     }`,
+  // All Projects that currentUser is member of
+  PROJECTS: gql`query($username: String!) {
+    Project(filter: { members_single: { User: { username: $username } } }) {
+      id
+      title
+      label
+      startDate
+      endDate
+      desc
+    }
+  }`,
+  // All Tickets from projects that currentUser is member of
+  TICKETS: gql`query($username: String!) {
+    Ticket(
+      filter: { project: { members_some: { User: { username: $username } } } }
+    ) {
+      id
+      issueNumber
+      title
+      done
+      hourEstimate
+      assignee {
+        id
+      }
+      project {
+        id
+      }
+    }
+  }`,
+  USER_STORIES: gql`query($username: String!) {
+    UserStory(
+      filter: { project: { members_some: { User: { username: $username } } } }
+    ) {
+      id
+      storyText
+      issueNumber
+      project {
+        id
+      }
+    }
+  }`,
+  SPRINTS: gql`query($username: String!) {
+    Sprint(
+      filter: { project: { members_some: { User: { username: $username } } } }
+    ) {
+      id
+      sprintNo
+      active
+      startDate
+      endDate
+      tickets {
+        id
+        done
+      }
+      project {
+        id
+      }
+    }
+  }`,
   PM_PROJECTS: gql`
     query($username: String!) {
       User(filter: { username: $username }) {
@@ -438,23 +497,6 @@ const gqlQueries = {
       email
       avatar
       role
-    }
-  }`,
-  Tickets: gql`query{
-    Ticket {
-      id
-      issueNumber
-      hourEstimate
-      userStory {
-        id
-      }
-      title
-      creator
-      desc
-      done
-      sprint {
-        id
-      }
     }
   }`,
   BackLogData: gql`query{

@@ -104,6 +104,10 @@ export default {
           await this.fetchCurrentUserTasks({ username: this.currentUser.username });
         }
         await this.fetchAllUserList();
+        await this.fetchProjects({ username: this.currentUser.username });
+        await this.fetchTickets({ username: this.currentUser.username });
+        await this.fetchUserStories({ username: this.currentUser.username });
+        await this.fetchSprints({ username: this.currentUser.username });
       }
     },
   },
@@ -113,6 +117,10 @@ export default {
   },
   methods: {
     ...mapActions([
+      'fetchSprints',
+      'fetchUserStories',
+      'fetchProjects',
+      'fetchTickets',
       'fetchAllUserList',
       'fetchCurrentUserTasks',
       'logoutUser',
