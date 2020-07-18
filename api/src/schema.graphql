@@ -112,6 +112,15 @@ type Mutation {
     UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
     UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
 
+    DeleteTicket(tick: _TicketInput!): Ticket
+    @hasScope(scopes:["Ticket:Delete"])
+    @cypher(statement:"""
+    MATCH(t:Ticket {id: $tick.id})
+    WITH t, properties(t) AS tick
+    DETACH DELETE t
+    RETURN tick
+    """)
+
     loginUser(username: String!, password: String!): JSON
     @cypher(statement:"""
     MATCH(u:User{username: $username})

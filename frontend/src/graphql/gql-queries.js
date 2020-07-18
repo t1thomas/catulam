@@ -220,6 +220,13 @@ const gqlQueries = {
       }
     }
   `,
+  DELETE_TICKET: gql`
+    mutation($tick: _TicketInput!) {
+      DeleteTicket(tick: $tick) {
+        title
+      }
+    }
+  `,
   UPDATE_TICKET_ETIME: gql`
     mutation($id: ID!, $hrs: Int!) {
       UpdateTicket(id: $id, hourEstimate: $hrs) {

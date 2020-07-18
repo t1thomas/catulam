@@ -252,13 +252,12 @@ export async function onLogout(client) {
   /* remove token right away, s even if the database
 operation fails the client no longer has a token
  */
-
   if (typeof localStorage !== 'undefined') {
     localStorage.removeItem(AUTH_TOKEN);
   }
   // run logout mutation
   await Vue.$store.dispatch('logoutUser');
-
+  // reset webSocket connections
   if (client.wsClient) restartWebsockets(apolloClient.wsClient);
   try {
     await apolloClient.resetStore();

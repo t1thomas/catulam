@@ -124,7 +124,7 @@ export default {
       // starts saving animation
       this.savingProgress();
       this.disabled = true;
-      await this.apollo.mutate({
+      await this.$apollo.mutate({
         mutation: gqlQueries.UPDATE_TICKET_DESC,
         fetchPolicy: 'no-cache',
         variables: { id: this.ticket.id, desc: this.text },

@@ -494,6 +494,15 @@ const resolveFunctions = {
         throw new Error(e);
       }
     },
+    DeleteTicket: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('project', { update: result.project.id });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
     TicToToDo: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);

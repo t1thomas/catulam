@@ -9,11 +9,19 @@
     <v-container
       v-if="dataLoaded"
     >
+      <v-overlay
+        absolute
+        :value="overlay"
+        opacity="0.78"
+      >
+        <del-tic-dialog @closeDialog="overlay = false" />
+      </v-overlay>
       <topSection />
       <v-divider />
       <details-section />
       <v-divider />
       <desc-section />
+      <delete-section @delDialog="overlay = true" />
     </v-container>
 
 
@@ -32,6 +40,8 @@ import { mapActions, mapState } from 'vuex';
 import topSection from '../Page Components/topSection.vue';
 import detailsSection from '../Page Components/detailsSection.vue';
 import descSection from '../Page Components/descSection.vue';
+import deleteSection from '../Page Components/deleteSection.vue';
+import DelTicDialog from '../dialogs/DelTicDialog.vue';
 
 export default {
   name: 'DetailsDrawer',
@@ -39,19 +49,23 @@ export default {
     topSection,
     detailsSection,
     descSection,
+    deleteSection,
+    DelTicDialog,
   },
+  data: () => ({
+    overlay: false,
+  }),
   computed: {
     proId() {
       return this.$route.query.proId;
     },
     dataLoaded() {
-      return this.ticket !== null && this.project !== null;
+      return this.ticket !== null;
     },
     ...mapState({
       show: (state) => state.detailsDrawer.show,
       ticketId: (state) => state.detailsDrawer.ticketId,
       ticket: (state) => state.currentTicket,
-      project: (state) => state.currProElements,
     }),
     drawer: {
       get() {
@@ -59,19 +73,20 @@ export default {
       },
       set(val) {
         this.$store.commit('set_DrawerShow', { show: val });
+        if (val === false) {
+          this.overlay = false;
+        }
       },
     },
   },
   watch: {
     async show(val) {
+      // if val === true i.e if drawer is showing
       if (val) {
         await this.fetchCurrTicket(this.ticketId);
       }
     },
   },
-  // async mounted() {
-  //   await this.fetchCurrTicket(this.ticketId);
-  // },
   methods: {
     ...mapActions([
       'detDrawShow',
