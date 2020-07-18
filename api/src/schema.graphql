@@ -112,10 +112,10 @@ type Mutation {
     UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
     UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
 
-    DeleteTicket(tick: _TicketInput!): Ticket
+    DeleteTicket(ticket: _TicketInput!, project: _ProjectInput!): Ticket
     @hasScope(scopes:["Ticket:Delete"])
     @cypher(statement:"""
-    MATCH(t:Ticket {id: $tick.id})
+    MATCH(t:Ticket {id: $ticket.id})
     WITH t, properties(t) AS tick
     DETACH DELETE t
     RETURN tick

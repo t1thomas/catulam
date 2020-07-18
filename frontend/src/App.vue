@@ -45,6 +45,7 @@
       </v-btn>
     </v-app-bar>
     <snackbar />
+    <tic-det-drawer />
     <v-container
       fill-height
       fluid
@@ -60,11 +61,12 @@ import { mapActions, mapState } from 'vuex';
 import { onLogout } from './vue-apollo';
 import snackbar from './components/snackbar.vue';
 import navDrawItems from './components/appMain/navDrawItems.vue';
-
+import TicDetailsDrawer from './components/Ticket/drawer component/TicDetailsDrawer.vue';
 
 export default {
   name: 'LayoutDefault',
   components: {
+    'tic-det-drawer': TicDetailsDrawer,
     snackbar,
     navDrawItems,
   },

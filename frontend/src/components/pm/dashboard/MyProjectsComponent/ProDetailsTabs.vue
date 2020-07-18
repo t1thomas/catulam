@@ -110,85 +110,7 @@
         </v-card>
       </v-tab-item>
       <v-tab-item>
-        <v-card flat>
-          <v-simple-table>
-            <template v-slot:default>
-              <thead>
-                <tr>
-                  <th>
-                    Name
-                  </th>
-                  <th>
-                    Estimate (Hrs)
-                  </th>
-                  <th>
-                    Completed
-                  </th>
-                  <th>
-                    Assignee
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="ticket in proTickets"
-                  :key="ticket.id"
-                  style="cursor: pointer"
-                  @click="tickNavigation(ticket)"
-                >
-                  <td>
-                    {{ ticket.title }}
-                  </td>
-                  <td>
-                    {{ ticket.hourEstimate.toString() }}
-                  </td>
-                  <td>
-                    <v-icon
-                      v-if="ticket.done"
-                      color="green"
-                    >
-                      mdi-check
-                    </v-icon>
-                    <v-icon
-                      v-else
-                      color="amber"
-                    >
-                      mdi-close
-                    </v-icon>
-                  </td>
-                  <td>
-                    <v-chip
-                      v-if="ticket.assignee !== null"
-                      pill
-                      small
-                    >
-                      <v-avatar left>
-                        <v-img
-                          :src="gravatar(memberByID(ticket.assignee.id))"
-                        />
-                      </v-avatar>
-                      {{ memberByID(ticket.assignee.id).fullName }}
-                    </v-chip>
-                    <v-chip
-                      v-else
-                      small
-                      pill
-                    >
-                      <v-avatar left>
-                        <v-icon
-                          dark
-                        >
-                          mdi-help-circle
-                        </v-icon>
-                      </v-avatar>
-                      Unassigned
-                    </v-chip>
-                  </td>
-                </tr>
-              </tbody>
-            </template>
-          </v-simple-table>
-        </v-card>
+        <ticket-table :project-id="projectId"/>
       </v-tab-item>
       <v-tab-item>
         <not-found-card
@@ -265,11 +187,13 @@
 <script>
 import { mapActions } from 'vuex';
 import NotFoundCard from '../../../NotFoundCard.vue';
+import TicketTable from './TicketTable.vue';
 
 export default {
   name: 'ProDetailsTabs',
   components: {
     NotFoundCard,
+    TicketTable,
   },
   props: {
     projectId: {

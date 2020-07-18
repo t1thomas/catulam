@@ -221,8 +221,8 @@ const gqlQueries = {
     }
   `,
   DELETE_TICKET: gql`
-    mutation($tick: _TicketInput!) {
-      DeleteTicket(tick: $tick) {
+    mutation($ticket: _TicketInput!, $project: _ProjectInput!) {
+      DeleteTicket(ticket: $ticket, project: $project) {
         title
       }
     }

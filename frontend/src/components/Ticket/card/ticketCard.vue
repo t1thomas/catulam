@@ -88,14 +88,14 @@ export default {
     }),
     ...mapGetters([
       'getTicketById',
-      'getMemberById',
+      'getProMemberById',
     ]),
     assignee() {
       if (this.ticket.assignee === null) {
         return null;
       }
       // const memObj = this.members.find((member) => member.User.id === this.ticket.assignee.id);
-      return this.getMemberById(this.ticket.assignee.id);
+      return this.getProMemberById(this.ticket.assignee.id);
     },
     ticket() {
       return this.getTicketById(this.tickId);

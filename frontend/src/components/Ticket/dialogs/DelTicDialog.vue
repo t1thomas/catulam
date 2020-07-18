@@ -69,7 +69,10 @@ export default {
       await this.$apollo.mutate({
         mutation: gqlQueries.DELETE_TICKET,
         fetchPolicy: 'no-cache',
-        variables: { tick: { id: this.ticket.id } },
+        variables: {
+          ticket: { id: this.ticket.id },
+          project: { id: this.ticket.project.id },
+        },
       }).then(() => {
         this.snackBarOn({
           message: 'Deleted Successfully',

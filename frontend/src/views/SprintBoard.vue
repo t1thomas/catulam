@@ -8,7 +8,7 @@
 <script>
 import { mapActions } from 'vuex';
 import sprintColumns from '../components/sprintBoard/sprintColumns.vue';
-import DetailsDrawer from '../components/Ticket/drawer component/DetailsDrawer.vue';
+import DetailsDrawer from '../components/Ticket/drawer component/TicDetailsDrawer.vue';
 
 export default {
   name: 'SprintBoard',

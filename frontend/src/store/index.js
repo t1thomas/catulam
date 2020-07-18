@@ -749,8 +749,10 @@ export default new Vuex.Store({
       .map((tick) => tick.id),
     getPosDoneTicks: (state) => state.sprintBoardData.posDone[0].tickets
       .map((tick) => tick.id),
-    getMemberById: (state) => (memberId) => state.currProElements.members
+    getProMemberById: (state) => (memberId) => state.currProElements.members
       .find((member) => member.User.id === memberId).User,
+    getMemberById: (state) => (memberId) => state.allUserList
+      .find((member) => member.id === memberId),
     // get members of current project, apart from currently logged in PM
     getProMembers_ex_pm: (state) => state.currProElements.members
       .filter((member) => member.User.id !== state.currentUser.id),
