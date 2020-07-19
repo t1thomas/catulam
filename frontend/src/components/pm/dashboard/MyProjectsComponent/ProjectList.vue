@@ -21,7 +21,7 @@
       </v-btn>
     </v-toolbar>
     <not-found-card
-      v-if="projectsNone"
+      v-if="projects.length <= 0"
       type="Project"
       @createAction="createProDialog"
     />
@@ -72,13 +72,9 @@ export default {
         this.$store.dispatch('onTabChange', val);
       },
     },
-    // this property always returns true if there are no projects
-    projectsNone() {
-      return this.projects.length === 0;
-    },
-    ...mapState({
-      projects: (state) => state.currPmProjects,
-    }),
+    ...mapState([
+      'projects',
+    ]),
   },
   methods: {
     ...mapActions([

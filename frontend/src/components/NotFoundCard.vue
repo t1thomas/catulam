@@ -55,6 +55,8 @@ export default {
           return { title: '0 Tickets Found', subtitle: 'Add new Ticket (Open BackLog)' };
         case 'Project':
           return { title: '0 Projects Found', subtitle: 'Create New Project' };
+        case 'Member':
+          return { title: '0 Members Found', subtitle: 'Add Members to Project' };
         default:
           return null;
       }

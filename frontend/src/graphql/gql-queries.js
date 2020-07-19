@@ -180,18 +180,6 @@ const gqlQueries = {
         lastName
         fullName
         email
-          projects {
-            Project {
-              id
-            }
-          }
-        userStories {
-          id
-        }
-        tickets {
-          id
-          done
-        }
         avatar
       }
     }`,
@@ -350,6 +338,18 @@ const gqlQueries = {
       startDate
       endDate
       desc
+      members {
+        User {
+          id
+        }
+        role
+      }
+      sprints {
+        id
+      }
+      tickets {
+        id
+      }
     }
   }`,
   // All Tickets from projects that currentUser is member of
@@ -366,6 +366,9 @@ const gqlQueries = {
         id
       }
       project {
+        id
+      }
+      sprint {
         id
       }
     }
@@ -400,57 +403,6 @@ const gqlQueries = {
       }
     }
   }`,
-  PM_PROJECTS: gql`
-    query($username: String!) {
-      User(filter: { username: $username }) {
-        projects {
-          Project {
-            id
-            label
-            startDate
-            endDate
-            sprints {
-              id
-              sprintNo
-              active
-              startDate
-              endDate
-              tickets {
-                id
-                done
-              }
-            }
-            tickets {
-              id
-              issueNumber
-              title
-              done
-              hourEstimate
-              assignee {
-                id
-              }
-            }
-            userStories {
-              id
-              storyText
-              tickets {
-                id
-              }
-            }
-            members {
-              User {
-                id
-                firstName
-                lastName
-                fullName
-                avatar
-              }
-              role
-            }
-          }
-        }
-      }
-    }`,
   CREATE_PROJECT: gql`
     mutation(
       $title: String!

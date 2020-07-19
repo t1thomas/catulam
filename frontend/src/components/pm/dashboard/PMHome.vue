@@ -17,6 +17,7 @@
         >
           <v-btn
             class="primary"
+            @click="print"
           >
             Print
           </v-btn>
@@ -29,7 +30,7 @@
         <project-list />
       </v-col>
     </v-row>
-    <n-pro-dialog/>
+    <n-pro-dialog />
   </v-container>
 </template>
 
@@ -42,6 +43,11 @@ export default {
   components: {
     NProDialog,
     ProjectList,
+  },
+  methods: {
+    print() {
+
+    },
   },
 };
 </script>

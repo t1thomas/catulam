@@ -1,5 +1,10 @@
 <template>
   <v-card flat>
+    <not-found-card
+      v-if="proTickets.length <= 0"
+      type="Sprint"
+      @createAction="navigate"
+    />
     <v-simple-table>
       <template v-slot:default>
         <thead>
@@ -53,10 +58,10 @@
               >
                 <v-avatar left>
                   <v-img
-                    :src="gravatar(getMemberById(ticket.assignee.id).avatar)"
+                    :src="getGravatar(ticket.assignee.id)"
                   />
                 </v-avatar>
-                {{ getMemberById(ticket.assignee.id).fullName }}
+                {{ getFullName(ticket.assignee.id) }}
               </v-chip>
               <v-chip
                 v-else
@@ -82,9 +87,13 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import NotFoundCard from '../../../NotFoundCard.vue';
 
 export default {
   name: 'TicketTable',
+  components: {
+    NotFoundCard,
+  },
   props: {
     projectId: {
       type: String,
@@ -93,18 +102,19 @@ export default {
   },
   computed: {
     ...mapGetters([
-      'getMemberById',
+      'getFullName',
+      'getGravatar',
     ]),
     proTickets() {
-      return this.$store.getters.getCurrProject(this.projectId).tickets;
+      return this.$store.getters.getProjectTickets(this.projectId);
     },
   },
   methods: {
     ...mapActions([
       'detDrawShow',
     ]),
-    gravatar(avatar) {
-      return `https://gravatar.com/avatar/${avatar}?d=identicon`;
+    navigate() {
+      console.log('dont forget navigation to backlog and open dialog');
     },
   },
 };

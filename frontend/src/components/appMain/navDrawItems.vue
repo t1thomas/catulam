@@ -1,6 +1,6 @@
 <template>
   <v-list
-    v-if="currUser"
+    v-if="getCurrentUser"
     dense
   >
     <v-list-item
@@ -49,7 +49,7 @@
       <template v-slot:activator>
         <v-list-item-title>Sprints</v-list-item-title>
       </template>
-      <template v-if="!noSprints">
+      <template v-if="sprints.length > 0">
         <v-list-group
           v-for="project in projects"
           :key="project.id"
@@ -69,7 +69,7 @@
             @click="toSprint(sprint.id, project.id)"
           >
             <v-list-item-title>
-              Sprint {{ sprint.sprintNo }}
+              Sprint {{ getSprintById(sprint.id).sprintNo }}
             </v-list-item-title>
           </v-list-item>
         </v-list-group>
@@ -86,29 +86,19 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapGetters, mapState, mapActions } from 'vuex';
 
 export default {
   name: 'NavDrawer',
   computed: {
-    ...mapState({
-      currUser: 'currentUser',
-      devTasks: 'currentUserTasks',
-      pmProjects: 'currPmProjects',
-    }),
-    projects() {
-      if (this.currUser.role === 'pm') {
-        return this.pmProjects;
-      }
-      return this.devTasks;
-    },
-    noSprints() {
-      if (this.projects.length > 0) {
-        const proWithSprints = this.projects.filter((pro) => pro.sprints.length > 0).length;
-        return proWithSprints <= 0;
-      }
-      return true;
-    },
+    ...mapState([
+      'projects',
+      'sprints',
+    ]),
+    ...mapGetters([
+      'getSprintById',
+      'getCurrentUser',
+    ]),
   },
   methods: {
     toBacklog(project) {
