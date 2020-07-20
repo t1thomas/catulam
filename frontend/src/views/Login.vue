@@ -102,7 +102,6 @@ export default {
     },
     ...mapGetters([
       'getCurrentUser',
-      'getJwt',
     ]),
   },
   watch: {

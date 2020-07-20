@@ -94,7 +94,6 @@ export default {
     },
   },
   async created() {
-    console.log('here');
     await this.$store.dispatch('fetchCurrentUser');
   },
   methods: {

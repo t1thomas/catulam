@@ -224,6 +224,7 @@ export default new Vuex.Store({
       state.snackBar.type = '';
     },
     set_snackBarShow(state, obj) {
+      console.log(obj.message);
       state.snackBar.message = obj.message;
       state.snackBar.type = obj.type;
       state.snackBar.show = true;
@@ -313,8 +314,7 @@ export default new Vuex.Store({
           commit('set_projects', Project);
         }
       }).catch((error) => {
-        // console.log('User not found');
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
     // All Tickets from projects that currentUser is member of
@@ -330,7 +330,7 @@ export default new Vuex.Store({
           commit('set_tickets', Ticket);
         }
       }).catch((error) => {
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
     // set_userStories
@@ -347,7 +347,7 @@ export default new Vuex.Store({
           commit('set_userStories', UserStory);
         }
       }).catch((error) => {
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
     // All UserStories from projects that currentUser is member of
@@ -363,7 +363,7 @@ export default new Vuex.Store({
           commit('set_sprints', Sprint);
         }
       }).catch((error) => {
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
     async getRefreshTokens({ dispatch, commit }) {
@@ -379,7 +379,7 @@ export default new Vuex.Store({
         // update currentUser State
         dispatch('fetchCurrentUser');
       }).catch((error) => {
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
     autoRefresh({ dispatch, commit }) {
@@ -420,7 +420,7 @@ export default new Vuex.Store({
         const { Sprint } = response.data;
         commit('set_sprintList', Sprint);
       }).catch((error) => {
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
     async fetchCurrProElements({ commit }, id) {
@@ -431,14 +431,10 @@ export default new Vuex.Store({
       })
         .then((response) => {
           const { Project } = response.data;
-          if (Project === null) {
-            throw new Error();
-          } else {
-            commit('set_currProElements', Project[0]);
-          }
+          commit('set_currProElements', Project[0]);
         })
         .catch((error) => {
-          commit('set_snackBarShow', error);
+          commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
     async fetchBackLogData({ commit }, id) {
@@ -480,6 +476,7 @@ export default new Vuex.Store({
         });
     },
     async fetchCurrentUser({ commit, dispatch }) {
+      const inLogin = Vue.$router.currentRoute.name === 'login';
       apolloClient.query({
         query: gqlQueries.CurrentUser,
         fetchPolicy: 'no-cache',
@@ -490,14 +487,22 @@ export default new Vuex.Store({
         dispatch('autoRefresh');
       }).catch((error) => {
         commit('set_currentUser', null);
-        commit('set_snackBarShow', error);
+        // only show error message if request was made outside login page
+        if (!inLogin) {
+          commit('set_snackBarShow', {
+            message: error,
+            type: 'error',
+          });
+        }
       });
     },
     removeUser({ commit }) {
       // set current user to null
       commit('set_currentUser', null);
       // and force user to login
-      Vue.$router.push('/');
+      if (Vue.$router.currentRoute.name !== 'login') {
+        Vue.$router.push('/');
+      }
       // and remove invalid access token
       if (typeof localStorage !== 'undefined') {
         localStorage.removeItem(process.env.VUE_APP_AUTH_TOKEN);
@@ -516,7 +521,8 @@ export default new Vuex.Store({
         commit('set_currentUser', null);
         // and force user to login
         Vue.$router.push('/');
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
+        // remove timer that requests refresh token
         commit('set_RefreshTask', null);
       });
     },
@@ -535,7 +541,7 @@ export default new Vuex.Store({
           }
         })
         .catch((error) => {
-          commit('set_snackBarShow', error);
+          commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
     async fetchAllUserList({ commit }) {
@@ -550,7 +556,7 @@ export default new Vuex.Store({
         })
         .catch((error) => {
           // console.log('Unable to fetch Users');
-          commit('set_snackBarShow', error);
+          commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
     async updateTicketHours({ commit }, payload) {
@@ -566,7 +572,7 @@ export default new Vuex.Store({
           commit('set_currTickHours', UpdateTicket.hourEstimate);
         }
       }).catch((error) => {
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
     async updateTicketAssignee({ commit }, payload) {
@@ -584,7 +590,7 @@ export default new Vuex.Store({
           commit('set_currTicket_assignee', UpdateTicketAssignee);
         }
       }).catch((error) => {
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
     async fetchCurrentUserTasks({ commit }, payload) {
@@ -601,7 +607,7 @@ export default new Vuex.Store({
         })
         .catch((error) => {
           // console.log('Unable to fetch User Data');
-          commit('set_snackBarShow', error);
+          commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
     async sPlannerShow({ commit }, payload) {
@@ -621,7 +627,7 @@ export default new Vuex.Store({
           })
           .catch((error) => {
             // console.log('Unable to load Sprint Planner');
-            commit('set_snackBarShow', error);
+            commit('set_snackBarShow', { message: error, type: 'error' });
           });
       }
     },

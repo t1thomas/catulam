@@ -1,6 +1,5 @@
 const { GraphQLJSON } = require('graphql-type-json');
-const { PubSub, withFilter } = require('apollo-server-express');
-
+const { PubSub, withFilter, AuthenticationError } = require('apollo-server-express');
 const { GraphQLObjectType, GraphQLString, GraphQLList } = require('graphql');
 const { makeAugmentedSchema, neo4jgraphql } = require('neo4j-graphql-js');
 const fs = require('fs');
@@ -93,7 +92,7 @@ const resolveFunctions = {
   Query: {
     getCurrentUser: async (object, params, ctx, resolveInfo) => {
       if (!ctx.currentUser) {
-        return null;
+        throw new AuthenticationError('No Token');
       }
       const { id } = ctx.currentUser;
       // update the params so, cypher query contains id.
@@ -105,13 +104,12 @@ const resolveFunctions = {
   },
   Mutation: {
     refreshAccess: async (object, params, ctx, resolveInfo) => {
-      // console.log('refreshAccess');
       try {
         // get refresh token from cookie
         const oldTokenString = ctx.req.cookies[cookieName];
         if (oldTokenString === undefined) {
           // return nothing (silent refresh) if no token was found
-          return null;
+          return new Error('No Refresh Token');
         }
         const { id } = await verifyToken(oldTokenString);
         return neode.cypher(
@@ -187,8 +185,8 @@ const resolveFunctions = {
         });
         return neo4jgraphql(object, params, ctx, resolveInfo);
       })
-      .catch((e) => {
-        throw new Error(e);
+      .catch(() => {
+        throw new Error('Invalid username/password');
       }),
 
     StartToSprint: async (object, params, ctx, resolveInfo) => {
@@ -497,7 +495,6 @@ const resolveFunctions = {
     DeleteTicket: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        console.log(result);
         await pubSub.publish('project', { update: params.project.id });
         return result;
       } catch (e) {

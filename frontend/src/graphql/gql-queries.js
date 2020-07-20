@@ -1,10 +1,11 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
-  REFRESH_TOKEN: gql`
+  REFRESH_TOKEN: /* GraphQL */ `
     mutation {
       refreshAccess
-    }`,
+    }
+  `,
   SUB_BACKLOG_UPDATE: gql`
     subscription($proId: String!) {
       update(proId: $proId)

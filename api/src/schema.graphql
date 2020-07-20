@@ -87,7 +87,8 @@ type Sprint {
 }
 
 type Query {
-    getCurrentUser: User @cypher(statement: """
+    getCurrentUser: User
+    @cypher(statement: """
     MATCH (u:User {id: $id})
     RETURN u
     """)
