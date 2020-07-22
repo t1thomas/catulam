@@ -13,31 +13,35 @@
           md="6"
         >
           <div
-            color="warning"
-            class="px-5 py-3"
+            class="px-5 py-3 white--text"
           >
-            <v-btn
-              class="primary"
-              @click="print"
-            >
-              Print
-            </v-btn>
+            HELLO
           </div>
         </v-col>
         <v-col
           cols="12"
           md="6"
         >
-       </v-col>
+          <burn-down-chart
+            v-for="sprint in getProjectSprints(proId)"
+            :key="sprint.id"
+            :sprint="sprint"
+          />
+        </v-col>
       </v-row>
     </v-container>
   </v-content>
 </template>
 
 <script>
+import { mapGetters } from 'vuex';
+import BurnDownChart from '../components/Project/Charts/BurnDownChart.vue';
 
 export default {
   name: 'ProjectPage',
+  components: {
+    BurnDownChart,
+  },
   data: () => ({
     chartData: null,
     totalDays: 10,
@@ -48,6 +52,9 @@ export default {
     proId() {
       return this.$route.query.proId;
     },
+    ...mapGetters([
+      'getProjectSprints',
+    ]),
   },
   methods: {
     print() {

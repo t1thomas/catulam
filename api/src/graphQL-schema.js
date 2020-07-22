@@ -396,7 +396,6 @@ const resolveFunctions = {
       }
     },
     UpdateTicket: async (object, params, ctx, resolveInfo) => {
-      // const alias = resolveInfo.fieldNodes[0].alias;
       const tickId = params.id;
       try {
         // query for the project id linked to the current ticket
