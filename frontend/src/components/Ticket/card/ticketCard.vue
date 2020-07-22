@@ -32,7 +32,7 @@
           </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
-      <v-card-actions class="pt-1 pb-0">
+      <v-card-actions class="pt-1 pb-0 card-bottom">
         <v-spacer />
         <v-chip
           small
@@ -88,14 +88,14 @@ export default {
     }),
     ...mapGetters([
       'getTicketById',
-      'getMemberById',
+      'getProMemberById',
     ]),
     assignee() {
       if (this.ticket.assignee === null) {
         return null;
       }
       // const memObj = this.members.find((member) => member.User.id === this.ticket.assignee.id);
-      return this.getMemberById(this.ticket.assignee.id);
+      return this.getProMemberById(this.ticket.assignee.id);
     },
     ticket() {
       return this.getTicketById(this.tickId);

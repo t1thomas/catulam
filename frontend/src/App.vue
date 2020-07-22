@@ -7,7 +7,7 @@
       mini-variant
       expand-on-hover
     >
-      <nav-draw-items />
+      <nav-draw-items v-if="currentUser" />
     </v-navigation-drawer>
     <v-app-bar
       app
@@ -45,6 +45,7 @@
       </v-btn>
     </v-app-bar>
     <snackbar />
+    <tic-det-drawer />
     <v-container
       fill-height
       fluid
@@ -56,15 +57,15 @@
 
 <script>
 
-import { mapActions, mapState } from 'vuex';
 import { onLogout } from './vue-apollo';
 import snackbar from './components/snackbar.vue';
 import navDrawItems from './components/appMain/navDrawItems.vue';
-
+import TicDetailsDrawer from './components/Ticket/drawer component/TicDetailsDrawer.vue';
 
 export default {
   name: 'LayoutDefault',
   components: {
+    'tic-det-drawer': TicDetailsDrawer,
     snackbar,
     navDrawItems,
   },
@@ -75,48 +76,27 @@ export default {
     gravatar() {
       return `https://gravatar.com/avatar/${this.currentUser.avatar}?d=identicon`;
     },
-    ...mapState([
-      'currentUser',
-    ]),
-    fullName() {
-      return `${this.currentUser.firstName} ${this.currentUser.lastName}`;
-    },
-    drawerItems() {
-      if (this.currentUser) {
-        return [
-          { icon: 'mdi-home', label: 'home', link: '/home' },
-          { icon: 'mdi-math-log', label: 'Backlog', link: '/backlog' },
-        ];
-      }
-      return [
-        { icon: 'mdi-login-variant', label: 'Sign-in', link: '/' },
-      ];
+    currentUser() {
+      return this.$store.getters.getCurrentUser;
     },
   },
   watch: {
-    async currentUser(value) {
-      if (value !== null) {
-        if (this.currentUser.role === 'pm') {
-          await this.fetchPmPros({ username: this.currentUser.username });
-        } else if (this.currentUser.role === 'dev') {
-          await this.fetchCurrentUserTasks({ username: this.currentUser.username });
-        }
-        await this.fetchAllUserList();
+    async currentUser(val) {
+      if (val !== null) {
+        const payload = { username: this.currentUser.username };
+        console.log(payload);
+        await this.$store.dispatch('fetchAllUserList');
+        await this.$store.dispatch('fetchProjects', payload);
+        await this.$store.dispatch('fetchTickets', payload);
+        await this.$store.dispatch('fetchUserStories', payload);
+        await this.$store.dispatch('fetchSprints', payload);
       }
     },
   },
   async created() {
-    this.$vuetify.theme.dark = true;
     await this.$store.dispatch('fetchCurrentUser');
   },
   methods: {
-    ...mapActions([
-      'fetchAllUserList',
-      'fetchCurrentUserTasks',
-      'logoutUser',
-      'fetchPmPros',
-      'snackBarOn',
-    ]),
     async logout() {
       await onLogout(this.$apollo.provider.defaultClient);
     },

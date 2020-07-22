@@ -20,43 +20,11 @@
         </v-icon>
       </v-btn>
     </v-toolbar>
-    <v-container
-      v-if="projectsNone"
-      fluid
-    >
-      <v-card
-        ripple
-        tile
-        style="background: rgb(39, 54, 102)"
-        @click="createProDialog"
-      >
-        <div
-          class="d-flex flex-no-wrap justify-space-between"
-          style="height: 100px"
-        >
-          <div>
-            <v-card-title
-              class="headline"
-            >
-              0 Projects Found
-            </v-card-title>
-
-            <v-card-subtitle>
-              Create New Project
-            </v-card-subtitle>
-          </div>
-
-          <v-avatar
-            size="100"
-            tile
-          >
-            <v-icon dark>
-              mdi-plus
-            </v-icon>
-          </v-avatar>
-        </div>
-      </v-card>
-    </v-container>
+    <not-found-card
+      v-if="projects.length <= 0"
+      type="Project"
+      @createAction="createProDialog"
+    />
     <template v-else>
       <v-tabs
         v-model="tab"
@@ -87,11 +55,13 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import ProDetailsTabs from './ProDetailsTabs.vue';
+import NotFoundCard from '../../../NotFoundCard.vue';
 
 export default {
-  name: 'ProjectList',
+  name: 'MyProjectComponent',
   components: {
     ProDetailsTabs,
+    NotFoundCard,
   },
   computed: {
     tab: {
@@ -102,13 +72,9 @@ export default {
         this.$store.dispatch('onTabChange', val);
       },
     },
-    // this property always returns true if there are no projects
-    projectsNone() {
-      return this.projects.length === 0;
-    },
-    ...mapState({
-      projects: (state) => state.currPmProjects,
-    }),
+    ...mapState([
+      'projects',
+    ]),
   },
   methods: {
     ...mapActions([

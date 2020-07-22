@@ -17,11 +17,6 @@ type UserStory {
     storyText: String!
     issueNumber: Int!
     tickets: [Ticket] @relation(name: "SUB_TASK", direction: IN)
-    ticketIds: idList
-    @cypher(statement: """
-    MATCH (this)<-[:SUB_TASK]-(rec:Ticket)
-    RETURN collect(rec.id) AS ids
-    """)
     project: Project @relation(name: "USER_STORY", direction: OUT)
 }
 
@@ -92,7 +87,8 @@ type Sprint {
 }
 
 type Query {
-    getCurrentUser: User @cypher(statement: """
+    getCurrentUser: User
+    @cypher(statement: """
     MATCH (u:User {id: $id})
     RETURN u
     """)
@@ -111,6 +107,15 @@ type Mutation {
     UpdateTicketAssignee(tick: _TicketInput!, remUser: _UserInput, addUser: _UserInput, project: _ProjectInput!): User
     UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
     UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
+
+    DeleteTicket(ticket: _TicketInput!, project: _ProjectInput!): Ticket
+    @hasScope(scopes:["Ticket:Delete"])
+    @cypher(statement:"""
+    MATCH(t:Ticket {id: $ticket.id})
+    WITH t, properties(t) AS tick
+    DETACH DELETE t
+    RETURN tick
+    """)
 
     loginUser(username: String!, password: String!): JSON
     @cypher(statement:"""

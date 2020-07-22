@@ -10,6 +10,7 @@
       <details-section />
       <v-divider />
       <desc-section />
+      <delete-section />
     </v-content>
   </v-container>
 </template>
@@ -19,6 +20,7 @@ import { mapActions, mapState } from 'vuex';
 import topSection from './topSection.vue';
 import detailsSection from './detailsSection.vue';
 import descSection from './descSection.vue';
+import deleteSection from './deleteSection.vue';
 
 export default {
   name: 'TicketPage',
@@ -26,6 +28,7 @@ export default {
     topSection,
     detailsSection,
     descSection,
+    deleteSection,
   },
   computed: {
     dataLoaded() {
@@ -54,18 +57,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-
-</style>
-<!--id: ID!-->
-<!--issueNumber: Int!-->
-<!--hourEstimate: Int-->
-<!--userStory: UserStory @relation(name: "SUB_TASK", direction: OUT)-->
-<!--title: String!-->
-<!--desc: String-->
-<!--done: Boolean!-->
-<!--sprint: Sprint @relation(name: "SPRINT_TASK", direction: OUT)-->
-<!--project: Project @relation(name: "TICKET", direction: OUT)-->
-<!--assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)-->
-<!--creator: User @relation(name: "CREATOR", direction: OUT)-->

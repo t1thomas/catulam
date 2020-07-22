@@ -2,9 +2,9 @@ const jwt = require('jsonwebtoken');
 const { AuthenticationError } = require('apollo-server-express');
 
 module.exports = async function verifyToken(token) {
+  console.log('verifyToken');
   if (token) {
     try {
-      console.log(token);
       // return await jwt.verify(token, process.env.JWT_SECRET);
       return await jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
     } catch (e) {

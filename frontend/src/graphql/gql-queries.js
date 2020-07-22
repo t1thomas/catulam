@@ -4,7 +4,8 @@ const gqlQueries = {
   REFRESH_TOKEN: gql`
     mutation {
       refreshAccess
-    }`,
+    }
+  `,
   SUB_BACKLOG_UPDATE: gql`
     subscription($proId: String!) {
       update(proId: $proId)
@@ -161,6 +162,7 @@ const gqlQueries = {
           issueNumber
           desc
           hourEstimate
+          done
           sprint {
             id
           }
@@ -179,18 +181,6 @@ const gqlQueries = {
         lastName
         fullName
         email
-          projects {
-            Project {
-              id
-            }
-          }
-        userStories {
-          id
-        }
-        tickets {
-          id
-          done
-        }
         avatar
       }
     }`,
@@ -216,6 +206,13 @@ const gqlQueries = {
       UpdateTicket(id: $id, desc: $desc) {
         id
         desc
+      }
+    }
+  `,
+  DELETE_TICKET: gql`
+    mutation($ticket: _TicketInput!, $project: _ProjectInput!) {
+      DeleteTicket(ticket: $ticket, project: $project) {
+        title
       }
     }
   `,
@@ -333,57 +330,80 @@ const gqlQueries = {
         }
       }
     }`,
-  PM_PROJECTS: gql`
-    query($username: String!) {
-      User(filter: { username: $username }) {
-        projects {
-          Project {
-            id
-            label
-            startDate
-            endDate
-            sprints {
-              id
-              sprintNo
-              active
-              startDate
-              endDate
-              tickets {
-                id
-                done
-              }
-            }
-            tickets {
-              id
-              issueNumber
-              title
-              done
-              hourEstimate
-              assignee {
-                id
-              }
-            }
-            userStories {
-              id
-              storyText
-              tickets {
-                id
-              }
-            }
-            members {
-              User {
-                id
-                firstName
-                lastName
-                fullName
-                avatar
-              }
-              role
-            }
-          }
+  // All Projects that currentUser is member of
+  PROJECTS: gql`query($username: String!) {
+    Project(filter: { members_single: { User: { username: $username } } }) {
+      id
+      title
+      label
+      startDate
+      endDate
+      desc
+      members {
+        User {
+          id
         }
+        role
       }
-    }`,
+      sprints {
+        id
+      }
+      tickets {
+        id
+      }
+    }
+  }`,
+  // All Tickets from projects that currentUser is member of
+  TICKETS: gql`query($username: String!) {
+    Ticket(
+      filter: { project: { members_some: { User: { username: $username } } } }
+    ) {
+      id
+      issueNumber
+      title
+      done
+      hourEstimate
+      assignee {
+        id
+      }
+      project {
+        id
+      }
+      sprint {
+        id
+      }
+    }
+  }`,
+  USER_STORIES: gql`query($username: String!) {
+    UserStory(
+      filter: { project: { members_some: { User: { username: $username } } } }
+    ) {
+      id
+      storyText
+      issueNumber
+      project {
+        id
+      }
+    }
+  }`,
+  SPRINTS: gql`query($username: String!) {
+    Sprint(
+      filter: { project: { members_some: { User: { username: $username } } } }
+    ) {
+      id
+      sprintNo
+      active
+      startDate
+      endDate
+      tickets {
+        id
+        done
+      }
+      project {
+        id
+      }
+    }
+  }`,
   CREATE_PROJECT: gql`
     mutation(
       $title: String!
@@ -430,23 +450,6 @@ const gqlQueries = {
       email
       avatar
       role
-    }
-  }`,
-  Tickets: gql`query{
-    Ticket {
-      id
-      issueNumber
-      hourEstimate
-      userStory {
-        id
-      }
-      title
-      creator
-      desc
-      done
-      sprint {
-        id
-      }
     }
   }`,
   BackLogData: gql`query{

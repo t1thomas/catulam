@@ -55,10 +55,6 @@ export default new Vuex.Store({
       show: false,
       userStoryId: null,
     },
-    // jwt: {
-    //   exp: null,
-    //   token: null,
-    // },
     detDrawerUStory: {
       show: false,
       userStoryId: null,
@@ -71,16 +67,26 @@ export default new Vuex.Store({
     sprintBoardData: null,
     currentTicket: null,
     currProElements: null,
-    allUserList: null,
-    currPmProjects: [],
+    allUserList: [],
     refreshTask: null,
+    projects: [],
+    tickets: [],
+    userStories: [],
+    sprints: [],
   },
   mutations: {
-    // set_jwt(state, obj) {
-    //   // state.jwt.token = obj.token;
-    //   // state.jwt.exp = obj.exp;
-    //   state.jwt = { ...obj };
-    // },
+    set_projects(state, obj) {
+      state.projects = obj;
+    },
+    set_tickets(state, obj) {
+      state.tickets = obj;
+    },
+    set_userStories(state, obj) {
+      state.userStories = obj;
+    },
+    set_sprints(state, obj) {
+      state.sprints = obj;
+    },
     set_proLstTabModel(state, obj) {
       state.proListTabsModel = obj;
     },
@@ -95,9 +101,6 @@ export default new Vuex.Store({
         state.editMemDialog.show = obj.show;
         state.editMemDialog.proId = obj.proId;
       }
-    },
-    set_currPmPros(state, obj) {
-      state.currPmProjects = [...obj];
     },
     set_backLogData(state, obj) {
       if (obj === null) {
@@ -217,8 +220,11 @@ export default new Vuex.Store({
     },
     set_snackBarShow_false(state) {
       state.snackBar.show = false;
+      state.snackBar.message = '';
+      state.snackBar.type = '';
     },
     set_snackBarShow(state, obj) {
+      console.log(obj.message);
       state.snackBar.message = obj.message;
       state.snackBar.type = obj.type;
       state.snackBar.show = true;
@@ -295,6 +301,71 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    // Projects associated with currentUser
+    async fetchProjects({ commit }, payload) {
+      await apolloClient.query({
+        query: gqlQueries.PROJECTS,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { Project } = response.data;
+        console.log(Project);
+        if (Project.length > 0) {
+          commit('set_projects', Project);
+        }
+      }).catch((error) => {
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
+    // All Tickets from projects that currentUser is member of
+    async fetchTickets({ commit }, payload) {
+      await apolloClient.query({
+        query: gqlQueries.TICKETS,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { Ticket } = response.data;
+        console.log(Ticket);
+        if (Ticket.length > 0) {
+          commit('set_tickets', Ticket);
+        }
+      }).catch((error) => {
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
+    // set_userStories
+    // All UserStories from projects that currentUser is member of
+    async fetchUserStories({ commit }, payload) {
+      await apolloClient.query({
+        query: gqlQueries.USER_STORIES,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { UserStory } = response.data;
+        console.log(UserStory);
+        if (UserStory.length > 0) {
+          commit('set_userStories', UserStory);
+        }
+      }).catch((error) => {
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
+    // All UserStories from projects that currentUser is member of
+    async fetchSprints({ commit }, payload) {
+      await apolloClient.query({
+        query: gqlQueries.SPRINTS,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { Sprint } = response.data;
+        console.log(Sprint);
+        if (Sprint.length > 0) {
+          commit('set_sprints', Sprint);
+        }
+      }).catch((error) => {
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
     async getRefreshTokens({ dispatch, commit }) {
       await apolloClient.mutate({
         mutation: gqlQueries.REFRESH_TOKEN,
@@ -308,7 +379,7 @@ export default new Vuex.Store({
         // update currentUser State
         dispatch('fetchCurrentUser');
       }).catch((error) => {
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
     autoRefresh({ dispatch, commit }) {
@@ -340,30 +411,6 @@ export default new Vuex.Store({
     snackBarOn({ commit }, payload) {
       commit('set_snackBarShow', payload);
     },
-    // async loginUser({ commit }, payload) {
-    //   console.log('loginUserAction');
-    //   apolloClient.mutate({
-    //     mutation: gqlQueries.SignInUser,
-    //     fetchPolicy: 'no-cache',
-    //     variables: payload,
-    //   }).then((response) => {
-    //     const { loginUser } = response.data;
-    //     commit('set_jwt', loginUser);
-    //   }).catch((error) => {
-    //     commit('set_snackBarShow', error);
-    //   });
-    // },
-    // async fetchSprints({ commit }) {
-    //   await apolloClient.query({
-    //     query: gqlQueries.Sprints,
-    //     fetchPolicy: 'no-cache',
-    //   }).then((response) => {
-    //     const { Sprint } = response.data;
-    //     commit('set_sprintList', Sprint);
-    //   }).catch((error) => {
-    //     commit('set_snackBarShow', error);
-    //   });
-    // },
     async fetchSPlannerData({ commit }, id) {
       await apolloClient.query({
         query: gqlQueries.S_PLANNER_DATA,
@@ -373,7 +420,7 @@ export default new Vuex.Store({
         const { Sprint } = response.data;
         commit('set_sprintList', Sprint);
       }).catch((error) => {
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
     async fetchCurrProElements({ commit }, id) {
@@ -384,14 +431,10 @@ export default new Vuex.Store({
       })
         .then((response) => {
           const { Project } = response.data;
-          if (Project === null) {
-            throw new Error();
-          } else {
-            commit('set_currProElements', Project[0]);
-          }
+          commit('set_currProElements', Project[0]);
         })
         .catch((error) => {
-          commit('set_snackBarShow', error);
+          commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
     async fetchBackLogData({ commit }, id) {
@@ -433,23 +476,33 @@ export default new Vuex.Store({
         });
     },
     async fetchCurrentUser({ commit, dispatch }) {
+      const inLogin = Vue.$router.currentRoute.name === 'login';
       apolloClient.query({
         query: gqlQueries.CurrentUser,
         fetchPolicy: 'no-cache',
       }).then((response) => {
         const { getCurrentUser } = response.data;
+        console.log(getCurrentUser);
         commit('set_currentUser', getCurrentUser);
         dispatch('autoRefresh');
       }).catch((error) => {
         commit('set_currentUser', null);
-        commit('set_snackBarShow', error);
+        // only show error message if request was made outside login page
+        if (!inLogin) {
+          commit('set_snackBarShow', {
+            message: error,
+            type: 'error',
+          });
+        }
       });
     },
     removeUser({ commit }) {
       // set current user to null
       commit('set_currentUser', null);
       // and force user to login
-      Vue.$router.push('/');
+      if (Vue.$router.currentRoute.name !== 'login') {
+        Vue.$router.push('/');
+      }
       // and remove invalid access token
       if (typeof localStorage !== 'undefined') {
         localStorage.removeItem(process.env.VUE_APP_AUTH_TOKEN);
@@ -468,7 +521,8 @@ export default new Vuex.Store({
         commit('set_currentUser', null);
         // and force user to login
         Vue.$router.push('/');
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
+        // remove timer that requests refresh token
         commit('set_RefreshTask', null);
       });
     },
@@ -487,26 +541,22 @@ export default new Vuex.Store({
           }
         })
         .catch((error) => {
-          commit('set_snackBarShow', error);
+          commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
-    async fetchAllUserList({ commit }, id) {
+    async fetchAllUserList({ commit }) {
       await apolloClient.query({
         query: gqlQueries.ALL_USERS,
         fetchPolicy: 'no-cache',
-        variables: { id },
       })
         .then((response) => {
           const { User } = response.data;
-          if (User === null) {
-            throw new Error();
-          } else {
-            commit('set_allUserList', User);
-          }
+          console.log(User);
+          commit('set_allUserList', User);
         })
         .catch((error) => {
           // console.log('Unable to fetch Users');
-          commit('set_snackBarShow', error);
+          commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
     async updateTicketHours({ commit }, payload) {
@@ -522,7 +572,7 @@ export default new Vuex.Store({
           commit('set_currTickHours', UpdateTicket.hourEstimate);
         }
       }).catch((error) => {
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
     async updateTicketAssignee({ commit }, payload) {
@@ -540,23 +590,7 @@ export default new Vuex.Store({
           commit('set_currTicket_assignee', UpdateTicketAssignee);
         }
       }).catch((error) => {
-        commit('set_snackBarShow', error);
-      });
-    },
-    async fetchPmPros({ commit }, payload) {
-      await apolloClient.query({
-        query: gqlQueries.PM_PROJECTS,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { projects } = response.data.User[0];
-        if (projects.length > 0) {
-          const data = projects.map((pro) => pro.Project);
-          commit('set_currPmPros', data);
-        }
-      }).catch((error) => {
-        // console.log('User not found');
-        commit('set_snackBarShow', error);
+        commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
     async fetchCurrentUserTasks({ commit }, payload) {
@@ -573,7 +607,7 @@ export default new Vuex.Store({
         })
         .catch((error) => {
           // console.log('Unable to fetch User Data');
-          commit('set_snackBarShow', error);
+          commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
     async sPlannerShow({ commit }, payload) {
@@ -593,7 +627,7 @@ export default new Vuex.Store({
           })
           .catch((error) => {
             // console.log('Unable to load Sprint Planner');
-            commit('set_snackBarShow', error);
+            commit('set_snackBarShow', { message: error, type: 'error' });
           });
       }
     },
@@ -676,6 +710,13 @@ export default new Vuex.Store({
     },
   },
   getters: {
+    // construct and return gravatar url with member id
+    getGravatar: (state) => (memberId) => {
+      const { avatar } = state.allUserList.find((member) => member.id === memberId);
+      return `https://gravatar.com/avatar/${avatar}?d=identicon`;
+    },
+    getFullName: (state) => (memberId) => state.allUserList
+      .find((member) => member.id === memberId).fullName,
     // gets users apart from currentUser logged in
     getUserSelection: (state) => (id) => state.allUserList
       .filter((user) => user.id !== id)
@@ -687,12 +728,41 @@ export default new Vuex.Store({
         });
         return arr;
       }, []),
-    // getStoryById: (state) => (id) => state.currProElements.userStories
-    //   .find((story) => story.id === id).storyText,
+    getMemberById: (state) => (memberId) => state.allUserList
+      .find((member) => member.id === memberId),
+    getSprintById: (state) => (sprintId) => state.sprints
+      .find((sprint) => sprint.id === sprintId),
+    // get project members by project ID
+    getProjectMembers: (state) => (projectId) => state.projects
+      .find((pro) => pro.id === projectId).members
+      .map((mem) => ({ id: mem.User.id, role: mem.role })),
+    // get project members by project ID
+    getProjectTickets: (state) => (projectId) => state.tickets
+      .filter((tick) => tick.project.id === projectId),
+    getProjectSprints: (state) => (projectId) => state.sprints
+      .filter((sp) => sp.project.id === projectId),
+
+    // get completed tickets by user ID and project ID
+    getDoneTicksByProMember: (state) => (memberId, projectID) => state.tickets
+      .filter((tick) => tick.project.id === projectID && tick.assignee !== null)
+      .filter((proTick) => proTick.assignee.id === memberId && proTick.done === true),
+    // get unCompleted tickets by user ID and project ID
+    getUnDoneTicksByProMember: (state) => (memberId, projectID) => state.tickets
+      .filter((tick) => tick.project.id === projectID && tick.assignee !== null)
+      .filter((proTick) => proTick.assignee.id === memberId && proTick.done === false),
+
+    // get completed tickets by Sprint ID
+    getDoneTicksBySprint: (state) => (sprintID) => state.tickets
+      .filter((tick) => tick.sprint.id === sprintID && tick.done === true),
+    // get unCompleted tickets by Sprint ID
+    getUnDoneTicksBySprint: (state) => (sprintID) => state.tickets
+      .filter((tick) => tick.sprint !== null)
+      .filter((tick) => tick.sprint.id === sprintID && tick.done === false),
+
     getCurrentUser: (state) => state.currentUser,
-    getCurrProject: (state) => (proId) => state.currPmProjects
+    getCurrProject: (state) => (proId) => state.projects
       .find((project) => project.id === proId),
-    getTicketById: (state) => (id) => state.currProElements.tickets
+    getTicketById: (state) => (id) => state.tickets
       .find((ticket) => ticket.id === id),
     // get ticket ids that dont have sprints, and have a uStory id that matches param
     getTicksUsNoSp: (state) => (userStoryId) => state.backLogData.UsNoSp[0].tickets
@@ -747,7 +817,7 @@ export default new Vuex.Store({
       .map((tick) => tick.id),
     getPosDoneTicks: (state) => state.sprintBoardData.posDone[0].tickets
       .map((tick) => tick.id),
-    getMemberById: (state) => (memberId) => state.currProElements.members
+    getProMemberById: (state) => (memberId) => state.currProElements.members
       .find((member) => member.User.id === memberId).User,
     // get members of current project, apart from currently logged in PM
     getProMembers_ex_pm: (state) => state.currProElements.members

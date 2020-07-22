@@ -105,35 +105,19 @@ import VueApollo from 'vue-apollo';
 import { createApolloClient, restartWebsockets } from 'vue-cli-plugin-apollo/graphql-client';
 import { onError } from 'apollo-link-error';
 import { Observable } from 'apollo-link';
+import refreshToken from './fetchRefreshToken';
+// import { request } from 'graphql-request';
 
 Vue.use(VueApollo);
 
 // Name of the localStorage item
 const AUTH_TOKEN = process.env.VUE_APP_AUTH_TOKEN;
-
-const httpEndpoint = process.env.VUE_APP_DEV_GRAPHQL_HTTP || `${window.location.origin}:4000/graphql`;
+// if in production env, build custom url otherwise use env variable
+const httpEndpoint = process.env.NODE_ENV === 'production' ? `${window.location.origin}:4000/graphql` : process.env.VUE_APP_DEV_GRAPHQL_HTTP;
 // Files URL root
 export const filesRoot = process.env.VUE_APP_FILES_ROOT || httpEndpoint.substr(0, httpEndpoint.indexOf('/graphql'));
 
 Vue.prototype.$filesRoot = filesRoot;
-
-async function getNewToken() {
-  // use fetch API to get refresh token
-  return fetch(process.env.VUE_APP_GRAPHQL_HTTP, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'include',
-    body: JSON.stringify({ query: 'mutation { refreshAccess }' }),
-  })
-    .then((res) => res.json())
-    .then((res) => res.data.refreshAccess.token)
-    .then((token) => {
-      if (typeof localStorage !== 'undefined') {
-        localStorage.setItem(AUTH_TOKEN, token);
-      }
-      return token;
-    });
-}
 
 const errorLink = onError(({
   graphQLErrors, networkError, operation, forward,
@@ -144,7 +128,8 @@ const errorLink = onError(({
     // We assume we have both tokens needed to run the async request
     // Let's refresh token through async request
     return new Observable((observer) => {
-      getNewToken().then((token) => {
+      refreshToken().then((token) => {
+        console.log('here3');
         const { headers } = operation.getContext();
         operation.setContext({
           headers: {
@@ -161,14 +146,14 @@ const errorLink = onError(({
 
         // Retry last failed request
         forward(operation).subscribe(subscriber);
-      }).catch(async (error) => {
+      }).catch((error) => {
+        observer.error(error);
         // If request for refresh token fails,
         // we set currentUser state to null
         // and force user to login page
         // and remove invalid access token
-        await Vue.$store.dispatch('removeUser');
-        observer.error(error);
-        await Vue.$store.dispatch('snackBarOn', error);
+        Vue.$store.dispatch('removeUser');
+        // await Vue.$store.dispatch('snackBarOn', error);
       });
     });
   }
@@ -177,11 +162,12 @@ const errorLink = onError(({
       message: `[Network error]: ${networkError}`,
       type: 'error',
     });
+    console.error(networkError);
   }
   if (graphQLErrors) {
     graphQLErrors.forEach((err) => {
       Vue.$store.dispatch('snackBarOn', {
-        message: err,
+        message: err.message,
         type: 'error',
       });
     });
@@ -194,7 +180,8 @@ const defaultOptions = {
   httpEndpoint,
   // You can use `wss` for secure connection (recommended in production)
   // Use `null` to disable subscriptions
-  wsEndpoint: process.env.VUE_APP_DEV_GRAPHQL_WS || `ws://${window.location.host}:4000/graphql`,
+  // if in production env, build custom url otherwise use env variable
+  wsEndpoint: process.env.NODE_ENV === 'production' ? `ws://${window.location.host}:4000/graphql` : process.env.VUE_APP_DEV_GRAPHQL_WS,
   // LocalStorage token
   tokenName: AUTH_TOKEN,
   // Enable Automatic Query persisting with Apollo Engine
@@ -251,13 +238,12 @@ export async function onLogout(client) {
   /* remove token right away, s even if the database
 operation fails the client no longer has a token
  */
-
   if (typeof localStorage !== 'undefined') {
     localStorage.removeItem(AUTH_TOKEN);
   }
   // run logout mutation
   await Vue.$store.dispatch('logoutUser');
-
+  // reset webSocket connections
   if (client.wsClient) restartWebsockets(apolloClient.wsClient);
   try {
     await apolloClient.resetStore();

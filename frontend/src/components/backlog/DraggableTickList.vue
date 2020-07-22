@@ -16,7 +16,7 @@
         v-ripple
         class="pa-0 ma-sm-1"
         clickable
-        @dblclick="detailsDrawer(ticketId)"
+        @dblclick="detDrawShow({ show: true, ticketId })"
       >
         <ticket-card-slim
           :tick-id="ticketId"
@@ -77,9 +77,6 @@ export default {
       'detDrawShow',
       'snackBarOn',
     ]),
-    detailsDrawer(ticketId) {
-      this.detDrawShow({ show: true, ticketId });
-    },
     onRemove() {
       // mutate store
       this.uSCDRemovedFrom(this.listProperties);

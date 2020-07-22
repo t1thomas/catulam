@@ -1,32 +1,26 @@
 <template>
   <div class="text-center">
     <v-snackbar
-      v-model="show"
+      v-model="showBar"
       top
+      :timeout="2000"
       class="pa-0"
     >
       <v-alert
+        v-model="showBar"
+        width="100%"
         :type="type"
         class="ma-0"
+        dismissible
       >
         {{ message }}
-        <v-btn
-          color="pink"
-          icon
-          small
-          @click="closeSnackBar"
-        >
-          <v-icon color="white">
-            mdi-close-circle
-          </v-icon>
-        </v-btn>
       </v-alert>
     </v-snackbar>
   </div>
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapState } from 'vuex';
 
 export default {
   computed: {
@@ -35,20 +29,20 @@ export default {
       show: (state) => state.snackBar.show,
       type: (state) => state.snackBar.type,
     }),
-  },
-  watch: {
-    show() {
-      if (this.show) {
-        setTimeout(this.closeSnackBar, 2000);
-      }
+    showBar: {
+      get() {
+        return this.show;
+      },
+      set(val) {
+        if (val === false) {
+          this.closeSnackBar();
+        }
+      },
     },
   },
   methods: {
-    ...mapActions([
-      'snackBarOff',
-    ]),
     closeSnackBar() {
-      this.snackBarOff();
+      this.$store.dispatch('snackBarOff');
     },
   },
 };

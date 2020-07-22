@@ -1,14 +1,8 @@
 <template>
   <v-card height="100%">
     <draggable-tick-list
-      v-if="!noUs"
       :list-properties="tickListConfig"
-      :ticket-ids="tickIds(userStoryId)"
-    />
-    <draggable-tick-list
-      v-else
-      :list-properties="tickListConfig"
-      :ticket-ids="tickIdsNoUs"
+      :ticket-ids="tickIds"
     />
   </v-card>
 </template>
@@ -46,8 +40,14 @@ export default {
         disabled: true,
       };
     },
+    tickIds() {
+      if (!this.noUs) {
+        return this.tickIdsUs(this.userStoryId);
+      }
+      return this.tickIdsNoUs;
+    },
     ...mapGetters({
-      tickIds: 'getDoneTicksUs',
+      tickIdsUs: 'getDoneTicksUs',
       tickIdsNoUs: 'getDoneTicksNoUs',
     }),
   },
