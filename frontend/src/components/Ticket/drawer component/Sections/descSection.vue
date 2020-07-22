@@ -74,7 +74,7 @@
 
 <script>
 import { mapState, mapActions } from 'vuex';
-import gqlQueries from '../../../graphql/gql-queries';
+import gqlQueries from '../../../../graphql/gql-queries';
 
 export default {
   name: 'DescSection',

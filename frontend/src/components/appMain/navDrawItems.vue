@@ -14,6 +14,24 @@
         <v-list-item-title>Home</v-list-item-title>
       </v-list-item-content>
     </v-list-item>
+    <v-list-group
+      no-action
+    >
+      <template v-slot:activator>
+        <v-list-item-title>Projects</v-list-item-title>
+      </template>
+      <template v-if="projects.length > 0">
+        <v-list-item
+          v-for="(project, i) in projects"
+          :key="i"
+          link
+          @click="toProject(project)"
+        >
+          <v-list-item-title v-text="project.label" />
+        </v-list-item>
+      </template>
+    </v-list-group>
+
 
     <v-list-group
       prepend-icon="mdi-view-list"
@@ -106,6 +124,14 @@ export default {
       const { id } = project;
       this.$router.push({
         path: '/backlog',
+        query: { proId: id },
+      });
+    },
+    toProject(project) {
+      // proId passed as query in url link
+      const { id } = project;
+      this.$router.push({
+        path: '/project',
         query: { proId: id },
       });
     },

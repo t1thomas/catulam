@@ -58,7 +58,7 @@ import ProDetailsTabs from './ProDetailsTabs.vue';
 import NotFoundCard from '../../../NotFoundCard.vue';
 
 export default {
-  name: 'ProjectList',
+  name: 'MyProjectComponent',
   components: {
     ProDetailsTabs,
     NotFoundCard,

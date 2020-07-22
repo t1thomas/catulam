@@ -37,10 +37,10 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
-import topSection from '../Page Components/topSection.vue';
-import detailsSection from '../Page Components/detailsSection.vue';
-import descSection from '../Page Components/descSection.vue';
-import deleteSection from '../Page Components/deleteSection.vue';
+import topSection from './Sections/topSection.vue';
+import detailsSection from './Sections/detailsSection.vue';
+import descSection from './Sections/descSection.vue';
+import deleteSection from './Sections/deleteSection.vue';
 import DelTicDialog from '../dialogs/DelTicDialog.vue';
 
 export default {

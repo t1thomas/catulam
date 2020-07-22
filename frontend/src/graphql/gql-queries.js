@@ -1,7 +1,7 @@
 import gql from 'graphql-tag';
 
 const gqlQueries = {
-  REFRESH_TOKEN: /* GraphQL */ `
+  REFRESH_TOKEN: gql`
     mutation {
       refreshAccess
     }
