@@ -1,15 +1,20 @@
 <template>
   <v-row>
-    <v-col>
+    <v-col
+      cols="12"
+    >
       <v-textarea
         v-if="desc"
         v-model="text"
+        height="15vh"
+        dense
         :loading="saving"
         no-resize
         filled
         label="Description"
         :disabled="disabled"
         @blur="onBlur"
+        hide-details
       >
         <template
           v-if="!saving"

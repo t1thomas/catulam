@@ -1,9 +1,6 @@
 <template>
-  <v-footer
-    absolute
-  >
+  <v-row>
     <v-col
-      class="pa-0"
       cols="12"
     >
       <v-btn
@@ -20,7 +17,7 @@
         Delete Ticket
       </v-btn>
     </v-col>
-  </v-footer>
+  </v-row>
 </template>
 
 <script>

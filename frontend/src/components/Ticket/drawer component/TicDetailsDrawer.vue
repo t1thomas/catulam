@@ -4,26 +4,25 @@
     app
     temporary
     right
-    style="width: fit-content"
+    style="width: fit-content;"
   >
-    <v-container
+    <div
       v-if="dataLoaded"
+      class="grid-container"
     >
-      <v-overlay
-        absolute
-        :value="overlay"
-        opacity="0.78"
-      >
-        <del-tic-dialog @closeDialog="overlay = false" />
-      </v-overlay>
       <topSection />
-      <v-divider />
       <details-section />
-      <v-divider />
       <desc-section />
+      <updates-section />
       <delete-section @delDialog="overlay = true" />
-    </v-container>
-
+    </div>
+    <v-overlay
+      absolute
+      :value="overlay"
+      opacity="0.78"
+    >
+      <del-tic-dialog @closeDialog="overlay = false" />
+    </v-overlay>
 
     <v-progress-circular
       v-if="!dataLoaded"
@@ -42,6 +41,7 @@ import detailsSection from './Sections/detailsSection.vue';
 import descSection from './Sections/descSection.vue';
 import deleteSection from './Sections/deleteSection.vue';
 import DelTicDialog from '../dialogs/DelTicDialog.vue';
+import updatesSection from './Sections/cmnts&cmits/updatesSection.vue';
 
 export default {
   name: 'DetailsDrawer',
@@ -51,6 +51,7 @@ export default {
     descSection,
     deleteSection,
     DelTicDialog,
+    updatesSection,
   },
   data: () => ({
     overlay: false,
@@ -94,5 +95,9 @@ export default {
 </script>
 
 <style scoped>
-
+.grid-container {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto 2fr auto;
+}
 </style>
