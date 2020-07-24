@@ -1,13 +1,35 @@
 <template>
-  <v-card class="fill-height">
-    <v-card-text style="height: 80%">
-      <span> No comments Found</span>
+  <v-card
+    flat
+    class="tab-content"
+  >
+    <v-card-text
+      class="comment-list pa-0"
+    >
+      <span
+        v-if="comments.length === 0"
+        class="not-found"
+      > No comments Found</span>
+      <v-list
+        v-else
+        dense
+      >
+        <v-list-item
+          v-for="comm in comments"
+          :key="comm.id"
+          dense
+        >
+          <comment-card
+            :comment="comm"
+          />
+        </v-list-item>
+      </v-list>
     </v-card-text>
-    <v-card-actions style="height: 20%">
+    <v-card-actions>
       <v-textarea
         v-model="text"
         auto-grow
-        class="mx-2"
+        class="ma-0"
         label="Add a comment"
         rows="2"
         dense
@@ -54,8 +76,31 @@ export default {
   },
   data: () => ({
     text: '',
-    comments: [],
+    comments: [{
+      id: 'sdfjghkjdsf',
+      userid: '3fce8c48-eb16-4757-b94b-e189eb758e64',
+      text: 'I made a comment about why it as a good ilsglksdjfgb;siodfbgv;sdaf sidfg s;dofg ;sg;sdfu g;sdfg ;sdfg ;sdf gs;df g;sdjfgls;dufg ;sdfj g;nts on tickets',
+    },
+    {
+      id: 'eslifgw3497g',
+      userid: '184f3c4a-8988-44ef-90ac-2285221a7e00',
+      text: 'I made a comment about why it as a good idea to make comments on tickets',
+    },
+    {
+      id: 'seo43ijw',
+      userid: 'af12859a-e3a8-4d34-b4db-fa4f3c9b7204',
+      text: 'I made a comment about why it as a good idea to make comments on tickets',
+    }, {
+      id: 'seo43ijwddd',
+      userid: 'af12859a-e3a8-4d34-b4db-fa4f3c9b7204',
+      text: 'I made a comment about why it as a good idea to make comments on tickets',
+    }, {
+      id: 'seo412123ijw',
+      userid: 'af12859a-e3a8-4d34-b4db-fa4f3c9b7204',
+      text: 'I made a comment about why it as a good idea to make comments on tickets',
+    }],
   }),
+
   computed: {
     ...mapGetters([
       'getGravatar',
@@ -69,9 +114,16 @@ export default {
 </script>
 
 <style scoped>
-  .card-container {
-    height: 100%;
+  .tab-content {
+    height: inherit;
     display: grid;
-    grid-template-rows: 1fr 2fr;
+    max-width: 34vw;
+    grid-template-rows: 80% auto;
+  }
+  .comment-list {
+    min-height: 100%;
+    max-height: inherit;
+    overflow-y: scroll;
+    background-color: #3e3e3e;
   }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <v-card flat>
+  <v-card flat class="tab-content">
     <v-card-text>Commits</v-card-text>
     <v-card-actions>
       <v-btn small>
@@ -23,5 +23,10 @@ export default {
 </script>
 
 <style scoped>
-
+  .tab-content {
+    height: inherit;
+    display: grid;
+    max-width: 34vw;
+    grid-template-rows: 80% auto;
+  }
 </style>

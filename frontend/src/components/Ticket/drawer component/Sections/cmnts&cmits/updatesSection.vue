@@ -2,7 +2,7 @@
   <v-tabs
     v-model="tab"
     color="white"
-    class="elevation-2"
+    class="elevation-2 cmns-cmis"
     centered
     grow
   >
@@ -13,7 +13,7 @@
       Comments (3)
     </v-tab>
     <v-tab-item>
-      <comment-list />
+      <comment-list/>
     </v-tab-item>
     <v-tab>
       <v-icon left>
@@ -51,7 +51,5 @@ export default {
 </script>
 
 <style scoped>
-  .v-window__container {
-    height: 100%
-  }
+
 </style>

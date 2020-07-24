@@ -1,7 +1,7 @@
 <template>
   <v-card
     flat
-    width="100%"
+    style="display: flex"
     class="mb-1"
     color="#b5b5b5"
   >
@@ -20,7 +20,7 @@
             @{{ creationTime }}
           </span>
         </v-list-item-title>
-        <v-list-item-subtitle style="color: black" v-text="comment.text" />
+        <v-list-item-subtitle style="color: black; white-space: pre-wrap" v-text="comment.text" />
       </v-list-item-content>
     </v-list-item>
   </v-card>

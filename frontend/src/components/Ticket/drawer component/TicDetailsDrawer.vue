@@ -98,6 +98,7 @@ export default {
 .grid-container {
   height: 100%;
   display: grid;
+  overflow: hidden;
   grid-template-rows: auto 1fr auto 2fr auto;
 }
 </style>
