@@ -1,6 +1,14 @@
 <template>
-  <v-card flat class="tab-content">
-    <v-card-text>Commits</v-card-text>
+  <v-card
+    flat
+    class="tab-content"
+  >
+    <v-card-text class="commit-list pa-0">
+      <span
+        v-if="commits.length === 0"
+        class="not-found"
+      > No commits Found</span>
+    </v-card-text>
     <v-card-actions>
       <v-btn small>
         Add Commit
@@ -19,6 +27,9 @@
 <script>
 export default {
   name: 'CommitList',
+  data: () => ({
+    commits: [],
+  }),
 };
 </script>
 
@@ -28,5 +39,11 @@ export default {
     display: grid;
     max-width: 34vw;
     grid-template-rows: 80% auto;
+  }
+  .commit-list {
+    min-height: 100%;
+    max-height: inherit;
+    overflow-y: auto;
+    background-color: #3e3e3e;
   }
 </style>

@@ -8,7 +8,6 @@
     >
       <span
         v-if="comments.length === 0"
-        class="not-found"
       > No comments Found</span>
       <v-list
         v-else
@@ -76,29 +75,7 @@ export default {
   },
   data: () => ({
     text: '',
-    comments: [{
-      id: 'sdfjghkjdsf',
-      userid: '3fce8c48-eb16-4757-b94b-e189eb758e64',
-      text: 'I made a comment about why it as a good ilsglksdjfgb;siodfbgv;sdaf sidfg s;dofg ;sg;sdfu g;sdfg ;sdfg ;sdf gs;df g;sdjfgls;dufg ;sdfj g;nts on tickets',
-    },
-    {
-      id: 'eslifgw3497g',
-      userid: '184f3c4a-8988-44ef-90ac-2285221a7e00',
-      text: 'I made a comment about why it as a good idea to make comments on tickets',
-    },
-    {
-      id: 'seo43ijw',
-      userid: 'af12859a-e3a8-4d34-b4db-fa4f3c9b7204',
-      text: 'I made a comment about why it as a good idea to make comments on tickets',
-    }, {
-      id: 'seo43ijwddd',
-      userid: 'af12859a-e3a8-4d34-b4db-fa4f3c9b7204',
-      text: 'I made a comment about why it as a good idea to make comments on tickets',
-    }, {
-      id: 'seo412123ijw',
-      userid: 'af12859a-e3a8-4d34-b4db-fa4f3c9b7204',
-      text: 'I made a comment about why it as a good idea to make comments on tickets',
-    }],
+    comments: [],
   }),
 
   computed: {
@@ -123,7 +100,7 @@ export default {
   .comment-list {
     min-height: 100%;
     max-height: inherit;
-    overflow-y: scroll;
+    overflow-y: auto;
     background-color: #3e3e3e;
   }
 </style>
