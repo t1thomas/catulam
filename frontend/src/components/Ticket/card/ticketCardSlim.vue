@@ -1,89 +1,84 @@
 <template>
-  <v-hover
-    v-slot:default="{ hover }"
-    open-delay="100"
+  <v-card
+    v-if="ticket"
+    width="100%"
+    :disabled="ticket.done"
+    @dblclick="detDrawShow({ show: true, ticketId: ticket.id })"
   >
-    <v-card
-      v-if="ticket"
-      :elevation="hover ? 12 : 2"
-      width="100%"
-      :disabled="ticket.done"
+    <div
+      v-if="ticket.done"
+      class="dash"
+      style="position: absolute"
+    />
+    <v-tooltip
+      bottom
+      :open-delay="tipDelay"
     >
-      <div
-        v-if="ticket.done"
-        class="dash"
-        style="position: absolute"
-      />
-      <v-tooltip
-        bottom
-        :open-delay="tipDelay"
-      >
-        <template v-slot:activator="{ on }">
-          <v-list-item
-            style="width: 100%; height: 30px"
-            class="pl-0 pr-0"
-            v-on="on"
-          >
-            <v-list-item-content>
-              <v-list-item-title class="font-weight-thin caption">
-                #{{ ticket.issueNumber }} {{ ticket.title }}
-              </v-list-item-title>
-            </v-list-item-content>
+      <template v-slot:activator="{ on }">
+        <v-list-item
+          style="width: 100%; height: 30px"
+          class="pl-0 pr-0"
+          v-on="on"
+        >
+          <v-list-item-content>
+            <v-list-item-title class="font-weight-thin caption">
+              #{{ ticket.issueNumber }} {{ ticket.title }}
+            </v-list-item-title>
+          </v-list-item-content>
 
-            <v-list-item-action class="ml-0 pr-1">
-              <div>
-                <v-chip
-                  style="padding-left: 0"
-                  x-small
-                  color="dark-grey"
-                  text-color="white"
+          <v-list-item-action class="ml-0 pr-1">
+            <div>
+              <v-chip
+                style="padding-left: 0"
+                x-small
+                color="dark-grey"
+                text-color="white"
+              >
+                <v-avatar
+                  left
+                  style="margin-left: 0"
                 >
-                  <v-avatar
-                    left
-                    style="margin-left: 0"
-                  >
-                    <v-icon small>
-                      mdi-progress-clock
-                    </v-icon>
-                  </v-avatar>
-                  {{ ticket.hourEstimate }}hr
-                </v-chip>
-                <v-chip
-                  style="padding-left: 0"
-                  x-small
-                  class="ml-2"
+                  <v-icon small>
+                    mdi-progress-clock
+                  </v-icon>
+                </v-avatar>
+                {{ ticket.hourEstimate }}hr
+              </v-chip>
+              <v-chip
+                style="padding-left: 0"
+                x-small
+                class="ml-2"
+              >
+                <v-avatar
+                  style="margin-left: 0"
+                  left
+                  tile
                 >
-                  <v-avatar
-                    style="margin-left: 0"
-                    left
-                    tile
+                  <v-img
+                    v-if="assignee"
+                    :src="gravatar"
+                  />
+                  <v-icon
+                    v-else
+                    small
+                    dark
                   >
-                    <v-img
-                      v-if="assignee"
-                      :src="gravatar"
-                    />
-                    <v-icon
-                      v-else
-                      small
-                      dark
-                    >
-                      mdi-help-circle
-                    </v-icon>
-                  </v-avatar>
-                  {{ fullName }}
-                </v-chip>
-              </div>
-            </v-list-item-action>
-          </v-list-item>
-        </template>
-        <span> #{{ ticket.issueNumber }} {{ ticket.title }}</span>
-      </v-tooltip>
-    </v-card>
-  </v-hover>
+                    mdi-help-circle
+                  </v-icon>
+                </v-avatar>
+                {{ fullName }}
+              </v-chip>
+            </div>
+          </v-list-item-action>
+        </v-list-item>
+      </template>
+      <span> #{{ ticket.issueNumber }} {{ ticket.title }}</span>
+    </v-tooltip>
+  </v-card>
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 
 export default {
   name: 'TicketCard',
@@ -122,6 +117,11 @@ export default {
       }
       return this.assignee.fullName;
     },
+  },
+  methods: {
+    ...mapActions([
+      'detDrawShow',
+    ]),
   },
 };
 </script>

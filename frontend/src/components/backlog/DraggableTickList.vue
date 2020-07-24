@@ -16,7 +16,6 @@
         v-ripple
         class="pa-0 ma-sm-1"
         clickable
-        @dblclick="detDrawShow({ show: true, ticketId })"
       >
         <ticket-card-slim
           :tick-id="ticketId"

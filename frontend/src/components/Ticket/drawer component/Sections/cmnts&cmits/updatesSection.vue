@@ -10,10 +10,10 @@
       <v-icon left>
         mdi-comment-text-multiple
       </v-icon>
-      Comments (3)
+      Comments ({{ getTicketComments(ticketId).length }})
     </v-tab>
     <v-tab-item>
-      <comment-list/>
+      <comment-list />
     </v-tab-item>
     <v-tab>
       <v-icon left>
@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import commentList from './commentList.vue';
 import commitList from './commitList.vue';
 
@@ -42,10 +42,16 @@ export default {
     tab: null,
   }),
   computed: {
+    ...mapState({
+      ticketId: (state) => state.detailsDrawer.ticketId,
+    }),
     ...mapGetters([
-      'getGravatar',
       'getCurrentUser',
+      'getTicketComments',
     ]),
+  },
+  mounted() {
+    console.log(this.getTicketComments(this.ticketId));
   },
 };
 </script>

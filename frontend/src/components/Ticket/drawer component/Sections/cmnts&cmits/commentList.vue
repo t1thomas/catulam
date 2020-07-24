@@ -7,7 +7,7 @@
       class="comment-list pa-0"
     >
       <span
-        v-if="comments.length === 0"
+        v-if="getTicketComments(ticketId).length === 0"
       > No comments Found</span>
       <v-list
         v-else
@@ -64,7 +64,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapState } from 'vuex';
 import commentCard from './commentCard.vue';
 
 export default {
@@ -75,16 +75,21 @@ export default {
   },
   data: () => ({
     text: '',
-    comments: [],
   }),
-
   computed: {
     ...mapGetters([
       'getGravatar',
       'getCurrentUser',
+      'getTicketComments',
     ]),
+    ...mapState({
+      ticketId: (state) => state.detailsDrawer.ticketId,
+    }),
     editing() {
       return this.text.length === 0;
+    },
+    comments() {
+      return this.getTicketComments(this.ticketId).sort((a, b) => a.timestamp - b.timestamp);
     },
   },
 };
@@ -93,13 +98,15 @@ export default {
 <style scoped>
   .tab-content {
     height: inherit;
+    max-height: inherit;
+
     display: grid;
     max-width: 34vw;
-    grid-template-rows: 80% auto;
+    grid-auto-rows: 75% auto;
   }
   .comment-list {
     min-height: 100%;
-    max-height: inherit;
+    max-height: 100%;
     overflow-y: auto;
     background-color: #3e3e3e;
   }

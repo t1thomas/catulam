@@ -34,6 +34,8 @@ type User {
     created: [Created]
     avatar: String
     role: Role!
+    comments: [Comment]
+    commits: [Commit]
 }
 
 type Created @relation(name: "CREATED") {
@@ -41,7 +43,20 @@ type Created @relation(name: "CREATED") {
     to: Ticket
     timestamp: String!
 }
-
+type Comment @relation(name: "COMMENT") {
+    from: User
+    to: Ticket
+    id: ID!
+    timestamp: String!
+    message: String!
+}
+type Commit @relation(name: "COMMIT") {
+    from: User
+    to: Ticket
+    id: ID!
+    timestamp: String!
+    message: String!
+}
 type Member @relation(name: "TEAM_MEMBER") {
     from: User
     to: Project
@@ -74,6 +89,8 @@ type Ticket {
     project: Project @relation(name: "TICKET", direction: OUT)
     assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
     creator: Created
+    comments: [Comment]
+    commits: [Commit]
 }
 
 type Sprint {
@@ -110,6 +127,16 @@ type Mutation {
 
     UpdateTicket(id: ID!, issueNumber: Int, hourEstimate: Int, sprintPos: Int, title: String, desc: String, done: Boolean):Ticket
     @hasScope(scopes:["Ticket:Edit"])
+
+    AddTicketComments(user: _UserInput!, ticket: _TicketInput!, data: String!, project: _ProjectInput!): Ticket
+    @hasScope(scopes:["Ticket:Comment"])
+    @cypher(statement:"""
+    MATCH (t:Ticket),(u:User)
+    WHERE t.id = $ticket.id AND u.id = $user.id
+    CREATE (u)-[:COMMENT {id: apoc.create.uuid(), timestamp: apoc.date.currentTimestamp(), message: $data }]->(t)
+    WITH t
+    RETURN t
+    """)
 
     DeleteTicket(ticket: _TicketInput!, project: _ProjectInput!): Ticket
     @hasScope(scopes:["Ticket:Delete"])

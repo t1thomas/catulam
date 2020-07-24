@@ -108,24 +108,20 @@ export default {
   .v-snack__content {
     padding: 0 !important;
   }
- /*div.v-tabs.elevation-2.cmns-cmis.v-tabs--centered.v-tabs--grow.theme--dark >*/
- /*div.v-window.v-item-group.theme--dark.v-tabs-items {*/
- /*  height: 90% !important;*/
- /*  max-height: 90% !important;*/
- /*}*/
+
  div.v-tabs.elevation-2.cmns-cmis.v-tabs--centered.v-tabs--grow.theme--dark {
    display: grid;
    height: 100%;
    overflow: hidden;
    grid-auto-rows: minmax(48px, auto);
  }
-
- div.v-tabs.elevation-2.cmns-cmis.v-tabs--centered.v-tabs--grow.theme--dark >
- div.v-window.v-item-group.theme--dark.v-tabs-items {
-   height: 100%;
- }
- div.v-tabs.elevation-2.cmns-cmis.v-tabs--centered.v-tabs--grow.theme--dark >
- div.v-window.v-item-group.theme--dark.v-tabs-items > div > div {
-   height: inherit;
- }
+  div.v-tabs.elevation-2.cmns-cmis.v-tabs--centered.v-tabs--grow.theme--dark
+  > div.v-window.v-item-group.theme--dark.v-tabs-items > .v-window__container {
+    height: 100%;
+  }
+  div.v-tabs.elevation-2.cmns-cmis.v-tabs--centered.v-tabs--grow.theme--dark >
+  div.v-window.v-item-group.theme--dark.v-tabs-items >
+  div > div.v-window-item.v-window-item--active{
+    height: inherit;
+  }
 </style>

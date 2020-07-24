@@ -235,6 +235,8 @@ export default new Vuex.Store({
         state.detailsDrawer.ticketId = null;
         state.currentTicket = null;
       } else {
+        console.log('here');
+        console.log(obj);
         state.detailsDrawer.show = obj.show;
         state.detailsDrawer.ticketId = obj.ticketId;
       }
@@ -764,6 +766,9 @@ export default new Vuex.Store({
       .find((project) => project.id === proId),
     getTicketById: (state) => (id) => state.tickets
       .find((ticket) => ticket.id === id),
+    // get ticket comments, and sort by time
+    getTicketComments: (state) => (id) => state.tickets
+      .find((ticket) => ticket.id === id).comments,
     // get ticket ids that dont have sprints, and have a uStory id that matches param
     getTicksUsNoSp: (state) => (userStoryId) => state.backLogData.UsNoSp[0].tickets
       .filter((tick) => tick.userStory.id === userStoryId)

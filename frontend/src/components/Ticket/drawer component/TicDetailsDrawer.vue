@@ -8,7 +8,7 @@
   >
     <div
       v-if="dataLoaded"
-      class="grid-container"
+      class="grid-container pa-2"
     >
       <topSection />
       <details-section />
@@ -70,8 +70,8 @@ export default {
         return this.show;
       },
       set(val) {
-        this.$store.commit('set_DrawerShow', { show: val });
         if (val === false) {
+          this.$store.commit('set_DrawerShow', { show: val });
           this.overlay = false;
         }
       },

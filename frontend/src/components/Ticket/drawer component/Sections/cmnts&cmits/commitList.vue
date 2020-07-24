@@ -38,11 +38,11 @@ export default {
     height: inherit;
     display: grid;
     max-width: 34vw;
-    grid-template-rows: 80% auto;
+    grid-auto-rows: 75% auto;
   }
   .commit-list {
     min-height: 100%;
-    max-height: inherit;
+    max-height: 100%;
     overflow-y: auto;
     background-color: #3e3e3e;
   }

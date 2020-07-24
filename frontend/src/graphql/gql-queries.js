@@ -372,6 +372,14 @@ const gqlQueries = {
       sprint {
         id
       }
+      comments {
+        id
+        timestamp
+        message
+        User {
+          id
+        }
+      }
     }
   }`,
   USER_STORIES: gql`query($username: String!) {
@@ -433,6 +441,42 @@ const gqlQueries = {
     logout
   }
   `,
+  TICKET_ADD_COMMENT: gql`mutation(
+    $user: _UserInput!
+    $ticket: _TicketInput!
+    $data: String!
+    $project: _ProjectInput!
+  ) {
+    AddTicketComments(
+      user: $user
+      ticket: $ticket
+      data: $data
+      project: $project
+    ) {
+      id
+      issueNumber
+      title
+      done
+      hourEstimate
+      assignee {
+        id
+      }
+      project {
+        id
+      }
+      sprint {
+        id
+      }
+      comments {
+        id
+        timestamp
+        message
+        User {
+          id
+        }
+      }
+    }
+  }`,
   USWithTickIds: gql`query{
     UserStory {
       id
