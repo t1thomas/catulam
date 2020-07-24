@@ -75,6 +75,10 @@ export default new Vuex.Store({
     sprints: [],
   },
   mutations: {
+    update_tickets(state, obj) {
+      state.tickets = [...state.tickets.map((tick) => (tick.id !== obj.id
+        ? tick : { ...tick, ...obj }))];
+    },
     set_projects(state, obj) {
       state.projects = obj;
     },
@@ -224,7 +228,6 @@ export default new Vuex.Store({
       state.snackBar.type = '';
     },
     set_snackBarShow(state, obj) {
-      console.log(obj.message);
       state.snackBar.message = obj.message;
       state.snackBar.type = obj.type;
       state.snackBar.show = true;
@@ -364,6 +367,18 @@ export default new Vuex.Store({
         if (Sprint.length > 0) {
           commit('set_sprints', Sprint);
         }
+      }).catch((error) => {
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
+    async addTicketComment({ commit }, payload) {
+      await apolloClient.query({
+        query: gqlQueries.ADD_TICKET_COMMENT,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { AddTicketComments } = response.data;
+        commit('update_tickets', AddTicketComments);
       }).catch((error) => {
         commit('set_snackBarShow', { message: error, type: 'error' });
       });
@@ -766,9 +781,12 @@ export default new Vuex.Store({
       .find((project) => project.id === proId),
     getTicketById: (state) => (id) => state.tickets
       .find((ticket) => ticket.id === id),
-    // get ticket comments, and sort by time
+    // get ticket comments
     getTicketComments: (state) => (id) => state.tickets
       .find((ticket) => ticket.id === id).comments,
+    // get ticket project id
+    getTicketProject: (state) => (id) => state.tickets
+      .find((ticket) => ticket.id === id).project.id,
     // get ticket ids that dont have sprints, and have a uStory id that matches param
     getTicksUsNoSp: (state) => (userStoryId) => state.backLogData.UsNoSp[0].tickets
       .filter((tick) => tick.userStory.id === userStoryId)

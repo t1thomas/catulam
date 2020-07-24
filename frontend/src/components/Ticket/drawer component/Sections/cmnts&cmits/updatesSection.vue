@@ -50,9 +50,6 @@ export default {
       'getTicketComments',
     ]),
   },
-  mounted() {
-    console.log(this.getTicketComments(this.ticketId));
-  },
 };
 </script>
 

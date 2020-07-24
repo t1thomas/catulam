@@ -106,9 +106,10 @@ type Sprint {
 type Query {
     getCurrentUser: User
     @cypher(statement: """
-    MATCH (u:User {id: $id})
+    MATCH (u:User {id: $cypherParams.currentUser.id})
     RETURN u
     """)
+
     UserStory: [UserStory] @hasScope(scopes:["UserStory:Read"])
     Project: [Project] @hasScope(scopes:["Project:Read"])
     Ticket: [Ticket] @hasScope(scopes:["Ticket:Read"])
@@ -128,11 +129,11 @@ type Mutation {
     UpdateTicket(id: ID!, issueNumber: Int, hourEstimate: Int, sprintPos: Int, title: String, desc: String, done: Boolean):Ticket
     @hasScope(scopes:["Ticket:Edit"])
 
-    AddTicketComments(user: _UserInput!, ticket: _TicketInput!, data: String!, project: _ProjectInput!): Ticket
+    AddTicketComments(ticket: _TicketInput!, data: String!, project: _ProjectInput!): Ticket
     @hasScope(scopes:["Ticket:Comment"])
     @cypher(statement:"""
     MATCH (t:Ticket),(u:User)
-    WHERE t.id = $ticket.id AND u.id = $user.id
+    WHERE t.id = $ticket.id AND u.id = $cypherParams.currentUser.id
     CREATE (u)-[:COMMENT {id: apoc.create.uuid(), timestamp: apoc.date.currentTimestamp(), message: $data }]->(t)
     WITH t
     RETURN t

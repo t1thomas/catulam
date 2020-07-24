@@ -441,14 +441,12 @@ const gqlQueries = {
     logout
   }
   `,
-  TICKET_ADD_COMMENT: gql`mutation(
-    $user: _UserInput!
+  ADD_TICKET_COMMENT: gql`mutation(
     $ticket: _TicketInput!
     $data: String!
     $project: _ProjectInput!
   ) {
     AddTicketComments(
-      user: $user
       ticket: $ticket
       data: $data
       project: $project

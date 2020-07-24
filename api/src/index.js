@@ -25,12 +25,16 @@ const server = new ApolloServer({
     if (connection) {
       const { token } = connection.context;
       return {
-        currentUser: await verifyToken(token),
+        cypherParams: {
+          currentUser: await verifyToken(token),
+        },
       };
     }
     const token = req.headers.authorization;
     return {
-      currentUser: await verifyToken(token),
+      cypherParams: {
+        currentUser: await verifyToken(token),
+      },
       driver,
       req,
       res,

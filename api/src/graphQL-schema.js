@@ -91,18 +91,23 @@ const resolveFunctions = {
   },
   Query: {
     getCurrentUser: async (object, params, ctx, resolveInfo) => {
-      if (!ctx.currentUser) {
+      if (!ctx.cypherParams.currentUser) {
         throw new AuthenticationError('No Token');
       }
-      const { id } = ctx.currentUser;
-      // update the params so, cypher query contains id.
-      Object.assign(params, {
-        id,
-      });
       return neo4jgraphql(object, params, ctx, resolveInfo);
     },
   },
   Mutation: {
+    AddTicketComments: async (object, params, ctx, resolveInfo) => {
+      try {
+        console.log(ctx.cypherParams.currentUser.id);
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('project', { update: result.project.id });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
     refreshAccess: async (object, params, ctx, resolveInfo) => {
       try {
         // get refresh token from cookie

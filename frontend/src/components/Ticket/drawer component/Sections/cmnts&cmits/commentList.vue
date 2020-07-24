@@ -29,6 +29,8 @@
         v-model="text"
         auto-grow
         class="ma-0"
+        :loading="saving"
+        :disabled="saving"
         label="Add a comment"
         rows="2"
         dense
@@ -52,11 +54,23 @@
             dark
             :disabled="editing"
             style="pointer-events: auto"
+            @click="addComment"
           >
             <v-icon small>
               mdi-send
             </v-icon>
           </v-btn>
+        </template>
+        <template
+          v-slot:progress
+        >
+          <v-progress-linear
+            active
+            indeterminate
+            bottom
+            absolute
+            color="amber"
+          />
         </template>
       </v-textarea>
     </v-card-actions>
@@ -70,17 +84,18 @@ import commentCard from './commentCard.vue';
 export default {
   name: 'CommentList',
   components: {
-    // eslint-disable-next-line vue/no-unused-components
     commentCard,
   },
   data: () => ({
     text: '',
+    saving: false,
   }),
   computed: {
     ...mapGetters([
       'getGravatar',
       'getCurrentUser',
       'getTicketComments',
+      'getTicketProject',
     ]),
     ...mapState({
       ticketId: (state) => state.detailsDrawer.ticketId,
@@ -91,6 +106,38 @@ export default {
     comments() {
       return this.getTicketComments(this.ticketId).sort((a, b) => a.timestamp - b.timestamp);
     },
+    proId() {
+      return this.getTicketProject(this.ticketId);
+    },
+  },
+  mounted() {
+    this.scrollToEnd();
+  },
+  methods: {
+    async addComment() {
+      this.savingProgress();
+      const payload = {
+        ticket: { id: this.ticketId },
+        data: this.text,
+        project: { id: this.proId },
+      };
+      await this.$store.dispatch('addTicketComment', payload)
+        .then(() => {
+          this.text = '';
+          this.savingProgress();
+          this.scrollToEnd();
+        })
+        .catch(() => {
+          this.savingProgress();
+        });
+    },
+    scrollToEnd() {
+      const container = this.$el.querySelector('.comment-list');
+      container.scrollTop = container.scrollHeight;
+    },
+    savingProgress() {
+      this.saving = !this.saving;
+    },
   },
 };
 </script>
@@ -99,7 +146,6 @@ export default {
   .tab-content {
     height: inherit;
     max-height: inherit;
-
     display: grid;
     max-width: 34vw;
     grid-auto-rows: 75% auto;
