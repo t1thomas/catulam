@@ -380,6 +380,16 @@ const gqlQueries = {
           id
         }
       }
+      commits {
+        id
+        message
+        timestamp
+        newHourEstimate
+        prevHourEstimate
+        User {
+          id
+        }
+      }
     }
   }`,
   USER_STORIES: gql`query($username: String!) {

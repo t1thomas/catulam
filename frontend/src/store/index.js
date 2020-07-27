@@ -775,6 +775,10 @@ export default new Vuex.Store({
     getUnDoneTicksBySprint: (state) => (sprintID) => state.tickets
       .filter((tick) => tick.sprint !== null)
       .filter((tick) => tick.sprint.id === sprintID && tick.done === false),
+    // get all tickets by Sprint ID
+    getAllTicksBySprint: (state) => (sprintID) => state.tickets
+      .filter((tick) => tick.sprint !== null)
+      .filter((tick) => tick.sprint.id === sprintID),
 
     getCurrentUser: (state) => state.currentUser,
     getCurrProject: (state) => (proId) => state.projects

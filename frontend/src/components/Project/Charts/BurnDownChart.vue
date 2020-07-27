@@ -35,7 +35,6 @@ export default {
     chartOptions: null,
   }),
   computed: {
-
     endDate() {
       return this.sprint.endDate;
     },
@@ -65,7 +64,7 @@ export default {
     idealHours() {
       const arr = [];
       const idealHoursPerDay = this.totalHours / this.totalDays;
-      for (let i = 0; i <= this.totalDays - 1; i += 1) {
+      for (let i = 1; i <= this.totalDays; i += 1) {
         const num = (this.totalHours - (idealHoursPerDay * i));
         arr.push(this.roundTo2(num));
       }
@@ -77,9 +76,32 @@ export default {
   },
   methods: {
     print() {
-      console.log(14 / 12);
-      const num = 122 / 225;
-      console.log(Math.round((num + Number.EPSILON) * 100) / 100);
+      const tickets = this.$store.getters.getAllTicksBySprint(this.sprint.id);
+      console.log(tickets);
+      this.getInitialHours();
+    },
+    getInitialHours() {
+      const tickets = this.$store.getters.getAllTicksBySprint(this.sprint.id);
+      let totalHrs = 0;
+      tickets.forEach((tick) => {
+        if (tick.commits.length > 0) {
+          const lowest = {
+            lowestDate: Vue.$moment.unix(tick.commits[0].timestamp),
+            hourEstimate: tick.commits[0].prevHourEstimate,
+          };
+          tick.commits.forEach((commit) => {
+            const date = Vue.$moment.unix(commit.timestamp);
+            if (date.isBefore(lowest.lowestDate)) {
+              lowest.lowestDate = date;
+              lowest.hourEstimate = commit.prevHourEstimate;
+            }
+          });
+          totalHrs += lowest.hourEstimate;
+        } else {
+          totalHrs += tick.hourEstimate;
+        }
+      });
+      console.log(totalHrs);
     },
     roundTo2(num) {
       return Math.round((num + Number.EPSILON) * 100) / 100;
