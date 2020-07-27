@@ -16,6 +16,7 @@
 </template>
 <script>
 import Vue from 'vue';
+import moment from 'moment';
 import LineChart from './vueChartJs/LineChart.vue';
 
 export default {
@@ -66,18 +67,9 @@ export default {
       let totalHrs = 0;
       tickets.forEach((tick) => {
         if (tick.commits.length > 0) {
-          const lowest = {
-            lowestDate: Vue.$moment.unix(tick.commits[0].timestamp),
-            hourEstimate: tick.commits[0].prevHourEstimate,
-          };
-          tick.commits.forEach((commit) => {
-            const date = Vue.$moment.unix(commit.timestamp);
-            if (date.isBefore(lowest.lowestDate)) {
-              lowest.lowestDate = date;
-              lowest.hourEstimate = commit.prevHourEstimate;
-            }
-          });
-          totalHrs += lowest.hourEstimate;
+          const reduced = tick.commits
+            .reduce((pre, cur) => ((pre.timestamp < cur.timestamp) ? pre : cur));
+          totalHrs += reduced.prevHourEstimate;
         } else {
           totalHrs += tick.hourEstimate;
         }
@@ -99,9 +91,53 @@ export default {
   },
   methods: {
     print() {
-      const tickets = this.$store.getters.getAllTicksBySprint(this.sprint.id);
-      console.log(tickets);
-      console.log(this.totalDays);
+      const tickets = this.$store.getters.getUnDoneTicksBySprint(this.sprint.id)
+        .filter((tick) => tick.commits.length > 0);
+      const { startDate } = this;
+      const { endDate } = this;
+      const arr = [];
+      for (const m = moment(startDate); m.diff(endDate, 'days') <= 0; m.add(1, 'days')) {
+        arr.push({ start: m.startOf('day').unix(), end: m.endOf('day').unix(), format: m.format('YYYY-MM-DD') });
+      }
+      arr.forEach((date, index) => {
+        console.log(`${date.format} ${index}`);
+        tickets.forEach((tick) => {
+          console.log(tick.title);
+          // filter to find commits between the start and end of curr date
+          const filtered = tick.commits
+            .filter((comm) => comm.timestamp > date.start && comm.timestamp < date.end);
+          if (filtered.length > 0) {
+            // if there are commits in the current date
+            // get the LAST commit
+            const reduced = filtered
+              .reduce((pre, cur) => ((pre.timestamp > cur.timestamp) ? pre : cur));
+            console.log(reduced.newHourEstimate);
+          } else if (index === 0) {
+            // if index is 0 aka it's first day
+            // we can only look to find the FIRST commit from future
+            const firstCommit = tick.commits
+              .reduce((pre, cur) => ((pre.timestamp < cur.timestamp) ? pre : cur));
+            console.log(firstCommit.prevHourEstimate);
+          } else {
+            // if we are past the first day
+            // then check for future commits
+            const nextCommit = tick.commits.filter((comm) => comm.timestamp > date.end);
+            if (nextCommit.length > 0) {
+              // if there are future commits, then get the FIRST commit from future
+              const reduced = nextCommit
+                .reduce((pre, cur) => ((pre.timestamp < cur.timestamp) ? pre : cur));
+              console.log(reduced.prevHourEstimate);
+            } else {
+              // if there are no future commits, then it must be in the past
+              const prevCommit = tick.commits.filter((comm) => comm.timestamp < date.start);
+              // get the LAST commit from the past
+              const reduced = prevCommit
+                .reduce((pre, cur) => ((pre.timestamp > cur.timestamp) ? pre : cur));
+              console.log(reduced.newHourEstimate);
+            }
+          }
+        });
+      });
     },
     roundTo2(num) {
       return Math.round((num + Number.EPSILON) * 100) / 100;
