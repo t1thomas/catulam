@@ -61,26 +61,7 @@ export default {
       }
       return dates;
     },
-    idealHours() {
-      const arr = [];
-      const idealHoursPerDay = this.totalHours / this.totalDays;
-      for (let i = 1; i <= this.totalDays; i += 1) {
-        const num = (this.totalHours - (idealHoursPerDay * i));
-        arr.push(this.roundTo2(num));
-      }
-      return arr;
-    },
-  },
-  async mounted() {
-    await this.loadData();
-  },
-  methods: {
-    print() {
-      const tickets = this.$store.getters.getAllTicksBySprint(this.sprint.id);
-      console.log(tickets);
-      this.getInitialHours();
-    },
-    getInitialHours() {
+    getIniTotalHrs() {
       const tickets = this.$store.getters.getAllTicksBySprint(this.sprint.id);
       let totalHrs = 0;
       tickets.forEach((tick) => {
@@ -101,7 +82,26 @@ export default {
           totalHrs += tick.hourEstimate;
         }
       });
-      console.log(totalHrs);
+      return totalHrs;
+    },
+    idealHours() {
+      const arr = [];
+      const idealHoursPerDay = this.getIniTotalHrs / this.totalDays;
+      for (let i = 1; i <= this.totalDays; i += 1) {
+        const num = (this.getIniTotalHrs - (idealHoursPerDay * i));
+        arr.push(this.roundTo2(num));
+      }
+      return arr;
+    },
+  },
+  async mounted() {
+    await this.loadData();
+  },
+  methods: {
+    print() {
+      const tickets = this.$store.getters.getAllTicksBySprint(this.sprint.id);
+      console.log(tickets);
+      console.log(this.totalDays);
     },
     roundTo2(num) {
       return Math.round((num + Number.EPSILON) * 100) / 100;

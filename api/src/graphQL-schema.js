@@ -589,7 +589,7 @@ const schema = makeAugmentedSchema({
     auth: {
       isAuthenticated: true,
       hasRole: true,
-      hasScope: true,
+      // hasScope: true,
     },
   },
 });
