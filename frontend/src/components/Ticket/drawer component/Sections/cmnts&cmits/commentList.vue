@@ -118,7 +118,7 @@ export default {
       this.savingProgress();
       const payload = {
         ticket: { id: this.ticketId },
-        data: this.text,
+        message: this.text,
         project: { id: this.proId },
       };
       await this.$store.dispatch('addTicketComment', payload)

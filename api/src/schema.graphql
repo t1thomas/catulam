@@ -47,7 +47,7 @@ type Comment @relation(name: "COMMENT") {
     from: User
     to: Ticket
     id: ID!
-    timestamp: String!
+    timestamp: Int!
     message: String!
 }
 type Commit @relation(name: "COMMIT") {
@@ -123,7 +123,11 @@ type Query {
     Sprint: [Sprint]
     User: [User]
 }
-
+input _CommitInput {
+    message: String!
+    newEst: Int!
+    timestamp: Int!
+}
 type Subscription {
     update(proId:String!): String
 }
@@ -136,13 +140,30 @@ type Mutation {
     UpdateTicket(id: ID!, issueNumber: Int, hourEstimate: Int, sprintPos: Int, title: String, desc: String, done: Boolean):Ticket
 #    @hasScope(scopes:["Ticket:Edit"])
 
-    AddTicketComments(ticket: _TicketInput!, data: String!, project: _ProjectInput!): Ticket
+    AddTicketComments(ticket: _TicketInput!, message: String!, project: _ProjectInput!): Ticket
 #    @hasScope(scopes:["Ticket:Comment"])
     @cypher(statement:"""
     MATCH (t:Ticket),(u:User)
     WHERE t.id = $ticket.id AND u.id = $cypherParams.currentUser.id
-    CREATE (u)-[:COMMENT {id: apoc.create.uuid(), timestamp: apoc.date.currentTimestamp(), message: $data }]->(t)
+    CREATE (u)-[com:COMMENT]->(t)
+    SET com.id = apoc.create.uuid()
+    SET com.timestamp = datetime().epochSeconds
+    SET com.message = $message
     WITH t
+    RETURN t
+    """)
+    AddTicketCommits(ticket: _TicketInput!, commit: _CommitInput!, project: _ProjectInput!): Ticket
+    #    @hasScope(scopes:["Ticket:Comment"])
+    @cypher(statement:"""
+    MATCH (t:Ticket),(u:User)
+    WHERE t.id = $ticket.id AND u.id = $cypherParams.currentUser.id
+    CREATE (u)-[com:COMMIT]->(t)
+    SET com.id = apoc.create.uuid()
+    SET com.timestamp = datetime().epochSeconds
+    SET com.message = $commit.message
+    SET com.prevHourEstimate = t.hourEstimate
+    SET com.newHourEstimate = $commit.newEst
+    SET t.hourEstimate = $commit.newEst
     RETURN t
     """)
 
@@ -322,7 +343,7 @@ type Mutation {
     sprintPos: 0,
     desc:$desc,
     done:false
-    })<-[:CREATED {timestamp: apoc.date.currentTimestamp()}]-(u)
+    })<-[:CREATED {timestamp: datetime().epochSeconds }]-(u)
     WITH p, t
     MATCH (p)<-[r1:TICKET]-(:Ticket)
     WITH COUNT(r1) AS issNo, t

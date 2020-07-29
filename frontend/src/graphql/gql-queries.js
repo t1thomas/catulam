@@ -453,12 +453,12 @@ const gqlQueries = {
   `,
   ADD_TICKET_COMMENT: gql`mutation(
     $ticket: _TicketInput!
-    $data: String!
+    $message: String!
     $project: _ProjectInput!
   ) {
     AddTicketComments(
       ticket: $ticket
-      data: $data
+      message: $message
       project: $project
     ) {
       id

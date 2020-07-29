@@ -86,7 +86,10 @@ const resolveFunctions = {
   },
   Token: {
     ttl(obj) {
-      return obj.ttl / 1000;
+      // the apoc generated ttl value is in 'ms', which will through an error as
+      // Int cannot represent value greater than 32-bit signed integer
+      // so this resolver divides value by 1000 to show timestamp in 's'
+      return Math.round(obj.ttl / 1000);
     },
   },
   Query: {
