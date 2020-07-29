@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken');
 const md5 = require('md5');
 const neode = require('./neode');
 const authScopes = require('./authScopes');
-const verifyToken = require('./authenticate');
+const verifyToken = require('./verifyAndDecodeToken');
 
 const typeDefs = fs.readFileSync(path.join(__dirname, 'schema.graphql')).toString('utf-8');
 
@@ -95,6 +95,7 @@ const resolveFunctions = {
   Query: {
     getCurrentUser: async (object, params, ctx, resolveInfo) => {
       if (!ctx.cypherParams.currentUser) {
+        console.log('getCurrentUser');
         throw new AuthenticationError('No Token');
       }
       return neo4jgraphql(object, params, ctx, resolveInfo);
@@ -112,6 +113,7 @@ const resolveFunctions = {
       }
     },
     refreshAccess: async (object, params, ctx, resolveInfo) => {
+      console.log('refreshAccess');
       try {
         // get refresh token from cookie
         const oldTokenString = ctx.req.cookies[cookieName];

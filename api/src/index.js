@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const driver = require('./neo4jDriver');
 const schema = require('./graphQL-schema');
-const verifyToken = require('./authenticate');
+const verifyToken = require('./verifyAndDecodeToken');
 
 require('dotenv').config();
 

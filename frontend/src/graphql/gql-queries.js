@@ -6,6 +6,11 @@ const gqlQueries = {
       refreshAccess
     }
   `,
+  REFRESH_TOKEN_graphql_request: /* GraphQL */`
+    mutation {
+      refreshAccess
+    }
+  `,
   SUB_BACKLOG_UPDATE: gql`
     subscription($proId: String!) {
       update(proId: $proId)
