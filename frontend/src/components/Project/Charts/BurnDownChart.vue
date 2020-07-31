@@ -1,18 +1,64 @@
 <template>
-  <div>
-    <line-chart
-      v-if="loaded"
-      style="background: #ffffff"
-      :chart-data="chartData"
-      :chart-options="chartOptions"
-    />
-    <v-btn
-      class="primary"
-      @click="print"
-    >
-      Print
-    </v-btn>
-  </div>
+  <v-card
+    class="mx-auto"
+    max-width="500"
+    min-width="500"
+    color="#4e3f3f"
+  >
+    <div class="chart-container d-flex grow flex-wrap pa-0">
+      <v-sheet
+        class="mx-auto"
+        :elevation="6"
+        :width="400"
+      >
+        <line-chart
+          v-if="loaded"
+          class="primary"
+          :chart-data="chartData"
+          :chart-options="chartOptions"
+        />
+      </v-sheet>
+    </div>
+
+    <v-card-text class="py-0 title">
+      Sprint {{ sprint.sprintNo }} - BurnDown
+    </v-card-text>
+
+    <v-card-subtitle class="">
+      <v-simple-table>
+        <template v-slot:default>
+          <thead>
+            <tr class="font-weight-light">
+              <th>
+                Total Completed
+              </th>
+              <th>
+                Tickets Remaining
+              </th>
+              <th>
+                Avg. Productivity (hr/day)
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="color: #fffa56">
+              <td>{{ percentCompleted }}%</td>
+              <td>{{ ticksRemaining }}</td>
+              <td>{{ productivity }}</td>
+            </tr>
+          </tbody>
+        </template>
+      </v-simple-table>
+    </v-card-subtitle>
+    <v-card-actions>
+      <v-btn
+        color="myBlue"
+        @click="print"
+      >
+        Print
+      </v-btn>
+    </v-card-actions>
+  </v-card>
 </template>
 <script>
 import Vue from 'vue';
@@ -40,12 +86,16 @@ export default {
     ...mapGetters([
       'getUnDoneTicksBySprint',
       'getAllTicksBySprint',
+      'getDoneTicksBySprint',
     ]),
     endDate() {
       return this.sprint.endDate;
     },
     startDate() {
       return this.sprint.startDate;
+    },
+    ticksRemaining() {
+      return this.getUnDoneTicksBySprint(this.sprint.id).length;
     },
     arrDays() {
       const arr = [];
@@ -104,7 +154,7 @@ export default {
       const idealHoursPerDay = this.getIniTotalHrs / this.totalDays;
       for (let i = 1; i <= this.totalDays; i += 1) {
         const num = (this.getIniTotalHrs - (idealHoursPerDay * i));
-        arr.push(Math.round((num + Number.EPSILON) * 100) / 100);
+        arr.push(num.toFixed(2));
       }
       return arr;
     },
@@ -174,13 +224,62 @@ export default {
       });
       return data;
     },
+    productivity() {
+      // get total of initial hours
+      const start = this.getIniTotalHrs;
+      // get current burnDown
+      const burn = this.burnDown;
+      // generate array calculate hours worked each day
+      const hrsPerDay = burn
+        .reduce((arr, currVal, index) => (index > 0 ? [...arr, (burn[index - 1] - currVal)]
+          : [...arr, (start - currVal)]),
+        []);
+      // then reduce average hours worked per day
+      const avg = (hrsPerDay.reduce((p, c) => p + c, 0) / hrsPerDay.length).toFixed(2);
+      return avg;
+    },
+    percentCompleted() {
+      const totalTicks = this.getAllTicksBySprint(this.sprint.id).length;
+      const totalDoneTicks = this.getDoneTicksBySprint(this.sprint.id).length;
+      return (100 * totalDoneTicks) / totalTicks;
+    },
   },
   async mounted() {
     await this.loadData();
   },
   methods: {
     print() {
-      console.log(this.burnDown);
+      console.log(this.productivity);
+      const burn = this.burnDown;
+      const start = this.getIniTotalHrs;
+      // burn.forEach((day, index) => {
+      //   if (index > 0) {
+      //     start = burn[index - 1];
+      //   }
+      //   console.log(start - day);
+      // });
+      // const arr = [];
+      // for (let i = 0; i < burn.length; i += 1) {
+      //   if (i > 0) {
+      //     start = burn[i - 1];
+      //   }
+      //   arr.push(start - burn[i]);
+      // }
+      // const calc = arr.reduce((a, b) => a + b, 0) / this.burnDown.length;
+      // const hrsPerDay = burn.reduce((arr, currVal, index) => {
+      //   if (index > 0) {
+      //     start = burn[index - 1];
+      //   }
+      //   arr.push(start - currVal);
+      //   return arr;
+      // }, []);
+
+      // eslint-disable-next-line max-len
+      const hrssPerDay = burn.reduce((arr, currVal, index) => (index > 0 ? [...arr, (burn[index - 1] - currVal)] : [...arr, (start - currVal)]), []);
+      const avgHrsPerDay = hrssPerDay.reduce((a, b) => a + b, 0) / this.burnDown.length;
+
+      console.log(hrssPerDay);
+      console.log(avgHrsPerDay);
     },
     loadData() {
       this.chartData = {
@@ -209,17 +308,30 @@ export default {
       };
       this.chartOptions = {
         legend: {
-          display: true,
+          display: false,
           position: 'top',
           labels: {
             boxWidth: 80,
-            fontColor: 'black',
+            fontColor: '#ff9800',
           },
         },
         scales: {
           yAxes: [{
             gridLines: {
               display: false,
+            },
+            ticks: {
+              fontColor: 'white',
+            },
+          },
+          ],
+          xAxes: [{
+            ticks: {
+              fontColor: 'white',
+            },
+            gridLines: {
+              zeroLineColor: 'white',
+              color: 'white',
             },
           }],
         },
@@ -244,5 +356,8 @@ export default {
 </script>
 
 <style scoped>
-
+.chart-container {
+  position: relative;
+  bottom: 1rem;
+}
 </style>

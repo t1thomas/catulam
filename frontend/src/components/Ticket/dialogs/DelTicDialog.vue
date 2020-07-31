@@ -24,7 +24,7 @@
     <v-card-actions>
       <v-spacer />
       <v-btn
-        color="blue darken-1"
+        color="myBlue darken-1"
         text
         @click="$emit('closeDialog')"
       >

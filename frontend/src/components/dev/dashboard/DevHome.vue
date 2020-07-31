@@ -16,7 +16,7 @@
           class="px-5 py-3"
         >
           <v-btn
-            class="primary"
+            class="myBlue"
             @click="print"
           >
             Print

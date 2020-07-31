@@ -41,7 +41,7 @@
         </v-card-text>
         <v-card-actions>
           <v-btn
-            color="blue darken-1"
+            color="myBlue darken-1"
             text
             @click="onCancel"
           >
@@ -49,7 +49,7 @@
           </v-btn>
           <v-spacer />
           <v-btn
-            color="blue darken-1"
+            color="myBlue darken-1"
             text
             @click="onConfirm"
           >

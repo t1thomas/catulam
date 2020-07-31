@@ -4,7 +4,7 @@
   >
     <v-toolbar
       flat
-      color="primary"
+      color="myBlue"
       dark
     >
       <v-toolbar-title>My Tasks</v-toolbar-title>

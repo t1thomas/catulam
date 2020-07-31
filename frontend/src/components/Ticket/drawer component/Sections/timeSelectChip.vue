@@ -40,7 +40,7 @@
       </v-chip>
     </template>
     <v-container
-      class="secondary pl-1 pr-0 py-0 d-inline-flex"
+      class="accent pl-1 pr-0 py-0 d-inline-flex"
     >
       <v-text-field
         v-model="hours"
@@ -59,7 +59,7 @@
           :disabled="valueSame"
           @click="changeHours"
         >
-          <v-icon color="primary">
+          <v-icon color="myBlue">
             mdi-check-circle
           </v-icon>
         </v-btn>
@@ -69,7 +69,7 @@
           :disabled="valueSame"
           @click="setOriginalHours"
         >
-          <v-icon color="primary">
+          <v-icon color="myBlue">
             mdi-undo
           </v-icon>
         </v-btn>

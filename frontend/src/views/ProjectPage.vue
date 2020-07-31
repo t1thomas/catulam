@@ -49,12 +49,12 @@ export default {
     loaded: false,
   }),
   computed: {
-    proId() {
-      return this.$route.query.proId;
-    },
     ...mapGetters([
       'getProjectSprints',
     ]),
+    proId() {
+      return this.$route.query.proId;
+    },
   },
   methods: {
     print() {

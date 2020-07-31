@@ -14,7 +14,7 @@
       >
         <v-card class="elevation-12">
           <v-toolbar
-            color="primary"
+            color="myBlue"
             dark
             flat
           >
@@ -51,7 +51,7 @@
           <v-card-actions>
             <v-spacer />
             <v-btn
-              color="primary"
+              color="myBlue"
               @click="onSubmit"
             >
               Login

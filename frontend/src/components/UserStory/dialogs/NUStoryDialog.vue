@@ -21,7 +21,7 @@
             >
               <v-progress-circular
                 :size="150"
-                color="primary"
+                color="myBlue"
                 indeterminate
               />
             </v-overlay>
@@ -42,14 +42,14 @@
           <small>*indicates required field</small>
           <v-spacer />
           <v-btn
-            color="blue darken-1"
+            color="myBlue darken-1"
             text
             @click="onCancel"
           >
             Cancel
           </v-btn>
           <v-btn
-            color="primary"
+            color="myBlue"
             @click="onCreate"
           >
             Create

@@ -48,7 +48,7 @@
               >
                 <td>
                   <v-icon
-                    color="blue"
+                    color="myBlue"
                   >
                     mdi-ticket-confirmation
                   </v-icon>

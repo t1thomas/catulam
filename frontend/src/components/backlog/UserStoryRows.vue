@@ -26,7 +26,7 @@
                 <v-btn
                   v-model="addBtn"
                   small
-                  color="blue darken-2"
+                  color="myBlue darken-2"
                   dark
                   fab
                 >

@@ -35,7 +35,7 @@
       <v-btn
         v-if="currentUser"
         dark
-        color="secondary"
+        color="accent"
         @click="logout"
       >
         Logout
