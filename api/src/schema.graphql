@@ -137,13 +137,29 @@ type Subscription {
 }
 
 type Mutation {
-    UpdateTicketAssignee(tick: _TicketInput!, remUser: _UserInput, addUser: _UserInput, project: _ProjectInput!): User
     UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
     UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
 
     UpdateTicket(id: ID!, issueNumber: Int, hourEstimate: Int, sprintPos: Int, title: String, desc: String, done: Boolean):Ticket
 #    @hasScope(scopes:["Ticket:Edit"])
-
+    UpdateTicketAssignee(tick: _TicketInput!, user: _UserInput!, project: _ProjectInput!): User
+    @cypher(statement:"""
+    MATCH (u1:User {id: $user.id}),(t:Ticket{id: $tick.id})
+    OPTIONAL MATCH (u2:User)-[rel:ASSIGNED_TASK]->(t)
+    CALL apoc.do.when(
+    rel IS NOT NULL,
+    'CREATE (u1)-[:ASSIGNED_TASK]->(t) DELETE rel RETURN u1',
+    'CREATE (u1)-[:ASSIGNED_TASK]->(t) RETURN u1',
+    {u1:u1, rel:rel, t:t})
+    YIELD value
+    RETURN value.u1
+    """)
+    RemoveTicketAssignee(tick: _TicketInput!, project: _ProjectInput!): User
+    @cypher(statement:"""
+    MATCH (u:User)-[rel:ASSIGNED_TASK]->(t:Ticket{id: $tick.id})
+    DELETE rel
+    RETURN u
+    """)
     AddTicketComments(ticket: _TicketInput!, message: String!, project: _ProjectInput!): Ticket
 #    @hasScope(scopes:["Ticket:Comment"])
     @cypher(statement:"""
@@ -346,11 +362,11 @@ type Mutation {
     RETURN s
     """)
 
-    CreateTicket(hourEstimate: Int, title: String!, desc: String, project: _ProjectInput!, user: _UserInput!): Ticket
+    CreateTicket(hourEstimate: Int, title: String!, desc: String, project: _ProjectInput!): Ticket
 #    @hasScope(scopes:["Ticket:Create"])
     @cypher(statement:"""
     MATCH (p:Project),(u:User)
-    WHERE p.id = $project.id AND u.id = $user.id
+    WHERE p.id = $project.id AND u.id = $cypherParams.currentUser.id
     CREATE (p)<-[:TICKET]-(t: Ticket {
     id:apoc.create.uuid(),
     title:$title,

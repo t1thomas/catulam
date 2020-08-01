@@ -44,10 +44,8 @@ export default {
   methods: {
     ...mapActions([
       'fetchBackLogData',
-      'fetchCurrProElements',
     ]),
     async loadData() {
-      await this.fetchCurrProElements(this.proId);
       await this.fetchBackLogData(this.proId);
     },
   },

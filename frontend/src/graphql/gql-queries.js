@@ -21,20 +21,44 @@ const gqlQueries = {
       $title: String!
       $desc: String
       $project: _ProjectInput!
-      $user: _UserInput!
     ) {
       CreateTicket(
         hourEstimate: $hourEstimate
         title: $title
         desc: $desc
         project: $project
-        user: $user
       ) {
         id
-        title
         issueNumber
+        title
+        done
+        hourEstimate
+        assignee {
+          id
+        }
         project {
           id
+        }
+        sprint {
+          id
+        }
+        comments {
+          id
+          timestamp
+          message
+          User {
+            id
+          }
+        }
+        commits {
+          id
+          message
+          timestamp
+          newHourEstimate
+          prevHourEstimate
+          User {
+            id
+          }
         }
       }
     }`,
@@ -76,108 +100,68 @@ const gqlQueries = {
         }
       }
     }`,
-  BACKLOG_DATA: gql`
-    query($id: ID!) {
-      noUsNoSp: Project(filter: { id: $id }) {
-        tickets(
-          filter: { AND: [{ done: false }, { userStory: null }, { sprint: null }] }
-        ) {
-          id
-        }
+  BACKLOG_DATA: gql`query($id: ID!) {
+    noUsNoSp: Ticket(
+      filter: {
+        project: { id: $id }
+        AND: [{ done: false }, { userStory: null }, { sprint: null }]
       }
-      noUsSp: Project(filter: { id: $id }) {
-        tickets(
-          filter: {
-            AND: [{ done: false }, { userStory: null }, { sprint_not: null }]
-          }
-        ) {
-          id
-          sprint {
-            id
-          }
-        }
+    ) {
+      id
+    }
+    noUsSp: Ticket(
+      filter: {
+        project: { id: $id }
+        AND: [{ done: false }, { userStory: null }, { sprint_not: null }]
       }
-      UsNoSp: Project(filter: { id: $id }) {
-        tickets(
-          filter: {
-            AND: [{ done: false }, { userStory_not: null }, { sprint: null }]
-          }
-        ) {
-          id
-          userStory {
-            id
-          }
-        }
-      }
-      UsSp: Project(filter: { id: $id }) {
-        tickets(
-          filter: {
-            AND: [{ done: false }, { userStory_not: null }, { sprint_not: null }]
-          }
-        ) {
-          id
-          sprint {
-            id
-          }
-          userStory{
-            id
-          }
-        }
-      }
-      DUS: Project(filter: { id: $id }) {
-        tickets(filter: { AND: [{ done: true }, { userStory_not: null }] }) {
-          id
-          userStory {
-            id
-          }
-        }
-      }
-      DnoUS: Project(filter: { id: $id }) {
-        tickets(filter: { AND: [{ done: true }, { userStory: null }] }) {
-          id
-        }
+    ) {
+      id
+      sprint {
+        id
       }
     }
-  `,
-  CURR_PROJECT_ELEMENTS: gql`
-    query($id: ID!) {
-      Project(filter: { id: $id }) {
-        id
-        title
-        label
-        userStories {
-          id
-          storyText
-        }
-        members {
-          User {
-            id
-            avatar
-            firstName
-            lastName
-            fullName
-          }
-        }
-        tickets {
-          assignee {
-            id
-          }
-          id
-          title
-          issueNumber
-          desc
-          hourEstimate
-          done
-          sprint {
-            id
-          }
-        }
-        sprints {
-          id
-          sprintNo
-        }
+    UsNoSp: Ticket(
+      filter: {
+        project: { id: $id }
+        AND: [{ done: false }, { userStory_not: null }, { sprint: null }]
       }
-    }`,
+    ) {
+      id
+      userStory {
+        id
+      }
+    }
+    UsSp: Ticket(
+      filter: {
+        project: { id: $id }
+        AND: [{ done: false }, { userStory_not: null }, { sprint_not: null }]
+      }
+    ) {
+      id
+      sprint {
+        id
+      }
+      userStory {
+        id
+      }
+    }
+    DUS: Ticket(
+      filter: {
+        project: { id: $id }
+        AND: [{ done: true }, { userStory_not: null }]
+      }
+    ) {
+      id
+      userStory {
+        id
+      }
+    }
+    DnoUS: Ticket(
+      filter: { project: { id: $id }, AND: [{ done: true }, { userStory: null }] }
+    ) {
+      id
+    }
+  }`,
   ALL_USERS: gql`
     query {
       User {
@@ -231,15 +215,25 @@ const gqlQueries = {
   `,
   UPDATE_TICKET_ASSIGNEE: gql`
     mutation(
-      $tick: _TicketInput!
-      $remUser: _UserInput
-      $addUser: _UserInput
+      $tick: _TicketInput!,
+      $user: _UserInput!,
       $project: _ProjectInput!
     ) {
       UpdateTicketAssignee(
         tick: $tick
-        remUser: $remUser
-        addUser: $addUser
+        user: $user
+        project: $project
+      ) {
+        id
+      }
+    }`,
+  REMOVE_TICKET_ASSIGNEE: gql`
+    mutation(
+      $tick: _TicketInput!,
+      $project: _ProjectInput!
+    ) {
+      RemoveTicketAssignee(
+        tick: $tick
         project: $project
       ) {
         id

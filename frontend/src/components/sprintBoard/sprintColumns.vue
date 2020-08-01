@@ -49,11 +49,9 @@ export default {
   methods: {
     ...mapActions([
       'fetchSprintBoardData',
-      'fetchCurrProElements',
       'snackBarOn',
     ]),
     async loadData() {
-      await this.fetchCurrProElements(this.proId);
       await this.fetchSprintBoardData(this.sprintId);
     },
   },

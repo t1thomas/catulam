@@ -431,65 +431,22 @@ const resolveFunctions = {
         throw new Error(e);
       }
     },
-    UpdateTicketAssignee: async (_, {
-      tick, remUser, addUser, project,
-    }) => {
-      if (remUser && !addUser) {
-        try {
-          return neode.cypher(
-            'MATCH (t:Ticket { id: $tick.id })<-[rel:ASSIGNED_TASK]-(u:User { id: $remUser.id })'
-                        + ' DELETE rel'
-                        + ' RETURN u',
-            { tick, remUser },
-          )
-            .then(() => {
-              pubSub.publish('project', { update: project.id });
-              return null;
-            })
-            .catch((e) => {
-              throw e;
-            });
-        } catch (e) {
-          throw new Error(e);
-        }
-      } else if (!remUser && addUser) {
-        try {
-          return neode.cypher('MATCH (t:Ticket),(u:User)'
-                        + ' WHERE t.id = $tick.id AND u.id = $addUser.id'
-                        + ' CREATE (u)-[rel:ASSIGNED_TASK]->(t)'
-                        + ' RETURN u',
-          { tick, addUser })
-            .then((result) => {
-              pubSub.publish('project', { update: project.id });
-              return result.records[0].get('u').properties;
-            })
-            .catch((e) => {
-              throw e;
-            });
-        } catch (e) {
-          throw new Error(e);
-        }
-      } else if (remUser && addUser) {
-        // reassign ticket
-        try {
-          return neode.cypher('MATCH (a:Ticket { id:$tick.id })<-[rel:ASSIGNED_TASK]-(b:User{ id:$remUser.id })'
-                        + ' MATCH (c:User { id:$addUser.id })'
-                        + ' CALL apoc.refactor.from(rel, c)'
-                        + ' YIELD input, output, error'
-                        + ' RETURN c',
-          { tick, remUser, addUser })
-            .then((result) => {
-              pubSub.publish('project', { update: project.id });
-              return result.records[0].get('c').properties;
-            })
-            .catch((e) => {
-              throw e;
-            });
-        } catch (e) {
-          throw new Error(e);
-        }
-      } else {
-        throw new Error('Query does not contain necessary params');
+    UpdateTicketAssignee: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('project', { update: params.project.id });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
+    RemoveTicketAssignee: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('project', { update: params.project.id });
+        return result;
+      } catch (e) {
+        throw new Error(e);
       }
     },
     CreateTicket: async (object, params, ctx, resolveInfo) => {

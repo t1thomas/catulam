@@ -39,14 +39,8 @@
         cols="8"
       >
         <draggable-tick-list
-          v-if="!noUs"
           :list-properties="tickListConfig"
-          :ticket-ids="tickIds(userStoryId)"
-        />
-        <draggable-tick-list
-          v-else
-          :list-properties="tickListConfig"
-          :ticket-ids="tickIdsNoUs"
+          :ticket-ids="tickIds"
         />
       </v-col>
     </div>
@@ -77,24 +71,30 @@ export default {
       return this.userStoryId === 'noUs';
     },
     tickListConfig() {
-      if (!this.noUs) {
+      if (this.noUs) {
         return {
-          userStoryId: this.userStoryId,
+          userStoryId: null,
           columnType: 'start',
           disabled: false,
         };
       }
       return {
-        userStoryId: null,
+        userStoryId: this.userStoryId,
         columnType: 'start',
         disabled: false,
       };
     },
     ...mapGetters({
       storyById: 'getUserStoryText',
-      tickIds: 'getTicksUsNoSp',
-      tickIdsNoUs: 'getTicksNoUsNoSp',
+      tickIdsUsNoSp: 'getTicksUsNoSp',
+      tickIdsNoUsNoSp: 'getTicksNoUsNoSp',
     }),
+    tickIds() {
+      if (this.noUs) {
+        return this.tickIdsNoUsNoSp;
+      }
+      return this.tickIdsUsNoSp(this.userStoryId);
+    },
   },
   methods: {
     ...mapActions({

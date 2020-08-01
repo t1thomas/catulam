@@ -86,7 +86,6 @@
 </template>
 <script>
 import { mapActions, mapState } from 'vuex';
-import gqlQueries from '../../../graphql/gql-queries';
 
 export default {
   name: 'NTicDialog',
@@ -103,7 +102,6 @@ export default {
     },
     ...mapState({
       showDialog: (state) => state.nTicketDialog.show,
-      currUser: (state) => state.currentUser,
     }),
   },
   methods: {
@@ -130,35 +128,21 @@ export default {
     async onCreate() {
       if (this.$refs.ticForm.validate()) {
         this.setSaving();
-        await this.$apollo.mutate({
-          mutation: gqlQueries.CREATE_TICKET,
-          fetchPolicy: 'no-cache',
-          variables: {
-            hourEstimate: Number(this.hours),
-            title: this.title,
-            desc: this.desc,
-            project: { id: this.proId },
-            user: { id: this.currUser.id },
-          },
-        }).then((response) => {
-          const { CreateTicket } = response.data;
-          if (CreateTicket === null) {
-            throw new Error('Unable to Create Ticket');
-          } else {
-            // show success notification of Ticket creation
-            this.snackBarOn({
-              message: `Created Ticket ${CreateTicket.title} #${CreateTicket.issueNumber} Successfully`,
-              type: 'success',
-            });
-          }
-        }).catch((error) => {
-          this.snackBarOn({
-            message: error,
-            type: 'error',
+        const payload = {
+          hourEstimate: Number(this.hours),
+          title: this.title,
+          desc: this.desc,
+          project: { id: this.proId },
+        };
+        await this.$store.dispatch('createTicket', payload)
+          .then(() => {
+            this.setSaving();
+            this.onCancel();
+          })
+          .catch(() => {
+            this.setSaving();
+            this.onCancel();
           });
-        });
-        this.setSaving();
-        this.onCancel();
       }
     },
     setSaving() {

@@ -54,8 +54,8 @@
             tile
           >
             <v-img
-              v-if="assignee"
-              :src="gravatar"
+              v-if="ticket.assignee !== null"
+              :src="getGravatar(ticket.assignee.id)"
             />
             <v-icon
               v-else
@@ -64,7 +64,7 @@
               mdi-help-circle
             </v-icon>
           </v-avatar>
-          {{ fullName(assignee) }}
+          {{ fullName }}
         </v-chip>
       </v-card-actions>
     </v-card>
@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'TicketCard',
@@ -83,33 +83,19 @@ export default {
     },
   },
   computed: {
-    ...mapState({
-      members: (state) => state.currProElements.members,
-    }),
     ...mapGetters([
       'getTicketById',
-      'getProMemberById',
+      'getGravatar',
+      'getFullName',
     ]),
-    assignee() {
-      if (this.ticket.assignee === null) {
-        return null;
-      }
-      // const memObj = this.members.find((member) => member.User.id === this.ticket.assignee.id);
-      return this.getProMemberById(this.ticket.assignee.id);
-    },
     ticket() {
       return this.getTicketById(this.tickId);
     },
-    gravatar() {
-      return `https://gravatar.com/avatar/${this.assignee.avatar}?d=identicon`;
-    },
-  },
-  methods: {
     fullName() {
-      if (this.assignee === null) {
-        return 'Unassigned';
+      if (this.ticket.assignee === null) {
+        return 'n/a';
       }
-      return this.assignee.fullName;
+      return this.getFullName(this.ticket.assignee.id);
     },
   },
 };

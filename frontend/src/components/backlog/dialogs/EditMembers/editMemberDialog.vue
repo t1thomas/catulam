@@ -132,7 +132,6 @@ export default {
     ...mapActions([
       'showEditMemDialog',
       'snackBarOn',
-      'fetchCurrProElements',
     ]),
     getAllMembers() {
       // get all members apart from current User (PM)
@@ -170,7 +169,7 @@ export default {
           message: 'Updated Project Members Successfully',
           type: 'success',
         });
-        await this.fetchCurrProElements(this.proId);
+        // await this.fetchCurrProElements(this.proId);
         // update the store so new members are shown
       }).catch((error) => {
         this.setSaving();

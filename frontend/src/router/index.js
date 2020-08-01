@@ -4,7 +4,6 @@ import Home from '../views/Home.vue';
 import backlog from '../views/Backlog.vue';
 import ProjectPage from '../views/ProjectPage.vue';
 import login from '../views/Login.vue';
-import TicketPage from '../components/Ticket/drawer component/Sections/TicketPage.vue';
 import UserStoryPage from '../components/UserStory/UserStoryPage.vue';
 import SprintBoard from '../views/SprintBoard.vue';
 import AuthGuard from '../AuthGuard';
@@ -37,12 +36,6 @@ const routes = [
     path: '/uStory',
     name: 'uStory',
     component: UserStoryPage,
-    beforeEnter: AuthGuard,
-  },
-  {
-    path: '/ticket',
-    name: 'ticket',
-    component: TicketPage,
     beforeEnter: AuthGuard,
   },
   {

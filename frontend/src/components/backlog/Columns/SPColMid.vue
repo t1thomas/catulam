@@ -6,7 +6,7 @@
     height="100%"
   >
     <v-carousel-item
-      v-for="(sprint) in sprintList"
+      v-for="(sprint) in getSprints(proId)"
       :key="sprint.id"
       :name="sprint.sprintNo"
     >
@@ -51,8 +51,10 @@ export default {
     noUs() {
       return this.userStoryId === 'noUs';
     },
+    proId() {
+      return this.$route.query.proId;
+    },
     ...mapState({
-      sprintList: (state) => state.currProElements.sprints,
       carModP: (state) => state.carouselModelParent,
     }),
     carouselModel: {
@@ -68,6 +70,7 @@ export default {
     ...mapGetters({
       tickIds: 'getTickIdsPerSprintUS',
       tickIdsNoUs: 'getTickIdsPerSprintNoUS',
+      getSprints: 'getProjectSprints',
     }),
   },
   methods: {

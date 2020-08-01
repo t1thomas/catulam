@@ -19,8 +19,8 @@
             color="amber"
           />
           <v-img
-            v-else-if="assignee"
-            :src="gravatar(assignee)"
+            v-if="assignee !== null"
+            :src="getGravatar(assignee.id)"
           />
           <v-icon
             v-else
@@ -29,7 +29,7 @@
             mdi-help-circle
           </v-icon>
         </v-avatar>
-        {{ fullName(assignee) }}
+        {{ fullName }}
         <v-icon
           dark
           class="ml-2"
@@ -46,14 +46,14 @@
           class="member-item"
         >
           <v-list-item-avatar size="25">
-            <v-img :src="gravatar(member)" />
+            <v-img :src="getGravatar(member.id)" />
           </v-list-item-avatar>
           <v-list-item-content>
-            <v-list-item-subtitle>{{ fullName(member) }}</v-list-item-subtitle>
+            <v-list-item-subtitle>{{ getFullName(member.id) }}</v-list-item-subtitle>
           </v-list-item-content>
           <v-list-item-action>
             <v-btn
-              v-if="isAssignee(member)"
+              v-if="assignee !== null && isAssignee(member)"
               icon
               @click="removeAssignee(member)"
             >
@@ -81,7 +81,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'SelectorChip',
@@ -90,74 +90,67 @@ export default {
     saving: false,
   }),
   computed: {
-    ...mapState({
-      ticket: 'currentTicket',
-      project: 'currProElements',
+    ...mapGetters({
+      ticket: 'getCurrTick',
     }),
-    proId() {
-      return this.$route.query.proId;
-    },
+    ...mapGetters([
+      'getProjectMembers',
+      'getGravatar',
+      'getFullName',
+    ]),
     members() {
-      return this.project.members.map((member) => member.User);
+      return this.getProjectMembers(this.ticket.project.id);
     },
     assignee() {
-      if (this.ticket.assignee === null) {
-        return null;
+      return this.ticket.assignee;
+    },
+    fullName() {
+      if (this.assignee === null) {
+        return 'n/a';
       }
-      return this.members.find((member) => member.id === this.ticket.assignee.id);
+      return this.getFullName(this.assignee.id);
     },
   },
   methods: {
-    ...mapActions([
-      'updateTicketAssignee',
-    ]),
-    gravatar(user) {
-      return `https://gravatar.com/avatar/${user.avatar}?d=identicon`;
+    isAssignee(member) {
+      return member.id === this.assignee.id;
     },
-    fullName(user) {
-      if (user === null) {
-        return 'Unassigned';
-      }
-      return `${user.firstName} ${user.lastName}`;
+    setSaving() {
+      this.saving = !this.saving;
     },
-    isAssignee(user) {
-      return user === this.assignee;
-    },
-    async removeAssignee(member) {
-      this.saving = true;
+    async removeAssignee() {
+      this.setSaving();
       // construct variable payload for graphQL mutation
       const payload = {
-        remUser: { id: member.id },
         tick: { id: this.ticket.id },
-        project: { id: this.proId },
+        project: { id: this.ticket.project.id },
       };
       // Fires a mutation to remove assignee of current ticket
-      await this.updateTicketAssignee(payload);
-      this.saving = false;
+      await this.$store.dispatch('removeTicketAssignee', payload)
+        .then(() => {
+          this.setSaving();
+        })
+        .catch(() => {
+          this.setSaving();
+          this.selector = false;
+        });
     },
     async changeAssignee(member) {
       this.saving = true;
-      // if no one is currently assigned
-      if (this.assignee === null) {
-        // construct variable payload for graphQL mutation
-        const payload = {
-          addUser: { id: member.id },
-          tick: { id: this.ticket.id },
-          project: { id: this.proId },
-        };
-        await this.updateTicketAssignee(payload);
-      } else {
-        const payload = {
-          remUser: { id: this.assignee.id },
-          addUser: { id: member.id },
-          tick: { id: this.ticket.id },
-          project: { id: this.proId },
-        };
-        // Fires a mutation to change assignee of current ticket
-        await this.updateTicketAssignee(payload);
-      }
-      this.saving = false;
-      this.selector = false;
+      const payload = {
+        user: { id: member.id },
+        tick: { id: this.ticket.id },
+        project: { id: this.ticket.project.id },
+      };
+      await this.$store.dispatch('updateTicketAssignee', payload)
+        .then(() => {
+          this.setSaving();
+          this.selector = false;
+        })
+        .catch(() => {
+          this.setSaving();
+          this.selector = false;
+        });
     },
   },
 };

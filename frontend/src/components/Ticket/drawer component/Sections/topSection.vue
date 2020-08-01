@@ -1,33 +1,28 @@
 <template>
-  <v-row>
-    <v-col
-      cols="4"
-    >
-      <span class="headline">
-        {{ ticket.title }}
-      </span>
-      <span class="horiz-line" />
+  <v-container>
+    <v-row>
       <span class="headline">
         #{{ ticket.issueNumber }}
+        {{ ticket.title }}
       </span>
-    </v-col>
-    <v-divider
-      style="background: lightslategrey"
-      vertical
-    />
-    <v-col
-      cols="7"
-    >
-      <span class="body-2 mr-4">
+    </v-row>
+    <v-row>
+      <v-col
+        cols="6"
+      >
         Assigned to:
-      </span>
-      <user-select />
-    </v-col>
-  </v-row>
+      </v-col>
+      <v-col
+        cols="6"
+      >
+        <user-select />
+      </v-col>
+    </v-row>
+  </v-container>
 </template>
 
 <script>
-import { mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import userSelectChip from './userSelectChip.vue';
 
 export default {
@@ -36,18 +31,13 @@ export default {
     userSelect: userSelectChip,
   },
   computed: {
-    ...mapState({
-      ticket: 'currentTicket',
+    ...mapGetters({
+      ticket: 'getCurrTick',
     }),
   },
 };
 </script>
 
 <style scoped>
-.horiz-line {
-  display: inline-block;
-  vertical-align: super;
-  border-bottom: 2px solid #fafafa;
-  padding: 0 30px;
-}
+
 </style>

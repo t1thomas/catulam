@@ -3,7 +3,6 @@
     v-if="ticket"
     width="100%"
     :disabled="ticket.done"
-    @dblclick="detDrawShow({ show: true, ticketId: ticket.id })"
   >
     <div
       v-if="ticket.done"
@@ -55,8 +54,8 @@
                   tile
                 >
                   <v-img
-                    v-if="assignee"
-                    :src="gravatar"
+                    v-if="ticket.assignee !== null"
+                    :src="getGravatar(ticket.assignee.id)"
                   />
                   <v-icon
                     v-else
@@ -78,7 +77,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'TicketCard',
@@ -92,36 +91,20 @@ export default {
     tipDelay: 1200,
   }),
   computed: {
-    ...mapState({
-      members: (state) => state.currProElements.members,
-    }),
     ...mapGetters([
       'getTicketById',
+      'getGravatar',
+      'getFullName',
     ]),
-    assignee() {
-      if (this.ticket.assignee === null) {
-        return null;
-      }
-      const memObj = this.members.find((member) => member.User.id === this.ticket.assignee.id);
-      return memObj.User;
-    },
     ticket() {
       return this.getTicketById(this.tickId);
     },
-    gravatar() {
-      return `https://gravatar.com/avatar/${this.assignee.avatar}?d=identicon`;
-    },
     fullName() {
-      if (this.assignee === null) {
+      if (this.ticket.assignee === null) {
         return 'n/a';
       }
-      return this.assignee.fullName;
+      return this.getFullName(this.ticket.assignee.id);
     },
-  },
-  methods: {
-    ...mapActions([
-      'detDrawShow',
-    ]),
   },
 };
 </script>

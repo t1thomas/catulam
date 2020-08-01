@@ -10,7 +10,7 @@
         item-value="id"
       >
         <template v-slot:selection="{ item }">
-          <v-list-item-content>
+          <v-list-item-content style="flex: none">
             <v-list-item-title>{{ item.label }}</v-list-item-title>
             <v-list-item-subtitle>{{ item.title }}</v-list-item-subtitle>
           </v-list-item-content>
@@ -79,18 +79,17 @@
                 </v-list-item-title>
               </v-list-item-content>
             </template>
-            <template v-if="getProjectSprints(selected.id).length > 0">
+            <template v-if="getProjectSprints(selected).length > 0">
               <v-list-item
-                v-for="sprint in getProjectSprints(selected.id)"
+                v-for="sprint in getProjectSprints(selected)"
                 :key="sprint.id"
-                style="padding-left: 24px"
                 color="primary"
                 link
                 :to="`/sprint?sprintId=${sprint.id}&proId=${selected}`"
                 exact
               >
                 <v-list-item-title>
-                  Sprint {{ sprint.sprintNo }}
+                  Sprint #{{ sprint.sprintNo }}
                 </v-list-item-title>
               </v-list-item>
             </template>

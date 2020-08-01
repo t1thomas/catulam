@@ -144,7 +144,7 @@
             </v-col>
           </v-row>
           <v-row
-            v-if="currPro.userStories.length <= 0"
+            v-if="getUserStoryByPro(proId).length <= 0"
             no-gutters
           >
             <not-found-card
@@ -153,7 +153,7 @@
             />
           </v-row>
           <v-row
-            v-for="story in currPro.userStories"
+            v-for="story in getUserStoryByPro(proId)"
             :key="story.id"
             class="mb-0"
             no-gutters
@@ -199,7 +199,7 @@
   </v-content>
 </template>
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapActions, mapState, mapGetters } from 'vuex';
 import USColumnStart from './Columns/USColStart.vue';
 import USColumnEnd from './Columns/USColEnd.vue';
 import SPColumnMiddle from './Columns/SPColMid.vue';
@@ -232,7 +232,6 @@ export default {
   }),
   computed: {
     ...mapState({
-      currPro: (state) => state.currProElements,
       currUser: (state) => state.currentUser,
       showSPlanDialog: (state) => state.sPlanDialog.show,
       showNUStoryDialog: (state) => state.nUStoryDialog.show,
@@ -240,8 +239,16 @@ export default {
       showUADialog: (state) => state.changeDialog.showUADialog,
       showUSDialog: (state) => state.changeDialog.showUSDialog,
     }),
+    ...mapGetters([
+      'getCurrProject',
+      'getUserStoryByPro',
+    ]),
+
     proId() {
       return this.$route.query.proId;
+    },
+    currPro() {
+      return this.getCurrProject(this.proId);
     },
     isPm() {
       return this.currUser.role === 'pm';
@@ -269,7 +276,6 @@ export default {
   methods: {
     ...mapActions([
       'fetchBackLogData',
-      'fetchCurrProElements',
       'nTicDialogShow',
       'sPlannerShow',
       'nUStoryDialogShow',
@@ -277,7 +283,7 @@ export default {
       'showEditMemDialog',
     ]),
     async loadData() {
-      await this.fetchCurrProElements(this.proId);
+      console.log('here');
       await this.fetchBackLogData(this.proId);
     },
     nTicShow() {

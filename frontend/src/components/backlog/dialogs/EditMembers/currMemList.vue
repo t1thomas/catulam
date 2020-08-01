@@ -85,7 +85,6 @@ export default {
   methods: {
     ...mapActions([
       'snackBarOn',
-      'fetchCurrProElements',
     ]),
     gravatar(user) {
       return `https://gravatar.com/avatar/${user.avatar}?d=identicon`;
@@ -118,7 +117,7 @@ export default {
           message: 'Deleted Successfully',
           type: 'success',
         });
-        await this.fetchCurrProElements(this.proId);
+        // await this.fetchCurrProElements(this.proId);
         // update the store so new members are shown
       }).catch((error) => {
         this.showDialog = false;

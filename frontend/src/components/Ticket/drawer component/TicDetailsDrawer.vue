@@ -7,63 +7,51 @@
     style="width: fit-content;"
   >
     <div
-      v-if="dataLoaded"
+      v-if="tickId !== null"
       class="grid-container pa-2"
     >
       <topSection />
-      <details-section />
-      <desc-section />
-      <updates-section />
-      <delete-section @delDialog="overlay = true" />
+<!--      <details-section />-->
+<!--      <desc-section />-->
+<!--      <updates-section />-->
+<!--      <delete-section @delDialog="overlay = true" />-->
     </div>
-    <v-overlay
-      absolute
-      :value="overlay"
-      opacity="0.78"
-    >
-      <del-tic-dialog @closeDialog="overlay = false" />
-    </v-overlay>
-
-    <v-progress-circular
-      v-if="!dataLoaded"
-      style="display: contents"
-      :size="50"
-      color="primary"
-      indeterminate
-    />
+<!--    <v-overlay-->
+<!--      absolute-->
+<!--      :value="overlay"-->
+<!--      opacity="0.78"-->
+<!--    >-->
+<!--      <del-tic-dialog @closeDialog="overlay = false" />-->
+<!--    </v-overlay>-->
   </v-navigation-drawer>
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapState } from 'vuex';
 import topSection from './Sections/topSection.vue';
-import detailsSection from './Sections/detailsSection.vue';
-import descSection from './Sections/descSection.vue';
-import deleteSection from './Sections/deleteSection.vue';
-import DelTicDialog from '../dialogs/DelTicDialog.vue';
-import updatesSection from './Sections/cmnts&cmits/updatesSection.vue';
+// import detailsSection from './Sections/detailsSection.vue';
+// import descSection from './Sections/descSection.vue';
+// import deleteSection from './Sections/deleteSection.vue';
+// import DelTicDialog from '../dialogs/DelTicDialog.vue';
+// import updatesSection from './Sections/cmnts&cmits/updatesSection.vue';
 
 export default {
   name: 'DetailsDrawer',
   components: {
     topSection,
-    detailsSection,
-    descSection,
-    deleteSection,
-    DelTicDialog,
-    updatesSection,
+    // detailsSection,
+    // descSection,
+    // deleteSection,
+    // DelTicDialog,
+    // updatesSection,
   },
   data: () => ({
     overlay: false,
   }),
   computed: {
-    dataLoaded() {
-      return this.ticket !== null;
-    },
     ...mapState({
       show: (state) => state.detailsDrawer.show,
-      ticketId: (state) => state.detailsDrawer.ticketId,
-      ticket: (state) => state.currentTicket,
+      tickId: (state) => state.detailsDrawer.ticketId,
     }),
     drawer: {
       get() {
@@ -71,25 +59,11 @@ export default {
       },
       set(val) {
         if (val === false) {
-          this.$store.commit('set_DrawerShow', { show: val });
+          this.$store.dispatch('detDrawShow', { show: val });
           this.overlay = false;
         }
       },
     },
-  },
-  watch: {
-    async show(val) {
-      // if val === true i.e if drawer is showing
-      if (val) {
-        await this.fetchCurrTicket(this.ticketId);
-      }
-    },
-  },
-  methods: {
-    ...mapActions([
-      'detDrawShow',
-      'fetchCurrTicket',
-    ]),
   },
 };
 </script>
