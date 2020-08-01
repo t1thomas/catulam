@@ -28,7 +28,7 @@
           <small>*Any associated Tickets will be moved to Unassigned</small>
           <v-spacer />
           <v-btn
-            color="myBlue darken-1"
+            color="primary darken-1"
             text
             @click="onCancel"
           >

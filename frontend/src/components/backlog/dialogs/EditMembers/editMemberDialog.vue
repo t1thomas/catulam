@@ -25,7 +25,7 @@
             >
               <v-progress-circular
                 :size="150"
-                color="myBlue"
+                color="primary"
                 indeterminate
               />
             </v-overlay>
@@ -72,7 +72,7 @@
                 style="align-self: center;"
               >
                 <v-btn
-                  color="myBlue"
+                  color="primary"
                   dark
                   :disabled="(selected.length<=0)"
                   @click="addMembers"
@@ -89,7 +89,7 @@
         <v-card-actions>
           <v-spacer />
           <v-btn
-            color="myBlue darken-1"
+            color="primary darken-1"
             text
             @click="onCancel"
           >

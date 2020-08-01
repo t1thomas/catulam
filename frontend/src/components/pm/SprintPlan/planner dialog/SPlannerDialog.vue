@@ -77,7 +77,7 @@
         </v-card-text>
         <v-card-actions>
           <v-btn
-            color="myBlue darken-1"
+            color="primary darken-1"
             text
             @click="onCancel"
           >

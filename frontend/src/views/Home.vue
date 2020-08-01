@@ -1,8 +1,12 @@
 <template>
-  <v-content v-if="getCurrentUser !== null">
+  <v-container
+    v-if="getCurrentUser !== null"
+    fluid
+    class="fill-height"
+  >
     <DevHome v-if="userType==='dev'" />
     <PMHome v-if="userType==='pm'" />
-  </v-content>
+  </v-container>
 </template>
 
 <script>

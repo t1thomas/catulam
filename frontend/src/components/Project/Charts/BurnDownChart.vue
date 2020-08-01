@@ -13,7 +13,7 @@
       >
         <line-chart
           v-if="loaded"
-          class="primary"
+          class="main"
           :chart-data="chartData"
           :chart-options="chartOptions"
         />
@@ -52,7 +52,7 @@
     </v-card-subtitle>
     <v-card-actions>
       <v-btn
-        color="myBlue"
+        color="primary"
         @click="print"
       >
         Print

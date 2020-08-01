@@ -1,7 +1,7 @@
 <template>
   <v-container
-    fill-height
     fluid
+    class="fill-height"
   >
     <v-row
       align="center"
@@ -14,7 +14,7 @@
       >
         <v-card class="elevation-12">
           <v-toolbar
-            color="myBlue"
+            color="primary"
             dark
             flat
           >
@@ -51,7 +51,7 @@
           <v-card-actions>
             <v-spacer />
             <v-btn
-              color="myBlue"
+              color="primary"
               @click="onSubmit"
             >
               Login

@@ -59,7 +59,7 @@
           :disabled="valueSame"
           @click="changeHours"
         >
-          <v-icon color="myBlue">
+          <v-icon color="primary">
             mdi-check-circle
           </v-icon>
         </v-btn>
@@ -69,7 +69,7 @@
           :disabled="valueSame"
           @click="setOriginalHours"
         >
-          <v-icon color="myBlue">
+          <v-icon color="primary">
             mdi-undo
           </v-icon>
         </v-btn>

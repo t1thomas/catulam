@@ -20,7 +20,7 @@
             >
               <v-progress-circular
                 :size="150"
-                color="myBlue"
+                color="primary"
                 indeterminate
               />
             </v-overlay>
@@ -76,14 +76,14 @@
 
           <v-spacer />
           <v-btn
-            color="myBlue darken-1"
+            color="primary darken-1"
             text
             @click="onCancel"
           >
             Cancel
           </v-btn>
           <v-btn
-            color="myBlue"
+            color="primary"
             @click="onCreate"
           >
             Create

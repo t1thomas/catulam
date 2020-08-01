@@ -3,7 +3,7 @@
     <v-tabs
       v-if="currProject !== null"
       vertical
-      color="myBlue2"
+      color="primary"
     >
       <v-tab style="place-content: start">
         <v-icon left>
@@ -11,7 +11,7 @@
         </v-icon>
         Members
         <v-badge
-          color="myBlue"
+          color="primary"
           inline
           :content="currProject.members.length.toString()"
         />
@@ -22,7 +22,7 @@
         </v-icon>
         Tickets
         <v-badge
-          color="myBlue"
+          color="primary"
           inline
           :content="currProject.tickets.length.toString()"
         />
@@ -33,7 +33,7 @@
         </v-icon>
         Sprints
         <v-badge
-          color="myBlue"
+          color="primary"
           inline
           :content="currProject.sprints.length.toString()"
         />

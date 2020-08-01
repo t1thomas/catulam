@@ -45,7 +45,7 @@
         <v-card-actions>
           <v-spacer />
           <v-btn
-            color="myBlue"
+            color="primary"
             text
             @click="onCancel"
           >

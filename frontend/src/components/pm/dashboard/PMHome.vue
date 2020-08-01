@@ -1,12 +1,6 @@
 <template>
-  <v-container
-    class="fill-height"
-    fluid
-  >
-    <v-row
-      align="center"
-      justify="center"
-    >
+  <v-content class="fill-height">
+    <v-row>
       <v-col
         cols="12"
         md="6"
@@ -16,7 +10,7 @@
           class="px-5 py-3"
         >
           <v-btn
-            class="myBlue"
+            class="primary"
             @click="print"
           >
             Print
@@ -31,7 +25,7 @@
       </v-col>
     </v-row>
     <n-pro-dialog />
-  </v-container>
+  </v-content>
 </template>
 
 <script>

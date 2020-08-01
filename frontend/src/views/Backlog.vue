@@ -1,9 +1,12 @@
 <template>
-  <v-content class="pb-0">
+  <v-container
+    fluid
+    class="fill-height"
+  >
     <uStory-det-drawer />
     <user-story-rows v-if="loaded" />
     <del-u-s-dialog />
-  </v-content>
+  </v-container>
 </template>
 
 <script>

@@ -2,56 +2,26 @@
   <v-app id="inspire">
     <v-navigation-drawer
       v-model="drawer"
-      app
+      absolute
       clipped
       mini-variant
       expand-on-hover
-    >
-      <nav-draw-items v-if="currentUser" />
-    </v-navigation-drawer>
-    <v-app-bar
-      app
-      clipped-left
-    >
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-toolbar-title>Caṭulam</v-toolbar-title>
-      <v-spacer />
-      <v-btn
-        v-if="currentUser"
-        class="ma-2"
-        text
-        icon
-        color="red lighten-2"
-      >
-        <v-avatar
-          size="30"
-        >
-          <img
-            :src="gravatar"
-            alt="John"
-          >
-        </v-avatar>
-      </v-btn>
-      <v-btn
-        v-if="currentUser"
-        dark
-        color="accent"
-        @click="logout"
-      >
-        Logout
-        <v-icon right>
-          mdi-logout-variant
-        </v-icon>
-      </v-btn>
-    </v-app-bar>
+      color="accent"
+    />
     <snackbar />
     <tic-det-drawer />
-    <v-container
-      fill-height
-      fluid
+    <v-content
+      class="fill-height"
     >
-      <router-view />
-    </v-container>
+      <div class="grid-container-main">
+        <div>
+          <nav-draw-items v-if="currentUser" />
+        </div>
+        <div>
+          <router-view />
+        </div>
+      </div>
+    </v-content>
   </v-app>
 </template>
 
@@ -67,6 +37,7 @@ export default {
   components: {
     'tic-det-drawer': TicDetailsDrawer,
     snackbar,
+    // eslint-disable-next-line vue/no-unused-components
     navDrawItems,
   },
   data: () => ({
@@ -123,5 +94,11 @@ export default {
   div.v-window.v-item-group.theme--dark.v-tabs-items >
   div > div.v-window-item.v-window-item--active{
     height: inherit;
+  }
+  .grid-container-main {
+    height: 100%;
+    width: 100%;
+    display: grid;
+    grid-template-columns: 312px auto;
   }
 </style>

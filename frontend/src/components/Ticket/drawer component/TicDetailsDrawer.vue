@@ -28,7 +28,7 @@
       v-if="!dataLoaded"
       style="display: contents"
       :size="50"
-      color="myBlue"
+      color="primary"
       indeterminate
     />
   </v-navigation-drawer>

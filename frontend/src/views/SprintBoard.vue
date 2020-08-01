@@ -1,8 +1,11 @@
 <template>
-  <v-content class="fill-height">
+  <v-container
+    fluid
+    class="fill-height"
+  >
     <details-drawer />
     <sprint-columns v-if="loaded" />
-  </v-content>
+  </v-container>
 </template>
 
 <script>
