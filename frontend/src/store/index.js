@@ -79,6 +79,9 @@ export default new Vuex.Store({
       state.tickets = [...state.tickets.map((tick) => (tick.id !== obj.id
         ? tick : { ...tick, ...obj }))];
     },
+    add_project(state, obj) {
+      state.projects = [...state.projects, obj];
+    },
     set_projects(state, obj) {
       state.projects = obj;
     },
@@ -305,6 +308,9 @@ export default new Vuex.Store({
         state.refreshTask = obj;
       }
     },
+    set_viewingPro(state, obj) {
+      state.currentUser.viewingPro = obj.project.id;
+    },
   },
   actions: {
     // Projects associated with currentUser
@@ -496,7 +502,7 @@ export default new Vuex.Store({
     async fetchCurrentUser({ commit, dispatch }) {
       // const inLogin = Vue.$router.currentRoute.name === 'login';
       apolloClient.query({
-        query: gqlQueries.CurrentUser,
+        query: gqlQueries.CURRENT_USER,
         fetchPolicy: 'no-cache',
       }).then((response) => {
         const { getCurrentUser } = response.data;
@@ -611,6 +617,32 @@ export default new Vuex.Store({
         commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
+    async createProject({ commit }, payload) {
+      await apolloClient.mutate({
+        mutation: gqlQueries.CREATE_PROJECT,
+        variables: payload,
+        fetchPolicy: 'no-cache',
+      })
+        .then((response) => {
+          const { CreateProject } = response.data;
+          commit('add_project', CreateProject);
+        })
+        .catch((error) => {
+          commit('set_snackBarShow', { message: error, type: 'error' });
+        });
+    },
+    async updateViewingPro({ commit }, payload) {
+      // update local state, regardless
+      // of API operation success
+      commit('set_viewingPro', payload);
+      await apolloClient.mutate({
+        mutation: gqlQueries.UPDATE_VIEWING_PRO,
+        variables: payload,
+        fetchPolicy: 'no-cache',
+      }).catch((error) => {
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
     async fetchCurrentUserTasks({ commit }, payload) {
       apolloClient.query({
         query: gqlQueries.USER_TASKS,
@@ -624,7 +656,6 @@ export default new Vuex.Store({
           }
         })
         .catch((error) => {
-          // console.log('Unable to fetch User Data');
           commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
@@ -728,6 +759,7 @@ export default new Vuex.Store({
     },
   },
   getters: {
+    getViewingProject: (state) => state.currentUser.viewingPro,
     // construct and return gravatar url with member id
     getGravatar: (state) => (memberId) => {
       const { avatar } = state.allUserList.find((member) => member.id === memberId);

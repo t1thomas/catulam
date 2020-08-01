@@ -176,7 +176,6 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
-import gqlQueries from '../../../../graphql/gql-queries';
 
 export default {
   name: 'NProDialog',
@@ -217,9 +216,7 @@ export default {
   },
   methods: {
     ...mapActions([
-      'fetchPmPros',
       'nProDialogShow',
-      'snackBarOn',
     ]),
     getMembers() {
       // get all members apart from current User
@@ -235,35 +232,23 @@ export default {
     async onCreate() {
       if (this.$refs.proForm.validate()) {
         this.setSaving();
-        await this.$apollo.mutate({
-          mutation: gqlQueries.CREATE_PROJECT,
-          fetchPolicy: 'no-cache',
-          variables: {
-            title: this.title,
-            label: this.label,
-            startDate: this.startDate,
-            endDate: this.endDate,
-            desc: this.desc,
-            members: this.getSelectedMembers(),
-          },
-        }).then((response) => {
-          const { CreateProject } = response.data;
-          this.snackBarOn({
-            message: `Successfully Created project: '${CreateProject.title}'`,
-            type: 'success',
+        const payload = {
+          title: this.title,
+          label: this.label,
+          startDate: this.startDate,
+          endDate: this.endDate,
+          desc: this.desc,
+          members: this.getSelectedMembers(),
+        };
+        await this.$store.dispatch('createProject', payload)
+          .then(() => {
+            this.setSaving();
+            this.onCancel();
+          })
+          .catch(() => {
+            this.setSaving();
+            this.onCancel();
           });
-          this.setSaving();
-          this.onCancel();
-          // update the store, this in turn will Update DOM with new projects
-          this.fetchPmPros({ username: this.currUser.username });
-        }).catch((error) => {
-          this.snackBarOn({
-            message: error,
-            type: 'error',
-          });
-          this.setSaving();
-          this.onCancel();
-        });
       }
     },
     getSelectedMembers() {

@@ -335,6 +335,9 @@ const gqlQueries = {
         }
       }
     }`,
+  UPDATE_VIEWING_PRO: gql`mutation($project: _ProjectInput!) {
+    UpdateViewingProject(project: $project)
+  }`,
   // All Projects that currentUser is member of
   PROJECTS: gql`query($username: String!) {
     Project(filter: { members_single: { User: { username: $username } } }) {
@@ -446,6 +449,22 @@ const gqlQueries = {
       ) {
         id
         title
+        label
+        startDate
+        endDate
+        desc
+        members {
+          User {
+            id
+          }
+          role
+        }
+        sprints {
+          id
+        }
+        tickets {
+          id
+        }
       }
     }`,
   SignInUser: gql`mutation($username: String!, $password: String!) {
@@ -497,7 +516,7 @@ const gqlQueries = {
       ticketIds
     }
   }`,
-  CurrentUser: gql`query {
+  CURRENT_USER: gql`query {
     getCurrentUser {
       id
       firstName
@@ -507,6 +526,7 @@ const gqlQueries = {
       email
       avatar
       role
+      viewingPro
     }
   }`,
   BackLogData: gql`query{

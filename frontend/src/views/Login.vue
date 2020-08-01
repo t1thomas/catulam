@@ -3,14 +3,12 @@
     fluid
     class="fill-height"
   >
-    <v-row
-      align="center"
-      justify="center"
-    >
+    <v-row align="center">
       <v-col
+        style="position: relative; left: 24%"
         cols="12"
-        sm="8"
-        md="4"
+        lg="5"
+        xl="4"
       >
         <v-card class="elevation-12">
           <v-toolbar

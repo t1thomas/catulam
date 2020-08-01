@@ -6,15 +6,31 @@
         class="pa-1"
         :items="projects"
         filled
-        item
-        item-text="label"
+        label="Select Project"
         item-value="id"
       >
         <template v-slot:selection="{ item }">
-          <v-list-item two-line>
+          <v-list-item-content>
+            <v-list-item-title>{{ item.label }}</v-list-item-title>
+            <v-list-item-subtitle>{{ item.title }}</v-list-item-subtitle>
+          </v-list-item-content>
+        </template>
+        <template v-slot:item="{on, item, attrs }">
+          <v-list-item
+            two-line
+            v-bind="attrs"
+            v-on="on"
+          >
             <v-list-item-content>
               <v-list-item-title>{{ item.label }}</v-list-item-title>
               <v-list-item-subtitle>{{ item.title }}</v-list-item-subtitle>
+            </v-list-item-content>
+          </v-list-item>
+        </template>
+        <template v-slot:no-data>
+          <v-list-item>
+            <v-list-item-content>
+              <v-list-item-title>No Projects found</v-list-item-title>
             </v-list-item-content>
           </v-list-item>
         </template>
@@ -32,14 +48,15 @@
             <v-icon>mdi-home</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title>Home</v-list-item-title>
+            <v-list-item-title>My Home</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
         <v-list-item
-          v-if="selected != null"
+          v-if="selected !== ''"
           color="primary"
           link
-          :to="`/backlog?proId=${selected.id}`"
+          :to="`/backlog?proId=${this.selected}`"
+          exact
         >
           <v-list-item-action>
             <v-icon>mdi-view-list</v-icon>
@@ -48,7 +65,8 @@
             <v-list-item-title>Backlog</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <template v-if="selected != null">
+
+        <template v-if="selected !== ''">
           <v-list-group
             prepend-icon="mdi-view-dashboard-variant"
             no-action
@@ -57,7 +75,7 @@
             <template v-slot:activator>
               <v-list-item-content>
                 <v-list-item-title>
-                  Sprints ({{ getProjectSprints(selected.id).length}})
+                  Sprints ({{ getProjectSprints(selected).length }})
                 </v-list-item-title>
               </v-list-item-content>
             </template>
@@ -68,7 +86,8 @@
                 style="padding-left: 24px"
                 color="primary"
                 link
-                :to="`/sprint?sprintId=${sprint.id}&proId=${selected.id}`"
+                :to="`/sprint?sprintId=${sprint.id}&proId=${selected}`"
+                exact
               >
                 <v-list-item-title>
                   Sprint {{ sprint.sprintNo }}
@@ -86,12 +105,12 @@
             </v-list-item>
           </v-list-group>
         </template>
-        <v-list-item v-else>
+        <v-list-item v-if="errMessage">
           <v-list-item-content>
             <v-list-item-title
               class="font-italic"
             >
-              No Projects Found
+              {{ errMessage }}
             </v-list-item-title>
           </v-list-item-content>
         </v-list-item>
@@ -108,9 +127,6 @@ import { mapGetters, mapState } from 'vuex';
 
 export default {
   name: 'NavDrawer',
-  data: () => ({
-    selected: null,
-  }),
   computed: {
     ...mapState([
       'projects',
@@ -120,17 +136,29 @@ export default {
       'getSprintById',
       'getCurrentUser',
       'getProjectSprints',
+      'getViewingProject',
     ]),
-  },
-  beforeUpdate() {
-    // eslint-disable-next-line prefer-destructuring
-    this.selected = this.projects[1];
+    errMessage() {
+      if (this.projects.length === 0) {
+        return 'No Projects Found';
+      } if (this.projects.length > 0 && this.getViewingProject === '') {
+        return 'No Projects Selected';
+      }
+      return false;
+    },
+    selected: {
+      get() {
+        return this.getViewingProject;
+      },
+      set(val) {
+        this.$store.dispatch('updateViewingPro', { project: { id: val } });
+      },
+    },
   },
   methods: {
     print() {
-      console.log(this.selected);
+      console.log(this.getViewingProject);
     },
-
   },
 };
 </script>
