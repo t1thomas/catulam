@@ -21,7 +21,7 @@
             {{ getFullName(comment.User.id) }}
           </span>
           <span class="font-weight-light font-italic">
-            @{{ creationTime }}
+            @ {{ creationTime }}
           </span>
         </v-list-item-title>
         <v-list-item-subtitle
@@ -36,6 +36,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import moment from 'moment';
 
 export default {
   name: 'CommentCard',
@@ -52,8 +53,7 @@ export default {
     ]),
     creationTime() {
       const { timestamp } = this.comment;
-      const date = new Date(Number(timestamp));
-      return date.toLocaleString('en-GB');
+      return moment.unix(timestamp).format('DD-MM-YYYY, HH:MM:SS');
     },
   },
 };

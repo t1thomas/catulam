@@ -163,16 +163,16 @@ type Mutation {
     DELETE rel
     RETURN t
     """)
-    AddTicketComments(ticket: _TicketInput!, message: String!, project: _ProjectInput!): Ticket
+    AddTicketComments(tick: _TicketInput!, message: String!, project: _ProjectInput!): Ticket
 #    @hasScope(scopes:["Ticket:Comment"])
     @cypher(statement:"""
     MATCH (t:Ticket),(u:User)
-    WHERE t.id = $ticket.id AND u.id = $cypherParams.currentUser.id
+    WHERE t.id = $tick.id AND u.id = $cypherParams.currentUser.id
     CREATE (u)-[com:COMMENT]->(t)
+    WITH t, com
     SET com.id = apoc.create.uuid()
     SET com.timestamp = datetime().epochSeconds
     SET com.message = $message
-    WITH t
     RETURN t
     """)
     UpdateViewingProject(project: _ProjectInput!): String
@@ -199,10 +199,10 @@ type Mutation {
     RETURN t
     """)
 
-    DeleteTicket(ticket: _TicketInput!, project: _ProjectInput!): Ticket
+    DeleteTicket(tick: _TicketInput!, project: _ProjectInput!): Ticket
 #    @hasScope(scopes:["Ticket:Delete"])
     @cypher(statement:"""
-    MATCH(t:Ticket {id: $ticket.id})
+    MATCH(t:Ticket {id: $tick.id})
     WITH t, properties(t) AS tick
     DETACH DELETE t
     RETURN tick

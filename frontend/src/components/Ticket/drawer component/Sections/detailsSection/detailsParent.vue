@@ -1,9 +1,8 @@
 <template>
   <v-container fluid>
-    <v-row>
+    <v-row dense>
       <v-col
         cols="6"
-        class="pa-0 pr-1"
       >
         <v-simple-table class="fill-height">
           <template v-slot:default>
@@ -17,7 +16,6 @@
       </v-col>
       <v-col
         cols="6"
-        class="pa-0"
       >
         <v-simple-table class="fill-height">
           <template v-slot:default>

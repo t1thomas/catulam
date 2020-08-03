@@ -202,9 +202,9 @@ const gqlQueries = {
       }
     }`,
   DELETE_TICKET: gql`
-    mutation($ticket: _TicketInput!, $project: _ProjectInput!) {
-      DeleteTicket(ticket: $ticket, project: $project) {
-        title
+    mutation($tick: _TicketInput!, $project: _ProjectInput!) {
+      DeleteTicket(tick: $tick, project: $project) {
+        id
       }
     }
   `,
@@ -495,29 +495,16 @@ const gqlQueries = {
   }
   `,
   ADD_TICKET_COMMENT: gql`mutation(
-    $ticket: _TicketInput!
+    $tick: _TicketInput!
     $message: String!
     $project: _ProjectInput!
   ) {
     AddTicketComments(
-      ticket: $ticket
+      tick: $tick
       message: $message
       project: $project
     ) {
       id
-      issueNumber
-      title
-      done
-      hourEstimate
-      assignee {
-        id
-      }
-      project {
-        id
-      }
-      sprint {
-        id
-      }
       comments {
         id
         timestamp

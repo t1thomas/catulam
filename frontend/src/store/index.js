@@ -73,10 +73,6 @@ export default new Vuex.Store({
     sprints: [],
   },
   mutations: {
-    update_tickets(state, obj) {
-      state.tickets = [...state.tickets.map((tick) => (tick.id !== obj.id
-        ? tick : { ...tick, ...obj }))];
-    },
     add_project(state, obj) {
       state.projects = [...state.projects, obj];
     },
@@ -89,6 +85,13 @@ export default new Vuex.Store({
     set_tickets(state, obj) {
       state.tickets = obj;
     },
+    delete_ticket(state, obj) {
+      const index = state.tickets.findIndex((tick) => tick.id === obj.id);
+      if (index !== -1) {
+        console.log('deleting');
+        state.tickets.splice(index, 1);
+      }
+    },
     remove_tic_assignee(state, obj) {
       state.tickets = state.tickets
         .map((tick) => (tick.id === obj.id ? { ...tick, assignee: null } : tick));
@@ -96,6 +99,10 @@ export default new Vuex.Store({
     update_tic_assignee(state, obj) {
       state.tickets = state.tickets
         .map((tick) => (tick.id === obj.id ? { ...tick, assignee: obj.assignee } : tick));
+    },
+    update_tic_comments(state, obj) {
+      state.tickets = state.tickets
+        .map((tick) => (tick.id === obj.id ? { ...tick, comments: obj.comments } : tick));
     },
     update_tic_hrs(state, obj) {
       state.tickets = state.tickets
@@ -370,18 +377,6 @@ export default new Vuex.Store({
         commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
-    async addTicketComment({ commit }, payload) {
-      await apolloClient.query({
-        query: gqlQueries.ADD_TICKET_COMMENT,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { AddTicketComments } = response.data;
-        commit('update_tickets', AddTicketComments);
-      }).catch((error) => {
-        commit('set_snackBarShow', { message: error, type: 'error' });
-      });
-    },
     async getRefreshTokens({ dispatch, commit }) {
       await apolloClient.mutate({
         mutation: gqlQueries.REFRESH_TOKEN,
@@ -545,6 +540,19 @@ export default new Vuex.Store({
           commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
+    async addTicketComment({ commit }, payload) {
+      await apolloClient.query({
+        query: gqlQueries.ADD_TICKET_COMMENT,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { AddTicketComments } = response.data;
+        console.log(AddTicketComments);
+        commit('update_tic_comments', AddTicketComments);
+      }).catch((error) => {
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
     async updateTicketHours({ commit }, payload) {
       await apolloClient.mutate({
         mutation: gqlQueries.UPDATE_TICKET_ETIME,
@@ -596,6 +604,20 @@ export default new Vuex.Store({
         commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
+    async deleteTicket({ commit }, payload) {
+      await apolloClient.mutate({
+        mutation: gqlQueries.DELETE_TICKET,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { DeleteTicket } = response.data;
+        console.log(DeleteTicket);
+        commit('set_DrawerShow', { show: false });
+        commit('delete_ticket', DeleteTicket);
+      }).catch((error) => {
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
     async createProject({ commit }, payload) {
       await apolloClient.mutate({
         mutation: gqlQueries.CREATE_PROJECT,
@@ -604,6 +626,8 @@ export default new Vuex.Store({
       })
         .then((response) => {
           const { CreateProject } = response.data;
+          commit('set_DrawerShow', CreateProject);
+
           commit('add_project', CreateProject);
         })
         .catch((error) => {

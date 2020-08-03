@@ -1,23 +1,19 @@
 <template>
-  <v-row>
-    <v-col
-      cols="12"
+  <v-container>
+    <v-btn
+      block
+      color="#501d1d"
+      @click="$emit('delDialog')"
     >
-      <v-btn
-        block
-        color="#501d1d"
-        @click="$emit('delDialog')"
+      <v-icon
+        left
+        dark
       >
-        <v-icon
-          left
-          dark
-        >
-          mdi-trash-can
-        </v-icon>
-        Delete Ticket
-      </v-btn>
-    </v-col>
-  </v-row>
+        mdi-trash-can
+      </v-icon>
+      Delete Ticket
+    </v-btn>
+  </v-container>
 </template>
 
 <script>

@@ -8,42 +8,44 @@
   >
     <div
       v-if="tickId !== null"
-      class="grid-container pa-2"
+      class="grid-container"
     >
       <topSection />
-      <details-section />
+      <details-parent />
       <desc-section />
-<!--      <updates-section />-->
-<!--      <delete-section @delDialog="overlay = true" />-->
+      <updates-parent />
     </div>
-<!--    <v-overlay-->
-<!--      absolute-->
-<!--      :value="overlay"-->
-<!--      opacity="0.78"-->
-<!--    >-->
-<!--      <del-tic-dialog @closeDialog="overlay = false" />-->
-<!--    </v-overlay>-->
+    <v-overlay
+      absolute
+      :value="overlay"
+      opacity="0.78"
+    >
+      <del-tic-dialog @closeOverlay="overlay = false" />
+    </v-overlay>
+    <template v-slot:append>
+      <delete-section @delDialog="overlay = true" />
+    </template>
   </v-navigation-drawer>
 </template>
 
 <script>
 import { mapState } from 'vuex';
 import topSection from './Sections/topSection.vue';
-import detailsSection from './Sections/detailsSection/detailsSection.vue';
+import detailsParent from './Sections/detailsSection/detailsParent.vue';
 import descSection from './Sections/descSection.vue';
-// import deleteSection from './Sections/deleteSection.vue';
-// import DelTicDialog from '../dialogs/DelTicDialog.vue';
-// import updatesSection from './Sections/cmnts&cmits/updatesSection.vue';
+import deleteSection from './Sections/deleteSection.vue';
+import DelTicDialog from '../dialogs/DelTicDialog.vue';
+import updatesParent from './Sections/updatesSection/updatesParent.vue';
 
 export default {
   name: 'DetailsDrawer',
   components: {
     topSection,
-    detailsSection,
+    detailsParent,
     descSection,
-    // deleteSection,
-    // DelTicDialog,
-    // updatesSection,
+    deleteSection,
+    DelTicDialog,
+    updatesParent,
   },
   data: () => ({
     overlay: false,
@@ -70,10 +72,10 @@ export default {
 
 <style scoped>
 .grid-container {
-  height: 100%;
+  height: inherit;
   width: 37vw;
   display: grid;
   overflow: hidden;
-  grid-template-rows: auto 1fr auto 2fr auto;
+  grid-template-rows: auto;
 }
 </style>

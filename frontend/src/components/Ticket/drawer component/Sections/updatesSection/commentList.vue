@@ -3,18 +3,18 @@
     flat
     class="tab-content"
   >
-    <v-card-text
-      class="comment-list pa-0"
-    >
-      <span
-        v-if="getTicketComments(ticketId).length === 0"
-      > No comments Found</span>
+    <v-content class="comment-list">
       <v-list
-        v-else
         dense
       >
+        <v-list-item v-if="comments.length === 0">
+          <v-list-item-content>
+            <v-list-item-title>No comments Found</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
         <v-list-item
           v-for="comm in comments"
+          v-else
           :key="comm.id"
           dense
         >
@@ -23,8 +23,8 @@
           />
         </v-list-item>
       </v-list>
-    </v-card-text>
-    <v-card-actions>
+    </v-content>
+    <v-container>
       <v-textarea
         v-model="text"
         auto-grow
@@ -73,12 +73,12 @@
           />
         </template>
       </v-textarea>
-    </v-card-actions>
+    </v-container>
   </v-card>
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapGetters } from 'vuex';
 import commentCard from './commentCard.vue';
 
 export default {
@@ -91,23 +91,19 @@ export default {
     saving: false,
   }),
   computed: {
+    ...mapGetters({
+      ticket: 'getCurrTick',
+    }),
     ...mapGetters([
       'getGravatar',
       'getCurrentUser',
-      'getTicketComments',
-      'getTicketProject',
     ]),
-    ...mapState({
-      ticketId: (state) => state.detailsDrawer.ticketId,
-    }),
+    comments() {
+      const { comments } = this.ticket;
+      return comments.sort((a, b) => a.timestamp - b.timestamp);
+    },
     editing() {
       return this.text.length === 0;
-    },
-    comments() {
-      return this.getTicketComments(this.ticketId).sort((a, b) => a.timestamp - b.timestamp);
-    },
-    proId() {
-      return this.getTicketProject(this.ticketId);
     },
   },
   mounted() {
@@ -117,9 +113,9 @@ export default {
     async addComment() {
       this.savingProgress();
       const payload = {
-        ticket: { id: this.ticketId },
+        tick: { id: this.ticket.id },
         message: this.text,
-        project: { id: this.proId },
+        project: { id: this.ticket.project.id },
       };
       await this.$store.dispatch('addTicketComment', payload)
         .then(() => {
@@ -144,16 +140,14 @@ export default {
 
 <style scoped>
   .tab-content {
-    height: inherit;
-    max-height: inherit;
+    height: 100%;
     display: grid;
-    max-width: 34vw;
-    grid-auto-rows: 75% auto;
+    grid-template-rows: 25vh auto;
   }
   .comment-list {
     min-height: 100%;
     max-height: 100%;
     overflow-y: auto;
-    background-color: #3e3e3e;
+    background-color: #2d2d2d;
   }
 </style>
