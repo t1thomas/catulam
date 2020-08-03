@@ -11,7 +11,7 @@
       class="grid-container pa-2"
     >
       <topSection />
-<!--      <details-section />-->
+      <details-section />
 <!--      <desc-section />-->
 <!--      <updates-section />-->
 <!--      <delete-section @delDialog="overlay = true" />-->
@@ -29,7 +29,7 @@
 <script>
 import { mapState } from 'vuex';
 import topSection from './Sections/topSection.vue';
-// import detailsSection from './Sections/detailsSection.vue';
+import detailsSection from './Sections/detailsSection/detailsSection.vue';
 // import descSection from './Sections/descSection.vue';
 // import deleteSection from './Sections/deleteSection.vue';
 // import DelTicDialog from '../dialogs/DelTicDialog.vue';
@@ -39,7 +39,7 @@ export default {
   name: 'DetailsDrawer',
   components: {
     topSection,
-    // detailsSection,
+    detailsSection,
     // descSection,
     // deleteSection,
     // DelTicDialog,
@@ -71,6 +71,7 @@ export default {
 <style scoped>
 .grid-container {
   height: 100%;
+  width: 30vw;
   display: grid;
   overflow: hidden;
   grid-template-rows: auto 1fr auto 2fr auto;

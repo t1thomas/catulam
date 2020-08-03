@@ -7,6 +7,7 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const md5 = require('md5');
+const { parseResolveInfo, simplifyParsedResolveInfoFragmentWithType } = require('graphql-parse-resolve-info');
 const neode = require('./neode');
 const authScopes = require('./authScopes');
 const verifyToken = require('./verifyAndDecodeToken');
@@ -406,20 +407,32 @@ const resolveFunctions = {
       }
     },
     UpdateTicket: async (object, params, ctx, resolveInfo) => {
-      const tickId = params.id;
+      const session = ctx.driver.session();
       try {
-        // query for the project id linked to the current ticket
-        const proId = await neode.cypher('MATCH (a:Ticket { id:$tickId})-[rel:TICKET]->(b:Project)'
-                    + ' RETURN b.id', { tickId })
-          .then((result) => result.records[0].get('b.id'))
-          .catch((e) => {
-            throw e;
-          });
-        // using project Id found,
-        pubSub.publish('project', { update: proId });
-        return await neo4jgraphql(object, params, ctx, resolveInfo);
-      } catch (e) {
-        throw new Error(e);
+        const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
+        const type = Object.keys(parsedResolveInfoFragment.fieldsByTypeName)[0];
+
+        const fields = Object.keys(parsedResolveInfoFragment.fieldsByTypeName[type])
+          .map((key) => `.${key}`).join(', ');
+        const cypherString = Object.keys(params).reduce((arr, key) => {
+          if (key !== 'id') {
+            arr.push(`${key}:$params.${key}`);
+          }
+          return arr;
+        }, []).join(', ');
+
+        const result = await session.run(
+          'MATCH (t: Ticket {id: $params.id})'
+            + ` SET t += { ${cypherString} }`
+            + ` RETURN t { ${fields} } AS ticket`, {
+            params,
+          },
+        );
+        const singleRecord = result.records[0];
+        const node = singleRecord.get(0);
+        return node;
+      } finally {
+        await session.close();
       }
     },
     CreateUserStory: async (object, params, ctx, resolveInfo) => {
@@ -553,6 +566,7 @@ const schema = makeAugmentedSchema({
       hasRole: true,
       // hasScope: true,
     },
+    debug: true,
   },
 });
 

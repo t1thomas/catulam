@@ -373,6 +373,7 @@ const gqlQueries = {
       }
       sprint {
         id
+        sprintNo
       }
       comments {
         id
@@ -391,6 +392,12 @@ const gqlQueries = {
         User {
           id
         }
+      }
+      creator {
+        User {
+          id
+        }
+        timestamp
       }
     }
   }`,
