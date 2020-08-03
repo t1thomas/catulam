@@ -141,6 +141,10 @@ type Mutation {
     UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
 
     UpdateTicket(id: ID!, issueNumber: Int, hourEstimate: Int, sprintPos: Int, title: String, desc: String, done: Boolean):Ticket
+    @cypher(statement:"""
+    MATCH (t: Ticket {id: $id})
+    RETURN t
+    """)
 #    @hasScope(scopes:["Ticket:Edit"])
     UpdateTicketAssignee(tick: _TicketInput!, user: _UserInput!, project: _ProjectInput!): User
     @cypher(statement:"""

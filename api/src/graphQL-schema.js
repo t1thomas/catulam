@@ -409,11 +409,7 @@ const resolveFunctions = {
     UpdateTicket: async (object, params, ctx, resolveInfo) => {
       const session = ctx.driver.session();
       try {
-        // construct cypher query based on arguments and fields provided
-        const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
-        const type = Object.keys(parsedResolveInfoFragment.fieldsByTypeName)[0];
-        const fields = Object.keys(parsedResolveInfoFragment.fieldsByTypeName[type])
-          .map((key) => `.${key}`).join(', ');
+        // construct cypher query based on arguments provided
         const paramString = Object.keys(params).reduce((arr, key) => {
           if (key !== 'id') {
             arr.push(`${key}:$params.${key}`);
@@ -421,15 +417,13 @@ const resolveFunctions = {
           return arr;
         }, []).join(', ');
         // run cypher query using driver
-        const result = await session.run(
+        await session.run(
           'MATCH (t: Ticket {id: $params.id})'
-            + ` SET t += { ${paramString} }`
-            + ` RETURN t { ${fields} } AS ticket`, {
+            + ` SET t += { ${paramString} }`, {
             params,
           },
         );
-        const singleRecord = result.records[0];
-        return singleRecord.get(0);
+        return neo4jgraphql(object, params, ctx, resolveInfo);
       } catch (e) {
         throw new Error(e);
       } finally {
