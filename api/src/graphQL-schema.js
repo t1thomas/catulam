@@ -7,7 +7,7 @@ const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const md5 = require('md5');
-const { parseResolveInfo, simplifyParsedResolveInfoFragmentWithType } = require('graphql-parse-resolve-info');
+const { parseResolveInfo } = require('graphql-parse-resolve-info');
 const neode = require('./neode');
 const authScopes = require('./authScopes');
 const verifyToken = require('./verifyAndDecodeToken');
@@ -409,28 +409,29 @@ const resolveFunctions = {
     UpdateTicket: async (object, params, ctx, resolveInfo) => {
       const session = ctx.driver.session();
       try {
+        // construct cypher query based on arguments and fields provided
         const parsedResolveInfoFragment = parseResolveInfo(resolveInfo);
         const type = Object.keys(parsedResolveInfoFragment.fieldsByTypeName)[0];
-
         const fields = Object.keys(parsedResolveInfoFragment.fieldsByTypeName[type])
           .map((key) => `.${key}`).join(', ');
-        const cypherString = Object.keys(params).reduce((arr, key) => {
+        const paramString = Object.keys(params).reduce((arr, key) => {
           if (key !== 'id') {
             arr.push(`${key}:$params.${key}`);
           }
           return arr;
         }, []).join(', ');
-
+        // run cypher query using driver
         const result = await session.run(
           'MATCH (t: Ticket {id: $params.id})'
-            + ` SET t += { ${cypherString} }`
+            + ` SET t += { ${paramString} }`
             + ` RETURN t { ${fields} } AS ticket`, {
             params,
           },
         );
         const singleRecord = result.records[0];
-        const node = singleRecord.get(0);
-        return node;
+        return singleRecord.get(0);
+      } catch (e) {
+        throw new Error(e);
       } finally {
         await session.close();
       }
