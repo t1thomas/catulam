@@ -145,23 +145,23 @@ type Mutation {
     RETURN t
     """)
 #    @hasScope(scopes:["Ticket:Edit"])
-    UpdateTicketAssignee(tick: _TicketInput!, user: _UserInput!, project: _ProjectInput!): User
+    UpdateTicketAssignee(tick: _TicketInput!, user: _UserInput!, project: _ProjectInput!): Ticket
     @cypher(statement:"""
     MATCH (u1:User {id: $user.id}),(t:Ticket{id: $tick.id})
     OPTIONAL MATCH (u2:User)-[rel:ASSIGNED_TASK]->(t)
     CALL apoc.do.when(
     rel IS NOT NULL,
-    'CREATE (u1)-[:ASSIGNED_TASK]->(t) DELETE rel RETURN u1',
-    'CREATE (u1)-[:ASSIGNED_TASK]->(t) RETURN u1',
+    'CREATE (u1)-[:ASSIGNED_TASK]->(t) DELETE rel RETURN t',
+    'CREATE (u1)-[:ASSIGNED_TASK]->(t) RETURN t',
     {u1:u1, rel:rel, t:t})
     YIELD value
-    RETURN value.u1
+    RETURN value.t
     """)
-    RemoveTicketAssignee(tick: _TicketInput!, project: _ProjectInput!): User
+    RemoveTicketAssignee(tick: _TicketInput!, project: _ProjectInput!): Ticket
     @cypher(statement:"""
     MATCH (u:User)-[rel:ASSIGNED_TASK]->(t:Ticket{id: $tick.id})
     DELETE rel
-    RETURN u
+    RETURN t
     """)
     AddTicketComments(ticket: _TicketInput!, message: String!, project: _ProjectInput!): Ticket
 #    @hasScope(scopes:["Ticket:Comment"])

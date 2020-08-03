@@ -32,6 +32,7 @@ const gqlQueries = {
         issueNumber
         title
         done
+        desc
         hourEstimate
         assignee {
           id
@@ -41,6 +42,7 @@ const gqlQueries = {
         }
         sprint {
           id
+          sprintNo
         }
         comments {
           id
@@ -49,6 +51,9 @@ const gqlQueries = {
           User {
             id
           }
+        }
+        userStory{
+          id
         }
         commits {
           id
@@ -59,6 +64,12 @@ const gqlQueries = {
           User {
             id
           }
+        }
+        creator {
+          User {
+            id
+          }
+          timestamp
         }
       }
     }`,
@@ -190,14 +201,6 @@ const gqlQueries = {
         }
       }
     }`,
-  UPDATE_TICKET_DESC: gql`
-    mutation($id: ID!, $desc: String!) {
-      UpdateTicket(id: $id, desc: $desc) {
-        id
-        desc
-      }
-    }
-  `,
   DELETE_TICKET: gql`
     mutation($ticket: _TicketInput!, $project: _ProjectInput!) {
       DeleteTicket(ticket: $ticket, project: $project) {
@@ -205,9 +208,18 @@ const gqlQueries = {
       }
     }
   `,
+  UPDATE_TICKET_DESC: gql`
+    mutation($tick: _TicketInput!, $desc: String!) {
+      UpdateTicket(tick: $tick, desc: $desc) {
+        id
+        desc
+      }
+    }
+  `,
   UPDATE_TICKET_ETIME: gql`
     mutation($tick: _TicketInput!, $hrs: Int!) {
       UpdateTicket(tick: $tick, hourEstimate: $hrs) {
+        id
         hourEstimate
       }
     }
@@ -224,6 +236,9 @@ const gqlQueries = {
         project: $project
       ) {
         id
+        assignee {
+          id
+        }
       }
     }`,
   REMOVE_TICKET_ASSIGNEE: gql`
@@ -363,6 +378,7 @@ const gqlQueries = {
       issueNumber
       title
       done
+      desc
       hourEstimate
       assignee {
         id

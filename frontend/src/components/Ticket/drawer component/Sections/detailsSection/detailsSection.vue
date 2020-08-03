@@ -5,12 +5,12 @@
         cols="6"
         class="pa-0 pr-1"
       >
-        <v-simple-table>
+        <v-simple-table class="fill-height">
           <template v-slot:default>
             <tbody>
               <time-estimate />
-
               <status />
+              <assigned-to />
             </tbody>
           </template>
         </v-simple-table>
@@ -19,22 +19,11 @@
         cols="6"
         class="pa-0"
       >
-        <v-simple-table>
+        <v-simple-table class="fill-height">
           <template v-slot:default>
             <tbody>
               <created />
               <current-sprint />
-            </tbody>
-          </template>
-        </v-simple-table>
-      </v-col>
-      <v-col
-        cols="12"
-        class="px-0 pt-1"
-      >
-        <v-simple-table>
-          <template v-slot:default>
-            <tbody>
               <user-story />
             </tbody>
           </template>
@@ -50,6 +39,7 @@ import timeEstimate from './timeEstimate.vue';
 import status from './status.vue';
 import created from './created.vue';
 import userStory from './userStory.vue';
+import assignedTo from './assignedTo.vue';
 
 export default {
   name: 'DetailsSection',
@@ -59,6 +49,7 @@ export default {
     CurrentSprint,
     timeEstimate,
     created,
+    assignedTo,
   },
   data: () => ({
     itemsPerPage: 4,

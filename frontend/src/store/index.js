@@ -89,17 +89,21 @@ export default new Vuex.Store({
     set_tickets(state, obj) {
       state.tickets = obj;
     },
-    update_tic_assignee(state, obj) {
-      state.tickets = state.tickets
-        .map((tick) => (tick.id === obj.tick.id ? { ...tick, assignee: obj.user } : tick));
-    },
-    update_tic_hrs(state, obj) {
-      state.tickets = state.tickets
-        .map((tick) => (tick.id === obj.tick.id ? { ...tick, hourEstimate: obj.hrs } : tick));
-    },
     remove_tic_assignee(state, obj) {
       state.tickets = state.tickets
         .map((tick) => (tick.id === obj.id ? { ...tick, assignee: null } : tick));
+    },
+    update_tic_assignee(state, obj) {
+      state.tickets = state.tickets
+        .map((tick) => (tick.id === obj.id ? { ...tick, assignee: obj.assignee } : tick));
+    },
+    update_tic_hrs(state, obj) {
+      state.tickets = state.tickets
+        .map((tick) => (tick.id === obj.id ? { ...tick, hourEstimate: obj.hourEstimate } : tick));
+    },
+    update_tic_desc(state, obj) {
+      state.tickets = state.tickets
+        .map((tick) => (tick.id === obj.id ? { ...tick, desc: obj.desc } : tick));
     },
     set_userStories(state, obj) {
       state.userStories = obj;
@@ -548,7 +552,20 @@ export default new Vuex.Store({
         variables: payload,
       }).then((response) => {
         const { UpdateTicket } = response.data;
-        commit('update_tic_hrs', { hrs: UpdateTicket.hourEstimate, tick: payload.tick });
+        commit('update_tic_hrs', UpdateTicket);
+        console.log(UpdateTicket);
+      }).catch((error) => {
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
+    async updateTicketDesc({ commit }, payload) {
+      await apolloClient.mutate({
+        mutation: gqlQueries.UPDATE_TICKET_DESC,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { UpdateTicket } = response.data;
+        commit('update_tic_desc', UpdateTicket);
         console.log(UpdateTicket);
       }).catch((error) => {
         commit('set_snackBarShow', { message: error, type: 'error' });
@@ -561,7 +578,8 @@ export default new Vuex.Store({
         variables: payload,
       }).then((response) => {
         const { UpdateTicketAssignee } = response.data;
-        commit('update_tic_assignee', { user: UpdateTicketAssignee, tick: payload.tick });
+        console.log(UpdateTicketAssignee);
+        commit('update_tic_assignee', UpdateTicketAssignee);
       }).catch((error) => {
         commit('set_snackBarShow', { message: error, type: 'error' });
       });
@@ -571,8 +589,9 @@ export default new Vuex.Store({
         mutation: gqlQueries.REMOVE_TICKET_ASSIGNEE,
         fetchPolicy: 'no-cache',
         variables: payload,
-      }).then(() => {
-        commit('remove_tic_assignee', payload.tick);
+      }).then((response) => {
+        const { RemoveTicketAssignee } = response.data;
+        commit('remove_tic_assignee', RemoveTicketAssignee);
       }).catch((error) => {
         commit('set_snackBarShow', { message: error, type: 'error' });
       });

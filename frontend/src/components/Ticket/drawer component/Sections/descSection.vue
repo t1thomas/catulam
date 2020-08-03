@@ -4,7 +4,6 @@
       cols="12"
     >
       <v-textarea
-        v-if="desc"
         v-model="text"
         height="15vh"
         dense
@@ -13,8 +12,8 @@
         filled
         label="Description"
         :disabled="disabled"
-        @blur="onBlur"
         hide-details
+        @blur="onBlur"
       >
         <template
           v-if="!saving"
@@ -78,8 +77,7 @@
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex';
-import gqlQueries from '../../../../graphql/gql-queries';
+import { mapGetters } from 'vuex';
 
 export default {
   name: 'DescSection',
@@ -89,15 +87,11 @@ export default {
     saving: false,
   }),
   computed: {
-    ...mapState({
-      ticket: 'currentTicket',
+    ...mapGetters({
+      ticket: 'getCurrTick',
     }),
     desc() {
-      const { desc } = this.ticket;
-      if (desc !== null) {
-        return desc;
-      }
-      return false;
+      return this.ticket.desc;
     },
     editButton() {
       return this.disabled && this.checkInputSame;
@@ -113,10 +107,6 @@ export default {
     this.setOriginalText();
   },
   methods: {
-    ...mapActions([
-      'setCurrTickDesc',
-      'snackBarOn',
-    ]),
     setOriginalText() {
       this.text = this.desc;
     },
@@ -126,34 +116,19 @@ export default {
       }
     },
     async onSave() {
-      // starts saving animation
-      this.savingProgress();
+      this.setSaving();
       this.disabled = true;
-      await this.$apollo.mutate({
-        mutation: gqlQueries.UPDATE_TICKET_DESC,
-        fetchPolicy: 'no-cache',
-        variables: { id: this.ticket.id, desc: this.text },
-      })
-        .then((response) => {
-          const { UpdateTicket } = response.data;
-          if (UpdateTicket === null) {
-            throw new Error('Unable to save changes');
-          } else {
-            this.setCurrTickDesc(UpdateTicket.desc);
-          }
-          // Ends saving animation
-          this.savingProgress();
-        })
-        .catch((error) => {
-          this.disabled = false;
-          this.snackBarOn({
-            message: error,
-            type: 'error',
-          });
-          this.savingProgress();
-        });
+
+      const payload = { tick: { id: this.ticket.id }, desc: this.text };
+      await this.$store.dispatch('updateTicketDesc', payload).then(() => {
+        this.setSaving();
+        this.selector = false;
+      }).catch(() => {
+        this.setSaving();
+        this.disabled = false;
+      });
     },
-    savingProgress() {
+    setSaving() {
       this.saving = !this.saving;
     },
   },

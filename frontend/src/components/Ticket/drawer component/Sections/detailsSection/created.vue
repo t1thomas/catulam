@@ -1,25 +1,23 @@
 <template>
   <tr>
     <td>
-      Created:
+      Created By:
     </td>
-    <td style="display: inline-grid; white-space: nowrap">
-      <v-chip
-        pill
-        small
-      >
-        <v-avatar
-          left
-        >
-          <v-img
-            :src="getGravatar(ticket.creator.User.id)"
-          />
-        </v-avatar>
-        {{ getFullName(ticket.creator.User.id) }}
-      </v-chip>
-      <span class="caption">
-        @{{ creationTime }}
-      </span>
+    <td class="pa-0">
+      <v-list-item two-line>
+        <v-list-item-content>
+          <v-list-item-title>
+            <v-avatar size="20px">
+              <img
+                :src="getGravatar(ticket.creator.User.id)"
+                alt="Avatar"
+              >
+            </v-avatar>
+            {{ getFullName(ticket.creator.User.id) }}
+          </v-list-item-title>
+          <v-list-item-subtitle v-text="creationTime" />
+        </v-list-item-content>
+      </v-list-item>
     </td>
   </tr>
 </template>

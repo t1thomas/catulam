@@ -3,12 +3,14 @@
     <td>
       User Story:
     </td>
-    <td v-if="ticket.userStory !== null">
-      <v-tooltip bottom>
+    <td
+      v-if="ticket.userStory !== null"
+      class="pl-0"
+    >
+      <v-tooltip bottom max-width="15.625rem">
         <template v-slot:activator="{ on }">
           <span
-            class="d-inline-block text-truncate"
-            style="max-width: 250px;"
+            class="caption story-text"
             v-on="on"
           >
             {{ userStory.storyText }}
@@ -43,5 +45,12 @@ export default {
 </script>
 
 <style scoped>
-
+.story-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 2;
+  white-space: initial;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
 </style>
