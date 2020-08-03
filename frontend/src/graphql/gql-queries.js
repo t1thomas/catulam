@@ -206,9 +206,8 @@ const gqlQueries = {
     }
   `,
   UPDATE_TICKET_ETIME: gql`
-    mutation($id: ID!, $hrs: Int!) {
-      UpdateTicket(id: $id, hourEstimate: $hrs) {
-        id
+    mutation($tick: _TicketInput!, $hrs: Int!) {
+      UpdateTicket(tick: $tick, hourEstimate: $hrs) {
         hourEstimate
       }
     }
@@ -382,6 +381,9 @@ const gqlQueries = {
         User {
           id
         }
+      }
+      userStory{
+        id
       }
       commits {
         id

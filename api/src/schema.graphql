@@ -12,13 +12,6 @@ type Token {
     ttl: Int!
 }
 
-type UserStory {
-    id: ID!
-    storyText: String!
-    issueNumber: Int!
-    tickets: [Ticket] @relation(name: "SUB_TASK", direction: IN)
-    project: Project @relation(name: "USER_STORY", direction: OUT)
-}
 
 type User {
     id: ID!
@@ -39,6 +32,25 @@ type User {
     commits: [Commit]
 }
 
+
+type Member @relation(name: "TEAM_MEMBER") {
+    from: User
+    to: Project
+    role: Role!
+}
+
+type Project {
+    id: ID!
+    title: String!
+    desc: String
+    label: String!
+    startDate: String!
+    endDate: String!
+    members: [Member]
+    userStories: [UserStory] @relation(name: "USER_STORY", direction: IN)
+    tickets: [Ticket] @relation(name: "TICKET", direction: IN)
+    sprints: [Sprint] @relation(name: "SPRINT", direction: IN)
+}
 type Created @relation(name: "CREATED") {
     from: User
     to: Ticket
@@ -60,31 +72,12 @@ type Commit @relation(name: "COMMIT") {
     prevHourEstimate: Int!
     newHourEstimate: Int!
 }
-type Member @relation(name: "TEAM_MEMBER") {
-    from: User
-    to: Project
-    role: Role!
-}
-
-type Project {
-    id: ID!
-    title: String!
-    desc: String
-    label: String!
-    startDate: String!
-    endDate: String!
-    members: [Member]
-    userStories: [UserStory] @relation(name: "USER_STORY", direction: IN)
-    tickets: [Ticket] @relation(name: "TICKET", direction: IN)
-    sprints: [Sprint] @relation(name: "SPRINT", direction: IN)
-}
-
 type Ticket {
     id: ID!
     issueNumber: Int
     hourEstimate: Int
     sprintPos: Int!
-    userStory: UserStory @relation(name: "SUB_TASK", direction: OUT)
+    userStory: UserStory @relation(name: "SUB_TASK", direction: IN)
     title: String!
     desc: String
     done: Boolean
@@ -95,7 +88,13 @@ type Ticket {
     comments: [Comment]
     commits: [Commit]
 }
-
+type UserStory {
+    id: ID!
+    storyText: String!
+    issueNumber: Int!
+    tickets: [Ticket] @relation(name: "SUB_TASK", direction: OUT)
+    project: Project @relation(name: "USER_STORY", direction: OUT)
+}
 type Sprint {
     id: ID!
     sprintNo: Int!
@@ -140,9 +139,9 @@ type Mutation {
     UnassignedTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
     UStoryTicketSwitch(project: _ProjectInput!, tick: _TicketInput!, uStoryRemove: _UserStoryInput, sprintRemove: _SprintInput,uStoryAdd: _UserStoryInput,sprintAdd: _SprintInput ): String
 
-    UpdateTicket(id: ID!, issueNumber: Int, hourEstimate: Int, sprintPos: Int, title: String, desc: String, done: Boolean):Ticket
+    UpdateTicket(tick: _TicketInput!, issueNumber: Int, hourEstimate: Int, sprintPos: Int, title: String, desc: String, done: Boolean):Ticket
     @cypher(statement:"""
-    MATCH (t: Ticket {id: $id})
+    MATCH (t: Ticket {id: $tick.id})
     RETURN t
     """)
 #    @hasScope(scopes:["Ticket:Edit"])

@@ -1,24 +1,18 @@
 <template>
-  <v-list-item>
-    <v-list-item-content>Current Sprint:</v-list-item-content>
-    <v-list-item-content
-      v-if="ticket.sprint !== null"
-      class="align-end"
-    >
+  <tr>
+    <td>Current Sprint:</td>
+    <td v-if="ticket.sprint !== null">
       <a
         style="cursor: pointer; max-width: fit-content;text-decoration-line: underline;"
         @click="onSprintLink"
       >
         Sprint {{ ticket.sprint.sprintNo }}
       </a>
-    </v-list-item-content>
-    <v-list-item-content
-      v-else
-      class="align-end"
-    >
+    </td>
+    <td v-else>
       N/a
-    </v-list-item-content>
-  </v-list-item>
+    </td>
+  </tr>
 </template>
 
 <script>
@@ -37,7 +31,7 @@ export default {
         path: '/sprint',
         query: { sprintId: this.ticket.sprint.id, proId: this.ticket.project.id },
       });
-      this.$emit('closeDrawer');
+      this.$store.dispatch('detDrawShow', { show: false });
     },
   },
 };

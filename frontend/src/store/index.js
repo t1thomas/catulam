@@ -93,6 +93,10 @@ export default new Vuex.Store({
       state.tickets = state.tickets
         .map((tick) => (tick.id === obj.tick.id ? { ...tick, assignee: obj.user } : tick));
     },
+    update_tic_hrs(state, obj) {
+      state.tickets = state.tickets
+        .map((tick) => (tick.id === obj.tick.id ? { ...tick, hourEstimate: obj.hrs } : tick));
+    },
     remove_tic_assignee(state, obj) {
       state.tickets = state.tickets
         .map((tick) => (tick.id === obj.id ? { ...tick, assignee: null } : tick));
@@ -544,11 +548,8 @@ export default new Vuex.Store({
         variables: payload,
       }).then((response) => {
         const { UpdateTicket } = response.data;
-        if (UpdateTicket === null) {
-          throw new Error('Unable to save changes');
-        } else {
-          commit('set_currTickHours', UpdateTicket.hourEstimate);
-        }
+        commit('update_tic_hrs', { hrs: UpdateTicket.hourEstimate, tick: payload.tick });
+        console.log(UpdateTicket);
       }).catch((error) => {
         commit('set_snackBarShow', { message: error, type: 'error' });
       });
@@ -825,6 +826,8 @@ export default new Vuex.Store({
       .find((userStory) => userStory.id === userStoryId).storyText,
     getUserStoryByPro: (state) => (proId) => state.userStories
       .filter((uStory) => uStory.project.id === proId),
+    getUserStoryByID: (state) => (uStoryId) => state.userStories
+      .find((uStory) => uStory.id === uStoryId),
     getSprintValues: (state) => state.currProElements.sprints
       .reduce((arr, currSprint, index) => {
         if (index === 0) {

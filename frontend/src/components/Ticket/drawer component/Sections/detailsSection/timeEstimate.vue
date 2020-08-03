@@ -1,7 +1,7 @@
 <template>
-  <v-list-item>
-    <v-list-item-content @click="print">Time Estimate:</v-list-item-content>
-    <v-list-item-content class="align-end">
+  <tr>
+    <td>Time Estimate:</td>
+    <td>
       <v-menu
         v-model="selector"
         offset-y
@@ -11,8 +11,8 @@
       >
         <template v-slot:activator="{ on }">
           <v-chip
+            small
             pill
-            style="max-width: fit-content"
             v-on="on"
           >
             <v-avatar left>
@@ -30,6 +30,7 @@
             {{ hourEstimateText }}
             <v-icon
               dark
+              small
               class="ml-2"
             >
               mdi-pencil-outline
@@ -73,8 +74,8 @@
           </div>
         </v-container>
       </v-menu>
-    </v-list-item-content>
-  </v-list-item>
+    </td>
+  </tr>
 </template>
 
 <script>
@@ -108,7 +109,6 @@ export default {
   methods: {
     ...mapActions([
       'snackBarOn',
-      'updateTicketHours',
     ]),
     print() {
       console.log(this.hours);
@@ -118,15 +118,23 @@ export default {
     },
     async changeHours() {
       if (this.validInput) {
-        this.saving = true;
-        const payload = { id: this.ticket.id, hrs: Number(this.hours) };
-        await this.updateTicketHours(payload);
-        this.selector = false;
-        this.saving = false;
+        this.setSaving();
+        const payload = { tick: { id: this.ticket.id }, hrs: Number(this.hours) };
+        await this.$store.dispatch('updateTicketHours', payload).then(() => {
+          this.setSaving();
+          this.selector = false;
+        })
+          .catch(() => {
+            this.setSaving();
+            this.selector = false;
+          });
       } else {
         const payload = { message: 'Enter valid number greater than 0', type: 'warning' };
         this.snackBarOn(payload);
       }
+    },
+    setSaving() {
+      this.saving = !this.saving;
     },
   },
 };

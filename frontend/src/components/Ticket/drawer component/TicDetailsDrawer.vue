@@ -71,7 +71,7 @@ export default {
 <style scoped>
 .grid-container {
   height: 100%;
-  width: 30vw;
+  width: 34vw;
   display: grid;
   overflow: hidden;
   grid-template-rows: auto 1fr auto 2fr auto;

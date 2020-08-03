@@ -237,7 +237,7 @@ const resolveFunctions = {
           case uStoryRemove !== undefined && uStoryAdd !== undefined
           && sprintRemove === undefined && sprintAdd === undefined:
             // UserStory Switch Only
-            query = 'MATCH (a:Ticket { id:$tick.id })-[rel:SUB_TASK]->(b:UserStory{ id:$uStoryRemove.id })'
+            query = 'MATCH (a:Ticket { id:$tick.id })<-[rel:SUB_TASK]-(b:UserStory{ id:$uStoryRemove.id })'
                             + ' MATCH (c:UserStory { id:$uStoryAdd.id })'
                             + ' CALL apoc.refactor.to(rel, c)'
                             + ' YIELD input, output, error'
@@ -247,7 +247,7 @@ const resolveFunctions = {
           case uStoryRemove !== undefined && uStoryAdd !== undefined
           && sprintAdd !== undefined && sprintRemove === undefined:
             // Switch User Story and add sprint
-            query = 'MATCH (t:Ticket { id:$tick.id })-[rel:SUB_TASK]->(b:UserStory{ id:$uStoryRemove.id })'
+            query = 'MATCH (t:Ticket { id:$tick.id })<-[rel:SUB_TASK]-(b:UserStory{ id:$uStoryRemove.id })'
                             + ' MATCH (c:UserStory { id:$uStoryAdd.id })'
                             + ' CALL apoc.refactor.to(rel, c)'
                             + ' YIELD input, output, error'
@@ -261,7 +261,7 @@ const resolveFunctions = {
           case uStoryRemove !== undefined && uStoryAdd !== undefined
           && sprintRemove !== undefined && sprintAdd === undefined:
             // Switch User Story and remove sprint
-            query = 'MATCH (t:Ticket { id:$tick.id })-[rel:SUB_TASK]->(b:UserStory{ id:$uStoryRemove.id })'
+            query = 'MATCH (t:Ticket { id:$tick.id })<-[rel:SUB_TASK]-(b:UserStory{ id:$uStoryRemove.id })'
                             + ' MATCH (c:UserStory { id:$uStoryAdd.id })'
                             + ' CALL apoc.refactor.to(rel, c)'
                             + ' YIELD input, output, error'
@@ -275,7 +275,7 @@ const resolveFunctions = {
           case uStoryAdd !== undefined && sprintAdd !== undefined
           && uStoryRemove !== undefined && sprintRemove !== undefined:
             // change sprint and change user story
-            query = 'MATCH (t:Ticket { id:$tick.id })-[rel:SUB_TASK]->(u1:UserStory{ id:$uStoryRemove.id })'
+            query = 'MATCH (t:Ticket { id:$tick.id })<-[rel:SUB_TASK]-(u1:UserStory{ id:$uStoryRemove.id })'
                             + ' MATCH (u2:UserStory { id:$uStoryAdd.id })'
                             + ' CALL apoc.refactor.to(rel,u2)'
                             + ' YIELD input, output, error'
@@ -315,13 +315,13 @@ const resolveFunctions = {
           case uStoryRemove !== undefined && sprintRemove === undefined
           && uStoryAdd === undefined && sprintAdd === undefined:
             // UserStory Remove Only
-            query = 'MATCH (t:Ticket {id:$tick.id})-[rel:SUB_TASK]->(u:UserStory {id:$uStoryRemove.id}) DELETE rel ';
+            query = 'MATCH (t:Ticket {id:$tick.id})<-[rel:SUB_TASK]-(u:UserStory {id:$uStoryRemove.id}) DELETE rel ';
             params = { tick, uStoryRemove };
             break;
           case uStoryRemove !== undefined && sprintRemove === undefined
           && uStoryAdd === undefined && sprintAdd !== undefined:
             // UserStory Remove Only and add sprint
-            query = 'MATCH (t:Ticket {id:$tick.id})-[rel:SUB_TASK]->(u:UserStory {id:$uStoryRemove.id})'
+            query = 'MATCH (t:Ticket {id:$tick.id})<-[rel:SUB_TASK]-(u:UserStory {id:$uStoryRemove.id})'
                             + ' DELETE rel'
                             + ' WITH t'
                             + ' MATCH (s:Sprint{id:$sprintAdd.id})'
@@ -331,14 +331,14 @@ const resolveFunctions = {
           case uStoryRemove !== undefined && sprintRemove !== undefined
           && uStoryAdd === undefined && sprintAdd === undefined:
             // REMOVE_USERSTORY_REMOVE_SPRINT
-            query = 'MATCH (s:Sprint {id:$sprintRemove.id})<-[rel1:SPRINT_TASK]-(t:Ticket {id:$tick.id})-[rel2:SUB_TASK]->(u:UserStory {id:$uStoryRemove.id})'
+            query = 'MATCH (s:Sprint {id:$sprintRemove.id})<-[rel1:SPRINT_TASK]-(t:Ticket {id:$tick.id})<-[rel2:SUB_TASK]-(u:UserStory {id:$uStoryRemove.id})'
                             + ' DELETE rel1, rel2 ';
             params = { tick, uStoryRemove, sprintRemove };
             break;
           case uStoryRemove !== undefined && sprintRemove !== undefined
           && uStoryAdd === undefined && sprintAdd !== undefined:
             // REMOVE_USERSTORY_CHANGE_SPRINT
-            query = 'MATCH (s:Sprint {id:$sprintRemove.id})<-[rel1:SPRINT_TASK]-(t:Ticket {id:$tick.id})-[rel2:SUB_TASK]->(u:UserStory {id:$uStoryRemove.id})'
+            query = 'MATCH (s:Sprint {id:$sprintRemove.id})<-[rel1:SPRINT_TASK]-(t:Ticket {id:$tick.id})<-[rel2:SUB_TASK]-(u:UserStory {id:$uStoryRemove.id})'
                             + ' DELETE rel1, rel2'
                             + ' WITH t'
                             + ' MATCH (s2:Sprint{id:$sprintAdd.id})'
@@ -352,7 +352,7 @@ const resolveFunctions = {
             // ADD_NEW_USERSTORY only
             query = 'MATCH (t:Ticket),(u:UserStory)'
                             + ' WHERE t.id = $tick.id AND u.id = $uStoryAdd.id'
-                            + ' CREATE (t)-[rel:SUB_TASK]->(u)';
+                            + ' CREATE (t)<-[rel:SUB_TASK]-(u)';
             params = { tick, uStoryAdd };
             break;
           case uStoryRemove === undefined && sprintRemove !== undefined
@@ -360,7 +360,7 @@ const resolveFunctions = {
             // ADD_NEW_USERSTORY_CHANGE_SPRINT
             query = 'MATCH (t:Ticket),(u:UserStory)'
                             + ' WHERE t.id = $tick.id AND u.id = $uStoryAdd.id'
-                            + ' CREATE (t)-[rel:SUB_TASK]->(u)'
+                            + ' CREATE (t)<-[rel:SUB_TASK]-(u)'
                             + ' WITH t'
                             + ' MATCH (s:Sprint {id:$sprintRemove.id})<-[rel1:SPRINT_TASK]-(t)'
                             + ' DELETE rel1';
@@ -371,7 +371,7 @@ const resolveFunctions = {
             // ADD_NEW_USERSTORY_CHANGE_SPRINT
             query = 'MATCH (t:Ticket),(u:UserStory)'
                             + ' WHERE t.id = $tick.id AND u.id = $uStoryAdd.id'
-                            + ' CREATE (t)-[rel:SUB_TASK]->(u)'
+                            + ' CREATE (t)<-[rel:SUB_TASK]-(u)'
                             + ' WITH t'
                             + ' MATCH (s:Sprint {id:$sprintRemove.id})<-[rel1:SPRINT_TASK]-(t)'
                             + ' DELETE rel1'
@@ -387,7 +387,7 @@ const resolveFunctions = {
             // ADD_NEW_USERSTORY_ADD_NEW_SPRINT
             query = 'MATCH (t:Ticket), (u:UserStory), (s:Sprint)'
                             + ' WHERE t.id = $tick.id AND u.id = $uStoryAdd.id AND s.id = $sprintAdd.id'
-                            + ' CREATE (s)<-[rel1:SPRINT_TASK]-(t)-[rel2:SUB_TASK]->(u)';
+                            + ' CREATE (s)<-[rel1:SPRINT_TASK]-(t)<-[rel2:SUB_TASK]-(u)';
             params = { tick, uStoryAdd, sprintAdd };
             break;
           default:
@@ -411,14 +411,14 @@ const resolveFunctions = {
       try {
         // construct cypher query based on arguments provided
         const paramString = Object.keys(params).reduce((arr, key) => {
-          if (key !== 'id') {
+          if (key !== 'tick') {
             arr.push(`${key}:$params.${key}`);
           }
           return arr;
         }, []).join(', ');
         // run cypher query using driver
         await session.run(
-          'MATCH (t: Ticket {id: $params.id})'
+          'MATCH (t: Ticket {id: $params.tick.id})'
             + ` SET t += { ${paramString} }`, {
             params,
           },
