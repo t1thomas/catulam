@@ -16,6 +16,7 @@ export default new Vuex.Store({
       addedTo: {},
       evt: null,
     },
+    addCommitOverLay: false,
     sBoardTicMove: {
       ticketId: null,
       removedFrom: null,
@@ -73,6 +74,9 @@ export default new Vuex.Store({
     sprints: [],
   },
   mutations: {
+    set_addCommitOverLay(state, obj) {
+      state.addCommitOverLay = obj;
+    },
     add_project(state, obj) {
       state.projects = [...state.projects, obj];
     },
@@ -103,6 +107,11 @@ export default new Vuex.Store({
     update_tic_comments(state, obj) {
       state.tickets = state.tickets
         .map((tick) => (tick.id === obj.id ? { ...tick, comments: obj.comments } : tick));
+    },
+    update_tic_commits(state, obj) {
+      state.tickets = state.tickets
+        .map((tick) => (tick.id === obj.id
+          ? { ...tick, commits: obj.commits, hourEstimate: obj.hourEstimate } : tick));
     },
     update_tic_hrs(state, obj) {
       state.tickets = state.tickets
@@ -312,6 +321,9 @@ export default new Vuex.Store({
     },
   },
   actions: {
+    showAddCommitOverLay({ commit }, obj) {
+      commit('set_addCommitOverLay', obj);
+    },
     // Projects associated with currentUser
     async fetchProjects({ commit }, payload) {
       await apolloClient.query({
@@ -541,8 +553,8 @@ export default new Vuex.Store({
         });
     },
     async addTicketComment({ commit }, payload) {
-      await apolloClient.query({
-        query: gqlQueries.ADD_TICKET_COMMENT,
+      await apolloClient.mutate({
+        mutation: gqlQueries.ADD_TICKET_COMMENT,
         fetchPolicy: 'no-cache',
         variables: payload,
       }).then((response) => {
@@ -551,6 +563,22 @@ export default new Vuex.Store({
         commit('update_tic_comments', AddTicketComments);
       }).catch((error) => {
         commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
+    async addTicketCommit({ commit }, payload) {
+      await apolloClient.mutate({
+        mutation: gqlQueries.ADD_TICKET_COMMIT,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { AddTicketCommits } = response.data;
+        console.log(AddTicketCommits);
+        commit('update_tic_commits', AddTicketCommits);
+      }).catch((error) => {
+        commit('set_snackBarShow', {
+          message: `Unable to add commit: ${error}`,
+          type: 'error',
+        });
       });
     },
     async updateTicketHours({ commit }, payload) {

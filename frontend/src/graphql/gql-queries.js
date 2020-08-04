@@ -515,6 +515,28 @@ const gqlQueries = {
       }
     }
   }`,
+  ADD_TICKET_COMMIT: gql`mutation(
+    $tick: _TicketInput!
+    $commit: _CommitInput!
+    $project: _ProjectInput!
+  ) {
+    AddTicketCommits(
+      tick: $tick
+      commit: $commit
+      project: $project
+    ) {
+      id
+      hourEstimate
+      commits {
+        id
+        timestamp
+        message
+        User {
+          id
+        }
+      }
+    }
+  }`,
   USWithTickIds: gql`query{
     UserStory {
       id

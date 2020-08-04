@@ -126,7 +126,6 @@ type Query {
 input _CommitInput {
     message: String!
     newEst: Int!
-    timestamp: Int!
 }
 input _ProjectInput {
     id: ID!
@@ -175,20 +174,11 @@ type Mutation {
     SET com.message = $message
     RETURN t
     """)
-    UpdateViewingProject(project: _ProjectInput!): String
-    #    @hasScope(scopes:["Ticket:Comment"])
-    @cypher(statement:"""
-    MATCH (u:User)
-    WHERE u.id = $cypherParams.currentUser.id
-    SET u.viewingPro = $project.id
-    WITH u
-    RETURN u.viewingPro
-    """)
-    AddTicketCommits(ticket: _TicketInput!, commit: _CommitInput!, project: _ProjectInput!): Ticket
+    AddTicketCommits(tick: _TicketInput!, commit: _CommitInput!, project: _ProjectInput!): Ticket
     #    @hasScope(scopes:["Ticket:Comment"])
     @cypher(statement:"""
     MATCH (t:Ticket),(u:User)
-    WHERE t.id = $ticket.id AND u.id = $cypherParams.currentUser.id
+    WHERE t.id = $tick.id AND u.id = $cypherParams.currentUser.id
     CREATE (u)-[com:COMMIT]->(t)
     SET com.id = apoc.create.uuid()
     SET com.timestamp = datetime().epochSeconds
@@ -198,7 +188,15 @@ type Mutation {
     SET t.hourEstimate = $commit.newEst
     RETURN t
     """)
-
+    UpdateViewingProject(project: _ProjectInput!): String
+    #    @hasScope(scopes:["Ticket:Comment"])
+    @cypher(statement:"""
+    MATCH (u:User)
+    WHERE u.id = $cypherParams.currentUser.id
+    SET u.viewingPro = $project.id
+    WITH u
+    RETURN u.viewingPro
+    """)
     DeleteTicket(tick: _TicketInput!, project: _ProjectInput!): Ticket
 #    @hasScope(scopes:["Ticket:Delete"])
     @cypher(statement:"""

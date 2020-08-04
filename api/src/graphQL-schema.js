@@ -438,6 +438,15 @@ const resolveFunctions = {
         throw new Error(e);
       }
     },
+    AddTicketCommits: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('project', { update: params.project.id });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
     UpdateTicketAssignee: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);

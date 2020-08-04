@@ -5,6 +5,7 @@
   >
     <v-content class="comment-list">
       <v-list
+        v-if="showAddCommit === false"
         dense
       >
         <v-list-item v-if="commits.length === 0">
@@ -18,11 +19,18 @@
           :key="comm.id"
           dense
         >
+          <commit-card :commit="comm" />
         </v-list-item>
       </v-list>
+      <add-commit v-if="showAddCommit" />
     </v-content>
-    <v-card-actions>
-      <v-btn small>
+    <v-card-actions
+      style="justify-content: flex-end;"
+    >
+      <v-btn
+        small
+        @click="showAddCommitOverLay(true)"
+      >
         Add Commit
         <v-icon
           small
@@ -37,11 +45,23 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions, mapState } from 'vuex';
+import commitCard from './commitCard.vue';
+import AddCommit from './AddCommit.vue';
 
 export default {
   name: 'CommitList',
+  components: {
+    commitCard,
+    AddCommit,
+  },
+  data: () => ({
+    overlay: false,
+  }),
   computed: {
+    ...mapState({
+      showAddCommit: (state) => state.addCommitOverLay,
+    }),
     ...mapGetters({
       ticket: 'getCurrTick',
     }),
@@ -56,6 +76,11 @@ export default {
     editing() {
       return this.text.length === 0;
     },
+  },
+  methods: {
+    ...mapActions([
+      'showAddCommitOverLay',
+    ]),
   },
 };
 </script>

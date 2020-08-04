@@ -63,6 +63,7 @@ export default {
         if (val === false) {
           this.$store.dispatch('detDrawShow', { show: val });
           this.overlay = false;
+          this.$store.dispatch('showAddCommitOverLay', false);
         }
       },
     },
