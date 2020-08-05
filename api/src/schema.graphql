@@ -250,15 +250,6 @@ type Mutation {
     RETURN u
     """)
 
-    StartToSprint(ticket: _TicketInput!, sprintAdd: _SprintInput! ): Ticket
-#    @hasScope(scopes:["Ticket:Edit", "Sprint:Edit"])
-    @cypher(statement:"""
-    MATCH (t:Ticket),(s:Sprint)
-    WHERE t.id = $ticket.id AND s.id = $sprintAdd.id
-    CREATE (t)-[rel:SPRINT_TASK]->(s)
-    RETURN t
-    """)
-
     TicToToDo(ticket: _TicketInput!, from: String!): Ticket
 #    @hasScope(scopes:["Ticket:Edit"])
     @cypher(statement:"""
@@ -286,6 +277,15 @@ type Mutation {
     WHERE t.id = $ticket.id
     SET t.sprintPos = 2
     SET t.done = true
+    RETURN t
+    """)
+
+    StartToSprint(ticket: _TicketInput!, sprintAdd: _SprintInput! ): Ticket
+    #    @hasScope(scopes:["Ticket:Edit", "Sprint:Edit"])
+    @cypher(statement:"""
+    MATCH (t:Ticket),(s:Sprint)
+    WHERE t.id = $ticket.id AND s.id = $sprintAdd.id
+    CREATE (t)-[rel:SPRINT_TASK]->(s)
     RETURN t
     """)
 

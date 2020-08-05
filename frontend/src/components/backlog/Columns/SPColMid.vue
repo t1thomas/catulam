@@ -16,13 +16,7 @@
         Sprint {{ sprint.sprintNo }}
       </div>
       <draggable-tick-list
-        v-if="!noUs"
-        :ticket-ids="tickIds(sprint.id, userStoryId)"
-        :list-properties="tickListConfig(sprint.id, sprint.sprintNo)"
-      />
-      <draggable-tick-list
-        v-else
-        :ticket-ids="tickIdsNoUs(sprint.id)"
+        :ticket-ids="tickIdsPerSprint(sprint.id)"
         :list-properties="tickListConfig(sprint.id, sprint.sprintNo)"
       />
     </v-carousel-item>
@@ -77,10 +71,16 @@ export default {
     ...mapActions([
       'setCarouselModel',
     ]),
+    tickIdsPerSprint(sprintID) {
+      if (this.noUs) {
+        return this.tickIdsNoUs(sprintID);
+      }
+      return this.tickIds(sprintID, this.userStoryId);
+    },
     tickListConfig(id, sprintNo) {
-      if (!this.noUs) {
+      if (this.noUs) {
         return {
-          userStoryId: this.userStoryId,
+          userStoryId: null,
           columnType: 'sprint',
           sprintId: id,
           disabled: false,
@@ -88,7 +88,7 @@ export default {
         };
       }
       return {
-        userStoryId: null,
+        userStoryId: this.userStoryId,
         columnType: 'sprint',
         sprintId: id,
         disabled: false,

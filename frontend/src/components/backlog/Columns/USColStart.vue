@@ -38,10 +38,21 @@
         class="pa-0"
         cols="8"
       >
-        <draggable-tick-list
-          :list-properties="tickListConfig"
-          :ticket-ids="tickIds"
-        />
+        <draggable
+          tag="div"
+          v-bind="dragOptions"
+          class="v-list v-list--dense"
+          style="background: #17429b66; width: 100%; height: 100%; overflow-y: auto"
+          @end="$emit('ticketMove')"
+          @add="uSCDAddedTo(listProperties)"
+          @remove="uSCDRemovedFrom(listProperties)"
+        >
+          <ticket-card-slim
+            v-for="id in tickIds"
+            :key="id"
+            :tick-id="id"
+          />
+        </draggable>
       </v-col>
     </div>
   </v-card>
@@ -50,12 +61,14 @@
 <script>
 
 import { mapGetters, mapActions } from 'vuex';
-import DraggableTickList from '../DraggableTickList.vue';
+import draggable from 'vuedraggable';
+import ticketCardSlim from '@/components/Ticket/card/ticketCardSlim.vue';
 
 export default {
   name: 'USColumnStart',
   components: {
-    DraggableTickList,
+    draggable,
+    ticketCardSlim,
   },
   props: {
     userStoryId: {
@@ -67,10 +80,18 @@ export default {
     editBtn: false,
   }),
   computed: {
+    dragOptions() {
+      return {
+        animation: 200,
+        group: 'ticketList',
+        disabled: false,
+        ghostClass: 'ghost',
+      };
+    },
     noUs() {
       return this.userStoryId === 'noUs';
     },
-    tickListConfig() {
+    listProperties() {
       if (this.noUs) {
         return {
           userStoryId: null,
@@ -100,6 +121,10 @@ export default {
     ...mapActions({
       showDrawer: 'detDrawUStoryShow',
     }),
+    ...mapActions([
+      'uSCDRemovedFrom',
+      'uSCDAddedTo',
+    ]),
   },
 };
 </script>

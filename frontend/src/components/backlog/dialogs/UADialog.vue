@@ -1,6 +1,6 @@
 <template>
   <v-row
-    v-model="showDialog"
+    v-if="showDialog"
     justify="center"
   >
     <v-dialog
@@ -12,8 +12,9 @@
         <v-card-title>
           <span class="headline">Move Ticket:
             <span
-              :style="{background: 'grey'}"
-            > {{ ticket.title }} #{{ ticket.issueNumber }}</span>
+              style="background: grey; font-style: italic"
+            >
+              {{ ticket.title }} #{{ ticket.issueNumber }}</span>
           </span>
         </v-card-title>
         <v-card-text>

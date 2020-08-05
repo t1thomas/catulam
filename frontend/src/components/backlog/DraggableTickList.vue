@@ -16,7 +16,7 @@
         v-ripple
         class="pa-0 ma-sm-1"
         clickable
-        @dblclick="detDrawShow({ show: true, ticketId: ticketId })"
+        @dblclick="detDrawShow({ show: true, ticketId })"
       >
         <ticket-card-slim
           :tick-id="ticketId"
@@ -74,7 +74,6 @@ export default {
       'uSCDEvt',
       'USDialogSwitcher',
       'UADialogSwitcher',
-      'detDrawShow',
       'snackBarOn',
     ]),
     onRemove() {
@@ -86,12 +85,14 @@ export default {
       this.uSCDAddedTo(this.listProperties);
     },
     ended(evt) {
+      console.log(evt);
       this.ticketMoveResolve(evt);
     },
     ticketMoveResolve(evt) {
       const ticketId = evt.item.id;
       const fromData = this.removedFrom;
       const toData = this.addedTo;
+
       // fromData and toData remains undefined if ticket is not moved between diff lists
       if (fromData !== undefined || toData !== undefined) {
         if (fromData.userStoryId === null || toData.userStoryId === null) {
@@ -116,6 +117,7 @@ export default {
       }
     },
     switchUADialog(evt) {
+      console.log('switchUADialog');
       const tickId = evt.item.id;
       this.uSCDTicketId(tickId);
       this.uSCDEvt(evt);
@@ -156,6 +158,7 @@ export default {
       });
     },
     async startToSprint(ticketId, sprintId, evt) {
+      console.log('startToSprint');
       await this.$apollo.mutate({
         mutation: gqlQueries.SwitchStartSprint.TIC_ADD_SPRINT,
         variables: {

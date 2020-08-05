@@ -27,24 +27,24 @@ export default {
       return this.userStoryId === 'noUs';
     },
     tickListConfig() {
-      if (!this.noUs) {
+      if (this.noUs) {
         return {
-          userStoryId: this.userStoryId,
+          userStoryId: null,
           columnType: 'end',
           disabled: true,
         };
       }
       return {
-        userStoryId: null,
+        userStoryId: this.userStoryId,
         columnType: 'end',
         disabled: true,
       };
     },
     tickIds() {
-      if (!this.noUs) {
-        return this.tickIdsUs(this.userStoryId);
+      if (this.noUs) {
+        return this.tickIdsNoUs;
       }
-      return this.tickIdsNoUs;
+      return this.tickIdsUs(this.userStoryId);
     },
     ...mapGetters({
       tickIdsUs: 'getDoneTicksUs',

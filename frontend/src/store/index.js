@@ -895,11 +895,13 @@ export default new Vuex.Store({
       .map((tick) => tick.id),
     getUserStoryText: (state) => (userStoryId) => state.userStories
       .find((userStory) => userStory.id === userStoryId).storyText,
-    getUserStoryByPro: (state) => (proId) => state.userStories
-      .filter((uStory) => uStory.project.id === proId),
+    // get user story Ids by project Id for each row in backlog
+    genUStoryRowsByPro: (state) => (proId) => state.userStories
+      .filter((uStory) => uStory.project.id === proId)
+      .map((uStory) => uStory.id),
     getUserStoryByID: (state) => (uStoryId) => state.userStories
       .find((uStory) => uStory.id === uStoryId),
-    getSprintValues: (state) => state.currProElements.sprints
+    getSprintValues: (state) => state.sprints
       .reduce((arr, currSprint, index) => {
         if (index === 0) {
           arr.push({
