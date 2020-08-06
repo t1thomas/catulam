@@ -65,7 +65,6 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
-import gqlQueries from '../../../graphql/gql-queries';
 
 export default {
   name: 'NUStoryDialog',
@@ -96,36 +95,24 @@ export default {
     },
     onCancel() {
       this.nUStoryDialogShow({ show: false });
+      this.$refs.uStoryForm.reset();
     },
     async onCreate() {
       if (this.$refs.uStoryForm.validate()) {
         this.setSaving();
-        await this.$apollo.mutate({
-          mutation: gqlQueries.CREATE_USER_STORY,
-          fetchPolicy: 'no-cache',
-          variables: {
-            storyText: this.desc,
-            project: { id: this.proId },
-          },
-        }).then((response) => {
-          const { CreateUserStory } = response.data;
-          if (CreateUserStory === null) {
-            throw new Error('Unable to Create User Story');
-          } else {
-            // show success notification of sprint creation
-            this.snackBarOn({
-              message: `Created User Story #${CreateUserStory.issueNumber} Successfully`,
-              type: 'success',
-            });
-          }
-        }).catch((error) => {
-          this.snackBarOn({
-            message: error,
-            type: 'error',
+        const payload = {
+          storyText: this.desc,
+          project: { id: this.proId },
+        };
+        await this.$store.dispatch('createUStory', payload)
+          .then(() => {
+            this.setSaving();
+            this.onCancel();
+          })
+          .catch(() => {
+            this.setSaving();
+            this.onCancel();
           });
-        });
-        this.setSaving();
-        this.onCancel();
       }
     },
     setSaving() {

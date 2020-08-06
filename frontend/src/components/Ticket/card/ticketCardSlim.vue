@@ -1,9 +1,10 @@
 <template>
   <v-list-item
+    :id="tickId"
     v-ripple
     class="pa-0 ma-sm-1"
     clickable
-    @dblclick="detDrawShow({ show: true, ticketId: ticket.id })"
+    @dblclick="detDrawShow({ show: true, ticketId: tickId })"
   >
     <v-card
       v-if="ticket"

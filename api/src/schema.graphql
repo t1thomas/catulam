@@ -1,5 +1,4 @@
 scalar JSON
-scalar idList
 
 enum Role {
     dev
@@ -91,7 +90,6 @@ type Ticket {
 type UserStory {
     id: ID!
     storyText: String!
-    issueNumber: Int!
     tickets: [Ticket] @relation(name: "SUB_TASK", direction: OUT)
     project: Project @relation(name: "USER_STORY", direction: OUT)
 }
@@ -111,7 +109,11 @@ type Query {
     MATCH (u:User {id: $cypherParams.currentUser.id})
     RETURN u
     """)
-
+    ticketById(tick: _TicketInput!): Ticket
+    @cypher(statement:"""
+    MATCH (t: Ticket {id: $tick.id})
+    RETURN t
+    """)
 #    UserStory: [UserStory] @hasScope(scopes:["UserStory:Read"])
 #    Project: [Project] @hasScope(scopes:["Project:Read"])
 #    Ticket: [Ticket] @hasScope(scopes:["Ticket:Read"])
@@ -130,8 +132,12 @@ input _CommitInput {
 input _ProjectInput {
     id: ID!
 }
+input _TicketInput {
+    id: ID!
+}
 type Subscription {
     update(proId:String!): String
+    tickUpdate(project: _ProjectInput!): Ticket
 }
 
 type Mutation {
@@ -280,19 +286,19 @@ type Mutation {
     RETURN t
     """)
 
-    StartToSprint(ticket: _TicketInput!, sprintAdd: _SprintInput! ): Ticket
+    StartToSprint(tick: _TicketInput!, sprintAdd: _SprintInput! ): Ticket
     #    @hasScope(scopes:["Ticket:Edit", "Sprint:Edit"])
     @cypher(statement:"""
     MATCH (t:Ticket),(s:Sprint)
-    WHERE t.id = $ticket.id AND s.id = $sprintAdd.id
+    WHERE t.id = $tick.id AND s.id = $sprintAdd.id
     CREATE (t)-[rel:SPRINT_TASK]->(s)
     RETURN t
     """)
 
-    SprintToStart(ticket: _TicketInput!, sprintRemove: _SprintInput! ): Ticket
+    SprintToStart(tick: _TicketInput!, sprintRemove: _SprintInput! ): Ticket
 #    @hasScope(scopes:["Ticket:Edit", "Sprint:Edit"])
     @cypher(statement:"""
-    MATCH (t:Ticket {id:$ticket.id})-[rel1:SPRINT_TASK]->(s:Sprint{id:$sprintRemove.id})
+    MATCH (t:Ticket {id:$tick.id})-[rel1:SPRINT_TASK]->(s:Sprint{id:$sprintRemove.id})
     WITH t, rel1
     DELETE rel1
     RETURN t
@@ -377,10 +383,15 @@ type Mutation {
     done:false
     })<-[:CREATED {timestamp: datetime().epochSeconds }]-(u)
     WITH p, t
-    MATCH (p)<-[r1:TICKET]-(:Ticket)
-    WITH COUNT(r1) AS issNo, t
-    SET t.issueNumber = issNo
-    RETURN t
+    MATCH (p)<-[:TICKET]-(t1:Ticket)
+    WITH t, max(t1.issueNumber) + 1 as num
+    CALL apoc.do.when(
+    num IS NOT NULL,
+    'SET t.issueNumber = num RETURN t',
+    'SET t.issueNumber = 1 RETURN t',
+    {t:t, num: num})
+    YIELD value
+    RETURN value.t
     """)
 
     CreateUserStory(storyText: String!, project: _ProjectInput!): UserStory
@@ -389,10 +400,6 @@ type Mutation {
     MATCH (p:Project)
     WHERE p.id = $project.id
     CREATE (p)<-[:USER_STORY]-(us: UserStory { id: apoc.create.uuid(), storyText: $storyText })
-    WITH p, us
-    MATCH (p)<-[r1:USER_STORY]-(:UserStory)
-    WITH COUNT(r1) AS issNo, us
-    SET us.issueNumber = issNo
     RETURN us
     """)
 }

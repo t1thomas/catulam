@@ -85,7 +85,6 @@ export default {
       this.uSCDAddedTo(this.listProperties);
     },
     ended(evt) {
-      console.log(evt);
       this.ticketMoveResolve(evt);
     },
     ticketMoveResolve(evt) {
@@ -117,7 +116,6 @@ export default {
       }
     },
     switchUADialog(evt) {
-      console.log('switchUADialog');
       const tickId = evt.item.id;
       this.uSCDTicketId(tickId);
       this.uSCDEvt(evt);
@@ -158,7 +156,6 @@ export default {
       });
     },
     async startToSprint(ticketId, sprintId, evt) {
-      console.log('startToSprint');
       await this.$apollo.mutate({
         mutation: gqlQueries.SwitchStartSprint.TIC_ADD_SPRINT,
         variables: {

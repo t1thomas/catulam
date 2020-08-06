@@ -43,7 +43,7 @@
           v-bind="dragOptions"
           class="v-list v-list--dense"
           style="background: #17429b66; width: 100%; height: 100%; overflow-y: auto"
-          @end="$emit('ticketMove')"
+          @end="tickMoved"
           @add="uSCDAddedTo(listProperties)"
           @remove="uSCDRemovedFrom(listProperties)"
         >
@@ -92,13 +92,6 @@ export default {
       return this.userStoryId === 'noUs';
     },
     listProperties() {
-      if (this.noUs) {
-        return {
-          userStoryId: null,
-          columnType: 'start',
-          disabled: false,
-        };
-      }
       return {
         userStoryId: this.userStoryId,
         columnType: 'start',
@@ -124,7 +117,14 @@ export default {
     ...mapActions([
       'uSCDRemovedFrom',
       'uSCDAddedTo',
+      'uSCDEvt',
+      'uSCDTicketId',
     ]),
+    tickMoved(evt) {
+      this.uSCDTicketId(evt.item.id);
+      this.uSCDEvt(evt);
+      this.$emit('ticketMove');
+    },
   },
 };
 </script>

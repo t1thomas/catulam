@@ -15,22 +15,35 @@
       >
         Sprint {{ sprint.sprintNo }}
       </div>
-      <draggable-tick-list
-        :ticket-ids="tickIdsPerSprint(sprint.id)"
-        :list-properties="tickListConfig(sprint.id, sprint.sprintNo)"
-      />
+      <draggable
+        tag="div"
+        v-bind="dragOptions"
+        class="v-list v-list--dense"
+        style="background: #17429b66; width: 100%; height: 100%; overflow-y: auto"
+        @end="tickMoved"
+        @add="uSCDAddedTo(listProperties(sprint.id, sprint.sprintNo))"
+        @remove="uSCDRemovedFrom(listProperties(sprint.id, sprint.sprintNo))"
+      >
+        <ticket-card-slim
+          v-for="id in tickIdsPerSprint(sprint.id)"
+          :key="id"
+          :tick-id="id"
+        />
+      </draggable>
     </v-carousel-item>
   </v-carousel>
 </template>
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import DraggableTickList from '../DraggableTickList.vue';
+import draggable from 'vuedraggable';
+import ticketCardSlim from '@/components/Ticket/card/ticketCardSlim.vue';
 
 export default {
   name: 'SPColumnMiddle',
   components: {
-    DraggableTickList,
+    ticketCardSlim,
+    draggable,
   },
   props: {
     userStoryId: {
@@ -42,6 +55,14 @@ export default {
     carouselModelLocal: 0,
   }),
   computed: {
+    dragOptions() {
+      return {
+        animation: 200,
+        group: 'ticketList',
+        disabled: false,
+        ghostClass: 'ghost',
+      };
+    },
     noUs() {
       return this.userStoryId === 'noUs';
     },
@@ -70,6 +91,10 @@ export default {
   methods: {
     ...mapActions([
       'setCarouselModel',
+      'uSCDRemovedFrom',
+      'uSCDAddedTo',
+      'uSCDEvt',
+      'uSCDTicketId',
     ]),
     tickIdsPerSprint(sprintID) {
       if (this.noUs) {
@@ -77,16 +102,7 @@ export default {
       }
       return this.tickIds(sprintID, this.userStoryId);
     },
-    tickListConfig(id, sprintNo) {
-      if (this.noUs) {
-        return {
-          userStoryId: null,
-          columnType: 'sprint',
-          sprintId: id,
-          disabled: false,
-          sprintNo,
-        };
-      }
+    listProperties(id, sprintNo) {
       return {
         userStoryId: this.userStoryId,
         columnType: 'sprint',
@@ -94,6 +110,11 @@ export default {
         disabled: false,
         sprintNo,
       };
+    },
+    tickMoved(evt) {
+      this.uSCDTicketId(evt.item.id);
+      this.uSCDEvt(evt);
+      this.$emit('ticketMove');
     },
   },
 };

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "nodemon": "nodemon --inspect src/index.js",
+    "nodemon": "nodemon src/index.js",
     "start": "node src/index.js",
     "lint": "eslint",
     "test": "jest --detectOpenHandles",
@@ -31,7 +31,7 @@
     "jsonwebtoken": "^8.5.1",
     "md5": "^2.2.1",
     "neo4j-driver": "^4.1.0",
-    "neo4j-graphql-js": "^2.14.2",
+    "neo4j-graphql-js": "^2.15.1",
     "neode": "^0.4.5",
     "node-fetch": "^2.6.0"
   },

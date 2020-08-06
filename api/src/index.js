@@ -28,6 +28,9 @@ const server = new ApolloServer({
         cypherParams: {
           currentUser: await verifyToken(token),
         },
+        driver,
+        req,
+        res,
       };
     }
     const token = req.headers.authorization;

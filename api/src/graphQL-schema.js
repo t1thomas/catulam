@@ -1,13 +1,11 @@
 const { GraphQLJSON } = require('graphql-type-json');
 const { PubSub, withFilter, AuthenticationError } = require('apollo-server-express');
-const { GraphQLObjectType, GraphQLString, GraphQLList } = require('graphql');
 const { makeAugmentedSchema, neo4jgraphql } = require('neo4j-graphql-js');
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const md5 = require('md5');
-const { parseResolveInfo } = require('graphql-parse-resolve-info');
 const neode = require('./neode');
 const authScopes = require('./authScopes');
 const verifyToken = require('./verifyAndDecodeToken');
@@ -18,12 +16,6 @@ require('dotenv').config();
 
 const pubSub = new PubSub();
 
-const idListScalar = new GraphQLObjectType({
-  name: 'ids',
-  fields: () => ({
-    ids: { type: new GraphQLList(GraphQLString) },
-  }),
-});
 // name of the cookie that will be set as refresh token
 const cookieName = 'catulam_token';
 
@@ -77,12 +69,21 @@ function validatePass(pass, user) {
     });
   });
 }
-const resolveFunctions = {
+const resolvers = {
   JSON: GraphQLJSON,
-  idList: idListScalar,
   User: {
     fullName(obj) {
       return `${obj.firstName} ${obj.lastName}`;
+    },
+  },
+  Subscription: {
+    update: {
+      subscribe: withFilter(() => pubSub.asyncIterator('project'),
+        (payload, variables) => payload.update === variables.proId),
+    },
+    tickUpdate: {
+      subscribe: withFilter(() => pubSub.asyncIterator('TICKET_UPDATE'),
+        (payload, variables) => payload.tickUpdate.project.id === variables.project.id),
     },
   },
   Token: {
@@ -201,8 +202,10 @@ const resolveFunctions = {
 
     StartToSprint: async (object, params, ctx, resolveInfo) => {
       try {
+        // console.log(object);
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
         await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
@@ -469,6 +472,7 @@ const resolveFunctions = {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
         await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
@@ -553,23 +557,18 @@ const resolveFunctions = {
       }
     },
   },
-  Subscription: {
-    update: {
-      subscribe: withFilter(() => pubSub.asyncIterator('project'),
-        (payload, variables) => payload.update === variables.proId),
-    },
-  },
 };
+
 const schema = makeAugmentedSchema({
   typeDefs,
-  resolvers: resolveFunctions,
+  resolvers,
   config: {
     auth: {
       isAuthenticated: true,
       hasRole: true,
       // hasScope: true,
     },
-    debug: true,
+    // debug: true,
   },
 });
 

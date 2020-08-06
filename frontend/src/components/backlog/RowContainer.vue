@@ -36,10 +36,26 @@ export default {
       query: gqlQueries.SUB_BACKLOG_UPDATE,
       variables: { proId: this.proId },
     });
+    const observerTickUpdate = this.$apollo.subscribe({
+      query: gqlQueries.SUB_BACKLOG_TICKET_UPDATE,
+      variables: { project: { id: this.proId } },
+    });
     observer.subscribe({
       async next() {
         await self.loadData();
         await self.updateSPlanData();
+      },
+      error(error) {
+        self.snackBarOn({
+          message: error,
+          type: 'error',
+        });
+      },
+    });
+    observerTickUpdate.subscribe({
+      next(response) {
+        const { tickUpdate } = response.data;
+        self.updateTicket(tickUpdate.id);
       },
       error(error) {
         self.snackBarOn({
@@ -62,6 +78,9 @@ export default {
       if (this.showSPlanDialog) {
         await this.sPlannerShow({ show: true, proId: this.proId });
       }
+    },
+    async updateTicket(tickId) {
+      await this.$store.dispatch('fetchTicketById', { id: tickId });
     },
   },
 };

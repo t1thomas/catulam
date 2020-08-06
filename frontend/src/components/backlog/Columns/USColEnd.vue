@@ -1,20 +1,30 @@
 <template>
   <v-card height="100%">
-    <draggable-tick-list
-      :list-properties="tickListConfig"
-      :ticket-ids="tickIds"
-    />
+    <draggable
+      tag="div"
+      v-bind="dragOptions"
+      class="v-list v-list--dense"
+      style="background: #17429b66; width: 100%; height: 100%; overflow-y: auto"
+    >
+      <ticket-card-slim
+        v-for="id in tickIds"
+        :key="id"
+        :tick-id="id"
+      />
+    </draggable>
   </v-card>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import DraggableTickList from '../DraggableTickList.vue';
+import draggable from 'vuedraggable';
+import ticketCardSlim from '@/components/Ticket/card/ticketCardSlim.vue';
 
 export default {
   name: 'USColumnEnd',
   components: {
-    DraggableTickList,
+    draggable,
+    ticketCardSlim,
   },
   props: {
     userStoryId: {
@@ -23,17 +33,18 @@ export default {
     },
   },
   computed: {
+    dragOptions() {
+      return {
+        animation: 200,
+        group: 'ticketList',
+        disabled: true,
+        ghostClass: 'ghost',
+      };
+    },
     noUs() {
       return this.userStoryId === 'noUs';
     },
-    tickListConfig() {
-      if (this.noUs) {
-        return {
-          userStoryId: null,
-          columnType: 'end',
-          disabled: true,
-        };
-      }
+    listProperties() {
       return {
         userStoryId: this.userStoryId,
         columnType: 'end',

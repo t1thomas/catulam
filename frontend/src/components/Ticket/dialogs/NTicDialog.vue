@@ -1,8 +1,5 @@
 <template>
-  <v-row
-    v-if="showDialog"
-    justify="center"
-  >
+  <v-row justify="center">
     <v-dialog
       v-model="showDialog"
       persistent
@@ -127,6 +124,7 @@ export default {
     },
     onCancel() {
       this.nTicDialogShow({ show: false });
+      this.$refs.ticForm.reset();
     },
     async onCreate() {
       if (this.$refs.ticForm.validate()) {

@@ -15,6 +15,12 @@ const gqlQueries = {
     subscription($proId: String!) {
       update(proId: $proId)
     }`,
+  SUB_BACKLOG_TICKET_UPDATE: gql`
+    subscription($project: _ProjectInput!) {
+    tickUpdate(project: $project) {
+      id
+    }
+  }`,
   CREATE_TICKET: gql`
     mutation(
       $hourEstimate: Int
@@ -29,47 +35,8 @@ const gqlQueries = {
         project: $project
       ) {
         id
-        issueNumber
-        title
-        done
-        desc
-        hourEstimate
-        assignee {
-          id
-        }
         project {
           id
-        }
-        sprint {
-          id
-          sprintNo
-        }
-        comments {
-          id
-          timestamp
-          message
-          User {
-            id
-          }
-        }
-        userStory{
-          id
-        }
-        commits {
-          id
-          message
-          timestamp
-          newHourEstimate
-          prevHourEstimate
-          User {
-            id
-          }
-        }
-        creator {
-          User {
-            id
-          }
-          timestamp
         }
       }
     }`,
@@ -83,7 +50,7 @@ const gqlQueries = {
         project: $project
       ) {
         id
-        issueNumber
+        storyText
         project {
           id
         }
@@ -111,6 +78,54 @@ const gqlQueries = {
         }
       }
     }`,
+  TICK_BY_ID: gql`
+    query($id: ID!) {
+    Ticket(filter: { id: $id }) {
+      id
+      issueNumber
+      title
+      done
+      desc
+      hourEstimate
+      assignee {
+        id
+      }
+      project {
+        id
+      }
+      sprint {
+        id
+        sprintNo
+      }
+      comments {
+        id
+        timestamp
+        message
+        User {
+          id
+        }
+      }
+      userStory{
+        id
+      }
+      commits {
+        id
+        message
+        timestamp
+        newHourEstimate
+        prevHourEstimate
+        User {
+          id
+        }
+      }
+      creator {
+        User {
+          id
+        }
+        timestamp
+      }
+    }
+  }`,
   BACKLOG_DATA: gql`query($id: ID!) {
     noUsNoSp: Ticket(
       filter: {
@@ -253,38 +268,6 @@ const gqlQueries = {
         id
       }
     }`,
-  CURRENT_TICKET: gql`
-    query($id: ID!) {
-      Ticket(filter: { id: $id }) {
-        id
-        issueNumber
-        hourEstimate
-        userStory {
-          id
-          issueNumber
-          storyText
-        }
-        project {
-          id
-        }
-        title
-        desc
-        done
-        sprint {
-          id
-          sprintNo
-        }
-        assignee {
-          id
-        }
-        creator {
-          User {
-            id
-          }
-          timestamp
-        }
-      }
-    }`,
   USER_TASKS: gql`
     query($username: String!) {
       User(filter: { username: $username }) {
@@ -425,7 +408,6 @@ const gqlQueries = {
     ) {
       id
       storyText
-      issueNumber
       project {
         id
       }
@@ -585,18 +567,17 @@ const gqlQueries = {
   SwitchStartSprint: {
     TIC_ADD_SPRINT: gql`
       mutation(
-        $ticket: _TicketInput!
+        $tick: _TicketInput!
         $sprintAdd: _SprintInput!
       ) {
         StartToSprint(
-          ticket: $ticket
+          tick: $tick
           sprintAdd: $sprintAdd
         )
         {
-          title
-          issueNumber
+          id
           sprint {
-            sprintNo
+            id
           }
           project {
             id
@@ -605,15 +586,14 @@ const gqlQueries = {
       }`,
     TIC_REMOVE_SPRINT: gql`
       mutation(
-        $ticket: _TicketInput!
+        $tick: _TicketInput!
         $sprintRemove: _SprintInput!
       ) {
         SprintToStart(
-          ticket: $ticket
+          tick: $tick
           sprintRemove: $sprintRemove
         ){
-          title
-          issueNumber
+          id
           project {
             id
           }

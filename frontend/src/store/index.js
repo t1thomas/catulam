@@ -8,12 +8,10 @@ Vue.use(Vuex);
 
 export default new Vuex.Store({
   state: {
-    changeDialog: {
-      showUSDialog: false,
-      showUADialog: false,
+    backlogTicMove: {
       ticketId: null,
-      removedFrom: {},
-      addedTo: {},
+      removedFrom: null,
+      addedTo: null,
       evt: null,
     },
     addCommitOverLay: false,
@@ -80,11 +78,22 @@ export default new Vuex.Store({
     add_project(state, obj) {
       state.projects = [...state.projects, obj];
     },
-    add_ticket(state, obj) {
-      state.tickets = [...state.tickets, obj];
+    // add_ticket(state, obj) {
+    //   state.tickets = [...state.tickets, obj];
+    // },
+    add_uStory(state, obj) {
+      state.userStories = [...state.userStories, obj];
     },
     set_projects(state, obj) {
       state.projects = obj;
+    },
+    update_ticket(state, obj) {
+      const index = state.tickets.findIndex((tick) => tick.id === obj.id);
+      if (index !== -1) {
+        state.tickets[index] = obj;
+      } else {
+        state.tickets = [...state.tickets, obj];
+      }
     },
     set_tickets(state, obj) {
       state.tickets = obj;
@@ -162,26 +171,36 @@ export default new Vuex.Store({
     set_allUserList(state, obj) {
       state.allUserList = obj;
     },
-    set_removedFrom(state, obj) {
-      state.removedFrom = obj;
-    },
-    set_addedTo(state, obj) {
-      state.addedTo = obj;
-    },
-    /* mutations to get data for changeDialog in backlog */
+
+
+    /* mutations to get data for backlogTicMove in backlog */
     uSCDSet_evt(state, obj) {
-      state.changeDialog.evt = obj;
+      state.backlogTicMove.evt = obj;
     },
     uSCDSet_ticketId(state, obj) {
-      state.changeDialog.ticketId = obj;
+      state.backlogTicMove.ticketId = obj;
     },
     uSCDSet_removedFrom(state, obj) {
-      state.changeDialog.removedFrom = obj;
+      state.backlogTicMove.removedFrom = obj;
     },
     uSCDSet_addedTo(state, obj) {
-      state.changeDialog.addedTo = obj;
+      state.backlogTicMove.addedTo = obj;
+    },
+    backlogSet_clear(state) {
+      state.backlogTicMove.evt = null;
+      state.backlogTicMove.ticketId = null;
+      state.backlogTicMove.removedFrom = null;
+      state.backlogTicMove.addedTo = null;
+    },
+    backlogSet_switchBack(state) {
+      // remove ticket from new list and put back in old list
+      const { evt } = state.backlogTicMove;
+      evt.from.insertBefore(evt.to.childNodes[evt.newDraggableIndex],
+        evt.from.childNodes[evt.oldDraggableIndex]);
     },
     /* ----------------------------------------------------------*/
+
+
     /* mutations to get data for change in sprintBoard */
     sBoardSet_evt(state, obj) {
       state.sBoardTicMove.evt = obj;
@@ -202,28 +221,6 @@ export default new Vuex.Store({
       state.sBoardTicMove.addedTo = null;
     },
     /* ----------------------------------------------------------*/
-    set_USChangeDialog(state) {
-      if (state.changeDialog.showUSDialog === false) {
-        state.changeDialog.showUSDialog = true;
-      } else {
-        state.changeDialog.showUSDialog = false;
-        state.changeDialog.removedFrom = undefined;
-        state.changeDialog.addedTo = undefined;
-        state.changeDialog.evt = null;
-        state.changeDialog.ticketId = null;
-      }
-    },
-    set_UAChangeDialog(state) {
-      if (state.changeDialog.showUADialog === false) {
-        state.changeDialog.showUADialog = true;
-      } else {
-        state.changeDialog.showUADialog = false;
-        state.changeDialog.removedFrom = undefined;
-        state.changeDialog.addedTo = undefined;
-        state.changeDialog.evt = null;
-        state.changeDialog.ticketId = null;
-      }
-    },
     /* ------------------------------------------------*/
     set_carouselModel(state, obj) {
       state.carouselModelParent = obj;
@@ -354,6 +351,19 @@ export default new Vuex.Store({
         }
       }).catch((error) => {
         commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
+    async fetchTicketById({ commit }, payload) {
+      await apolloClient.query({
+        query: gqlQueries.TICK_BY_ID,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const Ticket = response.data.Ticket[0];
+        commit('update_ticket', Ticket);
+        console.log(Ticket);
+      }).catch((error) => {
+        commit('set_snackBarShow', { message: `Unable to update Ticket: ${error}`, type: 'error' });
       });
     },
     // set_userStories
@@ -632,6 +642,38 @@ export default new Vuex.Store({
         commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
+    async startToSprint({ commit }, payload) {
+      await apolloClient.mutate({
+        mutation: gqlQueries.SwitchStartSprint.TIC_ADD_SPRINT,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { StartToSprint } = response.data;
+        console.log(StartToSprint);
+        commit('backlogSet_clear');
+      }).catch((error) => {
+        commit('backlogSet_switchBack');
+        // clear everything in backlog set
+        commit('backlogSet_clear');
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
+    async sprintToStart({ commit }, payload) {
+      await apolloClient.mutate({
+        mutation: gqlQueries.SwitchStartSprint.TIC_REMOVE_SPRINT,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { SprintToStart } = response.data;
+        console.log(SprintToStart);
+        commit('backlogSet_clear');
+      }).catch((error) => {
+        commit('backlogSet_switchBack');
+        // clear everything in backlog set
+        commit('backlogSet_clear');
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
     async deleteTicket({ commit }, payload) {
       await apolloClient.mutate({
         mutation: gqlQueries.DELETE_TICKET,
@@ -662,20 +704,33 @@ export default new Vuex.Store({
           commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
+    async createUStory({ commit }, payload) {
+      await apolloClient.mutate({
+        mutation: gqlQueries.CREATE_USER_STORY,
+        variables: payload,
+        fetchPolicy: 'no-cache',
+      })
+        .then((response) => {
+          const { CreateUserStory } = response.data;
+          console.log(CreateUserStory);
+          commit('add_uStory', CreateUserStory);
+        })
+        .catch((error) => {
+          commit('set_snackBarShow', {
+            message:
+              `Unable to Create User Story: ${error}`,
+            type: 'error',
+          });
+        });
+    },
     async createTicket({ commit }, payload) {
       await apolloClient.mutate({
         mutation: gqlQueries.CREATE_TICKET,
         variables: payload,
         fetchPolicy: 'no-cache',
       })
-        .then((response) => {
-          const { CreateTicket } = response.data;
-          console.log(CreateTicket);
-          commit('add_ticket', CreateTicket);
-          commit('set_snackBarShow', {
-            message: `Created Ticket ${CreateTicket.title} #${CreateTicket.issueNumber} Successfully`,
-            type: 'success',
-          });
+        .then(() => {
+
         })
         .catch((error) => {
           commit('set_snackBarShow', {
@@ -734,22 +789,10 @@ export default new Vuex.Store({
           });
       }
     },
-    setCardRemoved({ commit }, listConfig) {
-      commit('set_cardRemoved', listConfig);
-    },
-    setCardAdded({ commit }, listConfig) {
-      commit('set_cardAdded', listConfig);
-    },
-    clearRemAdd({ commit }) {
-      commit('clear_Rem_Add');
-    },
     setCarouselModel({ commit }, value) {
       commit('set_carouselModel', value);
     },
-    setRemovedFrom({ commit }, value) {
-      commit('set_removedFrom', value);
-    },
-    /* actions to set data for changeDialog in backlog */
+    /* actions to set data for backlogTicMove in backlog */
     uSCDEvt({ commit }, value) {
       commit('uSCDSet_evt', value);
     },
@@ -761,15 +804,6 @@ export default new Vuex.Store({
     },
     uSCDAddedTo({ commit }, value) {
       commit('uSCDSet_addedTo', value);
-    },
-    setAddedTo({ commit }, value) {
-      commit('set_addedTo', value);
-    },
-    USDialogSwitcher({ commit }) {
-      commit('set_USChangeDialog');
-    },
-    UADialogSwitcher({ commit }) {
-      commit('set_UAChangeDialog');
     },
     /* -------------------------------------- */
 
