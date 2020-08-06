@@ -1,6 +1,5 @@
 <template>
   <v-row
-    v-if="showDialog"
     justify="center"
   >
     <v-dialog

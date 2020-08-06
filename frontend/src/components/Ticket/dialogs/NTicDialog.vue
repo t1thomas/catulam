@@ -139,10 +139,6 @@ export default {
           .then(() => {
             this.setSaving();
             this.onCancel();
-          })
-          .catch(() => {
-            this.setSaving();
-            this.onCancel();
           });
       }
     },

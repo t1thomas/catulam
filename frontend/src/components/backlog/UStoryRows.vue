@@ -91,12 +91,13 @@ export default {
       // fromData and toData remains null if ticket is not moved between diff lists
       if (this.removedFrom !== null || this.addedTo !== null) {
         switch (true) {
+          /* if userStoryID is same for either addedTo or removedFrom the
+          ticket is being moved to/from start or sprint unassigned ticket list */
           case this.removedFrom.userStoryId === this.addedTo.userStoryId:
-            /* if userStoryID is same for either addedTo or removedFrom the
-               ticket is being moved to/from start or sprint unassigned ticket list */
             this.toStartOrSprint();
             break;
           default:
+            this.$store.dispatch('uSDialogShow', true);
             break;
         }
       }

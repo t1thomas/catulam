@@ -36,14 +36,10 @@ export default {
       query: gqlQueries.SUB_BACKLOG_UPDATE,
       variables: { proId: this.proId },
     });
-    const observerTickUpdate = this.$apollo.subscribe({
-      query: gqlQueries.SUB_BACKLOG_TICKET_UPDATE,
-      variables: { project: { id: this.proId } },
-    });
     observer.subscribe({
       async next() {
         await self.loadData();
-        await self.updateSPlanData();
+        // await self.updateSPlanData();
       },
       error(error) {
         self.snackBarOn({
@@ -52,10 +48,33 @@ export default {
         });
       },
     });
+    const observerTickUpdate = this.$apollo.subscribe({
+      query: gqlQueries.SUB_BACKLOG_TICKET_UPDATE,
+      variables: { project: { id: this.proId } },
+    });
     observerTickUpdate.subscribe({
-      next(response) {
+      async next(response) {
         const { tickUpdate } = response.data;
-        self.updateTicket(tickUpdate.id);
+        console.log(tickUpdate);
+        await self.$store.dispatch('updateTicketById', tickUpdate);
+      },
+      error(error) {
+        console.log('eror here');
+        self.snackBarOn({
+          message: error,
+          type: 'error',
+        });
+      },
+    });
+    const obsUstoryUpdate = this.$apollo.subscribe({
+      query: gqlQueries.SUB_BACKLOG_USTORY_UPDATE,
+      variables: { project: { id: this.proId } },
+    });
+    obsUstoryUpdate.subscribe({
+      async next(response) {
+        const { uSUpdate } = response.data;
+        console.log(uSUpdate);
+        await self.$store.dispatch('updateUStoryById', uSUpdate);
       },
       error(error) {
         self.snackBarOn({
@@ -73,15 +92,12 @@ export default {
     async loadData() {
       await this.fetchBackLogData(this.proId);
     },
-    async updateSPlanData() {
-      // only request update if sprint planner is currently in view
-      if (this.showSPlanDialog) {
-        await this.sPlannerShow({ show: true, proId: this.proId });
-      }
-    },
-    async updateTicket(tickId) {
-      await this.$store.dispatch('fetchTicketById', { id: tickId });
-    },
+    // async updateSPlanData() {
+    //   // only request update if sprint planner is currently in view
+    //   if (this.showSPlanDialog) {
+    //     await this.sPlannerShow({ show: true, proId: this.proId });
+    //   }
+    // },
   },
 };
 </script>

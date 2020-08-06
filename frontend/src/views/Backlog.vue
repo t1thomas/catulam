@@ -10,7 +10,7 @@
     <n-u-story-dialog />
     <n-tic-dialog />
 <!--    <u-a-dialog />-->
-<!--    <u-s-dialog />-->
+    <u-s-dialog />
     <edit-member-dialog />
   </v-container>
 </template>
@@ -20,7 +20,7 @@ import editMemberDialog from '@/components/backlog/dialogs/EditMembers/editMembe
 import SPlannerDialog from '@/components/pm/SprintPlan/planner dialog/SPlannerDialog.vue';
 import NUStoryDialog from '@/components/UserStory/dialogs/NUStoryDialog.vue';
 import NTicDialog from '@/components/Ticket/dialogs/NTicDialog.vue';
-// import USDialog from '@/components/backlog/dialogs/USDialog.vue';
+import USDialog from '@/components/backlog/dialogs/USDialog.vue';
 // import UADialog from '@/components/backlog/dialogs/UADialog.vue';
 import DelUSDialog from '../components/backlog/dialogs/DelUSDialog.vue';
 import DetDrawerUStory from '../components/backlog/UStoryDrawer/DetDrawerUStory.vue';
@@ -36,7 +36,7 @@ export default {
     SPlannerDialog,
     NUStoryDialog,
     NTicDialog,
-    // USDialog,
+    USDialog,
     // UADialog,
   },
   data: () => ({

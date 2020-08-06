@@ -72,8 +72,6 @@ export default {
       'uSCDAddedTo',
       'uSCDTicketId',
       'uSCDEvt',
-      'USDialogSwitcher',
-      'UADialogSwitcher',
       'snackBarOn',
     ]),
     onRemove() {

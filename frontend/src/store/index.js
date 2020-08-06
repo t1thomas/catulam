@@ -38,6 +38,7 @@ export default new Vuex.Store({
       show: false,
       proId: null,
     },
+    showUSDialog: false,
     nProDialog: {
       show: false,
     },
@@ -72,6 +73,9 @@ export default new Vuex.Store({
     sprints: [],
   },
   mutations: {
+    set_uSDialogShow(state, obj) {
+      state.showUSDialog = obj;
+    },
     set_addCommitOverLay(state, obj) {
       state.addCommitOverLay = obj;
     },
@@ -81,17 +85,33 @@ export default new Vuex.Store({
     // add_ticket(state, obj) {
     //   state.tickets = [...state.tickets, obj];
     // },
-    add_uStory(state, obj) {
-      state.userStories = [...state.userStories, obj];
-    },
+    // add_uStory(state, obj) {
+    //   state.userStories = [...state.userStories, obj];
+    // },
     set_projects(state, obj) {
       state.projects = obj;
     },
+    update_uStory(state, obj) {
+      // find index of userStories
+      const index = state.userStories.findIndex((uStory) => uStory.id === obj.id);
+      if (index !== -1) {
+        // if exists update uStory properties at index
+        const uStoryFound = state.userStories[index];
+        state.userStories[index] = Object.assign(uStoryFound, obj);
+      } else {
+        // if new uStory, add to array
+        state.userStories = [...state.userStories, obj];
+      }
+    },
     update_ticket(state, obj) {
+      // find index of ticket
       const index = state.tickets.findIndex((tick) => tick.id === obj.id);
       if (index !== -1) {
-        state.tickets[index] = obj;
+        // if exists update ticket properties at index
+        const ticFound = state.tickets[index];
+        state.tickets[index] = Object.assign(ticFound, obj);
       } else {
+        // if new tick, add to array
         state.tickets = [...state.tickets, obj];
       }
     },
@@ -353,21 +373,6 @@ export default new Vuex.Store({
         commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
-    async fetchTicketById({ commit }, payload) {
-      await apolloClient.query({
-        query: gqlQueries.TICK_BY_ID,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const Ticket = response.data.Ticket[0];
-        commit('update_ticket', Ticket);
-        console.log(Ticket);
-      }).catch((error) => {
-        commit('set_snackBarShow', { message: `Unable to update Ticket: ${error}`, type: 'error' });
-      });
-    },
-    // set_userStories
-    // All UserStories from projects that currentUser is member of
     async fetchUserStories({ commit }, payload) {
       await apolloClient.query({
         query: gqlQueries.USER_STORIES,
@@ -642,14 +647,34 @@ export default new Vuex.Store({
         commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
+    updateTicketById({ commit }, obj) {
+      commit('update_ticket', obj);
+    },
+    updateUStoryById({ commit }, obj) {
+      commit('update_uStory', obj);
+    },
+    async UStoryTicketSwitch({ commit }, payload) {
+      await apolloClient.mutate({
+        mutation: gqlQueries.SwitchUserStory.USTORY_TICKET_SWITCH,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then(() => {
+        commit('set_uSDialogShow', false);
+        commit('backlogSet_clear');
+      }).catch((error) => {
+        commit('set_uSDialogShow', false);
+        commit('backlogSet_switchBack');
+        // clear everything in backlog set
+        commit('backlogSet_clear');
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
     async startToSprint({ commit }, payload) {
       await apolloClient.mutate({
         mutation: gqlQueries.SwitchStartSprint.TIC_ADD_SPRINT,
         fetchPolicy: 'no-cache',
         variables: payload,
-      }).then((response) => {
-        const { StartToSprint } = response.data;
-        console.log(StartToSprint);
+      }).then(() => {
         commit('backlogSet_clear');
       }).catch((error) => {
         commit('backlogSet_switchBack');
@@ -663,9 +688,7 @@ export default new Vuex.Store({
         mutation: gqlQueries.SwitchStartSprint.TIC_REMOVE_SPRINT,
         fetchPolicy: 'no-cache',
         variables: payload,
-      }).then((response) => {
-        const { SprintToStart } = response.data;
-        console.log(SprintToStart);
+      }).then(() => {
         commit('backlogSet_clear');
       }).catch((error) => {
         commit('backlogSet_switchBack');
@@ -709,36 +732,25 @@ export default new Vuex.Store({
         mutation: gqlQueries.CREATE_USER_STORY,
         variables: payload,
         fetchPolicy: 'no-cache',
-      })
-        .then((response) => {
-          const { CreateUserStory } = response.data;
-          console.log(CreateUserStory);
-          commit('add_uStory', CreateUserStory);
-        })
-        .catch((error) => {
-          commit('set_snackBarShow', {
-            message:
-              `Unable to Create User Story: ${error}`,
-            type: 'error',
-          });
+      }).catch((error) => {
+        commit('set_snackBarShow', {
+          message: `Unable to Create User Story: ${error}`,
+          type: 'error',
         });
+      });
     },
     async createTicket({ commit }, payload) {
       await apolloClient.mutate({
         mutation: gqlQueries.CREATE_TICKET,
         variables: payload,
         fetchPolicy: 'no-cache',
-      })
-        .then(() => {
-
-        })
-        .catch((error) => {
-          commit('set_snackBarShow', {
-            message:
+      }).catch((error) => {
+        commit('set_snackBarShow', {
+          message:
               `Unable to Create Ticket: ${error}`,
-            type: 'error',
-          });
+          type: 'error',
         });
+      });
     },
     async updateViewingPro({ commit }, payload) {
       // update local state, regardless
@@ -842,6 +854,9 @@ export default new Vuex.Store({
     onTabChange({ commit }, value) {
       commit('set_proLstTabModel', value);
     },
+    uSDialogShow({ commit }, value) {
+      commit('set_uSDialogShow', value);
+    },
   },
   getters: {
     getViewingProject: (state) => state.currentUser.viewingPro,
@@ -939,18 +954,15 @@ export default new Vuex.Store({
       .reduce((arr, currSprint, index) => {
         if (index === 0) {
           arr.push({
-            value: index,
             id: 'noId',
             text: 'Add to Todo (no sprint)',
           });
           arr.push({
-            value: index + 1,
             id: currSprint.id,
             text: `Sprint ${currSprint.sprintNo}`,
           });
         } else {
           arr.push({
-            value: index + 1,
             id: currSprint.id,
             text: `Sprint ${currSprint.sprintNo}`,
           });

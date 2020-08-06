@@ -9,11 +9,11 @@
           <v-list-item-title>
             <v-avatar size="20px">
               <img
-                :src="getGravatar(ticket.creator.User.id)"
+                :src="getGravatar(ticket.creator.id)"
                 alt="Avatar"
               >
             </v-avatar>
-            {{ getFullName(ticket.creator.User.id) }}
+            {{ getFullName(ticket.creator.id) }}
           </v-list-item-title>
           <v-list-item-subtitle v-text="creationTime" />
         </v-list-item-content>
@@ -37,7 +37,7 @@ export default {
       'getFullName',
     ]),
     creationTime() {
-      const { timestamp } = this.ticket.creator;
+      const timestamp = this.ticket.creation_time;
       // const date = new Date(Number(timestamp));
       return moment.unix(timestamp).format('DD-MM-YYYY, HH:MM');
     },

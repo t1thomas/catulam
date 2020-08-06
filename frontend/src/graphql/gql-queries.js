@@ -17,10 +17,12 @@ const gqlQueries = {
     }`,
   SUB_BACKLOG_TICKET_UPDATE: gql`
     subscription($project: _ProjectInput!) {
-    tickUpdate(project: $project) {
-      id
-    }
+    tickUpdate(project: $project)
   }`,
+  SUB_BACKLOG_USTORY_UPDATE: gql`
+    subscription($project: _ProjectInput!) {
+      uSUpdate(project: $project)
+    }`,
   CREATE_TICKET: gql`
     mutation(
       $hourEstimate: Int
@@ -35,8 +37,45 @@ const gqlQueries = {
         project: $project
       ) {
         id
+        issueNumber
+        title
+        done
+        desc
+        hourEstimate
+        creation_time
+        assignee {
+          id
+        }
         project {
           id
+        }
+        sprint {
+          id
+          sprintNo
+        }
+        comments {
+          id
+          timestamp
+          message
+          User {
+            id
+          }
+        }
+        userStory{
+          id
+        }
+        commits {
+          id
+          message
+          timestamp
+          newHourEstimate
+          prevHourEstimate
+          User {
+            id
+          }
+        }
+        creator {
+            id
         }
       }
     }`,
@@ -78,54 +117,6 @@ const gqlQueries = {
         }
       }
     }`,
-  TICK_BY_ID: gql`
-    query($id: ID!) {
-    Ticket(filter: { id: $id }) {
-      id
-      issueNumber
-      title
-      done
-      desc
-      hourEstimate
-      assignee {
-        id
-      }
-      project {
-        id
-      }
-      sprint {
-        id
-        sprintNo
-      }
-      comments {
-        id
-        timestamp
-        message
-        User {
-          id
-        }
-      }
-      userStory{
-        id
-      }
-      commits {
-        id
-        message
-        timestamp
-        newHourEstimate
-        prevHourEstimate
-        User {
-          id
-        }
-      }
-      creator {
-        User {
-          id
-        }
-        timestamp
-      }
-    }
-  }`,
   BACKLOG_DATA: gql`query($id: ID!) {
     noUsNoSp: Ticket(
       filter: {
@@ -338,6 +329,7 @@ const gqlQueries = {
       startDate
       endDate
       desc
+      noOfTicks
       members {
         User {
           id
@@ -363,6 +355,7 @@ const gqlQueries = {
       done
       desc
       hourEstimate
+      creation_time
       assignee {
         id
       }
@@ -395,10 +388,7 @@ const gqlQueries = {
         }
       }
       creator {
-        User {
-          id
-        }
-        timestamp
+        id
       }
     }
   }`,
@@ -454,6 +444,7 @@ const gqlQueries = {
         startDate
         endDate
         desc
+        noOfTicks
         members {
           User {
             id
@@ -594,6 +585,9 @@ const gqlQueries = {
           sprintRemove: $sprintRemove
         ){
           id
+          sprint {
+            id
+          }
           project {
             id
           }
@@ -695,7 +689,19 @@ const gqlQueries = {
           sprintRemove: $sprintRemove
           uStoryAdd: $uStoryAdd
           sprintAdd: $sprintAdd
-        )
+        ) {
+          id
+          project {
+            id
+          }
+          sprint {
+            id
+            sprintNo
+          }
+          userStory{
+            id
+          }
+        }
       }`,
   },
 };
