@@ -69,8 +69,6 @@
 </template>
 
 <script>
-import gqlQueries from '../../../graphql/gql-queries';
-
 export default {
   name: 'StoryTextBox',
   data: () => ({
@@ -103,25 +101,14 @@ export default {
     async onSave() {
       // starts saving animation
       this.savingProgress();
-      this.disabled = true;
-      await this.$apollo.mutate({
-        mutation: gqlQueries.UPDATE_USER_STORY_TEXT,
-        fetchPolicy: 'no-cache',
-        variables: { id: this.userStoryId, storyText: this.text },
-      })
+      const payload = { uStory: { id: this.userStoryId }, storyText: this.text };
+      await this.$store.dispatch('updateUserStory', payload)
         .then(() => {
-          this.$store.dispatch('snackBarOn', {
-            message: 'Story Updated Successfully',
-            type: 'success',
-          });
-        }).catch((error) => {
+          this.savingProgress();
+        }).catch(() => {
+          this.savingProgress();
           this.disabled = false;
-          this.$store.dispatch('snackBarOn', {
-            message: error,
-            type: 'error',
-          });
         });
-      this.savingProgress();
     },
     setOriginalText() {
       this.text = this.storyText;

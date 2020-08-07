@@ -54,13 +54,6 @@
           >
             Confirm
           </v-btn>
-          <v-btn
-            color="primary darken-1"
-            text
-            @click="print"
-          >
-            PRINT
-          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
@@ -123,37 +116,32 @@ export default {
     },
   },
   methods: {
-    print() {
-      console.log(this.selectedSprint);
-    },
     ...mapActions([
       'snackBarOn',
     ]),
-
     async onConfirm() {
-      let payload = null;
+      const payload = {};
+      payload.project = { id: this.proId };
+      payload.tick = { id: this.ticketId };
       switch (true) {
-        /* if userStoryID is same for either addedTo or removedFrom the
-        ticket is being moved to/from start or sprint unassigned ticket list */
         case this.removedFrom.userStoryId === 'noUs' && this.addedTo.userStoryId !== 'noUs':
-          payload = this.fromUnToUs();
+          payload.uStoryAdd = { id: this.addedTo.userStoryId };
           break;
         case this.removedFrom.userStoryId !== 'noUs' && this.addedTo.userStoryId === 'noUs':
-          payload = this.fromUSToUn();
+          payload.uStoryRemove = { id: this.removedFrom.userStoryId };
           break;
         case this.removedFrom.userStoryId !== 'noUs' && this.addedTo.userStoryId !== 'noUs':
-          this.fromUSToUS();
+          payload.uStoryRemove = { id: this.removedFrom.userStoryId };
+          payload.uStoryAdd = { id: this.addedTo.userStoryId };
           break;
         default:
           break;
       }
+      Object.assign(payload, this.resolveSprintAddRemove());
       await this.$store.dispatch('UStoryTicketSwitch', payload);
     },
-    fromUnToUs() {
+    resolveSprintAddRemove() {
       const payload = {};
-      payload.project = { id: this.proId };
-      payload.tick = { id: this.ticketId };
-      payload.uStoryAdd = { id: this.addedTo.userStoryId };
       switch (true) {
         case this.removedFrom.sprintId === undefined && this.selectedSprint.id !== 'noId': {
           payload.sprintAdd = { id: this.selectedSprint.id };
@@ -173,34 +161,6 @@ export default {
           break;
       }
       return payload;
-    },
-    fromUSToUn() {
-      const payload = {};
-      payload.project = { id: this.proId };
-      payload.tick = { id: this.ticketId };
-      payload.uStoryRemove = { id: this.removedFrom.userStoryId };
-      switch (true) {
-        case this.removedFrom.sprintId === undefined && this.selectedSprint.id !== 'noId': {
-          payload.sprintAdd = { id: this.selectedSprint.id };
-          break;
-        }
-        case this.removedFrom.sprintId !== undefined && this.selectedSprint.id === 'noId': {
-          payload.sprintRemove = { id: this.removedFrom.sprintId };
-          break;
-        }
-        case this.removedFrom.sprintId !== undefined
-        && this.selectedSprint.id !== this.removedFrom.sprintId: {
-          payload.sprintRemove = { id: this.removedFrom.sprintId };
-          payload.sprintAdd = { id: this.selectedSprint.id };
-          break;
-        }
-        default:
-          break;
-      }
-      return payload;
-    },
-    fromUSToUS() {
-      console.log('fromUSToUS');
     },
     onCancel() {
       this.switchBack();
@@ -211,65 +171,6 @@ export default {
       // remove ticket from new list and put back in old list
       evt.from.insertBefore(evt.to.childNodes[evt.newDraggableIndex],
         evt.from.childNodes[evt.oldDraggableIndex]);
-    },
-    // updateStore() {
-    //   this.fetchBackLogData(this.proId);
-    // },
-    async onConfirm2() {
-      switch (true) {
-        case this.removedFrom.sprintId === undefined
-        && this.selectedOption.value === 0:
-          // this.uStorySwitchOnly();
-          await this.dataMutation({
-            project: { id: this.proId },
-            tick: { id: this.ticketId },
-            uStoryRemove: { id: this.removedFrom.userStoryId },
-            uStoryAdd: { id: this.addedTo.userStoryId },
-          });
-          break;
-        case this.removedFrom.sprintId === undefined
-        && this.selectedOption.value !== 0:
-          // ticket without a sprint moved to a sprint in a new userStory');
-          await this.dataMutation({
-            project: { id: this.proId },
-            tick: { id: this.ticketId },
-            uStoryRemove: { id: this.removedFrom.userStoryId },
-            uStoryAdd: { id: this.addedTo.userStoryId },
-            sprintAdd: { id: this.selectedOption.id },
-          });
-          break;
-        case this.removedFrom.sprintId !== undefined
-        && this.selectedOption.value === 0:
-          // Switch User Story and remove sprint
-          await this.dataMutation({
-            project: { id: this.proId },
-            tick: { id: this.ticketId },
-            uStoryRemove: { id: this.removedFrom.userStoryId },
-            uStoryAdd: { id: this.addedTo.userStoryId },
-            sprintRemove: { id: this.removedFrom.sprintId },
-          });
-          break;
-        case this.removedFrom.sprintId !== this.selectedOption.id:
-          // change sprint and change user story
-          await this.dataMutation({
-            project: { id: this.proId },
-            tick: { id: this.ticketId },
-            uStoryRemove: { id: this.removedFrom.userStoryId },
-            sprintRemove: { id: this.removedFrom.sprintId },
-            uStoryAdd: { id: this.addedTo.userStoryId },
-            sprintAdd: { id: this.selectedOption.id },
-          });
-          break;
-        default:
-          await this.dataMutation({
-            project: { id: this.proId },
-            tick: { id: this.ticketId },
-            uStoryRemove: { id: this.removedFrom.userStoryId },
-            uStoryAdd: { id: this.addedTo.userStoryId },
-          });
-          break;
-      }
-      this.USDialogSwitcher();
     },
   },
 };

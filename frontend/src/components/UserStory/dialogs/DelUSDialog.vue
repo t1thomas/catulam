@@ -49,11 +49,13 @@
 
 <script>
 import { mapState } from 'vuex';
-import gqlQueries from '../../../graphql/gql-queries';
 
 export default {
   name: 'DelUSDialog',
   computed: {
+    proId() {
+      return this.$route.query.proId;
+    },
     ...mapState({
       showDialog: (state) => state.delUSDialog.show,
       userStoryId: (state) => state.delUSDialog.userStoryId,
@@ -67,24 +69,12 @@ export default {
       this.$store.dispatch('delUSDialogShow', { show: false });
     },
     async onDelete() {
-      await this.$apollo.mutate({
-        mutation: gqlQueries.DELETE_USER_STORY,
-        fetchPolicy: 'no-cache',
-        variables: { id: this.userStoryId },
-      })
-        .then(() => {
-          this.$store.dispatch('snackBarOn', {
-            message: 'Story Deleted',
-            type: 'success',
-          });
-        }).catch((error) => {
-          this.disabled = false;
-          this.$store.dispatch('snackBarOn', {
-            message: error,
-            type: 'error',
-          });
-        });
-      this.onCancel();
+      const payload = {
+        uStory: { id: this.userStoryId },
+        project: { id: this.proId },
+      };
+      console.log(payload);
+      await this.$store.dispatch('deleteUserStory', payload);
     },
   },
 };

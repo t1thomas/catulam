@@ -9,7 +9,6 @@
     <s-planner-dialog />
     <n-u-story-dialog />
     <n-tic-dialog />
-<!--    <u-a-dialog />-->
     <u-s-dialog />
     <edit-member-dialog />
   </v-container>
@@ -20,10 +19,9 @@ import editMemberDialog from '@/components/backlog/dialogs/EditMembers/editMembe
 import SPlannerDialog from '@/components/pm/SprintPlan/planner dialog/SPlannerDialog.vue';
 import NUStoryDialog from '@/components/UserStory/dialogs/NUStoryDialog.vue';
 import NTicDialog from '@/components/Ticket/dialogs/NTicDialog.vue';
-import USDialog from '@/components/backlog/dialogs/USDialog.vue';
-// import UADialog from '@/components/backlog/dialogs/UADialog.vue';
-import DelUSDialog from '../components/backlog/dialogs/DelUSDialog.vue';
-import DetDrawerUStory from '../components/backlog/UStoryDrawer/DetDrawerUStory.vue';
+import USDialog from '@/components/backlog/dialogs/USSwitchDialog.vue';
+import DelUSDialog from '../components/UserStory/dialogs/DelUSDialog.vue';
+import DetDrawerUStory from '../components/UserStory/drawer component/DetDrawerUStory.vue';
 import RowContainer from '../components/backlog/RowContainer.vue';
 
 export default {
@@ -37,7 +35,6 @@ export default {
     NUStoryDialog,
     NTicDialog,
     USDialog,
-    // UADialog,
   },
   data: () => ({
     loaded: false,

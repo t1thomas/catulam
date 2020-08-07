@@ -125,6 +125,12 @@ export default new Vuex.Store({
         state.tickets.splice(index, 1);
       }
     },
+    delete_user_story(state, obj) {
+      const index = state.userStories.findIndex((uStory) => uStory.id === obj.id);
+      if (index !== -1) {
+        state.userStories.splice(index, 1);
+      }
+    },
     remove_tic_assignee(state, obj) {
       state.tickets = state.tickets
         .map((tick) => (tick.id === obj.id ? { ...tick, assignee: null } : tick));
@@ -567,6 +573,32 @@ export default new Vuex.Store({
           commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
+    async deleteTicket({ commit }, payload) {
+      await apolloClient.mutate({
+        mutation: gqlQueries.DELETE_TICKET,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then((response) => {
+        const { DeleteTicket } = response.data;
+        console.log(DeleteTicket);
+        commit('set_DrawerShow', { show: false });
+        commit('delete_ticket', DeleteTicket);
+      }).catch((error) => {
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
+    async deleteUserStory({ commit }, payload) {
+      await apolloClient.mutate({
+        mutation: gqlQueries.DELETE_USER_STORY,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).then(() => {
+        commit('set_delUSDialog', { show: false });
+      }).catch((error) => {
+        commit('set_delUSDialog', { show: false });
+        commit('set_snackBarShow', { message: error, type: 'error' });
+      });
+    },
     async addTicketComment({ commit }, payload) {
       await apolloClient.mutate({
         mutation: gqlQueries.ADD_TICKET_COMMENT,
@@ -653,6 +685,21 @@ export default new Vuex.Store({
     updateUStoryById({ commit }, obj) {
       commit('update_uStory', obj);
     },
+    deleteUserStoryByID({ commit }, obj) {
+      commit('delete_user_story', obj);
+    },
+    async updateUserStory({ commit }, payload) {
+      await apolloClient.mutate({
+        mutation: gqlQueries.UPDATE_USER_STORY_TEXT,
+        fetchPolicy: 'no-cache',
+        variables: payload,
+      }).catch((error) => {
+        commit('set_snackBarShow', {
+          message: `Unable to update story: ${error}`,
+          type: 'error',
+        });
+      });
+    },
     async UStoryTicketSwitch({ commit }, payload) {
       await apolloClient.mutate({
         mutation: gqlQueries.SwitchUserStory.USTORY_TICKET_SWITCH,
@@ -694,20 +741,6 @@ export default new Vuex.Store({
         commit('backlogSet_switchBack');
         // clear everything in backlog set
         commit('backlogSet_clear');
-        commit('set_snackBarShow', { message: error, type: 'error' });
-      });
-    },
-    async deleteTicket({ commit }, payload) {
-      await apolloClient.mutate({
-        mutation: gqlQueries.DELETE_TICKET,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { DeleteTicket } = response.data;
-        console.log(DeleteTicket);
-        commit('set_DrawerShow', { show: false });
-        commit('delete_ticket', DeleteTicket);
-      }).catch((error) => {
         commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },

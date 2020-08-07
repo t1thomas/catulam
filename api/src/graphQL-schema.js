@@ -89,6 +89,10 @@ const resolvers = {
       subscribe: withFilter(() => pubSub.asyncIterator('USER_STORY_UPDATE'),
         (payload, variables) => payload.uSUpdate.project.id === variables.project.id),
     },
+    uSDelete: {
+      subscribe: withFilter(() => pubSub.asyncIterator('USER_STORY_DELETE'),
+        (payload, variables) => payload.uSDelete.project.id === variables.project.id),
+    },
   },
   Token: {
     ttl(obj) {
@@ -294,6 +298,15 @@ const resolvers = {
         await session.close();
       }
     },
+    UpdateUserStory: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('USER_STORY_UPDATE', { uSUpdate: result });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
     CreateUserStory: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
@@ -367,19 +380,18 @@ const resolvers = {
         throw new Error(e);
       }
     },
-    UpdateUserStory: async (object, params, ctx, resolveInfo) => {
-      try {
-        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
-        return result;
-      } catch (e) {
-        throw new Error(e);
-      }
-    },
     DeleteUserStory: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        // await pubSub.publish('project', { update: result.project.id });
         await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('USER_STORY_DELETE',
+          {
+            uSDelete: {
+              id: result.id,
+              project: { id: params.project.id },
+            },
+          });
         return result;
       } catch (e) {
         throw new Error(e);

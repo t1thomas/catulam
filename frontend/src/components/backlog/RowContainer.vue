@@ -49,7 +49,7 @@ export default {
       },
     });
     const observerTickUpdate = this.$apollo.subscribe({
-      query: gqlQueries.SUB_BACKLOG_TICKET_UPDATE,
+      query: gqlQueries.SUB_TICKET_UPDATE,
       variables: { project: { id: this.proId } },
     });
     observerTickUpdate.subscribe({
@@ -67,7 +67,7 @@ export default {
       },
     });
     const obsUstoryUpdate = this.$apollo.subscribe({
-      query: gqlQueries.SUB_BACKLOG_USTORY_UPDATE,
+      query: gqlQueries.SUB_USTORY_UPDATE,
       variables: { project: { id: this.proId } },
     });
     obsUstoryUpdate.subscribe({
@@ -75,6 +75,23 @@ export default {
         const { uSUpdate } = response.data;
         console.log(uSUpdate);
         await self.$store.dispatch('updateUStoryById', uSUpdate);
+      },
+      error(error) {
+        self.snackBarOn({
+          message: error,
+          type: 'error',
+        });
+      },
+    });
+    const obsUstoryDelete = this.$apollo.subscribe({
+      query: gqlQueries.SUB_USTORY_DELETE,
+      variables: { project: { id: this.proId } },
+    });
+    obsUstoryDelete.subscribe({
+      async next(response) {
+        const { uSDelete } = response.data;
+        console.log(uSDelete);
+        await self.$store.dispatch('deleteUserStoryByID', uSDelete);
       },
       error(error) {
         self.snackBarOn({

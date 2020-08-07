@@ -144,6 +144,7 @@ type Subscription {
     update(proId:String!): String
     tickUpdate(project: _ProjectInput!): JSON
     uSUpdate(project: _ProjectInput!): JSON
+    uSDelete(project: _ProjectInput!): JSON
 }
 
 type Mutation {
@@ -158,6 +159,30 @@ type Mutation {
     @cypher(statement:"""
     MATCH (t: Ticket {id: $tick.id})
     RETURN t
+    """)
+    UpdateUserStory(uStory: _UserStoryInput!, storyText: String!):UserStory
+    @cypher(statement:"""
+    MATCH (us: UserStory {id: $uStory.id})
+    SET us.storyText = $storyText
+    RETURN us
+    """)
+    CreateUserStory(storyText: String!, project: _ProjectInput!): UserStory
+    #    @hasScope(scopes:["UserStory:Create"])
+    @cypher(statement:"""
+    MATCH (p:Project)
+    WHERE p.id = $project.id
+    CREATE (p)-[:USER_STORY]->(us:UserStory)
+    SET us.id = apoc.create.uuid()
+    SET us.storyText = $storyText
+    RETURN us
+    """)
+    DeleteUserStory(uStory: _UserStoryInput!, project: _ProjectInput!): UserStory
+    #    @hasScope(scopes:["Ticket:Delete"])
+    @cypher(statement:"""
+    MATCH (us: UserStory {id: $uStory.id})
+    WITH us, properties(us) AS userStory
+    DETACH DELETE us
+    RETURN userStory
     """)
     UpdateTicket(tick: _TicketInput!, issueNumber: Int, hourEstimate: Int, sprintPos: Int, title: String, desc: String, done: Boolean):Ticket
     @cypher(statement:"""
@@ -226,7 +251,6 @@ type Mutation {
     DETACH DELETE t
     RETURN tick
     """)
-
     loginUser(username: String!, password: String!): JSON
     @cypher(statement:"""
     MATCH(u:User{username: $username})
@@ -389,14 +413,5 @@ type Mutation {
     SET t.issueNumber = p.noOfTicks + 1
     SET p.noOfTicks = p.noOfTicks + 1
     RETURN t
-    """)
-
-    CreateUserStory(storyText: String!, project: _ProjectInput!): UserStory
-#    @hasScope(scopes:["UserStory:Create"])
-    @cypher(statement:"""
-    MATCH (p:Project)
-    WHERE p.id = $project.id
-    CREATE (p)-[:USER_STORY]->(us: UserStory { id: apoc.create.uuid(), storyText: $storyText })
-    RETURN us
     """)
 }

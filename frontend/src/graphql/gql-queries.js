@@ -15,13 +15,17 @@ const gqlQueries = {
     subscription($proId: String!) {
       update(proId: $proId)
     }`,
-  SUB_BACKLOG_TICKET_UPDATE: gql`
+  SUB_TICKET_UPDATE: gql`
     subscription($project: _ProjectInput!) {
     tickUpdate(project: $project)
   }`,
-  SUB_BACKLOG_USTORY_UPDATE: gql`
+  SUB_USTORY_UPDATE: gql`
     subscription($project: _ProjectInput!) {
       uSUpdate(project: $project)
+    }`,
+  SUB_USTORY_DELETE: gql`
+    subscription($project: _ProjectInput!) {
+      uSDelete(project: $project)
     }`,
   CREATE_TICKET: gql`
     mutation(
@@ -191,20 +195,19 @@ const gqlQueries = {
       }
     }`,
   UPDATE_USER_STORY_TEXT: gql`
-    mutation($id: ID!, $storyText: String!) {
-      UpdateUserStory(id: $id, storyText: $storyText) {
+    mutation($uStory: _UserStoryInput!, $storyText: String!) {
+      UpdateUserStory(uStory: $uStory, storyText: $storyText) {
         id
+        storyText
         project {
           id
         }
       }
     }`,
   DELETE_USER_STORY: gql`
-    mutation($id: ID!) {
-      DeleteUserStory(id: $id) {
-        project {
-          id
-        }
+    mutation($uStory: _UserStoryInput!, $project: _ProjectInput!) {
+      DeleteUserStory(uStory: $uStory, project: $project) {
+        id
       }
     }`,
   DELETE_TICKET: gql`
@@ -651,26 +654,6 @@ const gqlQueries = {
         }
       }
     `,
-  },
-  SwitchUnassigned: {
-    UNASSIGNED_TICK_SWITCH: gql`
-      mutation(
-        $project: _ProjectInput!
-        $tick: _TicketInput!
-        $uStoryRemove: _UserStoryInput
-        $sprintRemove: _SprintInput
-        $uStoryAdd: _UserStoryInput
-        $sprintAdd: _SprintInput
-      ) {
-        UnassignedTicketSwitch(
-          project: $project
-          tick: $tick
-          uStoryRemove: $uStoryRemove
-          sprintRemove: $sprintRemove
-          uStoryAdd: $uStoryAdd
-          sprintAdd: $sprintAdd
-        )
-      }`,
   },
   SwitchUserStory: {
     USTORY_TICKET_SWITCH: gql`
