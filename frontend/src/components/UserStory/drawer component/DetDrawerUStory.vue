@@ -20,14 +20,17 @@
         <v-divider />
         <v-btn
           block
-          color="#5c535366"
+          color="#501d1d"
           class="ma-2 white--text"
           @click="showDelDialog"
         >
-          Delete User Story
-          <v-icon dark>
-            mdi-trash-can-outline
+          <v-icon
+            left
+            dark
+          >
+            mdi-trash-can
           </v-icon>
+          Delete User Story
         </v-btn>
       </div>
     </template>

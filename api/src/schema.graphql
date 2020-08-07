@@ -145,6 +145,7 @@ type Subscription {
     tickUpdate(project: _ProjectInput!): JSON
     uSUpdate(project: _ProjectInput!): JSON
     uSDelete(project: _ProjectInput!): JSON
+    tickDelete(project: _ProjectInput!): JSON
 }
 
 type Mutation {
@@ -184,13 +185,21 @@ type Mutation {
     DETACH DELETE us
     RETURN userStory
     """)
+    DeleteTicket(tick: _TicketInput!, project: _ProjectInput!): Ticket
+    #    @hasScope(scopes:["Ticket:Delete"])
+    @cypher(statement:"""
+    MATCH(t:Ticket {id: $tick.id})
+    WITH t, properties(t) AS tick
+    DETACH DELETE t
+    RETURN tick
+    """)
     UpdateTicket(tick: _TicketInput!, issueNumber: Int, hourEstimate: Int, sprintPos: Int, title: String, desc: String, done: Boolean):Ticket
     @cypher(statement:"""
     MATCH (t: Ticket {id: $tick.id})
     RETURN t
     """)
 #    @hasScope(scopes:["Ticket:Edit"])
-    UpdateTicketAssignee(tick: _TicketInput!, user: _UserInput!, project: _ProjectInput!): Ticket
+    UpdateTicketAssignee(tick: _TicketInput!, user: _UserInput!): Ticket
     @cypher(statement:"""
     MATCH (u1:User {id: $user.id}),(t:Ticket{id: $tick.id})
     OPTIONAL MATCH (u2:User)-[rel:ASSIGNED_TASK]->(t)
@@ -202,13 +211,13 @@ type Mutation {
     YIELD value
     RETURN value.t
     """)
-    RemoveTicketAssignee(tick: _TicketInput!, project: _ProjectInput!): Ticket
+    RemoveTicketAssignee(tick: _TicketInput!): Ticket
     @cypher(statement:"""
     MATCH (u:User)-[rel:ASSIGNED_TASK]->(t:Ticket{id: $tick.id})
     DELETE rel
     RETURN t
     """)
-    AddTicketComments(tick: _TicketInput!, message: String!, project: _ProjectInput!): Ticket
+    AddTicketComments(tick: _TicketInput!, message: String!): Ticket
 #    @hasScope(scopes:["Ticket:Comment"])
     @cypher(statement:"""
     MATCH (t:Ticket),(u:User)
@@ -220,7 +229,7 @@ type Mutation {
     SET com.message = $message
     RETURN t
     """)
-    AddTicketCommits(tick: _TicketInput!, commit: _CommitInput!, project: _ProjectInput!): Ticket
+    AddTicketCommits(tick: _TicketInput!, commit: _CommitInput!): Ticket
     #    @hasScope(scopes:["Ticket:Comment"])
     @cypher(statement:"""
     MATCH (t:Ticket),(u:User)
@@ -242,14 +251,6 @@ type Mutation {
     SET u.viewingPro = $project.id
     WITH u
     RETURN u.viewingPro
-    """)
-    DeleteTicket(tick: _TicketInput!, project: _ProjectInput!): Ticket
-#    @hasScope(scopes:["Ticket:Delete"])
-    @cypher(statement:"""
-    MATCH(t:Ticket {id: $tick.id})
-    WITH t, properties(t) AS tick
-    DETACH DELETE t
-    RETURN tick
     """)
     loginUser(username: String!, password: String!): JSON
     @cypher(statement:"""

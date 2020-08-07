@@ -86,6 +86,7 @@
 </template>
 <script>
 import { mapActions, mapState } from 'vuex';
+import gqlQueries from '@/graphql/gql-queries';
 
 export default {
   name: 'NTicDialog',
@@ -129,17 +130,26 @@ export default {
     async onCreate() {
       if (this.$refs.ticForm.validate()) {
         this.setSaving();
-        const payload = {
-          hourEstimate: Number(this.hours),
-          title: this.title,
-          desc: this.desc,
-          project: { id: this.proId },
-        };
-        await this.$store.dispatch('createTicket', payload)
-          .then(() => {
-            this.setSaving();
-            this.onCancel();
+        await this.$apollo.mutate({
+          mutation: gqlQueries.CREATE_TICKET,
+          fetchPolicy: 'no-cache',
+          variables: {
+            hourEstimate: Number(this.hours),
+            title: this.title,
+            desc: this.desc,
+            project: { id: this.proId },
+          },
+        }).then(() => {
+          this.setSaving();
+          this.onCancel();
+        }).catch((error) => {
+          this.setSaving();
+          this.onCancel();
+          this.$store.dispatch('snackBarOn', {
+            message: `Unable to Create Ticket: ${error}`,
+            type: 'error',
           });
+        });
       }
     },
     setSaving() {

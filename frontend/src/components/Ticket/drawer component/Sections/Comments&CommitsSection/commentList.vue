@@ -79,6 +79,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import gqlQueries from '@/graphql/gql-queries';
 import commentCard from './commentCard.vue';
 
 export default {
@@ -112,20 +113,24 @@ export default {
   methods: {
     async addComment() {
       this.savingProgress();
-      const payload = {
-        tick: { id: this.ticket.id },
-        message: this.text,
-        project: { id: this.ticket.project.id },
-      };
-      await this.$store.dispatch('addTicketComment', payload)
-        .then(() => {
-          this.text = '';
-          this.savingProgress();
-          this.scrollToEnd();
-        })
-        .catch(() => {
-          this.savingProgress();
+      await this.$apollo.mutate({
+        mutation: gqlQueries.ADD_TICKET_COMMENT,
+        fetchPolicy: 'no-cache',
+        variables: {
+          tick: { id: this.ticket.id },
+          message: this.text,
+        },
+      }).then(() => {
+        this.text = '';
+        this.savingProgress();
+        this.scrollToEnd();
+      }).catch((error) => {
+        this.savingProgress();
+        this.$store.dispatch('snackBarOn', {
+          message: `Unable to add Comment ${error}`,
+          type: 'error',
         });
+      });
     },
     scrollToEnd() {
       const container = this.$el.querySelector('.comment-list');

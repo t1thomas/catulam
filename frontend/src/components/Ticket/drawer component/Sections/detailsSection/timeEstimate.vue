@@ -80,6 +80,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
+import gqlQueries from '@/graphql/gql-queries';
 
 export default {
   name: 'TimeEstimate',
@@ -103,6 +104,11 @@ export default {
       return pattern.test(this.hours);
     },
   },
+  watch: {
+    hourEstimateText() {
+      this.hours = this.ticket.hourEstimate;
+    },
+  },
   mounted() {
     this.setOriginalHours();
   },
@@ -119,15 +125,21 @@ export default {
     async changeHours() {
       if (this.validInput) {
         this.setSaving();
-        const payload = { tick: { id: this.ticket.id }, hrs: Number(this.hours) };
-        await this.$store.dispatch('updateTicketHours', payload).then(() => {
+        await this.$apollo.mutate({
+          mutation: gqlQueries.UPDATE_TICKET_ETIME,
+          fetchPolicy: 'no-cache',
+          variables: { tick: { id: this.ticket.id }, hrs: Number(this.hours) },
+        }).then(() => {
           this.setSaving();
           this.selector = false;
-        })
-          .catch(() => {
-            this.setSaving();
-            this.selector = false;
+        }).catch((error) => {
+          this.setSaving();
+          this.selector = false;
+          this.$store.dispatch('snackBarOn', {
+            message: `Unable to update time estimate: ${error}`,
+            type: 'error',
           });
+        });
       } else {
         const payload = { message: 'Enter valid number greater than 0', type: 'warning' };
         this.snackBarOn(payload);

@@ -1,6 +1,5 @@
 <template>
   <v-row
-    v-if="showDialog"
     justify="center"
   >
     <v-dialog
@@ -8,7 +7,7 @@
       persistent
       max-width="600px"
     >
-      <v-card>
+      <v-card v-if="showDialog">
         <v-card-text>
           <v-container>
             <v-row>
@@ -49,9 +48,11 @@
 
 <script>
 import { mapState } from 'vuex';
+import gqlQueries from '@/graphql/gql-queries';
 
 export default {
   name: 'DelUSDialog',
+
   computed: {
     proId() {
       return this.$route.query.proId;
@@ -69,12 +70,20 @@ export default {
       this.$store.dispatch('delUSDialogShow', { show: false });
     },
     async onDelete() {
-      const payload = {
-        uStory: { id: this.userStoryId },
-        project: { id: this.proId },
-      };
-      console.log(payload);
-      await this.$store.dispatch('deleteUserStory', payload);
+      await this.$apollo.mutate({
+        mutation: gqlQueries.DELETE_USER_STORY,
+        fetchPolicy: 'no-cache',
+        variables: {
+          uStory: { id: this.userStoryId },
+          project: { id: this.proId },
+        },
+      }).catch((error) => {
+        this.$store.dispatch('delUSDialogShow', { show: false });
+        this.$store.dispatch('snackBarOn', {
+          message: `Unable to delete User Story: ${error}`,
+          type: 'error',
+        });
+      });
     },
   },
 };

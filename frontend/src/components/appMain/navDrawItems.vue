@@ -70,7 +70,7 @@
           <v-list-group
             prepend-icon="mdi-view-dashboard-variant"
             no-action
-            color="primary"
+            color=""
           >
             <template v-slot:activator>
               <v-list-item-content>

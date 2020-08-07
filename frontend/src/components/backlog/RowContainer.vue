@@ -48,11 +48,11 @@ export default {
         });
       },
     });
-    const observerTickUpdate = this.$apollo.subscribe({
+    const obsTickUpdate = this.$apollo.subscribe({
       query: gqlQueries.SUB_TICKET_UPDATE,
       variables: { project: { id: this.proId } },
     });
-    observerTickUpdate.subscribe({
+    obsTickUpdate.subscribe({
       async next(response) {
         const { tickUpdate } = response.data;
         console.log(tickUpdate);
@@ -60,6 +60,24 @@ export default {
       },
       error(error) {
         console.log('eror here');
+        self.snackBarOn({
+          message: error,
+          type: 'error',
+        });
+      },
+    });
+    const obstTickDelete = this.$apollo.subscribe({
+      query: gqlQueries.SUB_TICKET_DELETE,
+      variables: { project: { id: this.proId } },
+    });
+    obstTickDelete.subscribe({
+      async next(response) {
+        const { tickDelete } = response.data;
+        console.log(tickDelete);
+        await self.$store.dispatch('deleteTicketByID', tickDelete);
+      },
+      error(error) {
+        console.log('err');
         self.snackBarOn({
           message: error,
           type: 'error',
@@ -94,6 +112,7 @@ export default {
         await self.$store.dispatch('deleteUserStoryByID', uSDelete);
       },
       error(error) {
+        console.log('err');
         self.snackBarOn({
           message: error,
           type: 'error',
@@ -109,12 +128,6 @@ export default {
     async loadData() {
       await this.fetchBackLogData(this.proId);
     },
-    // async updateSPlanData() {
-    //   // only request update if sprint planner is currently in view
-    //   if (this.showSPlanDialog) {
-    //     await this.sPlannerShow({ show: true, proId: this.proId });
-    //   }
-    // },
   },
 };
 </script>

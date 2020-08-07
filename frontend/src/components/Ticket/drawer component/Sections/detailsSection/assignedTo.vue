@@ -1,6 +1,8 @@
 <template>
   <tr>
-    <td class="pr-0">Assigned To:</td>
+    <td class="pr-0">
+      Assigned To:
+    </td>
     <td class="pa-0">
       <v-menu
         v-model="selector"
@@ -46,41 +48,13 @@
         </template>
         <v-card max-width="fit-content">
           <v-list>
-            <v-list-item
+            <member-item
               v-for="member in members"
               :key="member.id"
-              class="member-item"
-            >
-              <v-list-item-avatar size="25">
-                <v-img :src="getGravatar(member.id)" />
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-subtitle>{{ getFullName(member.id) }}</v-list-item-subtitle>
-              </v-list-item-content>
-              <v-list-item-action>
-                <v-btn
-                  v-if="assignee !== null && isAssignee(member)"
-                  icon
-                  @click="removeAssignee(member)"
-                >
-                  <v-icon color="red">
-                    mdi-close-circle
-                  </v-icon>
-                </v-btn>
-                <v-btn
-                  v-else
-                  class="btn-tick"
-                  icon
-                  small
-                  outlined
-                  @click="changeAssignee(member)"
-                >
-                  <v-icon>
-                    mdi-check-circle
-                  </v-icon>
-                </v-btn>
-              </v-list-item-action>
-            </v-list-item>
+              :member="member"
+              @remove="removeAssignee"
+              @change="changeAssignee"
+            />
           </v-list>
         </v-card>
       </v-menu>
@@ -90,9 +64,14 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import gqlQueries from '@/graphql/gql-queries';
+import memberItem from './memberItem.vue';
 
 export default {
   name: 'AssignedTo',
+  components: {
+    memberItem,
+  },
   data: () => ({
     selector: false,
     saving: false,
@@ -128,37 +107,42 @@ export default {
     },
     async removeAssignee() {
       this.setSaving();
-      // construct variable payload for graphQL mutation
-      const payload = {
-        tick: { id: this.ticket.id },
-        project: { id: this.ticket.project.id },
-      };
-      // Fires a mutation to remove assignee of current ticket
-      await this.$store.dispatch('removeTicketAssignee', payload)
-        .then(() => {
-          this.setSaving();
-        })
-        .catch(() => {
-          this.setSaving();
-          this.selector = false;
+      await this.$apollo.mutate({
+        mutation: gqlQueries.REMOVE_TICKET_ASSIGNEE,
+        fetchPolicy: 'no-cache',
+        variables: { tick: { id: this.ticket.id } },
+      }).then(() => {
+        this.setSaving();
+        this.selector = false;
+      }).catch((error) => {
+        this.setSaving();
+        this.selector = false;
+        this.$store.dispatch('snackBarOn', {
+          message: `Unable to update Assignee ${error}`,
+          type: 'error',
         });
+      });
     },
     async changeAssignee(member) {
-      this.saving = true;
-      const payload = {
-        user: { id: member.id },
-        tick: { id: this.ticket.id },
-        project: { id: this.ticket.project.id },
-      };
-      await this.$store.dispatch('updateTicketAssignee', payload)
-        .then(() => {
-          this.setSaving();
-          this.selector = false;
-        })
-        .catch(() => {
-          this.setSaving();
-          this.selector = false;
+      this.setSaving();
+      await this.$apollo.mutate({
+        mutation: gqlQueries.UPDATE_TICKET_ASSIGNEE,
+        fetchPolicy: 'no-cache',
+        variables: {
+          user: { id: member.id },
+          tick: { id: this.ticket.id },
+        },
+      }).then(() => {
+        this.setSaving();
+        this.selector = false;
+      }).catch((error) => {
+        this.setSaving();
+        this.selector = false;
+        this.$store.dispatch('snackBarOn', {
+          message: `Unable to update Assignee ${error}`,
+          type: 'error',
         });
+      });
     },
   },
 };

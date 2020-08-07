@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import Vuex from 'vuex';
 import jwtDecode from 'jwt-decode';
+import { apolloClient } from '@/vue-apollo';
 import gqlQueries from '../graphql/gql-queries';
-import { apolloClient } from '../vue-apollo';
 
 Vue.use(Vuex);
 
@@ -130,31 +130,6 @@ export default new Vuex.Store({
       if (index !== -1) {
         state.userStories.splice(index, 1);
       }
-    },
-    remove_tic_assignee(state, obj) {
-      state.tickets = state.tickets
-        .map((tick) => (tick.id === obj.id ? { ...tick, assignee: null } : tick));
-    },
-    update_tic_assignee(state, obj) {
-      state.tickets = state.tickets
-        .map((tick) => (tick.id === obj.id ? { ...tick, assignee: obj.assignee } : tick));
-    },
-    update_tic_comments(state, obj) {
-      state.tickets = state.tickets
-        .map((tick) => (tick.id === obj.id ? { ...tick, comments: obj.comments } : tick));
-    },
-    update_tic_commits(state, obj) {
-      state.tickets = state.tickets
-        .map((tick) => (tick.id === obj.id
-          ? { ...tick, commits: obj.commits, hourEstimate: obj.hourEstimate } : tick));
-    },
-    update_tic_hrs(state, obj) {
-      state.tickets = state.tickets
-        .map((tick) => (tick.id === obj.id ? { ...tick, hourEstimate: obj.hourEstimate } : tick));
-    },
-    update_tic_desc(state, obj) {
-      state.tickets = state.tickets
-        .map((tick) => (tick.id === obj.id ? { ...tick, desc: obj.desc } : tick));
     },
     set_userStories(state, obj) {
       state.userStories = obj;
@@ -290,7 +265,7 @@ export default new Vuex.Store({
     },
     set_delUSDialog(state, obj) {
       if (obj.show === false) {
-        state.delUSDialog.show = obj.show;
+        state.delUSDialog.show = false;
         state.delUSDialog.userStoryId = null;
       } else {
         state.delUSDialog.userStoryId = obj.userStoryId;
@@ -573,132 +548,19 @@ export default new Vuex.Store({
           commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
-    async deleteTicket({ commit }, payload) {
-      await apolloClient.mutate({
-        mutation: gqlQueries.DELETE_TICKET,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { DeleteTicket } = response.data;
-        console.log(DeleteTicket);
-        commit('set_DrawerShow', { show: false });
-        commit('delete_ticket', DeleteTicket);
-      }).catch((error) => {
-        commit('set_snackBarShow', { message: error, type: 'error' });
-      });
+    deleteTicketByID({ commit }, payload) {
+      commit('set_DrawerShow', { show: false });
+      commit('delete_ticket', payload);
     },
-    async deleteUserStory({ commit }, payload) {
-      await apolloClient.mutate({
-        mutation: gqlQueries.DELETE_USER_STORY,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then(() => {
-        commit('set_delUSDialog', { show: false });
-      }).catch((error) => {
-        commit('set_delUSDialog', { show: false });
-        commit('set_snackBarShow', { message: error, type: 'error' });
-      });
-    },
-    async addTicketComment({ commit }, payload) {
-      await apolloClient.mutate({
-        mutation: gqlQueries.ADD_TICKET_COMMENT,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { AddTicketComments } = response.data;
-        console.log(AddTicketComments);
-        commit('update_tic_comments', AddTicketComments);
-      }).catch((error) => {
-        commit('set_snackBarShow', { message: error, type: 'error' });
-      });
-    },
-    async addTicketCommit({ commit }, payload) {
-      await apolloClient.mutate({
-        mutation: gqlQueries.ADD_TICKET_COMMIT,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { AddTicketCommits } = response.data;
-        console.log(AddTicketCommits);
-        commit('update_tic_commits', AddTicketCommits);
-      }).catch((error) => {
-        commit('set_snackBarShow', {
-          message: `Unable to add commit: ${error}`,
-          type: 'error',
-        });
-      });
-    },
-    async updateTicketHours({ commit }, payload) {
-      await apolloClient.mutate({
-        mutation: gqlQueries.UPDATE_TICKET_ETIME,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { UpdateTicket } = response.data;
-        commit('update_tic_hrs', UpdateTicket);
-        console.log(UpdateTicket);
-      }).catch((error) => {
-        commit('set_snackBarShow', { message: error, type: 'error' });
-      });
-    },
-    async updateTicketDesc({ commit }, payload) {
-      await apolloClient.mutate({
-        mutation: gqlQueries.UPDATE_TICKET_DESC,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { UpdateTicket } = response.data;
-        commit('update_tic_desc', UpdateTicket);
-        console.log(UpdateTicket);
-      }).catch((error) => {
-        commit('set_snackBarShow', { message: error, type: 'error' });
-      });
-    },
-    async updateTicketAssignee({ commit }, payload) {
-      await apolloClient.mutate({
-        mutation: gqlQueries.UPDATE_TICKET_ASSIGNEE,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { UpdateTicketAssignee } = response.data;
-        console.log(UpdateTicketAssignee);
-        commit('update_tic_assignee', UpdateTicketAssignee);
-      }).catch((error) => {
-        commit('set_snackBarShow', { message: error, type: 'error' });
-      });
-    },
-    async removeTicketAssignee({ commit }, payload) {
-      await apolloClient.mutate({
-        mutation: gqlQueries.REMOVE_TICKET_ASSIGNEE,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).then((response) => {
-        const { RemoveTicketAssignee } = response.data;
-        commit('remove_tic_assignee', RemoveTicketAssignee);
-      }).catch((error) => {
-        commit('set_snackBarShow', { message: error, type: 'error' });
-      });
+    deleteUserStoryByID({ commit }, obj) {
+      commit('set_delUSDialog', { show: false });
+      commit('delete_user_story', obj);
     },
     updateTicketById({ commit }, obj) {
       commit('update_ticket', obj);
     },
     updateUStoryById({ commit }, obj) {
       commit('update_uStory', obj);
-    },
-    deleteUserStoryByID({ commit }, obj) {
-      commit('delete_user_story', obj);
-    },
-    async updateUserStory({ commit }, payload) {
-      await apolloClient.mutate({
-        mutation: gqlQueries.UPDATE_USER_STORY_TEXT,
-        fetchPolicy: 'no-cache',
-        variables: payload,
-      }).catch((error) => {
-        commit('set_snackBarShow', {
-          message: `Unable to update story: ${error}`,
-          type: 'error',
-        });
-      });
     },
     async UStoryTicketSwitch({ commit }, payload) {
       await apolloClient.mutate({
@@ -759,31 +621,6 @@ export default new Vuex.Store({
         .catch((error) => {
           commit('set_snackBarShow', { message: error, type: 'error' });
         });
-    },
-    async createUStory({ commit }, payload) {
-      await apolloClient.mutate({
-        mutation: gqlQueries.CREATE_USER_STORY,
-        variables: payload,
-        fetchPolicy: 'no-cache',
-      }).catch((error) => {
-        commit('set_snackBarShow', {
-          message: `Unable to Create User Story: ${error}`,
-          type: 'error',
-        });
-      });
-    },
-    async createTicket({ commit }, payload) {
-      await apolloClient.mutate({
-        mutation: gqlQueries.CREATE_TICKET,
-        variables: payload,
-        fetchPolicy: 'no-cache',
-      }).catch((error) => {
-        commit('set_snackBarShow', {
-          message:
-              `Unable to Create Ticket: ${error}`,
-          type: 'error',
-        });
-      });
     },
     async updateViewingPro({ commit }, payload) {
       // update local state, regardless
@@ -924,7 +761,6 @@ export default new Vuex.Store({
       .filter((tick) => tick.project.id === projectId),
     getProjectSprints: (state) => (projectId) => state.sprints
       .filter((sp) => sp.project.id === projectId),
-
     // get completed tickets by user ID and project ID
     getDoneTicksByProMember: (state) => (memberId, projectID) => state.tickets
       .filter((tick) => tick.project.id === projectID && tick.assignee !== null)

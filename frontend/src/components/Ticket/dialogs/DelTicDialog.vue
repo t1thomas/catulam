@@ -48,6 +48,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import gqlQueries from '@/graphql/gql-queries';
 
 export default {
   name: 'DelTicDialog',
@@ -62,15 +63,21 @@ export default {
   methods: {
     async deleteTicket() {
       this.setDeleting();
-      const payload = {
-        tick: { id: this.ticket.id },
-        project: { id: this.ticket.project.id },
-      };
-      await this.$store.dispatch('deleteTicket', payload)
-        .catch(() => {
-          this.setDeleting();
-          this.$emit('closeOverlay');
+      await this.$apollo.mutate({
+        mutation: gqlQueries.DELETE_TICKET,
+        fetchPolicy: 'no-cache',
+        variables: {
+          tick: { id: this.ticket.id },
+          project: { id: this.ticket.project.id },
+        },
+      }).catch((error) => {
+        this.setDeleting();
+        this.$emit('closeOverlay');
+        this.$store.dispatch('snackBarOn', {
+          message: `Unable to delete ticket: ${error}`,
+          type: 'error',
         });
+      });
     },
     setDeleting() {
       this.deleting = !this.deleting;

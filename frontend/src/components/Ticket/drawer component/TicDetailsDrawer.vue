@@ -35,7 +35,7 @@ import detailsParent from './Sections/detailsSection/detailsParent.vue';
 import descSection from './Sections/descSection.vue';
 import deleteSection from './Sections/deleteSection.vue';
 import DelTicDialog from '../dialogs/DelTicDialog.vue';
-import updatesParent from './Sections/updatesSection/updatesParent.vue';
+import updatesParent from './Sections/Comments&CommitsSection/updatesParent.vue';
 
 export default {
   name: 'DetailsDrawer',

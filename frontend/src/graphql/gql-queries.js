@@ -19,6 +19,10 @@ const gqlQueries = {
     subscription($project: _ProjectInput!) {
     tickUpdate(project: $project)
   }`,
+  SUB_TICKET_DELETE: gql`
+    subscription($project: _ProjectInput!) {
+      tickDelete(project: $project)
+    }`,
   SUB_USTORY_UPDATE: gql`
     subscription($project: _ProjectInput!) {
       uSUpdate(project: $project)
@@ -222,6 +226,9 @@ const gqlQueries = {
       UpdateTicket(tick: $tick, desc: $desc) {
         id
         desc
+        project {
+          id
+        }
       }
     }
   `,
@@ -230,6 +237,9 @@ const gqlQueries = {
       UpdateTicket(tick: $tick, hourEstimate: $hrs) {
         id
         hourEstimate
+        project {
+          id
+        }
       }
     }
   `,
@@ -237,15 +247,16 @@ const gqlQueries = {
     mutation(
       $tick: _TicketInput!,
       $user: _UserInput!,
-      $project: _ProjectInput!
     ) {
       UpdateTicketAssignee(
         tick: $tick
         user: $user
-        project: $project
       ) {
         id
         assignee {
+          id
+        }
+        project {
           id
         }
       }
@@ -253,13 +264,17 @@ const gqlQueries = {
   REMOVE_TICKET_ASSIGNEE: gql`
     mutation(
       $tick: _TicketInput!,
-      $project: _ProjectInput!
     ) {
       RemoveTicketAssignee(
         tick: $tick
-        project: $project
       ) {
         id
+        assignee {
+          id
+        }
+        project {
+          id
+        }
       }
     }`,
   USER_TASKS: gql`
@@ -473,12 +488,10 @@ const gqlQueries = {
   ADD_TICKET_COMMENT: gql`mutation(
     $tick: _TicketInput!
     $message: String!
-    $project: _ProjectInput!
   ) {
     AddTicketComments(
       tick: $tick
       message: $message
-      project: $project
     ) {
       id
       comments {
@@ -489,17 +502,18 @@ const gqlQueries = {
           id
         }
       }
+      project {
+        id
+      }
     }
   }`,
   ADD_TICKET_COMMIT: gql`mutation(
     $tick: _TicketInput!
     $commit: _CommitInput!
-    $project: _ProjectInput!
   ) {
     AddTicketCommits(
       tick: $tick
       commit: $commit
-      project: $project
     ) {
       id
       hourEstimate
@@ -510,6 +524,9 @@ const gqlQueries = {
         User {
           id
         }
+      }
+      project {
+        id
       }
     }
   }`,

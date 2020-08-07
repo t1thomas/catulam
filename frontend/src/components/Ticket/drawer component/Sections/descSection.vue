@@ -74,6 +74,7 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import gqlQueries from '@/graphql/gql-queries';
 
 export default {
   name: 'DescSection',
@@ -99,6 +100,11 @@ export default {
       return this.text === this.desc;
     },
   },
+  watch: {
+    desc() {
+      this.text = this.desc;
+    },
+  },
   mounted() {
     this.setOriginalText();
   },
@@ -114,14 +120,20 @@ export default {
     async onSave() {
       this.setSaving();
       this.disabled = true;
-
-      const payload = { tick: { id: this.ticket.id }, desc: this.text };
-      await this.$store.dispatch('updateTicketDesc', payload).then(() => {
+      await this.$apollo.mutate({
+        mutation: gqlQueries.UPDATE_TICKET_DESC,
+        fetchPolicy: 'no-cache',
+        variables: { tick: { id: this.ticket.id }, desc: this.text },
+      }).then(() => {
         this.setSaving();
         this.selector = false;
-      }).catch(() => {
+      }).catch((error) => {
         this.setSaving();
         this.disabled = false;
+        this.$store.dispatch('snackBarOn', {
+          message: error,
+          type: 'error',
+        });
       });
     },
     setSaving() {

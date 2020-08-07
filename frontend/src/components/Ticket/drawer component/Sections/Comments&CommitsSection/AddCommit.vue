@@ -72,6 +72,7 @@
 
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
+import gqlQueries from '@/graphql/gql-queries';
 
 export default {
   name: 'AddCommit',
@@ -96,7 +97,6 @@ export default {
   },
   methods: {
     ...mapActions([
-      'snackBarOn',
       'showAddCommitOverLay',
     ]),
     setOriginalHours() {
@@ -104,22 +104,30 @@ export default {
     },
     async pushCommit() {
       if (this.validInput) {
-        const payload = {
-          tick: { id: this.ticket.id },
-          commit: {
-            message: this.message,
-            newEst: Number(this.hours),
+        await this.$apollo.mutate({
+          mutation: gqlQueries.ADD_TICKET_COMMIT,
+          fetchPolicy: 'no-cache',
+          variables: {
+            tick: { id: this.ticket.id },
+            commit: {
+              message: this.message,
+              newEst: Number(this.hours),
+            },
           },
-          project: { id: this.ticket.project.id },
-        };
-        await this.$store.dispatch('addTicketCommit', payload).then(() => {
+        }).then(() => {
           this.$store.dispatch('showAddCommitOverLay', false);
-        }).catch(() => {
+        }).catch((error) => {
           this.$store.dispatch('showAddCommitOverLay', false);
+          this.$store.dispatch('snackBarOn', {
+            message: `Unable to Add Commit ${error}`,
+            type: 'error',
+          });
         });
       } else {
-        const payload = { message: 'Enter valid number greater than 0', type: 'warning' };
-        this.snackBarOn(payload);
+        await this.$store.dispatch('snackBarOn', {
+          message: 'Enter valid number greater than 0',
+          type: 'warning',
+        });
       }
     },
   },
