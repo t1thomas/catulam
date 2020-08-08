@@ -296,31 +296,31 @@ type Mutation {
     RETURN u
     """)
 
-    TicToToDo(ticket: _TicketInput!, from: String!): Ticket
+    TicToToDo(tick: _TicketInput!, from: String!): Ticket
 #    @hasScope(scopes:["Ticket:Edit"])
     @cypher(statement:"""
     CALL apoc.do.when($from = 'done',
-    'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 0  SET t.done = false RETURN t',
-    'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 0 RETURN t', {ticket: $ticket})
+    'MATCH (t:Ticket) WHERE t.id = $tick.id SET t.sprintPos = 0  SET t.done = false RETURN t',
+    'MATCH (t:Ticket) WHERE t.id = $tick.id SET t.sprintPos = 0 RETURN t', {tick: $tick})
     YIELD value
     RETURN value.t
     """)
 
-    TicToDoing(ticket: _TicketInput!, from: String!): Ticket
+    TicToDoing(tick: _TicketInput!, from: String!): Ticket
 #    @hasScope(scopes:["Ticket:Edit"])
     @cypher(statement:"""
     CALL apoc.do.when($from = 'done',
-    'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 1  SET t.done = false RETURN t',
-    'MATCH (t:Ticket) WHERE t.id = $ticket.id SET t.sprintPos = 1 RETURN t', {ticket: $ticket})
+    'MATCH (t:Ticket) WHERE t.id = $tick.id SET t.sprintPos = 1  SET t.done = false RETURN t',
+    'MATCH (t:Ticket) WHERE t.id = $tick.id SET t.sprintPos = 1 RETURN t', {tick: $tick})
     YIELD value
     RETURN value.t
     """)
 
-    TicToDone(ticket: _TicketInput!): Ticket
+    TicToDone(tick: _TicketInput!): Ticket
 #    @hasScope(scopes:["Ticket:Edit"])
     @cypher(statement:"""
     MATCH (t:Ticket)
-    WHERE t.id = $ticket.id
+    WHERE t.id = $tick.id
     SET t.sprintPos = 2
     SET t.done = true
     RETURN t

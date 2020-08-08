@@ -17,7 +17,6 @@
         v-ripple
         class="pa-0 ma-sm-1"
         clickable
-        @dblclick="detDrawShow({ show: true, ticketId: ticketId })"
       >
         <ticket-card
           :tick-id="ticketId"
@@ -74,7 +73,6 @@ export default {
       'sBoardTicketId',
       'sBoardRemovedFrom',
       'sBoardAddedTo',
-      'detDrawShow',
       'snackBarOn',
       'sBoardClear',
     ]),
@@ -110,21 +108,11 @@ export default {
         mutation: gqlQueries.sBoardTicMove.MOVE_TO_TODO,
         fetchPolicy: 'no-cache',
         variables: {
-          project: { id: this.proId },
-          ticket: { id: this.ticketId },
+          tick: { id: this.ticketId },
           from: this.removedFrom.columnType,
         },
-      }).then((response) => {
-        const { TicToToDo } = response.data;
-        if (TicToToDo === null) {
-          throw new Error('Unable to Complete Operation');
-        } else {
-          // show success notification of Ticket creation
-          this.snackBarOn({
-            message: `Moved Ticket ${TicToToDo.title} #${TicToToDo.issueNumber} to TO-DO Successfully`,
-            type: 'success',
-          });
-        }
+      }).then(() => {
+
       }).catch((error) => {
         this.snackBarOn({
           message: error,
@@ -138,21 +126,11 @@ export default {
         mutation: gqlQueries.sBoardTicMove.MOVE_TO_DOING,
         fetchPolicy: 'no-cache',
         variables: {
-          project: { id: this.proId },
-          ticket: { id: this.ticketId },
+          tick: { id: this.ticketId },
           from: this.removedFrom.columnType,
         },
-      }).then((response) => {
-        const { TicToDoing } = response.data;
-        if (TicToDoing === null) {
-          throw new Error('Unable to Complete Operation');
-        } else {
-          // show success notification of Ticket creation
-          this.snackBarOn({
-            message: `Moved Ticket ${TicToDoing.title} #${TicToDoing.issueNumber} to DOING Successfully`,
-            type: 'success',
-          });
-        }
+      }).then(() => {
+
       }).catch((error) => {
         this.snackBarOn({
           message: error,
@@ -166,20 +144,10 @@ export default {
         mutation: gqlQueries.sBoardTicMove.MOVE_TO_DONE,
         fetchPolicy: 'no-cache',
         variables: {
-          project: { id: this.proId },
-          ticket: { id: this.ticketId },
+          tick: { id: this.ticketId },
         },
-      }).then((response) => {
-        const { TicToDone } = response.data;
-        if (TicToDone === null) {
-          throw new Error('Unable to Complete Operation');
-        } else {
-          // show success notification of Ticket creation
-          this.snackBarOn({
-            message: `Moved Ticket ${TicToDone.title} #${TicToDone.issueNumber} to DONE Successfully`,
-            type: 'success',
-          });
-        }
+      }).then(() => {
+
       }).catch((error) => {
         this.snackBarOn({
           message: error,

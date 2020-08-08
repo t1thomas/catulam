@@ -8,10 +8,10 @@
 
 <script>
 import { mapActions } from 'vuex';
+// import gqlQueries from '@/graphql/gql-queries';
 import startCol from './Columns/ToDoCol.vue';
 import doingCol from './Columns/doingCol.vue';
 import doneCol from './Columns/doneCol.vue';
-import gqlQueries from '../../graphql/gql-queries';
 
 export default {
   name: 'SprintColumns',
@@ -28,32 +28,54 @@ export default {
       return this.$route.query.sprintId;
     },
   },
+  beforeDestroy() {
+    console.log('before SprintColumns');
+  },
   mounted() {
-    const self = this;
-    const observer = this.$apollo.subscribe({
-      query: gqlQueries.SUB_BACKLOG_UPDATE,
-      variables: { proId: this.proId },
-    });
-    observer.subscribe({
-      async next() {
-        await self.loadData();
-      },
-      error(error) {
-        this.snackBarOn({
-          message: error,
-          type: 'error',
-        });
-      },
-    });
+    // console.log('mounted SprintColumns');
+    //
+    // const self = this;
+    // const obsTickUpdate = this.$apollo.subscribe({
+    //   query: gqlQueries.SUB_TICKET_UPDATE,
+    //   variables: { project: { id: this.proId } },
+    // });
+    // obsTickUpdate.subscribe({
+    //   async next(response) {
+    //     const { tickUpdate } = response.data;
+    //     console.log(tickUpdate);
+    //     await self.$store.dispatch('updateTicketById', tickUpdate);
+    //   },
+    //   error(error) {
+    //     console.log('eror here');
+    //     self.snackBarOn({
+    //       message: error,
+    //       type: 'error',
+    //     });
+    //   },
+    // });
+    // const obstTickDelete = this.$apollo.subscribe({
+    //   query: gqlQueries.SUB_TICKET_DELETE,
+    //   variables: { project: { id: this.proId } },
+    // });
+    // obstTickDelete.subscribe({
+    //   async next(response) {
+    //     const { tickDelete } = response.data;
+    //     console.log(tickDelete);
+    //     await self.$store.dispatch('deleteTicketByID', tickDelete);
+    //   },
+    //   error(error) {
+    //     console.log('err');
+    //     self.snackBarOn({
+    //       message: error,
+    //       type: 'error',
+    //     });
+    //   },
+    // });
   },
   methods: {
     ...mapActions([
-      'fetchSprintBoardData',
       'snackBarOn',
     ]),
-    async loadData() {
-      await this.fetchSprintBoardData(this.sprintId);
-    },
   },
 };
 </script>

@@ -88,6 +88,9 @@ export default {
         ghostClass: 'ghost',
       };
     },
+    proId() {
+      return this.$route.query.proId;
+    },
     noUs() {
       return this.userStoryId === 'noUs';
     },
@@ -105,9 +108,9 @@ export default {
     }),
     tickIds() {
       if (this.noUs) {
-        return this.tickIdsNoUsNoSp;
+        return this.tickIdsNoUsNoSp(this.proId);
       }
-      return this.tickIdsUsNoSp(this.userStoryId);
+      return this.tickIdsUsNoSp(this.userStoryId, this.proId);
     },
   },
   methods: {

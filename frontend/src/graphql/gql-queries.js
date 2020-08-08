@@ -51,6 +51,7 @@ const gqlQueries = {
         desc
         hourEstimate
         creation_time
+        sprintPos
         assignee {
           id
         }
@@ -125,68 +126,6 @@ const gqlQueries = {
         }
       }
     }`,
-  BACKLOG_DATA: gql`query($id: ID!) {
-    noUsNoSp: Ticket(
-      filter: {
-        project: { id: $id }
-        AND: [{ done: false }, { userStory: null }, { sprint: null }]
-      }
-    ) {
-      id
-    }
-    noUsSp: Ticket(
-      filter: {
-        project: { id: $id }
-        AND: [{ done: false }, { userStory: null }, { sprint_not: null }]
-      }
-    ) {
-      id
-      sprint {
-        id
-      }
-    }
-    UsNoSp: Ticket(
-      filter: {
-        project: { id: $id }
-        AND: [{ done: false }, { userStory_not: null }, { sprint: null }]
-      }
-    ) {
-      id
-      userStory {
-        id
-      }
-    }
-    UsSp: Ticket(
-      filter: {
-        project: { id: $id }
-        AND: [{ done: false }, { userStory_not: null }, { sprint_not: null }]
-      }
-    ) {
-      id
-      sprint {
-        id
-      }
-      userStory {
-        id
-      }
-    }
-    DUS: Ticket(
-      filter: {
-        project: { id: $id }
-        AND: [{ done: true }, { userStory_not: null }]
-      }
-    ) {
-      id
-      userStory {
-        id
-      }
-    }
-    DnoUS: Ticket(
-      filter: { project: { id: $id }, AND: [{ done: true }, { userStory: null }] }
-    ) {
-      id
-    }
-  }`,
   ALL_USERS: gql`
     query {
       User {
@@ -317,24 +256,6 @@ const gqlQueries = {
         }
       }
     }`,
-  SPRINT_BOARD_DATA: gql`
-    query($id: ID!) {
-      pos0: Sprint(filter: { id: $id }) {
-        tickets(filter: { AND: [{ done: false }, { sprintPos: 0 }] }) {
-          id
-        }
-      }
-      pos1: Sprint(filter: { id: $id }) {
-        tickets(filter: { AND: [{ done: false }, { sprintPos: 1 }] }) {
-          id
-        }
-      }
-      posDone: Sprint(filter: { id: $id }) {
-        tickets(filter: { AND: [{ done: true }, { sprintPos: 2 }] }) {
-          id
-        }
-      }
-    }`,
   UPDATE_VIEWING_PRO: gql`mutation($project: _ProjectInput!) {
     UpdateViewingProject(project: $project)
   }`,
@@ -374,6 +295,7 @@ const gqlQueries = {
       desc
       hourEstimate
       creation_time
+      sprintPos
       assignee {
         id
       }
@@ -430,10 +352,6 @@ const gqlQueries = {
       active
       startDate
       endDate
-      tickets {
-        id
-        done
-      }
       project {
         id
       }
@@ -637,11 +555,11 @@ const gqlQueries = {
   },
   sBoardTicMove: {
     MOVE_TO_TODO: gql`
-      mutation($ticket: _TicketInput!, $from: String!) {
-        TicToToDo(ticket: $ticket, from: $from) {
+      mutation($tick: _TicketInput!, $from: String!) {
+        TicToToDo(tick: $tick, from: $from) {
           id
-          title
-          issueNumber
+          sprintPos
+          done
           project {
             id
           }
@@ -649,22 +567,22 @@ const gqlQueries = {
       }
     `,
     MOVE_TO_DOING: gql`
-      mutation($ticket: _TicketInput!, $from: String!) {
-        TicToDoing(ticket: $ticket, from: $from) {
+      mutation($tick: _TicketInput!, $from: String!) {
+        TicToDoing(tick: $tick, from: $from) {
           id
-          title
-          issueNumber
+          sprintPos
+          done
           project {
             id
           }
         }
       }`,
     MOVE_TO_DONE: gql`
-      mutation($ticket: _TicketInput!) {
-        TicToDone(ticket: $ticket) {
+      mutation($tick: _TicketInput!) {
+        TicToDone(tick: $tick) {
           id
-          title
-          issueNumber
+          sprintPos
+          done
           project {
             id
           }

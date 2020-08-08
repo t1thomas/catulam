@@ -7,7 +7,7 @@
       <v-card-text style="height: 85vh">
         <drag-list
           :list-properties="tickListConfig"
-          :ticket-ids="tickIdsPos1"
+          :ticket-ids="tickIds"
         />
       </v-card-text>
     </v-card>
@@ -31,9 +31,15 @@ export default {
         background: '#171b0582',
       };
     },
-    ...mapGetters({
-      tickIdsPos1: 'getPos1Ticks',
-    }),
+    sprintId() {
+      return this.$route.query.sprintId;
+    },
+    tickIds() {
+      return this.getPos1Ticks(this.sprintId);
+    },
+    ...mapGetters([
+      'getPos1Ticks',
+    ]),
   },
 };
 </script>

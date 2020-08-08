@@ -7,13 +7,20 @@
       height="5.5rem"
       :elevation="hover ? 12 : 2"
       width="100%"
+      @dblclick="detDrawShow({ show: true, ticketId: tickId })"
     >
       <v-card-title class="pt-1 pb-0 px-2">
-        <span class="font-weight-bold body-2">
+        <span
+          class="font-weight-bold body-2"
+          :class="{'double-line': ticket.done}"
+        >
           {{ ticket.title }}
         </span>
         <v-spacer />
-        <span class="font-weight-thin body-2">
+        <span
+          class="font-weight-thin body-2"
+          :class="{'double-line': ticket.done}"
+        >
           #{{ ticket.issueNumber }}
         </span>
       </v-card-title>
@@ -27,6 +34,7 @@
           <v-list-item-subtitle
             class="font-weight-light"
             style="font-size: 0.75rem"
+            :class="{'double-line': ticket.done}"
           >
             {{ ticket.desc }}
           </v-list-item-subtitle>
@@ -72,7 +80,7 @@
 </template>
 
 <script>
-import { mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
   name: 'TicketCard',
@@ -98,6 +106,11 @@ export default {
       return this.getFullName(this.ticket.assignee.id);
     },
   },
+  methods: {
+    ...mapActions([
+      'detDrawShow',
+    ]),
+  },
 };
 </script>
 
@@ -106,5 +119,16 @@ export default {
     position:absolute;
     bottom:1px;
     right:1px;
+  }
+  .dash {
+    border: 0.1rem solid white;
+    width: 10%;
+    left: 0.4rem;
+    z-index: 5;
+  }
+  .double-line {
+    text-decoration-line: line-through;
+    text-decoration-style: double;
+    text-decoration-color: #ffffff;
   }
 </style>

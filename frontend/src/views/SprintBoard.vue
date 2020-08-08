@@ -3,24 +3,20 @@
     fluid
     class="fill-height"
   >
-    <details-drawer />
     <sprint-columns v-if="loaded" />
   </v-container>
 </template>
 
 <script>
-import { mapActions } from 'vuex';
 import sprintColumns from '../components/sprintBoard/sprintColumns.vue';
-import DetailsDrawer from '../components/Ticket/drawer component/TicDetailsDrawer.vue';
 
 export default {
   name: 'SprintBoard',
   components: {
     sprintColumns,
-    DetailsDrawer,
   },
   data: () => ({
-    loaded: false,
+    loaded: true,
   }),
   computed: {
     sprintId() {
@@ -33,21 +29,14 @@ export default {
   watch: {
     async sprintId() {
       this.loaded = false;
-      await this.loadData();
       this.loaded = true;
     },
   },
-  async mounted() {
-    await this.loadData();
-    this.loaded = true;
+  beforeDestroy() {
+    console.log('beforeSprintBoard');
   },
-  methods: {
-    ...mapActions([
-      'fetchSprintBoardData',
-    ]),
-    async loadData() {
-      await this.fetchSprintBoardData(this.sprintId);
-    },
+  async mounted() {
+    console.log('mountedSprintBoard');
   },
 };
 </script>

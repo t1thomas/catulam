@@ -3,7 +3,7 @@
     fluid
     class="fill-height"
   >
-    <row-container v-if="loaded" />
+    <row-container />
     <uStory-det-drawer />
     <del-u-s-dialog />
     <s-planner-dialog />
@@ -36,29 +36,9 @@ export default {
     NTicDialog,
     USDialog,
   },
-  data: () => ({
-    loaded: false,
-  }),
   computed: {
     proId() {
       return this.$route.query.proId;
-    },
-  },
-  watch: {
-    async proId() {
-      this.loaded = false;
-      await this.loadData();
-    },
-  },
-  async mounted() {
-    await this.loadData();
-  },
-  methods: {
-    async loadData() {
-      await this.$store.dispatch('fetchBackLogData', this.proId)
-        .then(() => {
-          this.loaded = true;
-        });
     },
   },
 };

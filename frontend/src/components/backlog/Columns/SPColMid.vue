@@ -98,9 +98,9 @@ export default {
     ]),
     tickIdsPerSprint(sprintID) {
       if (this.noUs) {
-        return this.tickIdsNoUs(sprintID);
+        return this.tickIdsNoUs(sprintID, this.proId);
       }
-      return this.tickIds(sprintID, this.userStoryId);
+      return this.tickIds(sprintID, this.userStoryId, this.proId);
     },
     listProperties(id, sprintNo) {
       return {

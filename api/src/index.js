@@ -46,8 +46,12 @@ const server = new ApolloServer({
   schema,
   subscriptions: {
     onConnect: async (connectionParams) => {
+      console.log('onConnect');
       const token = connectionParams.Authorization;
       return { token };
+    },
+    onDisconnect: () => {
+      console.log('onDisconnect');
     },
   },
 });

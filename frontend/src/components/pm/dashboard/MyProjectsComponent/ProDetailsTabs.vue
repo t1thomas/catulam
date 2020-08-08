@@ -24,7 +24,7 @@
         <v-badge
           color="primary"
           inline
-          :content="currProject.tickets.length.toString()"
+          :content="ticketsLength"
         />
       </v-tab>
       <v-tab style="place-content: start">
@@ -89,6 +89,9 @@ export default {
     },
     proSprints() {
       return this.currProject.sprints;
+    },
+    ticketsLength() {
+      return this.$store.getters.getProjectTickets(this.projectId).length;
     },
   },
   methods: {

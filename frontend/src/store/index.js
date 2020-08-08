@@ -82,14 +82,14 @@ export default new Vuex.Store({
     add_project(state, obj) {
       state.projects = [...state.projects, obj];
     },
-    // add_ticket(state, obj) {
-    //   state.tickets = [...state.tickets, obj];
-    // },
-    // add_uStory(state, obj) {
-    //   state.userStories = [...state.userStories, obj];
-    // },
     set_projects(state, obj) {
       state.projects = obj;
+    },
+    set_userStories(state, obj) {
+      state.userStories = obj;
+    },
+    set_sprints(state, obj) {
+      state.sprints = obj;
     },
     update_uStory(state, obj) {
       // find index of userStories
@@ -130,12 +130,6 @@ export default new Vuex.Store({
       if (index !== -1) {
         state.userStories.splice(index, 1);
       }
-    },
-    set_userStories(state, obj) {
-      state.userStories = obj;
-    },
-    set_sprints(state, obj) {
-      state.sprints = obj;
     },
     set_proLstTabModel(state, obj) {
       state.proListTabsModel = obj;
@@ -442,46 +436,6 @@ export default new Vuex.Store({
         commit('set_snackBarShow', { message: error, type: 'error' });
       });
     },
-    async fetchBackLogData({ commit }, id) {
-      await apolloClient.query({
-        query: gqlQueries.BACKLOG_DATA,
-        fetchPolicy: 'no-cache',
-        variables: { id },
-      })
-        .then((response) => {
-          const { data } = response;
-          if (data === null) {
-            throw new Error();
-          } else {
-            commit('set_backLogData', data);
-          }
-        })
-        .catch((error) => {
-          commit('set_snackBarShow', {
-            message: `Unable to fetch Backlog for project: ${error}`,
-            type: 'error',
-          });
-        });
-    },
-    async fetchSprintBoardData({ commit }, id) {
-      await apolloClient.query({
-        query: gqlQueries.SPRINT_BOARD_DATA,
-        fetchPolicy: 'no-cache',
-        variables: { id },
-      })
-        .then((response) => {
-          const { data } = response;
-          if (data === null) {
-            throw new Error();
-          } else {
-            commit('set_sprintBoardData', data);
-          }
-        })
-      // eslint-disable-next-line no-unused-vars
-        .catch((error) => {
-          commit('set_snackBarShow', 'Unable to fetch Sprint Data project');
-        });
-    },
     async fetchCurrentUser({ commit, dispatch }) {
       // const inLogin = Vue.$router.currentRoute.name === 'login';
       apolloClient.query({
@@ -500,7 +454,6 @@ export default new Vuex.Store({
           message: error,
           type: 'error',
         });
-        // }
       });
     },
     removeUser({ commit }) {
@@ -554,9 +507,11 @@ export default new Vuex.Store({
     },
     deleteUserStoryByID({ commit }, obj) {
       commit('set_delUSDialog', { show: false });
+      commit('set_DrawShowUStory', false);
       commit('delete_user_story', obj);
     },
     updateTicketById({ commit }, obj) {
+      console.log('updateTicketById');
       commit('update_ticket', obj);
     },
     updateUStoryById({ commit }, obj) {
@@ -790,27 +745,69 @@ export default new Vuex.Store({
     getTicketById: (state) => (id) => state.tickets
       .find((ticket) => ticket.id === id),
     // get ticket ids that dont have sprints, and have a uStory id that matches param
-    getTicksUsNoSp: (state) => (userStoryId) => state.backLogData.UsNoSp
-      .filter((tick) => tick.userStory.id === userStoryId)
+    // getTicksUsNoSp: (state) => (userStoryId) => state.backLogData.UsNoSp
+    //   .filter((tick) => tick.userStory.id === userStoryId)
+    //   .map((tick) => tick.id),
+    getTicksUsNoSp: (state) => (userStoryId, proId) => state.tickets
+      .filter((tick) => tick.project.id === proId
+        && tick.done === false
+        && tick.sprint === null
+        && tick.userStory !== null
+        && tick.userStory.id === userStoryId)
+      .map((tick) => tick.id),
+    // getTicksNoUsNoSp: (state) => state.backLogData.noUsNoSp
+    //   .map((tick) => tick.id),
+    getTicksNoUsNoSp: (state) => (proId) => state.tickets
+      .filter((tick) => tick.project.id === proId
+        && tick.done === false
+        && tick.sprint === null
+        && tick.userStory === null)
+      .map((tick) => tick.id),
+    // getTickIdsPerSprintUS: (state) => (sprintId, userStoryId) => state.backLogData.UsSp
+    //   .filter((tick) => tick.sprint.id === sprintId && tick.userStory.id === userStoryId)
+    //   .map((tick) => tick.id),
+    getTickIdsPerSprintUS: (state) => (sprintId, userStoryId, proId) => state.tickets
+      .filter((tick) => tick.project.id === proId
+        && tick.done === false
+        && tick.sprint !== null
+        && tick.userStory !== null
+        && tick.sprint.id === sprintId
+        && tick.userStory.id === userStoryId)
+      .map((tick) => tick.id),
+    // getTickIdsPerSprintNoUS: (state) => (sprintId) => state.backLogData.noUsSp
+    //   .filter((tick) => tick.sprint.id === sprintId)
+    //   .map((tick) => tick.id),
+    getTickIdsPerSprintNoUS: (state) => (sprintId, proId) => state.tickets
+      .filter((tick) => tick.project.id === proId
+        && tick.done === false
+        && tick.userStory === null
+        && tick.sprint !== null
+        && tick.sprint.id === sprintId)
       .map((tick) => tick.id),
     // get ticket ids that are done, and have a uStory id that matches param
-    getDoneTicksUs: (state) => (userStoryId) => state.backLogData.DUS
-      .filter((tick) => tick.userStory.id === userStoryId)
+    // getDoneTicksUs: (state) => (userStoryId) => state.backLogData.DUS
+    //   .filter((tick) => tick.userStory.id === userStoryId)
+    //   .map((tick) => tick.id),
+    getDoneTicksUs: (state) => (userStoryId, proId) => state.tickets
+      .filter((tick) => tick.project.id === proId
+       && tick.done === true
+       && tick.userStory !== null
+       && tick.userStory.id === userStoryId)
       .map((tick) => tick.id),
     // get ticket ids that are done, and have no uStory id
-    getDoneTicksNoUs: (state) => state.backLogData.DnoUS
+    // getDoneTicksNoUs: (state) => state.backLogData.DnoUS
+    //   .map((tick) => tick.id),
+    getDoneTicksNoUs: (state) => (proId) => state.tickets
+      .filter((tick) => tick.project.id === proId
+        && tick.done === true
+        && tick.userStory === null)
       .map((tick) => tick.id),
     // get ticket ids have a uStory id sprint id that matches params
-    getTickIdsPerSprintUS: (state) => (sprintId, userStoryId) => state.backLogData.UsSp
-      .filter((tick) => tick.sprint.id === sprintId && tick.userStory.id === userStoryId)
-      .map((tick) => tick.id),
+
     // get ticket ids that dont have sprints, and no a uStory
-    getTicksNoUsNoSp: (state) => state.backLogData.noUsNoSp
-      .map((tick) => tick.id),
+
     // get ticket ids without uStory, but sprint id that matches params
-    getTickIdsPerSprintNoUS: (state) => (sprintId) => state.backLogData.noUsSp
-      .filter((tick) => tick.sprint.id === sprintId)
-      .map((tick) => tick.id),
+
     getUserStoryText: (state) => (userStoryId) => state.userStories
       .find((userStory) => userStory.id === userStoryId).storyText,
     // get user story Ids by project Id for each row in backlog
@@ -838,11 +835,23 @@ export default new Vuex.Store({
         }
         return arr;
       }, []),
-    getPos0Ticks: (state) => state.sprintBoardData.pos0[0].tickets
+    getPos0Ticks: (state) => (sprintId) => state.tickets
+      .filter((tick) => tick.sprint !== null
+        && tick.done === false
+        && tick.sprint.id === sprintId
+        && tick.sprintPos === 0)
       .map((tick) => tick.id),
-    getPos1Ticks: (state) => state.sprintBoardData.pos1[0].tickets
+    getPos1Ticks: (state) => (sprintId) => state.tickets
+      .filter((tick) => tick.sprint !== null
+        && tick.done === false
+        && tick.sprint.id === sprintId
+        && tick.sprintPos === 1)
       .map((tick) => tick.id),
-    getPosDoneTicks: (state) => state.sprintBoardData.posDone[0].tickets
+    getPosDoneTicks: (state) => (sprintId) => state.tickets
+      .filter((tick) => tick.sprint !== null
+        && tick.done === true
+        && tick.sprint.id === sprintId
+        && tick.sprintPos === 2)
       .map((tick) => tick.id),
     getProMemberById: (state) => (memberId) => state.currProElements.members
       .find((member) => member.User.id === memberId).User,

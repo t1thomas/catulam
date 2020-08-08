@@ -401,6 +401,7 @@ const resolvers = {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
         await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
@@ -409,7 +410,7 @@ const resolvers = {
     TicToDoing: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
@@ -418,7 +419,7 @@ const resolvers = {
     TicToDone: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
@@ -427,7 +428,7 @@ const resolvers = {
     CreateSprint: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);

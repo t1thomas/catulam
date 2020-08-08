@@ -106,7 +106,6 @@ import { createApolloClient, restartWebsockets } from 'vue-cli-plugin-apollo/gra
 import { onError } from 'apollo-link-error';
 import { Observable } from 'apollo-link';
 import refreshToken from './fetchRefreshToken';
-// import { request } from 'graphql-request';
 
 Vue.use(VueApollo);
 
