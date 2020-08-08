@@ -30,7 +30,7 @@
 
 <script>
 import NProDialog from './dialogs/NProDialog.vue';
-import ProjectList from './MyProjectsComponent/MyProject.vue';
+import ProjectList from '../../MyProjectsComponent/MyProject.vue';
 
 export default {
   name: 'Home',

@@ -141,7 +141,6 @@ input _UserInput {
     id: ID!
 }
 type Subscription {
-    update(proId:String!): String
     tickUpdate(project: _ProjectInput!): JSON
     uSUpdate(project: _ProjectInput!): JSON
     uSDelete(project: _ProjectInput!): JSON

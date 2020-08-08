@@ -9,6 +9,7 @@
       <v-spacer />
 
       <v-btn
+        v-if="currentUser.role === 'pm'"
         @click="createProDialog"
       >
         Create
@@ -55,7 +56,7 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import ProDetailsTabs from './ProDetailsTabs.vue';
-import NotFoundCard from '../../../NotFoundCard.vue';
+import NotFoundCard from '../NotFoundCard.vue';
 
 export default {
   name: 'MyProjectComponent',
@@ -74,6 +75,7 @@ export default {
     },
     ...mapState([
       'projects',
+      'currentUser',
     ]),
   },
   methods: {

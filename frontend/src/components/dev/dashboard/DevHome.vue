@@ -12,7 +12,6 @@
         md="6"
       >
         <div
-          color="warning"
           class="px-5 py-3"
         >
           <v-btn
@@ -27,31 +26,30 @@
         cols="12"
         md="6"
       >
-        <UserTasks />
+        <project-list />
       </v-col>
     </v-row>
   </v-container>
 </template>
 
 <script>
-import UserTasks from './UserTasks.vue';
+import { mapState } from 'vuex';
+import ProjectList from '@/components/MyProjectsComponent/MyProject.vue';
 
 export default {
   name: 'DevHome',
   components: {
-    UserTasks,
+    ProjectList,
+  },
+  computed: {
+    ...mapState([
+      'projects',
+    ]),
   },
   methods: {
     async print() {
-      // await this.$apollo.query({
-      //   query: gqlQueries.ALL_USERS,
-      //   fetchPolicy: 'no-cache',
-      // }).then((response) => {
-      //   const { User } = response.data;
-      //   console.log(User);
-      // }).catch((error) => {
-      //   console.error(error);
-      // });
+      console.log(this.projects);
+      console.log(this.$store.state.currentUser);
     },
   },
 };

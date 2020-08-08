@@ -24,7 +24,7 @@
         <v-badge
           color="primary"
           inline
-          :content="ticketsLength"
+          :content="ticketsLength.toString()"
         />
       </v-tab>
       <v-tab style="place-content: start">
@@ -55,7 +55,7 @@
         <member-table :project-id="projectId" />
       </v-tab-item>
       <v-tab-item>
-        <ticket-table :project-id="projectId"/>
+        <ticket-table :project-id="projectId" />
       </v-tab-item>
       <v-tab-item>
         <sprint-table :project-id="projectId" />

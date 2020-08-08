@@ -2,10 +2,10 @@
   <v-card flat>
     <not-found-card
       v-if="proTickets.length <= 0"
-      type="Sprint"
+      type="Ticket"
       @createAction="navigate"
     />
-    <v-simple-table>
+    <v-simple-table v-else>
       <template v-slot:default>
         <thead>
           <tr>
@@ -87,7 +87,7 @@
 
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import NotFoundCard from '../../../NotFoundCard.vue';
+import NotFoundCard from '../NotFoundCard.vue';
 
 export default {
   name: 'TicketTable',

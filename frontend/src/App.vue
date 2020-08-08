@@ -129,7 +129,7 @@ export default {
           await self.$store.dispatch('deleteTicketByID', tickDelete);
         },
         error(error) {
-          console.log('err');
+          console.log('obstTickDelete error');
           self.$store.dispatch('snackBarOn', {
             message: error,
             type: 'error',

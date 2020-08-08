@@ -502,6 +502,7 @@ export default new Vuex.Store({
         });
     },
     deleteTicketByID({ commit }, payload) {
+      console.log('deleteTicketByID');
       commit('set_DrawerShow', { show: false });
       commit('delete_ticket', payload);
     },

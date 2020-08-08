@@ -23,6 +23,7 @@
         </div>
 
         <v-avatar
+          v-if="message.plusBtn"
           size="100"
           tile
         >
@@ -36,6 +37,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex';
+
 export default {
   name: 'NotFoundCard',
   props: {
@@ -45,18 +48,48 @@ export default {
     },
   },
   computed: {
+    ...mapState([
+      'currentUser',
+    ]),
     message() {
       switch (this.type) {
         case 'Sprint':
-          return { title: '0 Sprints Found', subtitle: 'Add new Sprint (Open BackLog)' };
+          return {
+            title: '0 Sprints Found',
+            subtitle: 'Add new Sprint (Open BackLog)',
+            plusBtn: true,
+          };
         case 'UStory':
-          return { title: '0 User Stories Found', subtitle: 'Add new User Story (Open BackLog)' };
+          return {
+            title: '0 User Stories Found',
+            subtitle: 'Add new User Story (Open BackLog)',
+            plusBtn: true,
+          };
         case 'Ticket':
-          return { title: '0 Tickets Found', subtitle: 'Add new Ticket (Open BackLog)' };
+          return {
+            title: '0 Tickets Found',
+            subtitle: 'Add new Ticket (Open BackLog)',
+            plusBtn: true,
+          };
         case 'Project':
-          return { title: '0 Projects Found', subtitle: 'Create New Project' };
+          if (this.currentUser.role === 'pm') {
+            return {
+              title: '0 Projects Found',
+              subtitle: 'Create New Project',
+              plusBtn: true,
+            };
+          }
+          return {
+            title: '0 Projects Found',
+            subtitle: 'You have not been allocated to a project yet',
+            plusBtn: false,
+          };
         case 'Member':
-          return { title: '0 Members Found', subtitle: 'Add Members to Project' };
+          return {
+            title: '0 Members Found',
+            subtitle: 'Add Members to Project',
+            plusBtn: true,
+          };
         default:
           return null;
       }

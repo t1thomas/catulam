@@ -77,10 +77,6 @@ const resolvers = {
     },
   },
   Subscription: {
-    update: {
-      subscribe: withFilter(() => pubSub.asyncIterator('project'),
-        (payload, variables) => payload.update === variables.proId),
-    },
     tickUpdate: {
       subscribe: withFilter(() => pubSub.asyncIterator('TICKET_UPDATE'),
         (payload, variables) => payload.tickUpdate.project.id === variables.project.id),
@@ -207,7 +203,6 @@ const resolvers = {
       try {
         // console.log(object);
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
         await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
@@ -217,7 +212,6 @@ const resolvers = {
     SprintToStart: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
         await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
@@ -257,9 +251,7 @@ const resolvers = {
             { tick: params.tick, sprintAdd: params.sprintAdd },
           );
         }
-        console.log(params);
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
         await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return neo4jgraphql(object, params, ctx, resolveInfo);
       } catch (e) {
@@ -316,7 +308,6 @@ const resolvers = {
     AddTicketComments: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
         await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
@@ -326,7 +317,6 @@ const resolvers = {
     AddTicketCommits: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
         await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
@@ -336,7 +326,6 @@ const resolvers = {
     UpdateTicketAssignee: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
         await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
@@ -346,7 +335,6 @@ const resolvers = {
     RemoveTicketAssignee: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
         await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
@@ -356,7 +344,6 @@ const resolvers = {
     CreateTicket: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
         await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
@@ -366,8 +353,6 @@ const resolvers = {
     DeleteTicket: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        // await pubSub.publish('project', { update: result.project.id });
-        await pubSub.publish('project', { update: params.project.id });
         await pubSub.publish('TICKET_DELETE',
           {
             tickDelete: {
@@ -383,8 +368,6 @@ const resolvers = {
     DeleteUserStory: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        // await pubSub.publish('project', { update: result.project.id });
-        await pubSub.publish('project', { update: params.project.id });
         await pubSub.publish('USER_STORY_DELETE',
           {
             uSDelete: {
@@ -400,7 +383,6 @@ const resolvers = {
     TicToToDo: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
         await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
