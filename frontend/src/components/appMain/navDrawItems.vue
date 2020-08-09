@@ -55,7 +55,7 @@
           v-if="selected !== ''"
           color="primary"
           link
-          :to="`/backlog?proId=${this.selected}`"
+          :to="`/backlog?proId=${selected}`"
           exact
         >
           <v-list-item-action>
@@ -63,6 +63,21 @@
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>Backlog</v-list-item-title>
+          </v-list-item-content>
+        </v-list-item>
+
+        <v-list-item
+          v-if="selected !== '' && isPm"
+          color="primary"
+          link
+          :to="`/sPlanner?proId=${selected}`"
+          exact
+        >
+          <v-list-item-action>
+            <v-icon>mdi-chart-timeline</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title>Sprint Planner</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
 
@@ -130,6 +145,7 @@ export default {
     ...mapState([
       'projects',
       'sprints',
+      'currentUser',
     ]),
     ...mapGetters([
       'getSprintById',
@@ -144,6 +160,9 @@ export default {
         return 'No Projects Selected';
       }
       return false;
+    },
+    isPm() {
+      return this.currentUser.role === 'pm';
     },
     selected: {
       get() {

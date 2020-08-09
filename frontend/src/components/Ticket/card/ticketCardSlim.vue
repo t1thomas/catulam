@@ -1,15 +1,13 @@
 <template>
   <v-list-item
-    :id="tickId"
+    :id="ticket.id"
     v-ripple
     class="pa-0 ma-sm-1"
     clickable
-    @dblclick="detDrawShow({ show: true, ticketId: tickId })"
+    @dblclick="detDrawShow({ show: true, ticketId: ticket.id })"
   >
     <v-card
-      v-if="ticket"
       width="100%"
-      :disabled="ticket.done"
     >
       <div
         v-if="ticket.done"
@@ -90,8 +88,8 @@ import { mapActions, mapGetters } from 'vuex';
 export default {
   name: 'TicketCard',
   props: {
-    tickId: {
-      type: String,
+    ticket: {
+      type: Object,
       required: true,
     },
   },
@@ -104,9 +102,6 @@ export default {
       'getGravatar',
       'getFullName',
     ]),
-    ticket() {
-      return this.getTicketById(this.tickId);
-    },
     fullName() {
       if (this.ticket.assignee === null) {
         return 'n/a';

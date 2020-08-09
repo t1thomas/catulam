@@ -85,7 +85,7 @@ export default {
   },
   computed: {
     currProject() {
-      return this.$store.getters.getCurrProject(this.projectId);
+      return this.$store.getters.getProject(this.projectId);
     },
     proSprints() {
       return this.currProject.sprints;

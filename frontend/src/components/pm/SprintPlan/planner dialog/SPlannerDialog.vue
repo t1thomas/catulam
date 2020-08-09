@@ -95,7 +95,7 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
-import SprintItem from './SprintItem.vue';
+import SprintItem from '../SprintItem.vue';
 import NestedNSpDialog from './NestedNSpDialog.vue';
 
 export default {

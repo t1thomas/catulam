@@ -48,9 +48,9 @@
           @remove="uSCDRemovedFrom(listProperties)"
         >
           <ticket-card-slim
-            v-for="id in tickIds"
-            :key="id"
-            :tick-id="id"
+            v-for="tick in tickets"
+            :key="tick.id"
+            :ticket="tick"
           />
         </draggable>
       </v-col>
@@ -103,14 +103,14 @@ export default {
     },
     ...mapGetters({
       storyById: 'getUserStoryText',
-      tickIdsUsNoSp: 'getTicksUsNoSp',
-      tickIdsNoUsNoSp: 'getTicksNoUsNoSp',
+      ticksNoUsNoSp: 'getTicksNoUsNoSp',
+      ticksUsNoSp: 'getTicksUsNoSp',
     }),
-    tickIds() {
+    tickets() {
       if (this.noUs) {
-        return this.tickIdsNoUsNoSp(this.proId);
+        return this.ticksNoUsNoSp(this.proId);
       }
-      return this.tickIdsUsNoSp(this.userStoryId, this.proId);
+      return this.ticksUsNoSp(this.userStoryId, this.proId);
     },
   },
   methods: {

@@ -1,0 +1,66 @@
+<template>
+  <v-card
+    style="height: 100%"
+    color="#585858"
+  >
+    <v-toolbar flat>
+      <v-toolbar-title class="grey--text body-1">
+        Backlog Tickets - not assigned to sprint
+      </v-toolbar-title>
+    </v-toolbar>
+    <draggable
+      tag="div"
+      v-bind="dragOptions"
+      class="v-list v-list--dense"
+      style="width: 100%; height: 100%; overflow-y: auto"
+    >
+      <ticket-card-slim
+        v-for="tick in tickets"
+        :key="tick.id"
+        :ticket="tick"
+      />
+    </draggable>
+  </v-card>
+</template>
+
+<script>
+import draggable from 'vuedraggable';
+import { mapGetters } from 'vuex';
+import ticketCardSlim from '@/components/Ticket/card/ticketCardSlim.vue';
+
+export default {
+  name: 'TaskList',
+  components: {
+    ticketCardSlim,
+    draggable,
+  },
+  computed: {
+    dragOptions() {
+      return {
+        animation: 200,
+        group: 'ticketList',
+        disabled: false,
+        ghostClass: 'ghost',
+      };
+    },
+    listProperties() {
+      return {
+        sprintId: 'noSprint',
+      };
+    },
+    ...mapGetters([
+      'getProjectTicketsNoSp',
+    ]),
+    proId() {
+      return this.$route.query.proId;
+    },
+    tickets() {
+      return this.getProjectTicketsNoSp(this.proId);
+    },
+  },
+};
+</script>
+
+<style scoped>
+
+</style>

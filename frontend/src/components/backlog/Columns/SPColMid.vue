@@ -25,9 +25,9 @@
         @remove="uSCDRemovedFrom(listProperties(sprint.id, sprint.sprintNo))"
       >
         <ticket-card-slim
-          v-for="id in tickIdsPerSprint(sprint.id)"
-          :key="id"
-          :tick-id="id"
+          v-for="tick in ticksPerSprint(sprint.id)"
+          :key="tick.id"
+          :ticket="tick"
         />
       </draggable>
     </v-carousel-item>
@@ -83,8 +83,8 @@ export default {
       },
     },
     ...mapGetters({
-      tickIds: 'getTickIdsPerSprintUS',
-      tickIdsNoUs: 'getTickIdsPerSprintNoUS',
+      ticksUS: 'getTicksPerSprintUS',
+      tickNoUs: 'getTicksPerSprintNoUS',
       getSprints: 'getProjectSprints',
     }),
   },
@@ -96,11 +96,11 @@ export default {
       'uSCDEvt',
       'uSCDTicketId',
     ]),
-    tickIdsPerSprint(sprintID) {
+    ticksPerSprint(sprintID) {
       if (this.noUs) {
-        return this.tickIdsNoUs(sprintID, this.proId);
+        return this.tickNoUs(sprintID, this.proId);
       }
-      return this.tickIds(sprintID, this.userStoryId, this.proId);
+      return this.ticksUS(sprintID, this.userStoryId, this.proId);
     },
     listProperties(id, sprintNo) {
       return {

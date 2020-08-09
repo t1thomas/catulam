@@ -1,5 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import SprintPlanner from '@/views/SprintPlanner.vue';
 import Home from '../views/Home.vue';
 import backlog from '../views/Backlog.vue';
 import ProjectPage from '../views/ProjectPage.vue';
@@ -41,6 +42,12 @@ const routes = [
     path: '/project',
     name: 'ProjectPage',
     component: ProjectPage,
+    beforeEnter: AuthGuard,
+  },
+  {
+    path: '/sPlanner',
+    name: 'SprintPlanner',
+    component: SprintPlanner,
     beforeEnter: AuthGuard,
   },
 ];

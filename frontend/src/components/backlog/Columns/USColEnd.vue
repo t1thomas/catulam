@@ -7,9 +7,9 @@
       style="background: #17429b66; width: 100%; height: 100%; overflow-y: auto"
     >
       <ticket-card-slim
-        v-for="id in tickIds"
-        :key="id"
-        :tick-id="id"
+        v-for="tick in tickets"
+        :key="tick.id"
+        :ticket="tick"
       />
     </draggable>
   </v-card>
@@ -54,15 +54,15 @@ export default {
         disabled: true,
       };
     },
-    tickIds() {
+    tickets() {
       if (this.noUs) {
-        return this.tickIdsNoUs(this.proId);
+        return this.ticksNoUs(this.proId);
       }
-      return this.tickIdsUs(this.userStoryId, this.proId);
+      return this.ticksUs(this.userStoryId, this.proId);
     },
     ...mapGetters({
-      tickIdsUs: 'getDoneTicksUs',
-      tickIdsNoUs: 'getDoneTicksNoUs',
+      ticksUs: 'getDoneTicksUs',
+      ticksNoUs: 'getDoneTicksNoUs',
     }),
   },
 };

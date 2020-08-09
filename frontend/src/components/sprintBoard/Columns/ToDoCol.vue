@@ -11,9 +11,6 @@
         />
       </v-card-text>
     </v-card>
-    <v-btn @click="print">
-      Print
-    </v-btn>
   </v-col>
 </template>
 
@@ -43,11 +40,6 @@ export default {
     ...mapGetters([
       'getPos0Ticks',
     ]),
-  },
-  methods: {
-    print() {
-      console.log(this.tickIds);
-    },
   },
 };
 </script>

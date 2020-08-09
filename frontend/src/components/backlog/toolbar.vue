@@ -117,13 +117,13 @@ export default {
   }),
   computed: {
     ...mapGetters([
-      'getCurrProject',
+      'getProject',
     ]),
     proId() {
       return this.$route.query.proId;
     },
     currPro() {
-      return this.getCurrProject(this.proId);
+      return this.getProject(this.proId);
     },
     ...mapState({
       currUser: (state) => state.currentUser,
