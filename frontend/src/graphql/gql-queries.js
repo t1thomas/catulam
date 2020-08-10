@@ -238,24 +238,6 @@ const gqlQueries = {
         }
       }
     }`,
-  S_PLANNER_DATA: gql`
-    query ($id: ID!){
-      Project(filter: { id: $id }) {
-        startDate
-        endDate
-        sprints {
-          id
-          startDate
-          endDate
-          sprintNo
-          active
-          tickets {
-            id
-            done
-          }
-        }
-      }
-    }`,
   UPDATE_VIEWING_PRO: gql`mutation($project: _ProjectInput!) {
     UpdateViewingProject(project: $project)
   }`,
@@ -590,8 +572,7 @@ const gqlQueries = {
       }
     `,
   },
-  SwitchUserStory: {
-    USTORY_TICKET_SWITCH: gql`
+  TICKET_LOCATION_CHANGE: gql`
       mutation(
         $project: _ProjectInput!
         $tick: _TicketInput!
@@ -621,6 +602,5 @@ const gqlQueries = {
           }
         }
       }`,
-  },
 };
 export default gqlQueries;

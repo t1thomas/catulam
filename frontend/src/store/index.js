@@ -2,6 +2,7 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 import jwtDecode from 'jwt-decode';
 import { apolloClient } from '@/vue-apollo';
+import moment from 'moment';
 import gqlQueries from '../graphql/gql-queries';
 
 Vue.use(Vuex);
@@ -33,17 +34,7 @@ export default new Vuex.Store({
     nUStoryDialog: {
       show: false,
     },
-    sPlanDialog: {
-      show: false,
-      proId: null,
-      project: null,
-      sprints: null,
-    },
     nSpDialog: false,
-    editMemDialog: {
-      show: false,
-      proId: null,
-    },
     showUSDialog: false,
     nProDialog: {
       show: false,
@@ -143,15 +134,6 @@ export default new Vuex.Store({
     set_nSpDialog(state, obj) {
       state.nSpDialog = obj;
     },
-    set_editMemDialog(state, obj) {
-      if (obj.show === false) {
-        state.editMemDialog.show = obj.show;
-        state.editMemDialog.proId = null;
-      } else {
-        state.editMemDialog.show = obj.show;
-        state.editMemDialog.proId = obj.proId;
-      }
-    },
     set_backLogData(state, obj) {
       if (obj === null) {
         state.backLogData = null;
@@ -187,6 +169,34 @@ export default new Vuex.Store({
     uSCDSet_addedTo(state, obj) {
       state.backlogTicMove.addedTo = obj;
     },
+    /* ----------------------------------------------------- */
+    /* mutations to get data for backlogTicMove in backlog */
+    spSet_evt(state, obj) {
+      state.sPlanTicMove.evt = obj;
+    },
+    spSet_ticketId(state, obj) {
+      state.sPlanTicMove.ticketId = obj;
+    },
+    spSet_removedFrom(state, obj) {
+      state.sPlanTicMove.removedFrom = obj;
+    },
+    spSet_addedTo(state, obj) {
+      state.sPlanTicMove.addedTo = obj;
+    },
+    spSet_clear(state) {
+      state.sPlanTicMove.evt = null;
+      state.sPlanTicMove.ticketId = null;
+      state.sPlanTicMove.removedFrom = null;
+      state.sPlanTicMove.addedTo = null;
+    },
+    spSet_switchBack(state) {
+      // remove ticket from new list and put back in old list
+      const { evt } = state.sPlanTicMove;
+      evt.from.insertBefore(evt.to.childNodes[evt.newDraggableIndex],
+        evt.from.childNodes[evt.oldDraggableIndex]);
+    },
+    /* ----------------------------------------------------- */
+    /* mutations to clear data for backlogTicMove in backlog */
     backlogSet_clear(state) {
       state.backlogTicMove.evt = null;
       state.backlogTicMove.ticketId = null;
@@ -270,17 +280,6 @@ export default new Vuex.Store({
       } else {
         state.delUSDialog.userStoryId = obj.userStoryId;
         state.delUSDialog.show = obj.show;
-      }
-    },
-    set_sPlanShow(state, obj) {
-      if (obj.show === false) {
-        state.sPlanDialog.show = obj.show;
-        state.sPlanDialog.project = null;
-        state.sPlanDialog.sprints = null;
-      } else {
-        state.sPlanDialog.show = obj.show;
-        state.sPlanDialog.project = obj.project;
-        state.sPlanDialog.sprints = obj.sprints;
       }
     },
     set_nTicDialogShow(state, obj) {
@@ -407,9 +406,9 @@ export default new Vuex.Store({
         const token = localStorage.getItem(process.env.VUE_APP_AUTH_TOKEN);
         const { exp } = jwtDecode(token);
         // get Datetime 15 min before token expiry
-        const MinFromExp = Vue.$moment.unix(exp).subtract(15, 'minutes');
+        const MinFromExp = moment.unix(exp).subtract(15, 'minutes');
         // get current DateTime
-        const now = Vue.$moment();
+        const now = moment();
         // Calculate difference in milliseconds
         const diff = MinFromExp.diff(now, 'milliseconds');
         // setTimeout to request for refresh token 15min before exp
@@ -417,9 +416,6 @@ export default new Vuex.Store({
         // commit task to store, so it can be cleared on logout
         commit('set_RefreshTask', refreshTask);
       }
-    },
-    showEditMemDialog({ commit }, obj) {
-      commit('set_editMemDialog', obj);
     },
     delUSDialogShow({ commit }, payload) {
       commit('set_delUSDialog', payload);
@@ -429,18 +425,6 @@ export default new Vuex.Store({
     },
     snackBarOn({ commit }, payload) {
       commit('set_snackBarShow', payload);
-    },
-    async fetchSPlannerData({ commit }, id) {
-      await apolloClient.query({
-        query: gqlQueries.S_PLANNER_DATA,
-        fetchPolicy: 'no-cache',
-        variables: { id },
-      }).then((response) => {
-        const { Sprint } = response.data;
-        commit('set_sprintList', Sprint);
-      }).catch((error) => {
-        commit('set_snackBarShow', { message: error, type: 'error' });
-      });
     },
     async fetchCurrentUser({ commit, dispatch }) {
       // const inLogin = Vue.$router.currentRoute.name === 'login';
@@ -522,20 +506,24 @@ export default new Vuex.Store({
       commit('update_ticket', obj);
     },
     updateUStoryById({ commit }, obj) {
+      console.log('updateUStoryById');
       commit('update_uStory', obj);
     },
-    async UStoryTicketSwitch({ commit }, payload) {
+    async TicketSwitch({ commit }, payload) {
       await apolloClient.mutate({
-        mutation: gqlQueries.SwitchUserStory.USTORY_TICKET_SWITCH,
+        mutation: gqlQueries.TICKET_LOCATION_CHANGE,
         fetchPolicy: 'no-cache',
         variables: payload,
       }).then(() => {
         commit('set_uSDialogShow', false);
         commit('backlogSet_clear');
+        commit('spSet_clear');
       }).catch((error) => {
         commit('set_uSDialogShow', false);
         commit('backlogSet_switchBack');
-        // clear everything in backlog set
+        commit('spSet_switchBack');
+        // clear everything in backlog set and sp set
+        commit('spSet_clear');
         commit('backlogSet_clear');
         commit('set_snackBarShow', { message: error, type: 'error' });
       });
@@ -612,27 +600,6 @@ export default new Vuex.Store({
           commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
-    async sPlannerShow({ commit }, payload) {
-      if (!payload.show) {
-        commit('set_sPlanShow', payload);
-      } else {
-        await apolloClient.query({
-          query: gqlQueries.S_PLANNER_DATA,
-          fetchPolicy: 'no-cache',
-          variables: { id: payload.proId },
-        })
-          .then((response) => {
-            const { Project } = response.data;
-            const project = Project[0];
-            const sprints = Project[0].sprints.sort((a, b) => a.sprintNo - b.sprintNo);
-            commit('set_sPlanShow', { show: true, project, sprints });
-          })
-          .catch((error) => {
-            // console.log('Unable to load Sprint Planner');
-            commit('set_snackBarShow', { message: error, type: 'error' });
-          });
-      }
-    },
     setCarouselModel({ commit }, value) {
       commit('set_carouselModel', value);
     },
@@ -648,6 +615,20 @@ export default new Vuex.Store({
     },
     uSCDAddedTo({ commit }, value) {
       commit('uSCDSet_addedTo', value);
+    },
+    /* -------------------------------------- */
+    /* actions to set data for ticket movement in sprintPlanner */
+    spEvt({ commit }, value) {
+      commit('spSet_evt', value);
+    },
+    spTicketId({ commit }, value) {
+      commit('spSet_ticketId', value);
+    },
+    spRemovedFrom({ commit }, value) {
+      commit('spSet_removedFrom', value);
+    },
+    spAddedTo({ commit }, value) {
+      commit('spSet_addedTo', value);
     },
     /* -------------------------------------- */
 

@@ -96,7 +96,6 @@ export default {
   },
   methods: {
     ...mapActions([
-      'sPlannerShow',
       'nUStoryDialogShow',
     ]),
     navBacklog() {

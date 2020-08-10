@@ -65,43 +65,7 @@
             </template>
             <span class="caption">New Story</span>
           </v-tooltip>
-          <v-tooltip
-            v-if="isPm"
-            bottom
-          >
-            <template v-slot:activator="{ on }">
-              <v-btn
-                fab
-                dark
-                x-small
-                color="#4d371a"
-                v-on="on"
-                @click="sPlannerShow({ show: true, proId })"
-              >
-                <v-icon>mdi-run-fast</v-icon>
-              </v-btn>
-            </template>
-            <span class="caption">New Sprint</span>
-          </v-tooltip>
         </v-speed-dial>
-        <v-tooltip
-          v-if="isPm"
-          bottom
-        >
-          <template v-slot:activator="{ on }">
-            <v-btn
-              fab
-              dark
-              small
-              color="#e0d07066"
-              v-on="on"
-              @click="showEditMemDialog({ show: true, proId })"
-            >
-              <v-icon>mdi-account-edit</v-icon>
-            </v-btn>
-          </template>
-          <span class="caption">Edit Members</span>
-        </v-tooltip>
       </div>
     </template>
   </v-toolbar>
@@ -135,9 +99,7 @@ export default {
   methods: {
     ...mapActions([
       'nTicDialogShow',
-      'sPlannerShow',
       'nUStoryDialogShow',
-      'showEditMemDialog',
     ]),
   },
 };

@@ -138,7 +138,7 @@ export default {
           break;
       }
       Object.assign(payload, this.resolveSprintAddRemove());
-      await this.$store.dispatch('UStoryTicketSwitch', payload);
+      await this.$store.dispatch('TicketSwitch', payload);
     },
     resolveSprintAddRemove() {
       const payload = {};

@@ -96,7 +96,6 @@ export default {
         path: '/backlog',
         query: { proId: this.currProject.id },
       });
-      this.sPlannerShow({ show: true, proId: this.currProject.id });
     },
     sprintNavigation(sprint) {
       this.$router.push({

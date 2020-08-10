@@ -6,35 +6,99 @@
           Sprint {{ sprint.sprintNo }}
         </v-toolbar-title>
         <v-spacer />
-        <div class="text-center">
-          <v-chip
-            class="ma-2"
-            color="success"
-            outlined
-            @click="print"
-          >
-            <v-avatar
-              tile
-              left
+        <v-menu
+          ref="menu1"
+          v-model="dateMenu1"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-x
+          max-width="290px"
+          min-width="290px"
+        >
+          <template v-slot:activator="{ on }">
+            <v-card
+              raised
+              color="#414141"
+              v-on="on"
             >
-              <span style="font-size: smaller">Start</span>
-            </v-avatar>
-            {{ sprint.startDate }}
-          </v-chip>
-          <v-chip
-            class="ma-2"
-            color="red"
-            outlined
+              <v-chip
+                class="ma-2"
+                color="success"
+                outlined
+              >
+                <v-avatar
+                  tile
+                  left
+                >
+                  <span style="font-size: smaller">Start</span>
+                </v-avatar>
+                {{ sprint.startDate }}
+              </v-chip>
+              <v-chip
+                class="ma-2"
+                color="red"
+                outlined
+              >
+                <v-avatar
+                  tile
+                  left
+                >
+                  <span style="font-size: smaller">End</span>
+                </v-avatar>
+                {{ sprint.endDate }}
+              </v-chip>
+            </v-card>
+          </template>
+          <v-date-picker
+            v-model="dateRange"
+            no-title
+            :show-current="false"
+            :event-color="date => proStartEnd.indexOf(date) === 1 ? 'red' : 'green'"
+            :color="date => dateRange.indexOf(date) === 1 ? 'red' : 'green'"
+            :events="proStartEnd"
+            range
+            scrollable
           >
-            <v-avatar
-              tile
-              left
+            <div>
+              <v-badge
+                color="green"
+                dot
+                left
+                inline
+              >
+                <span style="font-size: smaller">
+                  Project Start
+                </span>
+              </v-badge>
+              <v-badge
+                color="red"
+                dot
+                left
+                inline
+              >
+                <span style="font-size: smaller">
+                  Project End
+                </span>
+              </v-badge>
+            </div>
+            <v-spacer />
+            <v-btn
+              text
+              color="primary"
+              @click="dateMenu1 = false"
             >
-              <span style="font-size: smaller">End</span>
-            </v-avatar>
-            {{ sprint.endDate }}
-          </v-chip>
-        </div>
+              Cancel
+            </v-btn>
+            <v-btn
+              :disabled="dateSame"
+              text
+              color="primary"
+              @click="$refs.menu1.save(date)"
+            >
+              OK
+            </v-btn>
+          </v-date-picker>
+        </v-menu>
       </v-toolbar>
       <v-card-text>
         <draggable
@@ -42,6 +106,9 @@
           v-bind="dragOptions"
           class="v-list v-list--dense"
           style="width: 100%; height: 100%; overflow-y: auto"
+          @end="tickMoved"
+          @add="spAddedTo(listProperties)"
+          @remove="spRemovedFrom(listProperties)"
         >
           <ticket-card-slim
             v-for="tick in tickets"
@@ -63,7 +130,7 @@
 <script>
 import draggable from 'vuedraggable';
 import moment from 'moment';
-import { mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import ticketCardSlim from '@/components/Ticket/card/ticketCardSlim.vue';
 
 export default {
@@ -78,7 +145,23 @@ export default {
       required: true,
     },
   },
+  data: () => ({
+    dateRange: [],
+    dateMenu1: false,
+  }),
   computed: {
+    proId() {
+      return this.$route.query.proId;
+    },
+    currPro() {
+      return this.getProject(this.proId);
+    },
+    proStartEnd() {
+      return [this.currPro.startDate, this.currPro.endDate];
+    },
+    sprintStartEnd() {
+      return [this.sprint.startDate, this.sprint.endDate];
+    },
     dragOptions() {
       return {
         animation: 200,
@@ -86,6 +169,9 @@ export default {
         disabled: false,
         ghostClass: 'ghost',
       };
+    },
+    dateSame() {
+      return JSON.stringify(this.dateRange) === JSON.stringify(this.sprintStartEnd);
     },
     listProperties() {
       return {
@@ -126,9 +212,22 @@ export default {
       return Math.round(ttlHeight * 1e2) / 1e2;
     },
   },
+  mounted() {
+    this.setSprintDates();
+  },
   methods: {
-    print() {
-      console.log('hi');
+    ...mapActions([
+      'spEvt',
+      'spTicketId',
+      'spRemovedFrom',
+      'spAddedTo',
+    ]),
+    setSprintDates() {
+      this.dateRange = this.sprintStartEnd;
+    },
+    tickMoved(evt) {
+      this.spTicketId(evt.item.id);
+      this.spEvt(evt);
     },
   },
 };

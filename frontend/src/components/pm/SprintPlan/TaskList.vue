@@ -13,6 +13,9 @@
       v-bind="dragOptions"
       class="v-list v-list--dense"
       style="width: 100%; height: 100%; overflow-y: auto"
+      @end="tickMoved"
+      @add="spAddedTo(listProperties)"
+      @remove="spRemovedFrom(listProperties)"
     >
       <ticket-card-slim
         v-for="tick in tickets"
@@ -25,7 +28,7 @@
 
 <script>
 import draggable from 'vuedraggable';
-import { mapGetters } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 import ticketCardSlim from '@/components/Ticket/card/ticketCardSlim.vue';
 
 export default {
@@ -56,6 +59,18 @@ export default {
     },
     tickets() {
       return this.getProjectTicketsNoSp(this.proId);
+    },
+  },
+  methods: {
+    ...mapActions([
+      'spEvt',
+      'spTicketId',
+      'spRemovedFrom',
+      'spAddedTo',
+    ]),
+    tickMoved(evt) {
+      this.spTicketId(evt.item.id);
+      this.spEvt(evt);
     },
   },
 };

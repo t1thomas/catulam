@@ -130,7 +130,6 @@ export default {
   },
   methods: {
     ...mapActions([
-      'showEditMemDialog',
       'snackBarOn',
     ]),
     getAllMembers() {
@@ -143,7 +142,6 @@ export default {
       return `https://gravatar.com/avatar/${user.avatar}?d=identicon`;
     },
     onCancel() {
-      this.showEditMemDialog({ show: false });
     },
     setSaving() {
       this.saving = !this.saving;
