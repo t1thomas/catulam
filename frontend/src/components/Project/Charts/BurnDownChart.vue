@@ -61,7 +61,6 @@
   </v-card>
 </template>
 <script>
-import Vue from 'vue';
 import moment from 'moment';
 import { mapGetters } from 'vuex';
 import LineChart from './vueChartJs/LineChart.vue';
@@ -116,8 +115,8 @@ export default {
       return arr;
     },
     totalDays() {
-      const endDate = Vue.$moment(this.endDate);
-      const startDate = Vue.$moment(this.startDate);
+      const endDate = moment(this.endDate);
+      const startDate = moment(this.startDate);
       return endDate.diff(startDate, 'days') + 1;
     },
     totalHours() {
@@ -126,8 +125,8 @@ export default {
         .reduce((a, b) => a + b, 0);
     },
     dateLabels() {
-      const endDate = Vue.$moment(this.endDate);
-      let startDate = Vue.$moment(this.startDate);
+      const endDate = moment(this.endDate);
+      let startDate = moment(this.startDate);
       const dates = [];
       while (startDate <= endDate) {
         dates.push(startDate.format('MMM DD'));

@@ -6,7 +6,6 @@
     <row-container />
     <uStory-det-drawer />
     <del-u-s-dialog />
-    <s-planner-dialog />
     <n-u-story-dialog />
     <n-tic-dialog />
     <u-s-dialog />
@@ -16,7 +15,6 @@
 
 <script>
 import editMemberDialog from '@/components/backlog/dialogs/EditMembers/editMemberDialog.vue';
-import SPlannerDialog from '@/components/pm/SprintPlan/planner dialog/SPlannerDialog.vue';
 import NUStoryDialog from '@/components/UserStory/dialogs/NUStoryDialog.vue';
 import NTicDialog from '@/components/Ticket/dialogs/NTicDialog.vue';
 import USDialog from '@/components/backlog/dialogs/USSwitchDialog.vue';
@@ -31,7 +29,6 @@ export default {
     'uStory-det-drawer': DetDrawerUStory,
     DelUSDialog,
     editMemberDialog,
-    SPlannerDialog,
     NUStoryDialog,
     NTicDialog,
     USDialog,

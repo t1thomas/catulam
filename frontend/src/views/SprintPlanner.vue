@@ -1,8 +1,5 @@
 <template>
-  <v-container
-    fluid
-    class="fill-height"
-  >
+  <v-content>
     <v-row dense>
       <v-col
         cols="8"
@@ -13,11 +10,11 @@
         <task-list />
       </v-col>
     </v-row>
-  </v-container>
+  </v-content>
 </template>
 <script>
-import SprintList from '@/components/pm/SprintPlan/SprintList.vue';
-import TaskList from '@/components/pm/SprintPlan/TaskList.vue';
+import SprintList from '@/components/SprintPlan/SprintList.vue';
+import TaskList from '@/components/SprintPlan/TaskList.vue';
 import { mapState } from 'vuex';
 
 export default {

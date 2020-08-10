@@ -31,6 +31,14 @@ const gqlQueries = {
     subscription($project: _ProjectInput!) {
       uSDelete(project: $project)
     }`,
+  SUB_SPRINT_UPDATE: gql`
+    subscription($project: _ProjectInput!) {
+      spUpdate(project: $project)
+    }`,
+  SUB_SPRINT_DELETE: gql`
+    subscription($project: _ProjectInput!) {
+      spDelete(project: $project)
+    }`,
   CREATE_TICKET: gql`
     mutation(
       $hourEstimate: Int
@@ -120,12 +128,36 @@ const gqlQueries = {
         project: $project
       ) {
         id
-        sprintNo
+        active
+        startDate
+        endDate
         project {
           id
         }
       }
     }`,
+  UPDATE_SPRINT: gql`
+    mutation(
+    $sprint: _SprintInput!,
+    $active: Boolean,
+    $startDate: String,
+    $endDate: String,
+  ) {
+    UpdateSprint(
+      sprint: $sprint,
+      active: $active,
+      startDate: $startDate,
+      endDate: $endDate,
+    ) {
+      id
+      active
+      startDate
+      endDate
+      project {
+        id
+      }
+    }
+  }`,
   ALL_USERS: gql`
     query {
       User {
@@ -251,17 +283,12 @@ const gqlQueries = {
       endDate
       desc
       noOfTicks
+      noOfSprints
       members {
         User {
           id
         }
         role
-      }
-      sprints {
-        id
-      }
-      tickets {
-        id
       }
     }
   }`,

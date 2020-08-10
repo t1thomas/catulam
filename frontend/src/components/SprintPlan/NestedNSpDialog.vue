@@ -95,9 +95,9 @@
 </template>
 
 <script>
-import Vue from 'vue';
 import { mapActions, mapState } from 'vuex';
-import gqlQueries from '../../../../graphql/gql-queries';
+import moment from 'moment';
+import gqlQueries from '../../graphql/gql-queries';
 
 export default {
   name: 'NSprintDialog',
@@ -152,11 +152,11 @@ export default {
       // if there are any sprints currently in the project
       if (this.sprintCount > 0) {
         // find the last sprint date
-        const start = Vue.$moment(this.sprints[this.sprints.length - 1].endDate).endOf('day');
+        const start = moment(this.sprints[this.sprints.length - 1].endDate).endOf('day');
         start.add(1, 'days');
         min = start.toISOString().substr(0, 10);
         // find project end date
-        const end = Vue.$moment(this.project.endDate).endOf('day');
+        const end = moment(this.project.endDate).endOf('day');
         max = end.toISOString().substr(0, 10);
       } else {
         min = this.project.startDate;

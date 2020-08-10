@@ -2,26 +2,20 @@
   <v-app id="inspire">
     <v-navigation-drawer
       v-model="drawer"
-      absolute
-      clipped
-      mini-variant
-      expand-on-hover
+      app
+      permanent
       color="accent"
-    />
+    >
+      <nav-draw-items v-if="currentUser" />
+    </v-navigation-drawer>
     <snackbar />
     <tic-det-drawer />
-    <v-content
+    <v-container
+      fluid
       class="fill-height"
     >
-      <div class="grid-container-main">
-        <div>
-          <nav-draw-items v-if="currentUser" />
-        </div>
-        <div>
-          <router-view />
-        </div>
-      </div>
-    </v-content>
+      <router-view />
+    </v-container>
   </v-app>
 </template>
 
@@ -48,6 +42,9 @@ export default {
     obstTickDelete: null,
     obsUstoryUpdate: null,
     obsUstoryDelete: null,
+    obsSpUpdate: null,
+    obsSpDelete: null,
+
   }),
   computed: {
     ...mapGetters([
@@ -86,6 +83,8 @@ export default {
       this.obstTickDelete = null;
       this.obsUstoryUpdate = null;
       this.obsUstoryDelete = null;
+      this.obsSpUpdate = null;
+      this.obsSpDelete = null;
       if (this.viewingPro !== null) {
         this.activateSubscribers();
       }
@@ -162,6 +161,41 @@ export default {
           const { uSDelete } = response.data;
           console.log(uSDelete);
           await self.$store.dispatch('deleteUserStoryByID', uSDelete);
+        },
+        error(error) {
+          console.log('err');
+          self.$store.dispatch('snackBarOn', {
+            message: error,
+            type: 'error',
+          });
+        },
+      });
+      this.obsSpUpdate = this.$apollo.subscribe({
+        query: gqlQueries.SUB_SPRINT_UPDATE,
+        variables: { project: { id: this.getViewingProject } },
+      });
+      this.obsSpUpdate.subscribe({
+        async next(response) {
+          const { spUpdate } = response.data;
+          console.log(spUpdate);
+          await self.$store.dispatch('updateSprintById', spUpdate);
+        },
+        error(error) {
+          self.$store.dispatch('snackBarOn', {
+            message: error,
+            type: 'error',
+          });
+        },
+      });
+      this.obsSpDelete = this.$apollo.subscribe({
+        query: gqlQueries.SUB_SPRINT_DELETE,
+        variables: { project: { id: this.getViewingProject } },
+      });
+      this.obsSpDelete.subscribe({
+        async next(response) {
+          const { spDelete } = response.data;
+          console.log(spDelete);
+          await self.$store.dispatch('deleteUserStoryByID', spDelete);
         },
         error(error) {
           console.log('err');

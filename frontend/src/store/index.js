@@ -100,6 +100,18 @@ export default new Vuex.Store({
         state.userStories = [...state.userStories, obj];
       }
     },
+    update_sprint(state, obj) {
+      // find index of sprints
+      const index = state.sprints.findIndex((sp) => sp.id === obj.id);
+      if (index !== -1) {
+        // if exists update sprints properties at index
+        const spFound = state.sprints[index];
+        state.sprints[index] = Object.assign(spFound, obj);
+      } else {
+        // if new sprints, add to array
+        state.sprints = [...state.sprints, obj];
+      }
+    },
     update_ticket(state, obj) {
       // find index of ticket
       const index = state.tickets.findIndex((tick) => tick.id === obj.id);
@@ -126,6 +138,12 @@ export default new Vuex.Store({
       const index = state.userStories.findIndex((uStory) => uStory.id === obj.id);
       if (index !== -1) {
         state.userStories.splice(index, 1);
+      }
+    },
+    delete_sprint(state, obj) {
+      const index = state.sprints.findIndex((sp) => sp.id === obj.id);
+      if (index !== -1) {
+        state.sprints.splice(index, 1);
       }
     },
     set_proLstTabModel(state, obj) {
@@ -501,6 +519,9 @@ export default new Vuex.Store({
       commit('set_DrawShowUStory', false);
       commit('delete_user_story', obj);
     },
+    deleteSprintByID({ commit }, obj) {
+      commit('delete_sprint', obj);
+    },
     updateTicketById({ commit }, obj) {
       console.log('updateTicketById');
       commit('update_ticket', obj);
@@ -508,6 +529,10 @@ export default new Vuex.Store({
     updateUStoryById({ commit }, obj) {
       console.log('updateUStoryById');
       commit('update_uStory', obj);
+    },
+    updateSprintById({ commit }, obj) {
+      console.log('updateSprintById');
+      commit('update_sprint', obj);
     },
     async TicketSwitch({ commit }, payload) {
       await apolloClient.mutate({

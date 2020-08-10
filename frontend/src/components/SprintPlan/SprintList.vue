@@ -50,7 +50,7 @@
 </template>
 
 <script>
-import SprintItem from '@/components/pm/SprintPlan/SprintItem.vue';
+import SprintItem from '@/components/SprintPlan/SprintItem.vue';
 import { mapGetters } from 'vuex';
 
 export default {

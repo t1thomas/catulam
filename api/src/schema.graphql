@@ -49,6 +49,7 @@ type Project {
     tickets: [Ticket] @relation(name: "TICKET", direction: OUT)
     sprints: [Sprint] @relation(name: "SPRINT", direction: OUT)
     noOfTicks: Int!
+    noOfSprints: Int!
 }
 type Comment @relation(name: "COMMENT") {
     from: User
@@ -142,9 +143,11 @@ input _UserInput {
 }
 type Subscription {
     tickUpdate(project: _ProjectInput!): JSON
+    tickDelete(project: _ProjectInput!): JSON
     uSUpdate(project: _ProjectInput!): JSON
     uSDelete(project: _ProjectInput!): JSON
-    tickDelete(project: _ProjectInput!): JSON
+    spUpdate(project: _ProjectInput!): JSON
+    spDelete(project: _ProjectInput!): JSON
 }
 
 type Mutation {
@@ -165,6 +168,11 @@ type Mutation {
     MATCH (us: UserStory {id: $uStory.id})
     SET us.storyText = $storyText
     RETURN us
+    """)
+    UpdateSprint(sprint: _SprintInput!, active: Boolean, startDate: String, endDate: String):Sprint
+    @cypher(statement:"""
+    MATCH (t: Sprint {id: $sprint.id})
+    RETURN t
     """)
     CreateUserStory(storyText: String!, project: _ProjectInput!): UserStory
     #    @hasScope(scopes:["UserStory:Create"])
@@ -347,7 +355,7 @@ type Mutation {
 #    @hasScope(scopes:["Project:Create"])
     @cypher(statement:"""
     CREATE (p:Project{id: apoc.create.uuid(), title:$title,
-    label:$label, startDate:$startDate, endDate:$endDate, desc:$desc, noOfTicks: 0 })
+    label:$label, startDate:$startDate, endDate:$endDate, desc:$desc, noOfTicks: 0, noOfSprints: 0 })
     WITH $members AS users, p
     UNWIND users AS user
     MATCH (u:User)
@@ -381,20 +389,18 @@ type Mutation {
     RETURN p
     """)
 
-    CreateSprint(sprintNo: Int!, active: Boolean!, startDate: String!, endDate: String!, project: _ProjectInput!): Sprint
+    CreateSprint(startDate: String!, endDate: String!, project: _ProjectInput!): Sprint
 #    @hasScope(scopes:["Sprint:Create"])
     @cypher(statement:"""
-    CREATE (s:Sprint{
-    id : apoc.create.uuid(),
-    sprintNo: $sprintNo,
-    active: $active,
-    startDate: $startDate,
-    endDate: $endDate
-    })
-    WITH s
     MATCH (p:Project) WHERE p.id = $project.id
-    CREATE (p)-[r:SPRINT]->(s)
-    RETURN s
+    CREATE (p)-[:SPRINT]->(sp: Sprint)
+    SET sp.id = apoc.create.uuid()
+    SET sp.active = false
+    SET sp.startDate = $startDate
+    SET sp.endDate = $endDate
+    SET sp.sprintNo = p.noOfSprints + 1
+    SET p.noOfSprints = p.noOfSprints + 1
+    RETURN sp
     """)
 
     CreateTicket(hourEstimate: Int, title: String!, desc: String, project: _ProjectInput!): Ticket

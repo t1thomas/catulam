@@ -81,6 +81,10 @@ const resolvers = {
       subscribe: withFilter(() => pubSub.asyncIterator('TICKET_UPDATE'),
         (payload, variables) => payload.tickUpdate.project.id === variables.project.id),
     },
+    tickDelete: {
+      subscribe: withFilter(() => pubSub.asyncIterator('TICKET_DELETE'),
+        (payload, variables) => payload.tickDelete.project.id === variables.project.id),
+    },
     uSUpdate: {
       subscribe: withFilter(() => pubSub.asyncIterator('USER_STORY_UPDATE'),
         (payload, variables) => payload.uSUpdate.project.id === variables.project.id),
@@ -89,9 +93,13 @@ const resolvers = {
       subscribe: withFilter(() => pubSub.asyncIterator('USER_STORY_DELETE'),
         (payload, variables) => payload.uSDelete.project.id === variables.project.id),
     },
-    tickDelete: {
-      subscribe: withFilter(() => pubSub.asyncIterator('TICKET_DELETE'),
-        (payload, variables) => payload.tickDelete.project.id === variables.project.id),
+    spUpdate: {
+      subscribe: withFilter(() => pubSub.asyncIterator('SPRINT_UPDATE'),
+        (payload, variables) => payload.spUpdate.project.id === variables.project.id),
+    },
+    spDelete: {
+      subscribe: withFilter(() => pubSub.asyncIterator('SPRINT_DELETE'),
+        (payload, variables) => payload.spDelete.project.id === variables.project.id),
     },
   },
   Token: {
@@ -260,7 +268,6 @@ const resolvers = {
         await session.close();
       }
     },
-
     UpdateTicket: async (object, params, ctx, resolveInfo) => {
       const session = ctx.driver.session();
       try {
@@ -280,6 +287,32 @@ const resolvers = {
         );
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
         await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      } finally {
+        await session.close();
+      }
+    },
+    UpdateSprint: async (object, params, ctx, resolveInfo) => {
+      const session = ctx.driver.session();
+      try {
+        // construct cypher query based on arguments provided
+        const paramString = Object.keys(params).reduce((arr, key) => {
+          if (key !== 'sprint') {
+            arr.push(`${key}:$params.${key}`);
+          }
+          return arr;
+        }, []).join(', ');
+        // run cypher query using driver
+        await session.run(
+          'MATCH (sp: Sprint {id: $params.sprint.id})'
+            + ` SET sp += { ${paramString} }`, {
+            params,
+          },
+        );
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('SPRINT_UPDATE', { spUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
