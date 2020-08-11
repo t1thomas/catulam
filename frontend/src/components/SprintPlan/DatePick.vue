@@ -2,11 +2,12 @@
   <v-menu
     ref="menu1"
     v-model="dateMenu1"
+    :disabled="saving"
     :close-on-content-click="false"
     transition="scale-transition"
-    offset-x
-    max-width="290px"
-    min-width="290px"
+    offset-y
+    max-width="17.938rem"
+    min-width="17.938rem"
   >
     <template v-slot:activator="{ on }">
       <v-card
@@ -49,54 +50,37 @@
         />
       </v-card>
     </template>
-    <v-date-picker
-      v-model="dateRange"
-      no-title
-      :show-current="false"
-      :event-color="date => proStartEnd.indexOf(date) === 1 ? 'red' : 'green'"
-      :events="proStartEnd"
-      range
-      scrollable
-    >
-      <div>
-        <v-badge
-          color="green"
-          dot
-          left
-          inline
+    <v-card>
+      <v-card-text>
+        <datepicker
+          v-model="dateRange"
+          mode="range"
+          is-inline
+          is-dark
+          :attributes="attrs"
+        />
+      </v-card-text>
+      <v-card-actions>
+        <v-btn
+          text
+          color="primary"
+          @click="dateMenu1 = false"
         >
-          <span style="font-size: smaller">
-            Project Start
-          </span>
-        </v-badge>
-        <v-badge
-          color="red"
-          dot
-          left
-          inline
+          Cancel
+        </v-btn>
+        <v-spacer />
+        <v-btn
+          :disabled="dateSame"
+          color="primary"
+          @click="changeDates"
         >
-          <span style="font-size: smaller">
-            Project End
-          </span>
-        </v-badge>
-      </div>
-      <v-spacer />
-      <v-btn
-        text
-        color="primary"
-        @click="dateMenu1 = false"
-      >
-        Cancel
-      </v-btn>
-      <v-btn
-        :disabled="dateSame"
-        text
-        color="primary"
-        @click="changeDates"
-      >
-        OK
-      </v-btn>
-    </v-date-picker>
+          Save
+          <v-icon right>
+            mdi-check-circle
+          </v-icon>
+        </v-btn>
+      </v-card-actions>
+    </v-card>
   </v-menu>
 </template>
 
@@ -104,9 +88,13 @@
 import moment from 'moment';
 import { mapGetters } from 'vuex';
 import gqlQueries from '@/graphql/gql-queries';
+import DatePicker from 'v-calendar/lib/components/date-picker.umd';
 
 export default {
-  name: 'DatePicker',
+  name: 'DatePick',
+  components: {
+    datepicker: DatePicker,
+  },
   props: {
     sprint: {
       type: Object,
@@ -117,13 +105,59 @@ export default {
     saving: false,
     dateRange: null,
     dateMenu1: false,
+    selectedDate: null,
+    colors: ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'],
   }),
   computed: {
     ...mapGetters([
       'getProject',
+      'getProjectSprints',
     ]),
+    selectDragAttribute() {
+      return {
+        popover: {
+          visibility: 'click',
+          isInteractive: false, // Defaults to true when using slot
+        },
+      };
+    },
     sprintStartEnd() {
-      return [this.sprint.startDate, this.sprint.endDate];
+      const start = new Date(this.sprint.startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(this.sprint.endDate);
+      end.setHours(0, 0, 0, 0);
+      return {
+        start,
+        end,
+      };
+    },
+    attrs() {
+      // highlight dates of other sprints
+      let colorIndex = 0;
+      return this.getProjectSprints(this.proId)
+        .reduce((arr, currSp) => {
+          if (currSp.id !== this.sprint.id) {
+            arr.push({
+              highlight: {
+                color: this.colors[colorIndex],
+                fillMode: 'none',
+              },
+              popover: {
+                label: `Sprint ${currSp.sprintNo}`,
+              },
+              dates: {
+                start: new Date(currSp.startDate),
+                end: new Date(currSp.endDate),
+              },
+            });
+            if (colorIndex === this.colors.length - 1) {
+              colorIndex = 0;
+            } else {
+              colorIndex += 1;
+            }
+          }
+          return arr;
+        }, []);
     },
     dateSame() {
       return JSON.stringify(this.dateRange) === JSON.stringify(this.sprintStartEnd);
@@ -146,6 +180,9 @@ export default {
     },
   },
   methods: {
+    print() {
+      console.log(this.dateRange);
+    },
     setSprintDates() {
       this.dateRange = this.sprintStartEnd;
     },
@@ -155,19 +192,18 @@ export default {
     async changeDates() {
       this.setSaving();
       this.dateMenu1 = false;
-      // sort the selected date range in ascending order
-      const sortedDates = this.dateRange.sort((a, b) => moment(a).diff(moment(b)));
+      // format dates
+      const start = moment(this.dateRange.start).format('YYYY-MM-DD');
+      const end = moment(this.dateRange.end).format('YYYY-MM-DD');
       await this.$apollo.mutate({
         mutation: gqlQueries.UPDATE_SPRINT,
         fetchPolicy: 'no-cache',
         variables: {
           sprint: { id: this.sprint.id },
-          startDate: sortedDates[0],
-          endDate: sortedDates[1],
+          startDate: start,
+          endDate: end,
         },
-      }).then((response) => {
-        const { UpdateSprint } = response.data;
-        console.log(UpdateSprint);
+      }).then(() => {
         this.setSaving();
       }).catch((error) => {
         this.setSaving();

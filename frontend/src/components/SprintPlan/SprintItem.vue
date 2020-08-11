@@ -1,14 +1,15 @@
 <template>
   <v-list-item-content>
     <v-card color="#585858">
-      <v-toolbar flat>
-        <v-toolbar-title class="grey--text">
-          Sprint {{ sprint.sprintNo }}
-        </v-toolbar-title>
+      <v-card-title
+        style="background: #2d2d2d"
+        class="py-1"
+      >
+        <span> Sprint {{ sprint.sprintNo }} </span>
         <v-spacer />
-        <date-picker :sprint="sprint"/>
-      </v-toolbar>
-      <v-card-text>
+        <date-pick :sprint="sprint" />
+      </v-card-title>
+      <v-card-text style="z-index: 0">
         <draggable
           tag="div"
           v-bind="dragOptions"
@@ -40,14 +41,14 @@ import draggable from 'vuedraggable';
 import moment from 'moment';
 import { mapActions, mapGetters } from 'vuex';
 import ticketCardSlim from '@/components/Ticket/card/ticketCardSlim.vue';
-import DatePicker from '@/components/SprintPlan/DatePicker.vue';
+import DatePick from '@/components/SprintPlan/DatePick.vue';
 
 export default {
   name: 'SprintItem',
   components: {
     ticketCardSlim,
     draggable,
-    DatePicker,
+    DatePick,
   },
   props: {
     sprint: {

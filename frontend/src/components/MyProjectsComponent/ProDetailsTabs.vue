@@ -35,7 +35,7 @@
         <v-badge
           color="primary"
           inline
-          :content="currProject.sprints.length.toString()"
+          :content="sprintsLength.toString()"
         />
       </v-tab>
       <v-btn
@@ -87,8 +87,8 @@ export default {
     currProject() {
       return this.$store.getters.getProject(this.projectId);
     },
-    proSprints() {
-      return this.currProject.sprints;
+    sprintsLength() {
+      return this.$store.getters.getProjectSprints(this.projectId).length;
     },
     ticketsLength() {
       return this.$store.getters.getProjectTickets(this.projectId).length;

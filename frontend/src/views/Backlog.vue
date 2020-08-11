@@ -9,12 +9,10 @@
     <n-u-story-dialog />
     <n-tic-dialog />
     <u-s-dialog />
-    <edit-member-dialog />
   </v-container>
 </template>
 
 <script>
-import editMemberDialog from '@/components/backlog/dialogs/EditMembers/editMemberDialog.vue';
 import NUStoryDialog from '@/components/UserStory/dialogs/NUStoryDialog.vue';
 import NTicDialog from '@/components/Ticket/dialogs/NTicDialog.vue';
 import USDialog from '@/components/backlog/dialogs/USSwitchDialog.vue';
@@ -28,7 +26,6 @@ export default {
     RowContainer,
     'uStory-det-drawer': DetDrawerUStory,
     DelUSDialog,
-    editMemberDialog,
     NUStoryDialog,
     NTicDialog,
     USDialog,
