@@ -1,35 +1,28 @@
 <template>
   <v-card>
-    <v-list-item
-      style="background-color: #2e2b2b"
-    >
-      <v-list-item-content>
-        <v-list-item-title
-          class="subtitle-2"
-          style="text-align: center"
-        >
-          Start Date: {{ currPro.startDate }}
-        </v-list-item-title>
-      </v-list-item-content>
-      <v-list-item-icon>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on }">
-            <v-btn
-              fab
-              color="#4d371a"
-              x-small
-              v-on="on"
-            >
-              <v-icon>mdi-plus</v-icon>
-            </v-btn>
-          </template>
-          <span class="caption">Add new Sprint</span>
-        </v-tooltip>
-      </v-list-item-icon>
-    </v-list-item>
-
+    <v-toolbar flat>
+      <v-toolbar-title class="body-1">
+        Sprints ({{ sprints.length }})
+      </v-toolbar-title>
+      <v-spacer />
+      <v-tooltip bottom>
+        <template v-slot:activator="{ on }">
+          <v-btn
+            fab
+            color="#4d371a"
+            x-small
+            v-on="on"
+            @click="nSprintDialog(true)"
+          >
+            <v-icon>mdi-plus</v-icon>
+          </v-btn>
+        </template>
+        <span class="caption">Add new Sprint</span>
+      </v-tooltip>
+    </v-toolbar>
     <v-list
-      style="background: rgb(39, 54, 102);width: 100%; height: 82%; overflow-y: auto"
+      style="background: rgb(39, 54, 102); width: 100%; min-height: 89vh; max-height: 89vh;
+       overflow-y: auto; overflow-x: hidden;"
     >
       <v-list-item
         v-for="sprint in sprints"
@@ -38,20 +31,12 @@
         <sprint-item :sprint="sprint" />
       </v-list-item>
     </v-list>
-    <v-card-actions
-      style="background-color: #2e2b2b"
-      class="justify-center"
-    >
-      <span class="subtitle-2">
-        End Date: {{ currPro.endDate }}
-      </span>
-    </v-card-actions>
   </v-card>
 </template>
 
 <script>
 import SprintItem from '@/components/SprintPlan/SprintItem.vue';
-import { mapGetters } from 'vuex';
+import { mapGetters, mapActions } from 'vuex';
 
 export default {
   name: 'SprintList',
@@ -73,6 +58,11 @@ export default {
       const sprints = this.getProjectSprints(this.proId);
       return sprints.sort((a, b) => a.sprintNo - b.sprintNo);
     },
+  },
+  methods: {
+    ...mapActions([
+      'nSprintDialog',
+    ]),
   },
 };
 </script>

@@ -1,6 +1,9 @@
 <template>
-  <v-content>
-    <v-row dense>
+  <v-container>
+    <v-row
+      dense
+      style="min-height:89vh;max-height: 89vh;overflow-y: hidden"
+    >
       <v-col
         cols="8"
       >
@@ -10,11 +13,13 @@
         <task-list />
       </v-col>
     </v-row>
-  </v-content>
+    <n-sp-dialog />
+  </v-container>
 </template>
 <script>
 import SprintList from '@/components/SprintPlan/SprintList.vue';
 import TaskList from '@/components/SprintPlan/TaskList.vue';
+import NSpDialog from '@/components/SprintPlan/NSpDialog.vue';
 import { mapState } from 'vuex';
 
 export default {
@@ -22,6 +27,7 @@ export default {
   components: {
     SprintList,
     TaskList,
+    NSpDialog,
   },
   computed: {
     ...mapState({

@@ -1,93 +1,40 @@
 <template>
-  <v-menu
-    ref="menu1"
-    v-model="dateMenu1"
-    :disabled="saving"
-    :close-on-content-click="false"
-    transition="scale-transition"
-    offset-y
-    max-width="17.938rem"
-    min-width="17.938rem"
-  >
-    <template v-slot:activator="{ on }">
-      <v-card
-        raised
-        color="#414141"
-        v-on="on"
+  <v-card>
+    <v-card-text>
+      <datepicker
+        v-model="selectedDates"
+        mode="range"
+        is-inline
+        is-dark
+        :attributes="attrs"
+      />
+    </v-card-text>
+    <v-card-actions>
+      <v-btn
+        text
+        color="primary"
+        @click="$emit('closeMenu')"
       >
-        <v-chip
-          class="ma-2"
-          color="success"
-          outlined
-        >
-          <v-avatar
-            tile
-            left
-          >
-            <span style="font-size: smaller">Start</span>
-          </v-avatar>
-          {{ sprint.startDate }}
-        </v-chip>
-        <v-chip
-          class="ma-2"
-          color="red"
-          outlined
-        >
-          <v-avatar
-            tile
-            left
-          >
-            <span style="font-size: smaller">End</span>
-          </v-avatar>
-          {{ sprint.endDate }}
-        </v-chip>
-        <v-progress-linear
-          :active="saving"
-          indeterminate
-          bottom
-          absolute
-          color="amber"
-        />
-      </v-card>
-    </template>
-    <v-card>
-      <v-card-text>
-        <datepicker
-          v-model="dateRange"
-          mode="range"
-          is-inline
-          is-dark
-          :attributes="attrs"
-        />
-      </v-card-text>
-      <v-card-actions>
-        <v-btn
-          text
-          color="primary"
-          @click="dateMenu1 = false"
-        >
-          Cancel
-        </v-btn>
-        <v-spacer />
-        <v-btn
-          :disabled="dateSame"
-          color="primary"
-          @click="changeDates"
-        >
-          Save
-          <v-icon right>
-            mdi-check-circle
-          </v-icon>
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-menu>
+        Cancel
+      </v-btn>
+      <v-spacer />
+      <v-btn
+        :disabled="dateSame"
+        color="primary"
+        @click="$emit('saveDates', selectedDates);
+                $emit('closeMenu');"
+      >
+        {{ btnText }}
+        <v-icon right>
+          mdi-check-circle
+        </v-icon>
+      </v-btn>
+    </v-card-actions>
+  </v-card>
 </template>
 
 <script>
-import moment from 'moment';
 import { mapGetters } from 'vuex';
-import gqlQueries from '@/graphql/gql-queries';
 import DatePicker from 'v-calendar/lib/components/date-picker.umd';
 
 export default {
@@ -98,17 +45,29 @@ export default {
   props: {
     sprint: {
       type: Object,
-      required: true,
+      default: null,
+    },
+    dateRange: {
+      type: Object,
+      default: null,
     },
   },
   data: () => ({
     saving: false,
-    dateRange: null,
     dateMenu1: false,
-    selectedDate: null,
+    selectedDates: null,
     colors: ['red', 'orange', 'yellow', 'green', 'blue', 'indigo', 'violet'],
   }),
   computed: {
+    btnText() {
+      if (this.noSprint) {
+        return 'Pick';
+      }
+      return 'Save';
+    },
+    noSprint() {
+      return this.sprint === null;
+    },
     ...mapGetters([
       'getProject',
       'getProjectSprints',
@@ -121,26 +80,18 @@ export default {
         },
       };
     },
-    sprintStartEnd() {
-      const start = new Date(this.sprint.startDate);
-      start.setHours(0, 0, 0, 0);
-      const end = new Date(this.sprint.endDate);
-      end.setHours(0, 0, 0, 0);
-      return {
-        start,
-        end,
-      };
-    },
     attrs() {
       // highlight dates of other sprints
       let colorIndex = 0;
-      return this.getProjectSprints(this.proId)
+      const sprintId = (this.noSprint ? null : this.sprint.id);
+      // highlight dates of other sprints in date picker
+      const highlights = this.getProjectSprints(this.proId)
         .reduce((arr, currSp) => {
-          if (currSp.id !== this.sprint.id) {
+          if (currSp.id !== sprintId) {
             arr.push({
               highlight: {
                 color: this.colors[colorIndex],
-                fillMode: 'none',
+                fillMode: 'light',
               },
               popover: {
                 label: `Sprint ${currSp.sprintNo}`,
@@ -158,9 +109,28 @@ export default {
           }
           return arr;
         }, []);
+      highlights.push({
+        dot: {
+          color: 'green',
+        },
+        popover: {
+          label: 'Project Start',
+        },
+        dates: new Date(this.currPro.startDate),
+      });
+      highlights.push({
+        dot: {
+          color: 'red',
+        },
+        popover: {
+          label: 'Project End',
+        },
+        dates: new Date(this.currPro.endDate),
+      });
+      return highlights;
     },
     dateSame() {
-      return JSON.stringify(this.dateRange) === JSON.stringify(this.sprintStartEnd);
+      return JSON.stringify(this.dateRange) === JSON.stringify(this.selectedDates);
     },
     proId() {
       return this.$route.query.proId;
@@ -168,51 +138,13 @@ export default {
     currPro() {
       return this.getProject(this.proId);
     },
-    proStartEnd() {
-      return [this.currPro.startDate, this.currPro.endDate];
-    },
   },
-  watch: {
-    dateMenu1(val) {
-      if (val) {
-        this.setSprintDates();
-      }
-    },
+  mounted() {
+    this.setSelectedDates();
   },
   methods: {
-    print() {
-      console.log(this.dateRange);
-    },
-    setSprintDates() {
-      this.dateRange = this.sprintStartEnd;
-    },
-    setSaving() {
-      this.saving = !this.saving;
-    },
-    async changeDates() {
-      this.setSaving();
-      this.dateMenu1 = false;
-      // format dates
-      const start = moment(this.dateRange.start).format('YYYY-MM-DD');
-      const end = moment(this.dateRange.end).format('YYYY-MM-DD');
-      await this.$apollo.mutate({
-        mutation: gqlQueries.UPDATE_SPRINT,
-        fetchPolicy: 'no-cache',
-        variables: {
-          sprint: { id: this.sprint.id },
-          startDate: start,
-          endDate: end,
-        },
-      }).then(() => {
-        this.setSaving();
-      }).catch((error) => {
-        this.setSaving();
-        this.disabled = false;
-        this.$store.dispatch('snackBarOn', {
-          message: error,
-          type: 'error',
-        });
-      });
+    setSelectedDates() {
+      this.selectedDates = this.dateRange;
     },
   },
 };

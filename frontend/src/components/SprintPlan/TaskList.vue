@@ -4,7 +4,7 @@
     color="#585858"
   >
     <v-toolbar flat>
-      <v-toolbar-title class="grey--text body-1">
+      <v-toolbar-title class="body-1">
         Backlog Tickets - not assigned to sprint
       </v-toolbar-title>
     </v-toolbar>
@@ -12,7 +12,8 @@
       tag="div"
       v-bind="dragOptions"
       class="v-list v-list--dense"
-      style="width: 100%; height: 100%; overflow-y: auto"
+      style="width: 100%; min-height: 89vh; max-height: 89vh;
+       overflow-y: auto; overflow-x: hidden;"
       @end="tickMoved"
       @add="spAddedTo(listProperties)"
       @remove="spRemovedFrom(listProperties)"

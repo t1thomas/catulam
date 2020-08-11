@@ -7,7 +7,66 @@
       >
         <span> Sprint {{ sprint.sprintNo }} </span>
         <v-spacer />
-        <date-pick :sprint="sprint" />
+        <v-menu
+          ref="menu1"
+          v-model="dateMenu"
+          :disabled="saving"
+          :close-on-content-click="false"
+          transition="scale-transition"
+          offset-y
+          max-width="17.938rem"
+          min-width="17.938rem"
+        >
+          <template v-slot:activator="{ on }">
+            <v-card
+              raised
+              color="#414141"
+              v-on="on"
+            >
+              <v-chip
+                class="ma-2"
+                color="success"
+                outlined
+                pill
+              >
+                <v-avatar
+                  left
+                >
+                  <span style="font-size: smaller">Start</span>
+                </v-avatar>
+                {{ sprint.startDate }}
+              </v-chip>
+              <v-chip
+                class="ma-2"
+                color="red"
+                outlined
+                pill
+              >
+                <v-avatar
+                  tile
+                  left
+                >
+                  <span style="font-size: smaller">End</span>
+                </v-avatar>
+                {{ sprint.endDate }}
+              </v-chip>
+              <v-progress-linear
+                :active="saving"
+                indeterminate
+                bottom
+                absolute
+                color="amber"
+              />
+            </v-card>
+          </template>
+          <date-pick
+            v-if="dateMenu"
+            :sprint="sprint"
+            :date-range="sprintStartEnd"
+            @closeMenu="dateMenu = false"
+            @saveDates="updateDates"
+          />
+        </v-menu>
       </v-card-title>
       <v-card-text style="z-index: 0">
         <draggable
@@ -39,9 +98,10 @@
 <script>
 import draggable from 'vuedraggable';
 import moment from 'moment';
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import ticketCardSlim from '@/components/Ticket/card/ticketCardSlim.vue';
 import DatePick from '@/components/SprintPlan/DatePick.vue';
+import gqlQueries from '@/graphql/gql-queries';
 
 export default {
   name: 'SprintItem',
@@ -56,7 +116,24 @@ export default {
       required: true,
     },
   },
+  data: () => ({
+    saving: false,
+    dateMenu: false,
+  }),
   computed: {
+    ...mapState({
+      showMenu: (state) => state.dateMenu,
+    }),
+    sprintStartEnd() {
+      const start = new Date(this.sprint.startDate);
+      start.setHours(0, 0, 0, 0);
+      const end = new Date(this.sprint.endDate);
+      end.setHours(0, 0, 0, 0);
+      return {
+        start,
+        end,
+      };
+    },
     dragOptions() {
       return {
         animation: 200,
@@ -113,6 +190,32 @@ export default {
     tickMoved(evt) {
       this.spTicketId(evt.item.id);
       this.spEvt(evt);
+    },
+    setSaving() {
+      this.saving = !this.saving;
+    },
+    async updateDates(val) {
+      this.setSaving();
+      // format dates
+      const start = moment(val.start).format('YYYY-MM-DD');
+      const end = moment(val.end).format('YYYY-MM-DD');
+      await this.$apollo.mutate({
+        mutation: gqlQueries.UPDATE_SPRINT,
+        fetchPolicy: 'no-cache',
+        variables: {
+          sprint: { id: this.sprint.id },
+          startDate: start,
+          endDate: end,
+        },
+      }).then(() => {
+        this.setSaving();
+      }).catch((error) => {
+        this.setSaving();
+        this.$store.dispatch('snackBarOn', {
+          message: `Unable to update Sprint date: ${error}`,
+          type: 'error',
+        });
+      });
     },
   },
 };

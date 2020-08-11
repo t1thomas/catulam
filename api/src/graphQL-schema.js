@@ -443,7 +443,7 @@ const resolvers = {
     CreateSprint: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
+        await pubSub.publish('SPRINT_UPDATE', { spUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);

@@ -56,6 +56,7 @@ export default new Vuex.Store({
       show: false,
       userStoryId: null,
     },
+    dateMenu: false,
     proListTabsModel: 0,
     currentUser: null,
     currentUserTasks: [],
@@ -151,6 +152,9 @@ export default new Vuex.Store({
     },
     set_nSpDialog(state, obj) {
       state.nSpDialog = obj;
+    },
+    set_dateMenu(state, obj) {
+      state.dateMenu = obj;
     },
     set_backLogData(state, obj) {
       if (obj === null) {
@@ -443,6 +447,12 @@ export default new Vuex.Store({
     },
     snackBarOn({ commit }, payload) {
       commit('set_snackBarShow', payload);
+    },
+    nSprintDialog({ commit }, payload) {
+      commit('set_nSpDialog', payload);
+    },
+    dateMenuShow({ commit }, payload) {
+      commit('set_dateMenu', payload);
     },
     async fetchCurrentUser({ commit, dispatch }) {
       // const inLogin = Vue.$router.currentRoute.name === 'login';

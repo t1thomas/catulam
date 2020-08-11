@@ -1,21 +1,29 @@
 <template>
   <v-app id="inspire">
     <v-navigation-drawer
+      v-if="currentUser"
       v-model="drawer"
       app
       permanent
       color="accent"
     >
-      <nav-draw-items v-if="currentUser" />
+      <nav-draw-items/>
+      <template v-slot:append>
+        <v-container>
+          <v-btn
+            block
+            @click="logout"
+          >
+            Logout
+          </v-btn>
+        </v-container>
+      </template>
     </v-navigation-drawer>
     <snackbar />
     <tic-det-drawer />
-    <v-container
-      fluid
-      class="fill-height"
-    >
+    <v-content>
       <router-view />
-    </v-container>
+    </v-content>
   </v-app>
 </template>
 
@@ -79,14 +87,10 @@ export default {
       }
     },
     viewingPro() {
-      this.obsTickUpdate = null;
-      this.obstTickDelete = null;
-      this.obsUstoryUpdate = null;
-      this.obsUstoryDelete = null;
-      this.obsSpUpdate = null;
-      this.obsSpDelete = null;
+      this.clearObservers();
       if (this.viewingPro !== null) {
         this.activateSubscribers();
+        this.updateRoute();
       }
     },
   },
@@ -94,6 +98,37 @@ export default {
     await this.$store.dispatch('fetchCurrentUser');
   },
   methods: {
+    updateRoute() {
+      const currrentPage = this.$router.currentRoute.name;
+      console.log(currrentPage);
+      switch (currrentPage) {
+        case 'backlog':
+          this.$router.push({
+            path: '/backlog',
+            query: { proId: this.viewingPro },
+          });
+          break;
+        case 'SprintPlanner':
+          this.$router.push({
+            path: '/sPlanner',
+            query: { proId: this.viewingPro },
+          });
+          break;
+        default:
+          this.$router.push({
+            path: '/home',
+          });
+          break;
+      }
+    },
+    clearObservers() {
+      this.obsTickUpdate = null;
+      this.obstTickDelete = null;
+      this.obsUstoryUpdate = null;
+      this.obsUstoryDelete = null;
+      this.obsSpUpdate = null;
+      this.obsSpDelete = null;
+    },
     async logout() {
       await onLogout(this.$apollo.provider.defaultClient);
     },

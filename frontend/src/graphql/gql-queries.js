@@ -114,21 +114,18 @@ const gqlQueries = {
     }`,
   CREATE_SPRINT: gql`
     mutation(
-    $sprintNo: Int!,
-    $active: Boolean!,
     $startDate: String!,
     $endDate: String!,
     $project: _ProjectInput!
     ) {
       CreateSprint(
-        sprintNo: $sprintNo,
-        active: $active,
         startDate: $startDate,
         endDate: $endDate,
         project: $project
       ) {
         id
         active
+        sprintNo
         startDate
         endDate
         project {
