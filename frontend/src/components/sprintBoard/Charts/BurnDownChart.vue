@@ -1,31 +1,23 @@
 <template>
   <v-card
-    class="mx-auto"
-    max-width="500"
-    min-width="500"
     color="#4e3f3f"
   >
-    <div class="chart-container d-flex grow flex-wrap pa-0">
-      <v-sheet
-        class="mx-auto"
-        :elevation="6"
-        :width="400"
-      >
-        <line-chart
-          v-if="loaded"
-          class="main"
-          :chart-data="chartData"
-          :chart-options="chartOptions"
-        />
-      </v-sheet>
-    </div>
-
-    <v-card-text class="py-0 title">
+    <v-card-title style="justify-content: center">
       Sprint {{ sprint.sprintNo }} - BurnDown
+    </v-card-title>
+
+    <v-card-text>
+      <line-chart
+        v-if="loaded"
+        ref="burnChart"
+        class="main"
+        :chart-data="chartData"
+      />
     </v-card-text>
 
-    <v-card-subtitle class="">
-      <v-simple-table>
+
+    <v-card-actions>
+      <v-simple-table style="width: 100%">
         <template v-slot:default>
           <thead>
             <tr class="font-weight-light">
@@ -49,14 +41,6 @@
           </tbody>
         </template>
       </v-simple-table>
-    </v-card-subtitle>
-    <v-card-actions>
-      <v-btn
-        color="primary"
-        @click="print"
-      >
-        Print
-      </v-btn>
     </v-card-actions>
   </v-card>
 </template>
@@ -70,23 +54,23 @@ export default {
   components: {
     LineChart,
   },
-  props: {
-    sprint: {
-      type: Object,
-      required: true,
-    },
-  },
   data: () => ({
     loaded: false,
     chartData: null,
-    chartOptions: null,
   }),
   computed: {
     ...mapGetters([
       'getUnDoneTicksBySprint',
       'getAllTicksBySprint',
       'getDoneTicksBySprint',
+      'getSprintById',
     ]),
+    sprintId() {
+      return this.$route.query.sprintId;
+    },
+    sprint() {
+      return this.getSprintById(this.sprintId);
+    },
     endDate() {
       return this.sprint.endDate;
     },
@@ -243,36 +227,19 @@ export default {
       return (100 * totalDoneTicks) / totalTicks;
     },
   },
-  async mounted() {
-    await this.loadData();
+  watch: {
+    sprintId() {
+      this.loadData();
+    },
+  },
+  mounted() {
+    this.loadData();
   },
   methods: {
     print() {
       console.log(this.productivity);
       const burn = this.burnDown;
       const start = this.getIniTotalHrs;
-      // burn.forEach((day, index) => {
-      //   if (index > 0) {
-      //     start = burn[index - 1];
-      //   }
-      //   console.log(start - day);
-      // });
-      // const arr = [];
-      // for (let i = 0; i < burn.length; i += 1) {
-      //   if (i > 0) {
-      //     start = burn[i - 1];
-      //   }
-      //   arr.push(start - burn[i]);
-      // }
-      // const calc = arr.reduce((a, b) => a + b, 0) / this.burnDown.length;
-      // const hrsPerDay = burn.reduce((arr, currVal, index) => {
-      //   if (index > 0) {
-      //     start = burn[index - 1];
-      //   }
-      //   arr.push(start - currVal);
-      //   return arr;
-      // }, []);
-
       // eslint-disable-next-line max-len
       const hrssPerDay = burn.reduce((arr, currVal, index) => (index > 0 ? [...arr, (burn[index - 1] - currVal)] : [...arr, (start - currVal)]), []);
       const avgHrsPerDay = hrssPerDay.reduce((a, b) => a + b, 0) / this.burnDown.length;
@@ -305,49 +272,6 @@ export default {
           },
         ],
       };
-      this.chartOptions = {
-        legend: {
-          display: false,
-          position: 'top',
-          labels: {
-            boxWidth: 80,
-            fontColor: '#ff9800',
-          },
-        },
-        scales: {
-          yAxes: [{
-            gridLines: {
-              display: false,
-            },
-            ticks: {
-              fontColor: 'white',
-            },
-          },
-          ],
-          xAxes: [{
-            ticks: {
-              fontColor: 'white',
-            },
-            gridLines: {
-              zeroLineColor: 'white',
-              color: 'white',
-            },
-          }],
-        },
-        tooltips: {
-          mode: 'index',
-          intersect: false,
-          callbacks: {
-            label(tooltipItems, data) {
-              return `${data.datasets[tooltipItems.datasetIndex].label}: ${tooltipItems.yLabel}hrs`;
-            },
-          },
-        },
-        hover: {
-          mode: 'index',
-          intersect: false,
-        },
-      };
       this.loaded = true;
     },
   },
@@ -355,8 +279,5 @@ export default {
 </script>
 
 <style scoped>
-.chart-container {
-  position: relative;
-  bottom: 1rem;
-}
+
 </style>

@@ -3,9 +3,8 @@
     flat
     class="tab-content"
   >
-    <v-content class="comment-list">
+    <div class="comment-list">
       <v-list
-        dense
       >
         <v-list-item v-if="comments.length === 0">
           <v-list-item-content>
@@ -23,7 +22,7 @@
           />
         </v-list-item>
       </v-list>
-    </v-content>
+    </div>
     <v-container>
       <v-textarea
         v-model="text"
@@ -147,7 +146,7 @@ export default {
   .tab-content {
     height: 100%;
     display: grid;
-    grid-template-rows: 25vh auto;
+    grid-auto-rows: 25vh auto;
   }
   .comment-list {
     min-height: 100%;

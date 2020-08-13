@@ -3,7 +3,6 @@ import VueRouter from 'vue-router';
 import SprintPlanner from '@/views/SprintPlanner.vue';
 import Home from '../views/Home.vue';
 import backlog from '../views/Backlog.vue';
-import ProjectPage from '../views/ProjectPage.vue';
 import login from '../views/Login.vue';
 import SprintBoard from '../views/SprintBoard.vue';
 import AuthGuard from '../AuthGuard';
@@ -36,12 +35,6 @@ const routes = [
     path: '/backlog',
     name: 'backlog',
     component: backlog,
-    beforeEnter: AuthGuard,
-  },
-  {
-    path: '/project',
-    name: 'ProjectPage',
-    component: ProjectPage,
     beforeEnter: AuthGuard,
   },
   {

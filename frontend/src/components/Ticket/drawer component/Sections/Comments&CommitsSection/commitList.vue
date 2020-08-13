@@ -3,7 +3,7 @@
     flat
     class="tab-content"
   >
-    <v-content class="comment-list">
+    <div class="comment-list">
       <v-list
         v-if="showAddCommit === false"
         dense
@@ -23,7 +23,7 @@
         </v-list-item>
       </v-list>
       <add-commit v-if="showAddCommit" />
-    </v-content>
+    </div>
     <v-card-actions
       style="justify-content: flex-end;"
     >
@@ -89,7 +89,7 @@ export default {
 .tab-content {
   height: 100%;
   display: grid;
-  grid-template-rows: 25vh auto;
+  grid-auto-rows: 25vh auto;
 }
 .comment-list {
   min-height: 100%;

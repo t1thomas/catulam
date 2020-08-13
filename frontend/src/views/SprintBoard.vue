@@ -3,11 +3,10 @@
     fluid
     class="fill-height pa-1"
   >
-    <v-card color="basil">
+    <v-card>
       <v-tabs
         v-model="tab"
         background-color="transparent"
-        color="basil"
       >
         <h1 class="font-weight-bold heading pl-1">
           Sprint {{ currSprint.sprintNo }} - {{ currPro.label }}
@@ -19,14 +18,7 @@
 
       <v-tabs-items v-model="tab">
         <sprint-columns />
-        <v-tab-item>
-          <v-card
-            color="basil"
-            flat
-          >
-            <v-card-text> Nothing </v-card-text>
-          </v-card>
-        </v-tab-item>
+        <charts-container />
       </v-tabs-items>
     </v-card>
   </v-content>
@@ -34,12 +26,14 @@
 
 <script>
 import { mapGetters } from 'vuex';
+import ChartsContainer from '@/components/sprintBoard/ChartsContainer.vue';
 import sprintColumns from '../components/sprintBoard/sprintColumns.vue';
 
 export default {
   name: 'SprintBoard',
   components: {
     sprintColumns,
+    ChartsContainer,
   },
   data: () => ({
     loaded: true,
@@ -49,6 +43,7 @@ export default {
     ...mapGetters([
       'getProject',
       'getSprintById',
+      'getProjectSprints',
     ]),
     sprintId() {
       return this.$route.query.sprintId;

@@ -38,7 +38,7 @@ import DelTicDialog from '../dialogs/DelTicDialog.vue';
 import updatesParent from './Sections/Comments&CommitsSection/updatesParent.vue';
 
 export default {
-  name: 'DetailsDrawer',
+  name: 'TicDetailsDrawer',
   components: {
     topSection,
     detailsParent,
@@ -49,6 +49,22 @@ export default {
   },
   data: () => ({
     overlay: false,
+    tickets: [
+      {
+        id: 'se340fh-34-fh3-3igfb',
+        title: 'Ticket 1',
+        hourEstimate: 8,
+      },
+      {
+        id: 'se33sssrg-f43--3igfb',
+        title: 'Ticket 2',
+        hourEstimate: 5,
+      },
+      {
+        id: '556aas-a6d-a6-asdfbe',
+        title: 'Ticket 3',
+        hourEstimate: 6,
+      }],
   }),
   computed: {
     ...mapState({
