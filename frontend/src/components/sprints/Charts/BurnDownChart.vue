@@ -28,7 +28,7 @@
                 Tickets Remaining
               </th>
               <th>
-                Avg. Productivity (hr/day)
+                Avg. Productivity rate (hr/day)
               </th>
             </tr>
           </thead>
@@ -80,6 +80,8 @@ export default {
     ticksRemaining() {
       return this.getUnDoneTicksBySprint(this.sprint.id).length;
     },
+    /* generates an array of object containing timestamp of
+     start of day and end of day for each day in the sprint */
     arrDays() {
       const arr = [];
       // only generate days if current datetime is ahead of the sprint start date
@@ -119,6 +121,8 @@ export default {
       return dates;
     },
     getIniTotalHrs() {
+      /* calculate the total hours of all tickets in sprint
+       based on initial hour estimate of each ticket */
       const tickets = this.getAllTicksBySprint(this.sprint.id);
       let totalHrs = 0;
       tickets.forEach((tick) => {
@@ -133,7 +137,11 @@ export default {
       return totalHrs;
     },
     idealHours() {
+      /* for the number of days in sprint, generate an array of ideal work rate,
+         with each element (day) showing the ideal
+         number of hours remaining */
       const arr = [];
+      // ideal work rate per day
       const idealHoursPerDay = this.getIniTotalHrs / this.totalDays;
       for (let i = 1; i <= this.totalDays; i += 1) {
         const num = (this.getIniTotalHrs - (idealHoursPerDay * i));
@@ -144,65 +152,69 @@ export default {
     burnDown() {
       const data = [];
       this.arrDays.forEach((date, index) => {
+        // variable to sum hourEstimate of ticket for every day in arrDays
         let totalHrs = 0;
+        // nested loop of tickets
         this.getUnDoneTicksBySprint(this.sprint.id).forEach((tick) => {
           // if tick has no commit
           if (tick.commits.length === 0) {
-            // add up total hours of tickets without
+            // add up total hours of tickets without commits
             totalHrs += tick.hourEstimate;
           } else {
-            // filter to find commits between the start and end of curr date
+            // filter to find commits between the start and end of CurrDate in arrDays
             const filtered = tick.commits
               .filter((comm) => comm.timestamp > date.start && comm.timestamp < date.end);
-            switch (true) {
-              case filtered.length > 0: {
-                // if there are commits in the current date
-                // get the LAST commit
-                const lastCommit = filtered
-                  .reduce((pre, cur) => ((pre.timestamp > cur.timestamp) ? pre : cur));
-                totalHrs += lastCommit.newHourEstimate;
-                break;
-              }
-              case index === 0 && filtered.length === 0: {
-                // if index is 0 aka it's first day
-                // we can only look to find the FIRST commit from future
-                const firstCommit = tick.commits
-                  .reduce((pre, cur) => ((pre.timestamp < cur.timestamp) ? pre : cur));
-                totalHrs += firstCommit.prevHourEstimate;
-                break;
-              }
-              case index === this.arrDays.length - 1 && filtered.length === 0: {
-                // if index is on the last day
-                // we can only look to find the LAST commit from the past
-                const prevCommit = tick.commits.filter((comm) => comm.timestamp < date.start);
-                // get the LAST commit from the past
-                const prevComLast = prevCommit
-                  .reduce((pre, cur) => ((pre.timestamp > cur.timestamp) ? pre : cur));
-                totalHrs += prevComLast.newHourEstimate;
-                break;
-              }
-              default: {
-                // if we are past the first day
-                // then check for future commits
-                const nextCommit = tick.commits.filter((comm) => comm.timestamp > date.end);
-                if (nextCommit.length > 0) {
-                  // if there are future commits, then get the FIRST commit from future
-                  const nextComFirst = nextCommit
+            if (filtered.length > 0) {
+              // if there are commits in the current date
+              // get the LAST commit made that day
+              const lastCommit = filtered
+                .reduce((pre, cur) => ((pre.timestamp > cur.timestamp) ? pre : cur));
+              totalHrs += lastCommit.newHourEstimate;
+            } else {
+              switch (true) {
+                case index === 0: {
+                  /* if index is 0 aka it's first day
+                   we can only look to find the FIRST commit
+                    to obtain ticket's hourEstimate for day 0 */
+                  const firstCommit = tick.commits
                     .reduce((pre, cur) => ((pre.timestamp < cur.timestamp) ? pre : cur));
-                  totalHrs += nextComFirst.prevHourEstimate;
-                } else {
-                  // if there are no future commits, then it must be in the past
+                  totalHrs += firstCommit.prevHourEstimate;
+                  break;
+                }
+                case index === this.arrDays.length - 1: {
+                  // if index is on the last day
+                  // we can only look to find the LAST commit from the past
                   const prevCommit = tick.commits.filter((comm) => comm.timestamp < date.start);
                   // get the LAST commit from the past
                   const prevComLast = prevCommit
                     .reduce((pre, cur) => ((pre.timestamp > cur.timestamp) ? pre : cur));
                   totalHrs += prevComLast.newHourEstimate;
+                  break;
                 }
-                break;
+                default: {
+                  // if we are past the first day
+                  // then check for future commits
+                  const nextCommit = tick.commits.filter((comm) => comm.timestamp > date.end);
+                  if (nextCommit.length > 0) {
+                    // if there are future commits, then get the FIRST commit from future
+                    const nextComFirst = nextCommit
+                      .reduce((pre, cur) => ((pre.timestamp < cur.timestamp) ? pre : cur));
+                    totalHrs += nextComFirst.prevHourEstimate;
+                  } else {
+                    // if there are no future commits, then it must be in the past
+                    const prevCommit = tick.commits.filter((comm) => comm.timestamp < date.start);
+                    // get the LAST commit from the past
+                    const prevComLast = prevCommit
+                      .reduce((pre, cur) => ((pre.timestamp > cur.timestamp) ? pre : cur));
+                    totalHrs += prevComLast.newHourEstimate;
+                  }
+                  break;
+                }
               }
             }
           }
         });
+        // PUSH totalHrs for each day in arrDays
         data.push(totalHrs);
       });
       return data;
@@ -218,8 +230,7 @@ export default {
           : [...arr, (start - currVal)]),
         []);
       // then reduce average hours worked per day
-      const avg = (hrsPerDay.reduce((p, c) => p + c, 0) / hrsPerDay.length).toFixed(2);
-      return avg;
+      return (hrsPerDay.reduce((p, c) => p + c, 0) / hrsPerDay.length).toFixed(2);
     },
     percentCompleted() {
       const totalTicks = this.getAllTicksBySprint(this.sprint.id).length;
@@ -236,17 +247,6 @@ export default {
     this.loadData();
   },
   methods: {
-    print() {
-      console.log(this.productivity);
-      const burn = this.burnDown;
-      const start = this.getIniTotalHrs;
-      // eslint-disable-next-line max-len
-      const hrssPerDay = burn.reduce((arr, currVal, index) => (index > 0 ? [...arr, (burn[index - 1] - currVal)] : [...arr, (start - currVal)]), []);
-      const avgHrsPerDay = hrssPerDay.reduce((a, b) => a + b, 0) / this.burnDown.length;
-
-      console.log(hrssPerDay);
-      console.log(avgHrsPerDay);
-    },
     loadData() {
       this.chartData = {
         labels: this.dateLabels,

@@ -7,7 +7,7 @@
       permanent
       color="accent"
     >
-      <nav-draw-items/>
+      <nav-draw-items />
       <template v-slot:append>
         <v-container>
           <v-btn
@@ -50,9 +50,10 @@ export default {
     obstTickDelete: null,
     obsUstoryUpdate: null,
     obsUstoryDelete: null,
+    obsMemRemove: null,
+    obsMemAdd: null,
     obsSpUpdate: null,
     obsSpDelete: null,
-
   }),
   computed: {
     ...mapGetters([
@@ -75,15 +76,10 @@ export default {
     },
   },
   watch: {
-    async currentUser(val) {
+    currentUser(val) {
       if (val !== null) {
-        const payload = { username: this.currentUser.username };
-        console.log(payload);
-        await this.$store.dispatch('fetchAllUserList');
-        await this.$store.dispatch('fetchProjects', payload);
-        await this.$store.dispatch('fetchTickets', payload);
-        await this.$store.dispatch('fetchUserStories', payload);
-        await this.$store.dispatch('fetchSprints', payload);
+        this.fetchAppDataSet();
+        this.activateProSubscriber();
       }
     },
     viewingPro() {
@@ -98,6 +94,11 @@ export default {
     await this.$store.dispatch('fetchCurrentUser');
   },
   methods: {
+    async fetchAppDataSet() {
+      // const payload = { username: this.currentUser.username };
+      await this.$store.dispatch('fetchAllUserList');
+      await this.$store.dispatch('fetchProjectElements');
+    },
     updateRoute() {
       const currrentPage = this.$router.currentRoute.name;
       console.log(currrentPage);
@@ -114,10 +115,18 @@ export default {
             query: { proId: this.viewingPro },
           });
           break;
-        default:
+        case 'mManagement':
+          this.$router.push({
+            path: '/mManagement',
+            query: { proId: this.viewingPro },
+          });
+          break;
+        case 'sprint':
           this.$router.push({
             path: '/home',
           });
+          break;
+        default:
           break;
       }
     },
@@ -131,6 +140,50 @@ export default {
     },
     async logout() {
       await onLogout(this.$apollo.provider.defaultClient);
+    },
+    activateProSubscriber() {
+      const self = this;
+      this.obsMemAdd = this.$apollo.subscribe({
+        query: gqlQueries.SUB_ADD_PRO_MEMBER,
+        variables: { user: { id: this.currentUser.id } },
+      });
+      this.obsMemAdd.subscribe({
+        async next() {
+          /* re-fetch all Project elements to update state
+             because when a user has been added to a project,
+            the state should contain info about that project. */
+          await self.$store.dispatch('fetchProjectElements');
+        },
+        error(error) {
+          console.log('error obsMemAdd');
+          self.$store.dispatch('snackBarOn', {
+            message: error,
+            type: 'error',
+          });
+        },
+      });
+      this.obsMemRemove = this.$apollo.subscribe({
+        query: gqlQueries.SUB_MEMBER_REMOVE,
+        variables: { user: { id: this.currentUser.id } },
+      });
+      this.obsMemRemove.subscribe({
+        async next() {
+          /* re-fetch all Project elements to update state because
+           when a user has been removed from a project,
+           the state must not contain info about that project. */
+          await self.$store.dispatch('fetchProjectElements');
+          /* re-fetch current user info, as the currently
+          viweingPro may be the project he was just removed from */
+          await self.$store.dispatch('fetchCurrentUser');
+        },
+        error(error) {
+          console.log('erorr obsMemRemove');
+          self.$store.dispatch('snackBarOn', {
+            message: error,
+            type: 'error',
+          });
+        },
+      });
     },
     activateSubscribers() {
       const self = this;
@@ -152,6 +205,7 @@ export default {
           });
         },
       });
+
       this.obstTickDelete = this.$apollo.subscribe({
         query: gqlQueries.SUB_TICKET_DELETE,
         variables: { project: { id: this.getViewingProject } },

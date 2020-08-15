@@ -176,6 +176,7 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
+import gqlQueries from '@/graphql/gql-queries';
 
 export default {
   name: 'NProDialog',
@@ -232,23 +233,31 @@ export default {
     async onCreate() {
       if (this.$refs.proForm.validate()) {
         this.setSaving();
-        const payload = {
-          title: this.title,
-          label: this.label,
-          startDate: this.startDate,
-          endDate: this.endDate,
-          desc: this.desc,
-          members: this.getSelectedMembers(),
-        };
-        await this.$store.dispatch('createProject', payload)
-          .then(() => {
-            this.setSaving();
-            this.onCancel();
-          })
-          .catch(() => {
-            this.setSaving();
-            this.onCancel();
+        await this.$apollo.mutate({
+          mutation: gqlQueries.CREATE_PROJECT,
+          fetchPolicy: 'no-cache',
+          variables: {
+            title: this.title,
+            label: this.label,
+            startDate: this.startDate,
+            endDate: this.endDate,
+            desc: this.desc,
+            members: this.getSelectedMembers(),
+          },
+        }).then((response) => {
+          const { CreateProject } = response.data;
+          this.setSaving();
+          this.onCancel();
+          this.$store.dispatch('newProject', CreateProject);
+          this.selector = false;
+        }).catch((error) => {
+          this.setSaving();
+          this.onCancel();
+          this.$store.dispatch('snackBarOn', {
+            message: `Unable to Create Project ${error}`,
+            type: 'error',
           });
+        });
       }
     },
     getSelectedMembers() {

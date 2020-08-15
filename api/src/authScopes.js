@@ -1,6 +1,27 @@
+const devScopes = [
+  'User:Read',
+  'User:Update',
+  'UserStory:Create',
+  'UserStory:Read',
+  'UserStory:Update',
+  'UserStory:Delete',
+  'Ticket:Create',
+  'Ticket:Read',
+  'Ticket:Update',
+  'Ticket:Delete',
+  'Ticket:Comment',
+  'Ticket:Commit',
+  'Sprint:Read',
+  'Sprint:Update',
+  'Project:Read',
+];
+// pm has a few extra scopes
+const pmScopes = () => [...devScopes, ...['Sprint:Create', 'Project:Create', 'Project:UpdateMembers']];
+const adminScopes = ['User:Create'];
+
 module.exports = {
-  pm: () => ['UserStory:Read', 'UserStory:Create', 'Project:Read', 'Ticket:Read', 'Ticket:Comment', 'Ticket:Edit', 'Ticket:Delete', 'Ticket:Create', 'Sprint:Edit', 'Sprint:Create', 'Sprint:Read', 'User:Read', 'Project:Create', 'Project:EditMembers'],
-  dev: () => ['UserStory:Read', 'UserStory:Create', 'Project:Read', 'Ticket:Read', 'Ticket:Comment', 'Ticket:Edit', 'Ticket:Delete', 'Ticket:Create', 'Sprint:Edit', 'Sprint:Read', 'User:Read'],
-  admin: () => ['User:Create'],
+  dev: devScopes,
+  pm: pmScopes(),
+  admin: adminScopes,
 };
 // return authentication scopes to be added to JWT for each user role type.

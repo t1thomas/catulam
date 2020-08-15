@@ -50,6 +50,22 @@
           <v-list-item-title>My Home</v-list-item-title>
         </v-list-item-content>
       </v-list-item>
+
+      <v-list-item
+        v-if="selected !== '' && isPm"
+        color="primary"
+        link
+        :to="`/mManagement?proId=${selected}`"
+        exact
+      >
+        <v-list-item-action>
+          <v-icon>mdi-account-group</v-icon>
+        </v-list-item-action>
+        <v-list-item-content>
+          <v-list-item-title>Member Management</v-list-item-title>
+        </v-list-item-content>
+      </v-list-item>
+
       <v-list-item
         v-if="selected !== ''"
         color="primary"

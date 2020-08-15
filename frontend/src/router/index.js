@@ -1,10 +1,11 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import SprintPlanner from '@/views/SprintPlanner.vue';
+import MemberManagement from '@/views/MemberManagement.vue';
 import Home from '../views/Home.vue';
 import backlog from '../views/Backlog.vue';
 import login from '../views/Login.vue';
-import SprintBoard from '../views/SprintBoard.vue';
+import SprintBoard from '../views/SprintPage.vue';
 import AuthGuard from '../AuthGuard';
 
 Vue.use(VueRouter);
@@ -41,6 +42,12 @@ const routes = [
     path: '/sPlanner',
     name: 'SprintPlanner',
     component: SprintPlanner,
+    beforeEnter: AuthGuard,
+  },
+  {
+    path: '/mManagement',
+    name: 'mManagement',
+    component: MemberManagement,
     beforeEnter: AuthGuard,
   },
 ];

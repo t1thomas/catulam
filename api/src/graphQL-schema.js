@@ -24,7 +24,7 @@ function createAccessToken(id, role) {
   const exp = Math.floor(Date.now() / 1000) + (60 * 60);
 
   // get scopes based on user role
-  const scope = authScopes[role]();
+  const scope = authScopes[role];
   // returns token string
   return ({
     token: jwt.sign({
@@ -100,6 +100,14 @@ const resolvers = {
     spDelete: {
       subscribe: withFilter(() => pubSub.asyncIterator('SPRINT_DELETE'),
         (payload, variables) => payload.spDelete.project.id === variables.project.id),
+    },
+    removeProMem: {
+      subscribe: withFilter(() => pubSub.asyncIterator('REMOVE_PRO_MEMBER'),
+        (payload, variables) => payload.removeProMem.id === variables.user.id),
+    },
+    addProMem: {
+      subscribe: withFilter(() => pubSub.asyncIterator('ADD_PRO_MEMBER'),
+        (payload, variables) => payload.addProMem.id === variables.user.id),
     },
   },
   Token: {
@@ -203,10 +211,33 @@ const resolvers = {
         });
         return neo4jgraphql(object, params, ctx, resolveInfo);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log(err);
         throw new Error('Invalid username/password');
       }),
-
+    CreateProject: async (object, params, ctx, resolveInfo) => {
+      try {
+        const currUserId = ctx.cypherParams.currentUser.id;
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        result.project.members.forEach((mem) => {
+          if (mem.id !== currUserId) {
+            pubSub.publish('ADD_PRO_MEMBER', { addProMem: { id: mem.id } });
+          }
+        });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
+    AddProjectMember: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('ADD_PRO_MEMBER', { addProMem: result });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
     StartToSprint: async (object, params, ctx, resolveInfo) => {
       try {
         // console.log(object);
@@ -226,7 +257,7 @@ const resolvers = {
         throw new Error(e);
       }
     },
-    UStoryTicketSwitch: async (object, params, ctx, resolveInfo) => {
+    TicketLocSwitch: async (object, params, ctx, resolveInfo) => {
       const session = ctx.driver.session();
       try {
         // construct cypher query based on arguments provided
@@ -449,6 +480,18 @@ const resolvers = {
         throw new Error(e);
       }
     },
+    RemoveProjectMember: async (object, params, ctx, resolveInfo) => {
+      try {
+        console.log('RemoveProjectMember');
+        console.log(params);
+
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('REMOVE_PRO_MEMBER', { removeProMem: result });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
     CreateUser: async (object, params, ctx, resolveInfo) => {
       try {
         const salt = bcrypt.genSaltSync(Number(process.env.BCRYPTHASHCOST));
@@ -474,7 +517,7 @@ const schema = makeAugmentedSchema({
     auth: {
       isAuthenticated: true,
       hasRole: true,
-      // hasScope: true,
+      hasScope: true,
     },
     // debug: true,
   },

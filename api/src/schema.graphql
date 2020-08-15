@@ -20,7 +20,7 @@ type User {
     username: String!
     email: String!
     password: String! @hasRole(roles:[admin])
-    projects: [Member]
+    projects: [Project] @relation(name: "TEAM_MEMBER", direction: OUT)
     tickets: [Ticket] @relation(name: "ASSIGNED_TASK", direction: OUT)
     created: [Ticket] @relation(name: "CREATED", direction: OUT)
     avatar: String
@@ -30,13 +30,6 @@ type User {
     commits: [Commit]
 }
 
-
-type Member @relation(name: "TEAM_MEMBER") {
-    from: User
-    to: Project
-    role: Role!
-}
-
 type Project {
     id: ID!
     title: String!
@@ -44,7 +37,7 @@ type Project {
     label: String!
     startDate: String!
     endDate: String!
-    members: [Member]
+    members: [User] @relation(name: "TEAM_MEMBER", direction: IN)
     userStories: [UserStory] @relation(name: "USER_STORY", direction: OUT)
     tickets: [Ticket] @relation(name: "TICKET", direction: OUT)
     sprints: [Sprint] @relation(name: "SPRINT", direction: OUT)
@@ -111,16 +104,11 @@ type Query {
     MATCH (t: Ticket {id: $tick.id})
     RETURN t
     """)
-#    UserStory: [UserStory] @hasScope(scopes:["UserStory:Read"])
-#    Project: [Project] @hasScope(scopes:["Project:Read"])
-#    Ticket: [Ticket] @hasScope(scopes:["Ticket:Read"])
-#    Sprint: [Sprint] @hasScope(scopes:["Sprint:Read"])
-#    User: [User] @hasScope(scopes:["User:Read"])
-    UserStory: [UserStory]
-    Project: [Project]
-    Ticket: [Ticket]
-    Sprint: [Sprint]
-    User: [User]
+    UserStory: [UserStory] @hasScope(scopes:["UserStory:Read"])
+    Project: [Project] @hasScope(scopes:["Project:Read"])
+    Ticket: [Ticket] @hasScope(scopes:["Ticket:Read"])
+    Sprint: [Sprint] @hasScope(scopes:["Sprint:Read"])
+    User: [User] @hasScope(scopes:["User:Read"])
 }
 input _CommitInput {
     message: String!
@@ -148,10 +136,12 @@ type Subscription {
     uSDelete(project: _ProjectInput!): JSON
     spUpdate(project: _ProjectInput!): JSON
     spDelete(project: _ProjectInput!): JSON
+    addProMem(user: _UserInput!): JSON
+    removeProMem(user: _UserInput!): JSON
 }
 
 type Mutation {
-    UStoryTicketSwitch(
+    TicketLocSwitch(
         project: _ProjectInput!,
         tick: _TicketInput!,
         uStoryRemove: _UserStoryInput,
@@ -164,18 +154,20 @@ type Mutation {
     RETURN t
     """)
     UpdateUserStory(uStory: _UserStoryInput!, storyText: String!):UserStory
+    @hasScope(scopes:["UserStory:Update"])
     @cypher(statement:"""
     MATCH (us: UserStory {id: $uStory.id})
     SET us.storyText = $storyText
     RETURN us
     """)
     UpdateSprint(sprint: _SprintInput!, active: Boolean, startDate: String, endDate: String):Sprint
+    @hasScope(scopes:["Sprint:Update"])
     @cypher(statement:"""
-    MATCH (t: Sprint {id: $sprint.id})
-    RETURN t
+    MATCH (sp: Sprint {id: $sprint.id})
+    RETURN sp
     """)
     CreateUserStory(storyText: String!, project: _ProjectInput!): UserStory
-    #    @hasScope(scopes:["UserStory:Create"])
+    @hasScope(scopes:["UserStory:Create"])
     @cypher(statement:"""
     MATCH (p:Project)
     WHERE p.id = $project.id
@@ -185,7 +177,7 @@ type Mutation {
     RETURN us
     """)
     DeleteUserStory(uStory: _UserStoryInput!, project: _ProjectInput!): UserStory
-    #    @hasScope(scopes:["Ticket:Delete"])
+    @hasScope(scopes:["UserStory:Delete"])
     @cypher(statement:"""
     MATCH (us: UserStory {id: $uStory.id})
     WITH us, properties(us) AS userStory
@@ -193,7 +185,7 @@ type Mutation {
     RETURN userStory
     """)
     DeleteTicket(tick: _TicketInput!, project: _ProjectInput!): Ticket
-    #    @hasScope(scopes:["Ticket:Delete"])
+    @hasScope(scopes:["Ticket:Delete"])
     @cypher(statement:"""
     MATCH(t:Ticket {id: $tick.id})
     WITH t, properties(t) AS tick
@@ -201,12 +193,13 @@ type Mutation {
     RETURN tick
     """)
     UpdateTicket(tick: _TicketInput!, issueNumber: Int, hourEstimate: Int, sprintPos: Int, title: String, desc: String, done: Boolean):Ticket
+    @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
     MATCH (t: Ticket {id: $tick.id})
     RETURN t
     """)
-#    @hasScope(scopes:["Ticket:Edit"])
     UpdateTicketAssignee(tick: _TicketInput!, user: _UserInput!): Ticket
+    @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
     MATCH (u1:User {id: $user.id}),(t:Ticket{id: $tick.id})
     OPTIONAL MATCH (u2:User)-[rel:ASSIGNED_TASK]->(t)
@@ -219,13 +212,14 @@ type Mutation {
     RETURN value.t
     """)
     RemoveTicketAssignee(tick: _TicketInput!): Ticket
+    @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
     MATCH (u:User)-[rel:ASSIGNED_TASK]->(t:Ticket{id: $tick.id})
     DELETE rel
     RETURN t
     """)
     AddTicketComments(tick: _TicketInput!, message: String!): Ticket
-#    @hasScope(scopes:["Ticket:Comment"])
+    @hasScope(scopes:["Ticket:Comment"])
     @cypher(statement:"""
     MATCH (t:Ticket),(u:User)
     WHERE t.id = $tick.id AND u.id = $cypherParams.currentUser.id
@@ -237,7 +231,7 @@ type Mutation {
     RETURN t
     """)
     AddTicketCommits(tick: _TicketInput!, commit: _CommitInput!): Ticket
-    #    @hasScope(scopes:["Ticket:Comment"])
+    @hasScope(scopes:["Ticket:Commit"])
     @cypher(statement:"""
     MATCH (t:Ticket),(u:User)
     WHERE t.id = $tick.id AND u.id = $cypherParams.currentUser.id
@@ -251,7 +245,7 @@ type Mutation {
     RETURN t
     """)
     UpdateViewingProject(project: _ProjectInput!): String
-    #    @hasScope(scopes:["Ticket:Comment"])
+    @hasScope(scopes:["User:Update"])
     @cypher(statement:"""
     MATCH (u:User)
     WHERE u.id = $cypherParams.currentUser.id
@@ -288,7 +282,7 @@ type Mutation {
     """)
 
     CreateUser(firstName: String!, lastName: String, username: String!, email: String!, password: String!, role: Role!): User
-#    @hasScope(scopes:["User:Create"])
+    @hasScope(scopes:["User:Create"])
     @cypher(statement:"""
     CREATE (u:User {
     id : apoc.create.uuid(),
@@ -304,7 +298,7 @@ type Mutation {
     """)
 
     TicToToDo(tick: _TicketInput!, from: String!): Ticket
-#    @hasScope(scopes:["Ticket:Edit"])
+    @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
     CALL apoc.do.when($from = 'done',
     'MATCH (t:Ticket) WHERE t.id = $tick.id SET t.sprintPos = 0  SET t.done = false RETURN t',
@@ -314,7 +308,7 @@ type Mutation {
     """)
 
     TicToDoing(tick: _TicketInput!, from: String!): Ticket
-#    @hasScope(scopes:["Ticket:Edit"])
+    @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
     CALL apoc.do.when($from = 'done',
     'MATCH (t:Ticket) WHERE t.id = $tick.id SET t.sprintPos = 1  SET t.done = false RETURN t',
@@ -324,7 +318,7 @@ type Mutation {
     """)
 
     TicToDone(tick: _TicketInput!): Ticket
-#    @hasScope(scopes:["Ticket:Edit"])
+    @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
     MATCH (t:Ticket)
     WHERE t.id = $tick.id
@@ -334,7 +328,7 @@ type Mutation {
     """)
 
     StartToSprint(tick: _TicketInput!, sprintAdd: _SprintInput! ): Ticket
-    #    @hasScope(scopes:["Ticket:Edit", "Sprint:Edit"])
+    @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
     MATCH (t:Ticket),(s:Sprint)
     WHERE t.id = $tick.id AND s.id = $sprintAdd.id
@@ -343,7 +337,7 @@ type Mutation {
     """)
 
     SprintToStart(tick: _TicketInput!, sprintRemove: _SprintInput! ): Ticket
-#    @hasScope(scopes:["Ticket:Edit", "Sprint:Edit"])
+    @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
     MATCH (s:Sprint{id:$sprintRemove.id})-[rel1:SPRINT_TASK]->(t:Ticket {id:$tick.id})
     WITH t, rel1
@@ -352,7 +346,7 @@ type Mutation {
     """)
 
     CreateProject(title: String!, desc: String, label: String!, startDate: String!, endDate: String!, members: [_UserInput]!): Project
-#    @hasScope(scopes:["Project:Create"])
+    @hasScope(scopes:["Project:Create"])
     @cypher(statement:"""
     CREATE (p:Project{id: apoc.create.uuid(), title:$title,
     label:$label, startDate:$startDate, endDate:$endDate, desc:$desc, noOfTicks: 0, noOfSprints: 0 })
@@ -360,37 +354,31 @@ type Mutation {
     UNWIND users AS user
     MATCH (u:User)
     WHERE u.id = user.id
-    CREATE (p)<-[:TEAM_MEMBER {role: u.role}]-(u)
+    CREATE (p)<-[:TEAM_MEMBER]-(u)
     RETURN p
     """)
-    AddProjectMembers(members: [_UserInput]!, project: _ProjectInput!): Project
-#    @hasScope(scopes:["Project:EditMembers"])
+    AddProjectMember(member:_UserInput!, project: _ProjectInput!): User
+    @hasScope(scopes:["Project:UpdateMembers"])
     @cypher(statement:"""
-    MATCH (p:Project)
-    WHERE p.id = $project.id
-    WITH $members AS users, p
-    UNWIND users AS user
-    MATCH (u:User)
-    WHERE u.id = user.id
-    CREATE (p)<-[:TEAM_MEMBER {role: u.role}]-(u)
-    RETURN p
+    MATCH (p:Project),(u:User)
+    WHERE p.id = $project.id AND u.id = $member.id
+    CREATE (p)<-[:TEAM_MEMBER]-(u)
+    RETURN u
     """)
-    RemoveProjectMembers(members: [_UserInput]!, project: _ProjectInput!): Project
-#    @hasScope(scopes:["Project:EditMembers"])
+    RemoveProjectMember(member: _UserInput!, project: _ProjectInput!): User
+    @hasScope(scopes:["Project:UpdateMembers"])
     @cypher(statement:"""
-    MATCH (p:Project)
-    WHERE p.id = $project.id
-    WITH $members AS users, p
-    UNWIND users AS user
-    MATCH (p)<-[rel:TEAM_MEMBER {role: u.role}]-(u:User)
-    WHERE u.id = user.id
-    SET u.viewingPro = ""
+    MATCH (p)<-[rel:TEAM_MEMBER]-(u:User)
+    WHERE p.id = $project.id AND u.id = $member.id
+    OPTIONAL MATCH (u)-[rel2: ASSIGNED_TASK]->(:Ticket)<-[:TICKET]-(p)
+    SET u.viewingPro = ''
     DELETE rel
-    RETURN p
+    DELETE rel2
+    RETURN u
     """)
 
     CreateSprint(startDate: String!, endDate: String!, project: _ProjectInput!): Sprint
-#    @hasScope(scopes:["Sprint:Create"])
+    @hasScope(scopes:["Sprint:Create"])
     @cypher(statement:"""
     MATCH (p:Project) WHERE p.id = $project.id
     CREATE (p)-[:SPRINT]->(sp: Sprint)
@@ -404,7 +392,7 @@ type Mutation {
     """)
 
     CreateTicket(hourEstimate: Int, title: String!, desc: String, project: _ProjectInput!): Ticket
-#    @hasScope(scopes:["Ticket:Create"])
+    @hasScope(scopes:["Ticket:Create"])
     @cypher(statement:"""
     MATCH (p:Project),(u:User)
     WHERE p.id = $project.id AND u.id = $cypherParams.currentUser.id

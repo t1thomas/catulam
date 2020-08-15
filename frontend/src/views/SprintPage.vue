@@ -13,7 +13,7 @@
         </h1>
         <v-spacer />
         <v-tab> Sprint Board</v-tab>
-        <v-tab> BurnDown</v-tab>
+        <v-tab> Analysis</v-tab>
       </v-tabs>
 
       <v-tabs-items v-model="tab">
@@ -26,11 +26,11 @@
 
 <script>
 import { mapGetters } from 'vuex';
-import ChartsContainer from '@/components/sprintBoard/ChartsContainer.vue';
-import sprintColumns from '../components/sprintBoard/sprintColumns.vue';
+import ChartsContainer from '@/components/sprints/ChartsContainer.vue';
+import sprintColumns from '../components/sprints/sprintColumns.vue';
 
 export default {
-  name: 'SprintBoard',
+  name: 'SprintPage',
   components: {
     sprintColumns,
     ChartsContainer,

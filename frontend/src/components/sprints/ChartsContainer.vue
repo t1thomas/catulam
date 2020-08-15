@@ -5,21 +5,21 @@
         <burn-down-chart />
       </v-col>
       <v-col cols="6">
-        <div>
-          Pie
-        </div>
+        <ticks-per-user-chart />
       </v-col>
     </v-row>
   </v-tab-item>
 </template>
 
 <script>
-import BurnDownChart from '@/components/sprintBoard/Charts/BurnDownChart.vue';
+import BurnDownChart from '@/components/sprints/Charts/BurnDownChart.vue';
+import TicksPerUserChart from '@/components/sprints/Charts/TicksPerUserChart.vue';
 
 export default {
   name: 'ChartsContainer',
   components: {
     BurnDownChart,
+    TicksPerUserChart,
   },
 };
 </script>

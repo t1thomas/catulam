@@ -11,10 +11,14 @@ const gqlQueries = {
       refreshAccess
     }
   `,
-  SUB_BACKLOG_UPDATE: gql`
-    subscription($proId: String!) {
-      update(proId: $proId)
-    }`,
+  SUB_ADD_PRO_MEMBER: gql`
+    subscription($user: _UserInput!) {
+      addProMem(user: $user)
+  }`,
+  SUB_MEMBER_REMOVE: gql`
+    subscription($user: _UserInput!) {
+      removeProMem(user: $user)
+  }`,
   SUB_TICKET_UPDATE: gql`
     subscription($project: _ProjectInput!) {
     tickUpdate(project: $project)
@@ -245,34 +249,12 @@ const gqlQueries = {
         }
       }
     }`,
-  USER_TASKS: gql`
-    query($username: String!) {
-      User(filter: { username: $username }) {
-        projects {
-          Project {
-            id
-            label
-            sprints {
-              id
-              sprintNo
-              active
-            }
-            tickets(filter: { assignee: { username: $username } }) {
-              id
-              issueNumber
-              title
-              hourEstimate
-            }
-          }
-        }
-      }
-    }`,
   UPDATE_VIEWING_PRO: gql`mutation($project: _ProjectInput!) {
     UpdateViewingProject(project: $project)
   }`,
-  // All Projects that currentUser is member of
-  PROJECTS: gql`query($username: String!) {
-    Project(filter: { members_single: { User: { username: $username } } }) {
+  // All elements required for the application filter each element so the is member of
+  PROJECT_ELEMENTS: gql`query($username: String!) {
+    PROJECTS: Project(filter: { members_single: { username: $username } }) {
       id
       title
       label
@@ -282,17 +264,13 @@ const gqlQueries = {
       noOfTicks
       noOfSprints
       members {
-        User {
-          id
-        }
+        id
         role
       }
     }
-  }`,
-  // All Tickets from projects that currentUser is member of
-  TICKETS: gql`query($username: String!) {
-    Ticket(
-      filter: { project: { members_some: { User: { username: $username } } } }
+
+    TICKETS: Ticket(
+      filter: { project: { members_some: { username: $username } } }
     ) {
       id
       issueNumber
@@ -320,7 +298,7 @@ const gqlQueries = {
           id
         }
       }
-      userStory{
+      userStory {
         id
       }
       commits {
@@ -337,10 +315,9 @@ const gqlQueries = {
         id
       }
     }
-  }`,
-  USER_STORIES: gql`query($username: String!) {
-    UserStory(
-      filter: { project: { members_some: { User: { username: $username } } } }
+
+    USER_STORIES: UserStory(
+      filter: { project: { members_some: { username: $username } } }
     ) {
       id
       storyText
@@ -348,10 +325,8 @@ const gqlQueries = {
         id
       }
     }
-  }`,
-  SPRINTS: gql`query($username: String!) {
-    Sprint(
-      filter: { project: { members_some: { User: { username: $username } } } }
+    SPRINTS: Sprint(
+      filter: { project: { members_some: { username: $username } } }
     ) {
       id
       sprintNo
@@ -387,17 +362,10 @@ const gqlQueries = {
         endDate
         desc
         noOfTicks
+        noOfSprints
         members {
-          User {
-            id
-          }
+          id
           role
-        }
-        sprints {
-          id
-        }
-        tickets {
-          id
         }
       }
     }`,
@@ -445,6 +413,8 @@ const gqlQueries = {
         id
         timestamp
         message
+        newHourEstimate
+        prevHourEstimate
         User {
           id
         }
@@ -488,14 +458,15 @@ const gqlQueries = {
     }
   }`,
   ADD_PROJECT_MEMBER: gql`
-    mutation($members: [_UserInput]!, $project: _ProjectInput!) {
-      AddProjectMembers(members: $members, project: $project) {
+    mutation($member: _UserInput!, $project: _ProjectInput!) {
+      AddProjectMember(member: $member, project: $project) {
         id
+        role
       }
     }`,
   REMOVE_PROJECT_MEMBER: gql`
-    mutation($members: [_UserInput]!, $project: _ProjectInput!) {
-      RemoveProjectMembers(members: $members, project: $project) {
+    mutation($member: _UserInput!, $project: _ProjectInput!) {
+      RemoveProjectMember(member: $member, project: $project) {
         id
       }
     }`,
@@ -605,7 +576,7 @@ const gqlQueries = {
         $uStoryAdd: _UserStoryInput
         $sprintAdd: _SprintInput
       ) {
-        UStoryTicketSwitch(
+        TicketLocSwitch(
           project: $project
           tick: $tick
           uStoryRemove: $uStoryRemove
