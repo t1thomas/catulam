@@ -114,7 +114,14 @@ export default {
       'detDrawShow',
     ]),
     navigate() {
-      console.log('dont forget navigation to backlog and open dialog');
+      this.$router.push({
+        path: '/backlog',
+        query: { proId: this.projectId },
+      });
+      this.updateViewingPro();
+    },
+    updateViewingPro() {
+      this.$store.dispatch('updateViewingPro', { project: { id: this.projectId } });
     },
   },
 };

@@ -116,9 +116,6 @@ export default {
     ...mapActions([
       'snackBarOn',
     ]),
-    print() {
-      console.log(this.hours);
-    },
     setOriginalHours() {
       this.hours = this.ticket.hourEstimate;
     },

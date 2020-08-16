@@ -58,18 +58,6 @@
           </template>
         </v-autocomplete>
       </v-card-text>
-      <v-col
-        cols="2"
-        style="align-self: center;"
-      >
-        <v-btn
-          color="primary"
-          dark
-          @click="print"
-        >
-          Print
-        </v-btn>
-      </v-col>
     </v-card>
     <remove-mem-dialog />
   </v-container>
@@ -138,10 +126,6 @@ export default {
           type: 'error',
         });
       });
-    },
-    print(data) {
-      console.log(data);
-      // console.log(this.proMembers);
     },
   },
 };

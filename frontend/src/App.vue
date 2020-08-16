@@ -1,29 +1,11 @@
 <template>
   <v-app id="inspire">
-    <v-navigation-drawer
-      v-if="currentUser"
-      v-model="drawer"
-      app
-      permanent
-      color="accent"
-    >
-      <nav-draw-items />
-      <template v-slot:append>
-        <v-container>
-          <v-btn
-            block
-            @click="logout"
-          >
-            Logout
-          </v-btn>
-        </v-container>
-      </template>
-    </v-navigation-drawer>
-    <snackbar />
-    <tic-det-drawer />
+    <nav-draw-items />
     <v-content>
       <router-view />
     </v-content>
+    <snackbar />
+    <tic-details-drawer />
   </v-app>
 </template>
 
@@ -31,7 +13,6 @@
 
 import { mapGetters } from 'vuex';
 import gqlQueries from '@/graphql/gql-queries';
-import { onLogout } from './vue-apollo';
 import snackbar from './components/snackbar.vue';
 import navDrawItems from './components/appMain/navDrawItems.vue';
 import TicDetailsDrawer from './components/Ticket/drawer component/TicDetailsDrawer.vue';
@@ -39,9 +20,8 @@ import TicDetailsDrawer from './components/Ticket/drawer component/TicDetailsDra
 export default {
   name: 'LayoutDefault',
   components: {
-    'tic-det-drawer': TicDetailsDrawer,
+    TicDetailsDrawer,
     snackbar,
-    // eslint-disable-next-line vue/no-unused-components
     navDrawItems,
   },
   data: () => ({
@@ -58,6 +38,7 @@ export default {
   computed: {
     ...mapGetters([
       'getViewingProject',
+      'getGravatar',
     ]),
     gravatar() {
       return `https://gravatar.com/avatar/${this.currentUser.avatar}?d=identicon`;
@@ -95,13 +76,11 @@ export default {
   },
   methods: {
     async fetchAppDataSet() {
-      // const payload = { username: this.currentUser.username };
       await this.$store.dispatch('fetchAllUserList');
       await this.$store.dispatch('fetchProjectElements');
     },
     updateRoute() {
       const currrentPage = this.$router.currentRoute.name;
-      console.log(currrentPage);
       switch (currrentPage) {
         case 'backlog':
           this.$router.push({
@@ -138,9 +117,6 @@ export default {
       this.obsSpUpdate = null;
       this.obsSpDelete = null;
     },
-    async logout() {
-      await onLogout(this.$apollo.provider.defaultClient);
-    },
     activateProSubscriber() {
       const self = this;
       this.obsMemAdd = this.$apollo.subscribe({
@@ -155,7 +131,6 @@ export default {
           await self.$store.dispatch('fetchProjectElements');
         },
         error(error) {
-          console.log('error obsMemAdd');
           self.$store.dispatch('snackBarOn', {
             message: error,
             type: 'error',
@@ -177,7 +152,6 @@ export default {
           await self.$store.dispatch('fetchCurrentUser');
         },
         error(error) {
-          console.log('erorr obsMemRemove');
           self.$store.dispatch('snackBarOn', {
             message: error,
             type: 'error',
@@ -194,11 +168,9 @@ export default {
       this.obsTickUpdate.subscribe({
         async next(response) {
           const { tickUpdate } = response.data;
-          console.log(tickUpdate);
           await self.$store.dispatch('updateTicketById', tickUpdate);
         },
         error(error) {
-          console.log('eror here');
           self.$store.dispatch('snackBarOn', {
             message: error,
             type: 'error',
@@ -213,11 +185,9 @@ export default {
       this.obstTickDelete.subscribe({
         async next(response) {
           const { tickDelete } = response.data;
-          console.log(tickDelete);
           await self.$store.dispatch('deleteTicketByID', tickDelete);
         },
         error(error) {
-          console.log('obstTickDelete error');
           self.$store.dispatch('snackBarOn', {
             message: error,
             type: 'error',
@@ -231,7 +201,6 @@ export default {
       this.obsUstoryUpdate.subscribe({
         async next(response) {
           const { uSUpdate } = response.data;
-          console.log(uSUpdate);
           await self.$store.dispatch('updateUStoryById', uSUpdate);
         },
         error(error) {
@@ -248,11 +217,9 @@ export default {
       this.obsUstoryDelete.subscribe({
         async next(response) {
           const { uSDelete } = response.data;
-          console.log(uSDelete);
           await self.$store.dispatch('deleteUserStoryByID', uSDelete);
         },
         error(error) {
-          console.log('err');
           self.$store.dispatch('snackBarOn', {
             message: error,
             type: 'error',
@@ -266,7 +233,6 @@ export default {
       this.obsSpUpdate.subscribe({
         async next(response) {
           const { spUpdate } = response.data;
-          console.log(spUpdate);
           await self.$store.dispatch('updateSprintById', spUpdate);
         },
         error(error) {
@@ -283,11 +249,9 @@ export default {
       this.obsSpDelete.subscribe({
         async next(response) {
           const { spDelete } = response.data;
-          console.log(spDelete);
           await self.$store.dispatch('deleteUserStoryByID', spDelete);
         },
         error(error) {
-          console.log('err');
           self.$store.dispatch('snackBarOn', {
             message: error,
             type: 'error',

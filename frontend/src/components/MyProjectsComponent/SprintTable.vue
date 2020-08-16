@@ -2,7 +2,7 @@
   <not-found-card
     v-if="proSprints.length <= 0"
     type="Sprint"
-    @createAction="sPlanShow"
+    @createAction="sPlanNavigation"
   />
   <v-card
     v-else
@@ -91,17 +91,22 @@ export default {
     },
   },
   methods: {
-    sPlanShow() {
+    sPlanNavigation() {
       this.$router.push({
-        path: '/backlog',
-        query: { proId: this.currProject.id },
+        path: '/sPlanner',
+        query: { proId: this.projectId },
       });
+      this.updateViewingPro();
     },
     sprintNavigation(sprint) {
       this.$router.push({
         path: '/sprint',
-        query: { sprintId: sprint.id, proId: this.currProject.id },
+        query: { sprintId: sprint.id, proId: this.projectId },
       });
+      this.updateViewingPro();
+    },
+    updateViewingPro() {
+      this.$store.dispatch('updateViewingPro', { project: { id: this.projectId } });
     },
   },
 };

@@ -1,5 +1,7 @@
 <template>
-  <v-card>
+  <v-card
+    color="#273666"
+  >
     <v-toolbar flat>
       <v-toolbar-title class="body-1">
         Sprints ({{ sprints.length }})
@@ -20,17 +22,14 @@
         <span class="caption">Add new Sprint</span>
       </v-tooltip>
     </v-toolbar>
-    <v-list
-      style="background: rgb(39, 54, 102); width: 100%; min-height: 89vh; max-height: 89vh;
-       overflow-y: auto; overflow-x: hidden;"
-    >
+    <v-card-text style="min-height: 89vh; max-height: 89vh; overflow-y: scroll">
       <v-list-item
         v-for="sprint in sprints"
         :key="sprint.id"
       >
         <sprint-item :sprint="sprint" />
       </v-list-item>
-    </v-list>
+    </v-card-text>
   </v-card>
 </template>
 

@@ -16,8 +16,7 @@ export default async function refreshToken() {
       localStorage.setItem(AUTH_TOKEN, token);
     }
     return token;
-  }).catch((e) => {
-    console.error(e);
+  }).catch(() => {
     throw new Error('Invalid Token, unable to access resource');
   });
 }

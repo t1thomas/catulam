@@ -4,6 +4,7 @@
       ripple
       tile
       style="background: rgb(39, 54, 102)"
+      :disabled="!message.plusBtn"
       @click="$emit('createAction')"
     >
       <div
@@ -54,10 +55,17 @@ export default {
     message() {
       switch (this.type) {
         case 'Sprint':
+          if (this.currentUser.role === 'pm') {
+            return {
+              title: '0 Sprints Found',
+              subtitle: 'Add new Sprint (Open Sprint Planner)',
+              plusBtn: true,
+            };
+          }
           return {
             title: '0 Sprints Found',
-            subtitle: 'Add new Sprint (Open BackLog)',
-            plusBtn: true,
+            subtitle: '',
+            plusBtn: false,
           };
         case 'UStory':
           return {

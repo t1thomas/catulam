@@ -6,74 +6,78 @@ import moment from 'moment';
 import gqlQueries from '../graphql/gql-queries';
 
 Vue.use(Vuex);
-
-export default new Vuex.Store({
-  state: {
-    backlogTicMove: {
-      ticketId: null,
-      removedFrom: null,
-      addedTo: null,
-      evt: null,
-    },
-    sPlanTicMove: {
-      ticketId: null,
-      removedFrom: null,
-      addedTo: null,
-      evt: null,
-    },
-    addCommitOverLay: false,
-    sBoardTicMove: {
-      ticketId: null,
-      removedFrom: null,
-      addedTo: null,
-      evt: null,
-    },
-    nTicketDialog: {
-      show: false,
-    },
-    nUStoryDialog: {
-      show: false,
-    },
-    nSpDialog: false,
-    showUSDialog: false,
-    nProDialog: {
-      show: false,
-    },
-    remMemDialog: {
-      show: false,
-      member: null,
-    },
-    snackBar: {
-      show: false,
-      message: '',
-      type: '',
-    },
-    detailsDrawer: {
-      show: false,
-      ticketId: null,
-    },
-    delUSDialog: {
-      show: false,
-      userStoryId: null,
-    },
-    detDrawerUStory: {
-      show: false,
-      userStoryId: null,
-    },
-    dateMenu: false,
-    proListTabsModel: 0,
-    currentUser: null,
-    carouselModelParent: 1,
-    backLogData: [],
-    sprintBoardData: null,
-    allUserList: [],
-    refreshTask: null,
-    projects: [],
-    tickets: [],
-    userStories: [],
-    sprints: [],
+const intialState = {
+  backlogTicMove: {
+    ticketId: null,
+    removedFrom: null,
+    addedTo: null,
+    evt: null,
   },
+  sPlanTicMove: {
+    ticketId: null,
+    removedFrom: null,
+    addedTo: null,
+    evt: null,
+  },
+  addCommitOverLay: false,
+  sBoardTicMove: {
+    ticketId: null,
+    removedFrom: null,
+    addedTo: null,
+    evt: null,
+  },
+  nTicketDialog: {
+    show: false,
+  },
+  nUStoryDialog: {
+    show: false,
+  },
+  nSpDialog: false,
+  showUSDialog: false,
+  nProDialog: {
+    show: false,
+  },
+  remMemDialog: {
+    show: false,
+    member: null,
+  },
+  snackBar: {
+    show: false,
+    message: '',
+    type: '',
+  },
+  detailsDrawer: {
+    show: false,
+    ticketId: null,
+  },
+  delUSDialog: {
+    show: false,
+    userStoryId: null,
+  },
+  detDrawerUStory: {
+    show: false,
+    userStoryId: null,
+  },
+  dateMenu: false,
+  proListTabsModel: 0,
+  taskListTabsModel: 0,
+  currentUser: null,
+  carouselModelParent: 1,
+  backLogData: [],
+  sprintBoardData: null,
+  allUserList: [],
+  refreshTask: null,
+  projects: [],
+  tickets: [],
+  userStories: [],
+  sprints: [],
+};
+export default new Vuex.Store({
+  state: { ...intialState },
   mutations: {
+    clear_state(state) {
+      Object.assign(state, intialState);
+    },
     set_uSDialogShow(state, obj) {
       state.showUSDialog = obj;
     },
@@ -82,7 +86,6 @@ export default new Vuex.Store({
     },
     add_project(state, obj) {
       state.projects = [...state.projects, obj];
-      console.log(obj);
     },
     add_pro_mem(state, obj) {
       const proIndex = state.projects.findIndex((pro) => pro.id === obj.proId);
@@ -177,7 +180,6 @@ export default new Vuex.Store({
     delete_ticket(state, obj) {
       const index = state.tickets.findIndex((tick) => tick.id === obj.id);
       if (index !== -1) {
-        console.log('deleting');
         state.tickets.splice(index, 1);
       }
     },
@@ -195,6 +197,9 @@ export default new Vuex.Store({
     },
     set_proLstTabModel(state, obj) {
       state.proListTabsModel = obj;
+    },
+    set_TskLstTabModel(state, obj) {
+      state.taskListTabsModel = obj;
     },
     set_nSpDialog(state, obj) {
       state.nSpDialog = obj;
@@ -321,7 +326,6 @@ export default new Vuex.Store({
       state.snackBar.type = '';
     },
     set_snackBarShow(state, obj) {
-      console.log(obj.message);
       state.snackBar.message = obj.message;
       state.snackBar.type = obj.type;
       state.snackBar.show = true;
@@ -331,7 +335,6 @@ export default new Vuex.Store({
         state.detailsDrawer.show = obj.show;
         state.detailsDrawer.ticketId = null;
       } else {
-        console.log(obj);
         state.detailsDrawer.show = obj.show;
         state.detailsDrawer.ticketId = obj.ticketId;
       }
@@ -412,13 +415,9 @@ export default new Vuex.Store({
           PROJECTS, TICKETS, USER_STORIES, SPRINTS,
         } = response.data;
         commit('set_projects', PROJECTS);
-        console.log(PROJECTS);
         commit('set_tickets', TICKETS);
-        console.log(TICKETS);
         commit('set_userStories', USER_STORIES);
-        console.log(USER_STORIES);
         commit('set_sprints', SPRINTS);
-        console.log(SPRINTS);
       }).catch((error) => {
         commit('set_snackBarShow', {
           message:
@@ -482,7 +481,6 @@ export default new Vuex.Store({
         fetchPolicy: 'no-cache',
       }).then((response) => {
         const { getCurrentUser } = response.data;
-        console.log(getCurrentUser);
         commit('set_currentUser', getCurrentUser);
         dispatch('autoRefresh');
       }).catch((error) => {
@@ -506,6 +504,8 @@ export default new Vuex.Store({
       if (typeof localStorage !== 'undefined') {
         localStorage.removeItem(process.env.VUE_APP_AUTH_TOKEN);
       }
+      // clear vuex state
+      commit('clear_state');
     },
     async logoutUser({ commit }) {
       await apolloClient.mutate({
@@ -516,6 +516,8 @@ export default new Vuex.Store({
         commit('set_RefreshTask', null);
         // and force user to login
         Vue.$router.push('/');
+        // clear vuex state
+        commit('clear_state');
       }).catch((error) => {
         commit('set_currentUser', null);
         // and force user to login
@@ -523,6 +525,8 @@ export default new Vuex.Store({
         commit('set_snackBarShow', { message: error, type: 'error' });
         // remove timer that requests refresh token
         commit('set_RefreshTask', null);
+        // clear vuex state
+        commit('clear_state');
       });
     },
     async fetchAllUserList({ commit }) {
@@ -532,16 +536,13 @@ export default new Vuex.Store({
       })
         .then((response) => {
           const { User } = response.data;
-          console.log(User);
           commit('set_allUserList', User);
         })
         .catch((error) => {
-          // console.log('Unable to fetch Users');
           commit('set_snackBarShow', { message: error, type: 'error' });
         });
     },
     deleteTicketByID({ commit }, payload) {
-      console.log('deleteTicketByID');
       commit('set_DrawerShow', { show: false });
       commit('delete_ticket', payload);
     },
@@ -554,15 +555,12 @@ export default new Vuex.Store({
       commit('delete_sprint', obj);
     },
     updateTicketById({ commit }, obj) {
-      console.log('updateTicketById');
       commit('update_ticket', obj);
     },
     updateUStoryById({ commit }, obj) {
-      console.log('updateUStoryById');
       commit('update_uStory', obj);
     },
     updateSprintById({ commit }, obj) {
-      console.log('updateSprintById');
       commit('update_sprint', obj);
     },
     async TicketSwitch({ commit }, payload) {
@@ -691,8 +689,11 @@ export default new Vuex.Store({
     nProDialogShow({ commit }, val) {
       commit('set_nProDialog', val);
     },
-    onTabChange({ commit }, value) {
+    onProTabChange({ commit }, value) {
       commit('set_proLstTabModel', value);
+    },
+    onTskTabChange({ commit }, value) {
+      commit('set_TskLstTabModel', value);
     },
     uSDialogShow({ commit }, value) {
       commit('set_uSDialogShow', value);
@@ -732,6 +733,10 @@ export default new Vuex.Store({
     // get project members by project ID
     getProjectTickets: (state) => (projectId) => state.tickets
       .filter((tick) => tick.project.id === projectId),
+    getProTicksByUser: (state, getters) => (proID) => getters.getProjectTickets(proID)
+      .filter((tick) => tick.done === false
+        && tick.assignee !== null
+        && tick.assignee.id === state.currentUser.id),
     getProjectTicketsNoSp: (state) => (projectId) => state.tickets
       .filter((tick) => tick.project.id === projectId
         && tick.sprint === null),

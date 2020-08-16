@@ -1,17 +1,18 @@
 <template>
-  <v-content>
-    <v-card color="#5c535366">
-      <v-card-title
-        class="pa-0"
-      >
-        <toolbar />
-      </v-card-title>
-      <v-divider />
-      <v-card-text class="pa-2">
-        <u-story-rows />
-      </v-card-text>
-    </v-card>
-  </v-content>
+  <v-card
+    color="#5c535366"
+    width="100%"
+  >
+    <v-card-title
+      class="pa-0"
+    >
+      <toolbar />
+    </v-card-title>
+    <v-divider />
+    <v-card-text class="pa-2">
+      <u-story-rows />
+    </v-card-text>
+  </v-card>
 </template>
 <script>
 import UStoryRows from '@/components/backlog/UStoryRows.vue';

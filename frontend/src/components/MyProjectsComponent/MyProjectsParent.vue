@@ -70,7 +70,7 @@ export default {
         return this.$store.state.proListTabsModel;
       },
       set(val) {
-        this.$store.dispatch('onTabChange', val);
+        this.$store.dispatch('onProTabChange', val);
       },
     },
     ...mapState([

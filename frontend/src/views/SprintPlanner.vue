@@ -2,7 +2,6 @@
   <v-container>
     <v-row
       dense
-      style="min-height:89vh;max-height: 89vh;overflow-y: hidden"
     >
       <v-col
         cols="8"

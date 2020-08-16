@@ -85,12 +85,8 @@ export default {
     setSaving() {
       this.saving = !this.saving;
     },
-    print() {
-      console.log(this.member);
-    },
     async remove() {
       this.setSaving();
-      console.log(this.member);
       await this.$apollo.mutate({
         mutation: gqlQueries.REMOVE_PROJECT_MEMBER,
         fetchPolicy: 'no-cache',

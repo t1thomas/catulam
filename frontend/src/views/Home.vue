@@ -1,24 +1,36 @@
 <template>
   <v-container
-    v-if="getCurrentUser !== null"
     fluid
     class="fill-height"
   >
-    <DevHome v-if="userType==='dev'" />
-    <PMHome v-if="userType==='pm'" />
+    <v-row>
+      <v-col
+        cols="4"
+      >
+        <my-tasks />
+      </v-col>
+      <v-col
+        cols="8"
+      >
+        <project-list />
+      </v-col>
+    </v-row>
+    <n-pro-dialog v-if="userType==='pm'" />
   </v-container>
 </template>
 
 <script>
 import { mapGetters } from 'vuex';
-import DevHome from '../components/dev/dashboard/DevHome.vue';
-import PMHome from '../components/pm/dashboard/PMHome.vue';
+import NProDialog from '@/components/Project/dialogs/NProDialog.vue';
+import ProjectList from '@/components/MyProjectsComponent/MyProjectsParent.vue';
+import MyTasks from '@/components/MyTasksComponent/MyTasks.vue';
 
 export default {
   name: 'Home',
   components: {
-    DevHome,
-    PMHome,
+    NProDialog,
+    ProjectList,
+    MyTasks,
   },
   computed: {
     ...mapGetters([
@@ -28,11 +40,5 @@ export default {
       return this.getCurrentUser.role;
     },
   },
-  // mounted() {
-  //   if (this.getCurrentUser === null) {
-  //     console.log('push to login');
-  //     this.$router.push('/');
-  //   }
-  // },
 };
 </script>
