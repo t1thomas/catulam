@@ -475,7 +475,7 @@ export default new Vuex.Store({
       commit('set_dateMenu', payload);
     },
     async fetchCurrentUser({ commit, dispatch }) {
-      // const inLogin = Vue.$router.currentRoute.name === 'login';
+      const inLogin = Vue.$router.currentRoute.name === 'login';
       apolloClient.query({
         query: gqlQueries.CURRENT_USER,
         fetchPolicy: 'no-cache',
@@ -486,11 +486,12 @@ export default new Vuex.Store({
       }).catch((error) => {
         commit('set_currentUser', null);
         // only show error message if request was made outside login page
-        // if (!inLogin) {
-        commit('set_snackBarShow', {
-          message: error,
-          type: 'error',
-        });
+        if (!inLogin) {
+          commit('set_snackBarShow', {
+            message: error,
+            type: 'error',
+          });
+        }
       });
     },
     removeUser({ commit }) {

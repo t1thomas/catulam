@@ -8,5 +8,5 @@ require('dotenv').config();
 module.exports = new Neode(
   process.env.NEO4J_URI || 'bolt://localhost:7687',
   process.env.NEO4J_USER || 'neo4j',
-  process.env.NEO4J_PASSWORD || 'neo4j',
+  process.env.NEO4J_PASSWORD || 'test',
 );

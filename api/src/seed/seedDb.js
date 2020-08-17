@@ -1,49 +1,35 @@
-const { setContext } = require('apollo-link-context');
+const md5 = require('md5');
+const bcrypt = require('bcrypt');
+const newUsers = require('./seed-users');
+const driver = require('../neo4jDriver');
 
-const { ApolloClient } = require('apollo-client');
-const fetch = require('node-fetch');
-const { createHttpLink } = require('apollo-link-http');
-const { InMemoryCache } = require('apollo-cache-inmemory');
-const jwt = require('jsonwebtoken');
-const authScopes = require('../authScopes');
-
-const dBMutations = require('./seed-mutations');
-
-require('dotenv').config();
-
-// generate admin token, so CreateUser mutation can be used seed the database.
-function generateAdminToken() {
-  //  token expiration, 2min from current time
-  const exp = Math.floor(Date.now() / 1000) + (2 * 60);
-  const role = 'admin';
-  // get scopes based on user role 'admin'
-  const scope = authScopes.admin();
-  return jwt.sign({ exp, scope, role }, process.env.JWT_SECRET);
-}
-const httpLink = createHttpLink({
-  uri: process.env.GRAPHQL_URI,
-  fetch,
-  credentials: 'include',
+newUsers.forEach(async (user) => {
+  const session = driver.session();
+  try {
+    const salt = bcrypt.genSaltSync(Number(process.env.BCRYPTHASHCOST));
+    // generate hash of pass to be saved in db
+    const passHash = bcrypt.hashSync(user.password, salt);
+    // generate hash based on username, for gravatar art
+    const avatarHash = await md5(user.username);
+    // update user object with new credentials before pushing to DB
+    Object.assign(user, {
+      password: passHash,
+      avatarHash,
+    });
+    // run cypher query using driver
+    await session.run('CREATE (u:User)\n'
+        + 'SET u.id = apoc.create.uuid()\n'
+        + 'SET u.firstName = $user.firstName\n'
+        + 'SET u.lastName = $user.lastName\n'
+        + 'SET u.username = $user.username\n'
+        + 'SET u.password = $user.password\n'
+        + 'SET u.avatar = $user.avatarHash\n'
+        + 'SET u.viewingPro = $user.viewingPro\n'
+        + 'SET u.role = $user.role\n'
+        + 'RETURN u', { user });
+  } catch (e) {
+    throw new Error(e);
+  } finally {
+    await session.close();
+  }
 });
-
-const authLink = setContext(async (_, { headers }) => {
-  const token = await generateAdminToken();
-  // return the headers to the context so httpLink can read them
-  return {
-    headers: {
-      ...headers,
-      authorization: token,
-    },
-  };
-});
-
-const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
-});
-
-client.mutate({
-  fetchPolicy: 'no-cache',
-  mutation: dBMutations,
-}).then((data) => console.log(data))
-  .catch((error) => console.error(error));

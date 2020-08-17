@@ -128,7 +128,6 @@ const gqlQueries = {
         project: $project
       ) {
         id
-        active
         sprintNo
         startDate
         endDate
@@ -140,18 +139,15 @@ const gqlQueries = {
   UPDATE_SPRINT: gql`
     mutation(
     $sprint: _SprintInput!,
-    $active: Boolean,
     $startDate: String,
     $endDate: String,
   ) {
     UpdateSprint(
       sprint: $sprint,
-      active: $active,
       startDate: $startDate,
       endDate: $endDate,
     ) {
       id
-      active
       startDate
       endDate
       project {
@@ -166,7 +162,6 @@ const gqlQueries = {
         firstName
         lastName
         fullName
-        email
         avatar
       }
     }`,
@@ -330,7 +325,6 @@ const gqlQueries = {
     ) {
       id
       sprintNo
-      active
       startDate
       endDate
       project {
@@ -438,7 +432,6 @@ const gqlQueries = {
       lastName
       fullName
       username
-      email
       avatar
       role
       viewingPro

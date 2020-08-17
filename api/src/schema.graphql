@@ -9,8 +9,8 @@ enum Role {
 type Token {
     token: String!
     ttl: Int!
+    user: User @relation(name: "JWT", direction: IN)
 }
-
 
 type User {
     id: ID!
@@ -18,14 +18,14 @@ type User {
     lastName: String!
     fullName: String
     username: String!
-    email: String!
     password: String! @hasRole(roles:[admin])
-    projects: [Project] @relation(name: "TEAM_MEMBER", direction: OUT)
-    tickets: [Ticket] @relation(name: "ASSIGNED_TASK", direction: OUT)
-    created: [Ticket] @relation(name: "CREATED", direction: OUT)
     avatar: String
     viewingPro: String
     role: Role!
+    projects: [Project] @relation(name: "TEAM_MEMBER", direction: OUT)
+    tickets: [Ticket] @relation(name: "ASSIGNED_TASK", direction: OUT)
+    created: [Ticket] @relation(name: "CREATED", direction: OUT)
+    tokens: [Token] @relation(name: "JWT", direction: OUT)
     comments: [Comment]
     commits: [Commit]
 }
@@ -37,12 +37,12 @@ type Project {
     label: String!
     startDate: String!
     endDate: String!
+    noOfTicks: Int!
+    noOfSprints: Int!
     members: [User] @relation(name: "TEAM_MEMBER", direction: IN)
     userStories: [UserStory] @relation(name: "USER_STORY", direction: OUT)
     tickets: [Ticket] @relation(name: "TICKET", direction: OUT)
     sprints: [Sprint] @relation(name: "SPRINT", direction: OUT)
-    noOfTicks: Int!
-    noOfSprints: Int!
 }
 type Comment @relation(name: "COMMENT") {
     from: User
@@ -68,12 +68,12 @@ type Ticket {
     title: String!
     desc: String
     done: Boolean
+    creation_time: Int!
     userStory: UserStory @relation(name: "SUB_TASK", direction: IN)
     sprint: Sprint @relation(name: "SPRINT_TASK", direction: IN)
     project: Project @relation(name: "TICKET", direction: IN)
     assignee: User @relation(name: "ASSIGNED_TASK", direction: IN)
     creator: User @relation(name: "CREATED", direction: IN)
-    creation_time: Int!
     comments: [Comment]
     commits: [Commit]
 }
@@ -86,7 +86,6 @@ type UserStory {
 type Sprint {
     id: ID!
     sprintNo: Int!
-    active: Boolean!
     startDate: String!
     endDate: String!
     tickets: [Ticket] @relation(name: "SPRINT_TASK", direction: OUT)
@@ -160,7 +159,7 @@ type Mutation {
     SET us.storyText = $storyText
     RETURN us
     """)
-    UpdateSprint(sprint: _SprintInput!, active: Boolean, startDate: String, endDate: String):Sprint
+    UpdateSprint(sprint: _SprintInput!, startDate: String, endDate: String):Sprint
     @hasScope(scopes:["Sprint:Update"])
     @cypher(statement:"""
     MATCH (sp: Sprint {id: $sprint.id})
@@ -281,22 +280,6 @@ type Mutation {
     RETURN $accTokenObj
     """)
 
-    CreateUser(firstName: String!, lastName: String, username: String!, email: String!, password: String!, role: Role!): User
-    @hasScope(scopes:["User:Create"])
-    @cypher(statement:"""
-    CREATE (u:User {
-    id : apoc.create.uuid(),
-    firstName : $firstName,
-    lastName : $lastName,
-    username : $username,
-    email : $email,
-    password: $password,
-    avatar: $avatarHash,
-    viewingPro: '',
-    role: $role })
-    RETURN u
-    """)
-
     TicToToDo(tick: _TicketInput!, from: String!): Ticket
     @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
@@ -383,7 +366,6 @@ type Mutation {
     MATCH (p:Project) WHERE p.id = $project.id
     CREATE (p)-[:SPRINT]->(sp: Sprint)
     SET sp.id = apoc.create.uuid()
-    SET sp.active = false
     SET sp.startDate = $startDate
     SET sp.endDate = $endDate
     SET sp.sprintNo = p.noOfSprints + 1

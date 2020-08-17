@@ -19,9 +19,6 @@
               Tickets
             </th>
             <th>
-              Status
-            </th>
-            <th>
               Start ~ End
             </th>
           </tr>
@@ -38,24 +35,6 @@
             </td>
             <td>
               {{ getUnDoneTicksBySprint(sprint.id).length }}
-            </td>
-            <td>
-              <span v-if="sprint.active">
-                Active
-                <v-badge
-                  dot
-                  color="#3aaf25"
-                  inline
-                />
-              </span>
-              <span v-else>
-                In-active
-                <v-badge
-                  dot
-                  color="#ffae4a"
-                  inline
-                />
-              </span>
             </td>
             <td>
               {{ sprint.startDate }} ~ {{ sprint.endDate }}

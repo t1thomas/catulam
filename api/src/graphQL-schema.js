@@ -5,7 +5,6 @@ const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const md5 = require('md5');
 const neode = require('./neode');
 const authScopes = require('./authScopes');
 const verifyToken = require('./verifyAndDecodeToken');
@@ -488,21 +487,6 @@ const resolvers = {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
         await pubSub.publish('REMOVE_PRO_MEMBER', { removeProMem: result });
         return result;
-      } catch (e) {
-        throw new Error(e);
-      }
-    },
-    CreateUser: async (object, params, ctx, resolveInfo) => {
-      try {
-        const salt = bcrypt.genSaltSync(Number(process.env.BCRYPTHASHCOST));
-        // update params that will be inserted into db
-        Object.assign(params, {
-          // generate hash of pass to be saved in db
-          password: bcrypt.hashSync(params.password, salt),
-          // generate hash based on username, for gravatar art
-          avatarHash: await md5(params.username),
-        });
-        return await neo4jgraphql(object, params, ctx, resolveInfo);
       } catch (e) {
         throw new Error(e);
       }
