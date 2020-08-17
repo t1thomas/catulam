@@ -70,7 +70,7 @@ export default {
         case 'UStory':
           return {
             title: '0 User Stories Found',
-            subtitle: 'Add new User Story (Open BackLog)',
+            subtitle: 'Add new User Story',
             plusBtn: true,
           };
         case 'Ticket':

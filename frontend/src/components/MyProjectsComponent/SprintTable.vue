@@ -76,6 +76,7 @@ export default {
         query: { proId: this.projectId },
       });
       this.updateViewingPro();
+      this.$store.dispatch('nSprintDialog', true);
     },
     sprintNavigation(sprint) {
       this.$router.push({

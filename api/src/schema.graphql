@@ -148,10 +148,12 @@ type Mutation {
         uStoryAdd: _UserStoryInput,
         sprintAdd: _SprintInput
     ): Ticket
+    @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
     MATCH (t: Ticket {id: $tick.id})
     RETURN t
     """)
+
     UpdateUserStory(uStory: _UserStoryInput!, storyText: String!):UserStory
     @hasScope(scopes:["UserStory:Update"])
     @cypher(statement:"""
@@ -159,12 +161,14 @@ type Mutation {
     SET us.storyText = $storyText
     RETURN us
     """)
+
     UpdateSprint(sprint: _SprintInput!, startDate: String, endDate: String):Sprint
     @hasScope(scopes:["Sprint:Update"])
     @cypher(statement:"""
     MATCH (sp: Sprint {id: $sprint.id})
     RETURN sp
     """)
+
     CreateUserStory(storyText: String!, project: _ProjectInput!): UserStory
     @hasScope(scopes:["UserStory:Create"])
     @cypher(statement:"""
@@ -175,6 +179,7 @@ type Mutation {
     SET us.storyText = $storyText
     RETURN us
     """)
+
     DeleteUserStory(uStory: _UserStoryInput!, project: _ProjectInput!): UserStory
     @hasScope(scopes:["UserStory:Delete"])
     @cypher(statement:"""
@@ -183,6 +188,7 @@ type Mutation {
     DETACH DELETE us
     RETURN userStory
     """)
+
     DeleteTicket(tick: _TicketInput!, project: _ProjectInput!): Ticket
     @hasScope(scopes:["Ticket:Delete"])
     @cypher(statement:"""
@@ -191,12 +197,14 @@ type Mutation {
     DETACH DELETE t
     RETURN tick
     """)
+
     UpdateTicket(tick: _TicketInput!, issueNumber: Int, hourEstimate: Int, sprintPos: Int, title: String, desc: String, done: Boolean):Ticket
     @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
     MATCH (t: Ticket {id: $tick.id})
     RETURN t
     """)
+
     UpdateTicketAssignee(tick: _TicketInput!, user: _UserInput!): Ticket
     @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
@@ -210,6 +218,7 @@ type Mutation {
     YIELD value
     RETURN value.t
     """)
+
     RemoveTicketAssignee(tick: _TicketInput!): Ticket
     @hasScope(scopes:["Ticket:Update"])
     @cypher(statement:"""
@@ -217,6 +226,7 @@ type Mutation {
     DELETE rel
     RETURN t
     """)
+
     AddTicketComments(tick: _TicketInput!, message: String!): Ticket
     @hasScope(scopes:["Ticket:Comment"])
     @cypher(statement:"""
@@ -229,6 +239,7 @@ type Mutation {
     SET com.message = $message
     RETURN t
     """)
+
     AddTicketCommits(tick: _TicketInput!, commit: _CommitInput!): Ticket
     @hasScope(scopes:["Ticket:Commit"])
     @cypher(statement:"""
@@ -243,6 +254,7 @@ type Mutation {
     SET t.hourEstimate = $commit.newEst
     RETURN t
     """)
+
     UpdateViewingProject(project: _ProjectInput!): String
     @hasScope(scopes:["User:Update"])
     @cypher(statement:"""
@@ -252,6 +264,7 @@ type Mutation {
     WITH u
     RETURN u.viewingPro
     """)
+
     loginUser(username: String!, password: String!): JSON
     @cypher(statement:"""
     MATCH(u:User{username: $username})
@@ -340,6 +353,7 @@ type Mutation {
     CREATE (p)<-[:TEAM_MEMBER]-(u)
     RETURN p
     """)
+
     AddProjectMember(member:_UserInput!, project: _ProjectInput!): User
     @hasScope(scopes:["Project:UpdateMembers"])
     @cypher(statement:"""
@@ -348,6 +362,7 @@ type Mutation {
     CREATE (p)<-[:TEAM_MEMBER]-(u)
     RETURN u
     """)
+
     RemoveProjectMember(member: _UserInput!, project: _ProjectInput!): User
     @hasScope(scopes:["Project:UpdateMembers"])
     @cypher(statement:"""

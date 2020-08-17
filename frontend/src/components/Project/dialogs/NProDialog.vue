@@ -105,6 +105,7 @@
                 <template v-slot:activator="{ on }">
                   <v-text-field
                     v-model="startDate"
+                    readonly
                     label="Start Date*"
                     hint="MM/DD/YYYY format"
                     persistent-hint
@@ -116,6 +117,7 @@
                 <v-date-picker
                   v-model="startDate"
                   no-title
+                  :show-current="false"
                   @input="dateMenu1 = false"
                 />
               </v-menu>
@@ -135,6 +137,7 @@
                 <template v-slot:activator="{ on }">
                   <v-text-field
                     v-model="endDate"
+                    readonly
                     label="End Date*"
                     hint="MM/DD/YYYY format"
                     persistent-hint
@@ -146,6 +149,7 @@
                 <v-date-picker
                   v-model="endDate"
                   no-title
+                  :show-current="false"
                   @input="dateMenu2 = false"
                 />
               </v-menu>
@@ -177,6 +181,7 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import gqlQueries from '@/graphql/gql-queries';
+import moment from 'moment';
 
 export default {
   name: 'NProDialog',
@@ -187,14 +192,15 @@ export default {
     saving: false,
     startDate: '',
     endDate: '',
-    hours: 0,
     valid: true,
     selected: [],
-    dateMenu1: false,
-    dateMenu2: false,
-    currentDate: new Date().toISOString().substr(0, 10),
+    dateMenu1: '',
+    dateMenu2: '',
   }),
   computed: {
+    currentDate() {
+      return moment().format('YYYY-MM-DD');
+    },
     ...mapState({
       currUser: (state) => state.currentUser,
       showDialog: (state) => state.nProDialog.show,
@@ -253,6 +259,7 @@ export default {
         }).catch((error) => {
           this.setSaving();
           this.onCancel();
+          console.log('heree');
           this.$store.dispatch('snackBarOn', {
             message: `Unable to Create Project ${error}`,
             type: 'error',

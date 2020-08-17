@@ -17,11 +17,9 @@ const devScopes = [
 ];
 // pm has a few extra scopes
 const pmScopes = () => [...devScopes, ...['Sprint:Create', 'Project:Create', 'Project:UpdateMembers']];
-const adminScopes = ['User:Create'];
 
 module.exports = {
   dev: devScopes,
   pm: pmScopes(),
-  admin: adminScopes,
 };
 // return authentication scopes to be added to JWT for each user role type.

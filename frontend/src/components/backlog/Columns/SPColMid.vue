@@ -3,10 +3,21 @@
     v-model="carouselModelLocal"
     class="px-2"
     hide-delimiters
+    :show-arrows="proSprints.length > 0"
     height="100%"
   >
     <v-carousel-item
-      v-for="(sprint) in getSprints(proId)"
+      v-if="proSprints.length <= 0"
+      style="justify-content: center"
+    >
+      <not-found-card
+        type="Sprint"
+        @createAction="sPlanNavigation"
+      />
+    </v-carousel-item>
+    <v-carousel-item
+      v-for="(sprint) in proSprints"
+      v-else
       :key="sprint.id"
       :name="sprint.sprintNo"
     >
@@ -38,12 +49,14 @@
 import { mapActions, mapGetters, mapState } from 'vuex';
 import draggable from 'vuedraggable';
 import ticketCardSlim from '@/components/Ticket/card/ticketCardSlim.vue';
+import NotFoundCard from '@/components/NotFoundCard.vue';
 
 export default {
   name: 'SPColumnMiddle',
   components: {
     ticketCardSlim,
     draggable,
+    NotFoundCard,
   },
   props: {
     userStoryId: {
@@ -72,6 +85,9 @@ export default {
     ...mapState({
       carModP: (state) => state.carouselModelParent,
     }),
+    proSprints() {
+      return this.getSprints(this.proId);
+    },
     carouselModel: {
       // getter
       get() {
@@ -115,6 +131,12 @@ export default {
       this.uSCDTicketId(evt.item.id);
       this.uSCDEvt(evt);
       this.$emit('ticketMove');
+    },
+    sPlanNavigation() {
+      this.$router.push({
+        path: '/sPlanner',
+        query: { proId: this.projectId },
+      });
     },
   },
 };

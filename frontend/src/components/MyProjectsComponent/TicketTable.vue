@@ -118,6 +118,8 @@ export default {
         path: '/backlog',
         query: { proId: this.projectId },
       });
+      // open new ticket dialog, as the user navigates to /backlog
+      this.$store.dispatch('nTicDialogShow', { show: true });
       this.updateViewingPro();
     },
     updateViewingPro() {

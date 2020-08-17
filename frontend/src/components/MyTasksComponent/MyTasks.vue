@@ -10,6 +10,7 @@
     <not-found-card
       v-if="projects.length <= 0"
       type="Project"
+      @createAction="createProDialog"
     />
     <v-tabs
       v-model="tab"
@@ -50,7 +51,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import ticketCard from '@/components/Ticket/card/ticketCard.vue';
 import NotFoundCard from '@/components/NotFoundCard.vue';
 
@@ -77,6 +78,14 @@ export default {
     },
     tickets() {
       return this.getProTicksByUser(this.projectId);
+    },
+  },
+  methods: {
+    ...mapActions([
+      'nProDialogShow',
+    ]),
+    createProDialog() {
+      this.nProDialogShow({ show: true });
     },
   },
 };

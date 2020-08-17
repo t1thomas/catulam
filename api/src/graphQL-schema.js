@@ -218,13 +218,16 @@ const resolvers = {
       try {
         const currUserId = ctx.cypherParams.currentUser.id;
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        result.project.members.forEach((mem) => {
+        // get added members
+        const { members } = result;
+        members.forEach((mem) => {
           if (mem.id !== currUserId) {
-            pubSub.publish('ADD_PRO_MEMBER', { addProMem: { id: mem.id } });
+            pubSub.publish('ADD_PRO_MEMBER', { addProMem: mem });
           }
         });
         return result;
       } catch (e) {
+        console.error(e);
         throw new Error(e);
       }
     },
