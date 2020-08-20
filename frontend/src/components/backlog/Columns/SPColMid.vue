@@ -135,7 +135,7 @@ export default {
     sPlanNavigation() {
       this.$router.push({
         path: '/sPlanner',
-        query: { proId: this.projectId },
+        query: { proId: this.proId },
       });
     },
   },

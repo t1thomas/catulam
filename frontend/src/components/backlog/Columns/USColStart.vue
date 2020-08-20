@@ -11,7 +11,7 @@
       >
         <template v-if="noUs">
           <v-card-subtitle>
-            Unassigned tickets
+            No User Story
           </v-card-subtitle>
         </template>
         <template v-else>
