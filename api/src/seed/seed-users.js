@@ -1,3 +1,7 @@
+const md5 = require('md5');
+const bcrypt = require('bcrypt');
+require('dotenv').config();
+
 const newUsers = [{
   firstName: 'Joe',
   lastName: 'Bloggz',
@@ -23,4 +27,12 @@ const newUsers = [{
   role: 'pm',
 },
 ];
-module.exports = newUsers;
+module.exports = newUsers.map((user) => {
+  const salt = bcrypt.genSaltSync(Number(process.env.BCRYPTHASHCOST));
+  // generate hash of pass to be saved in db
+  const passHash = bcrypt.hashSync(user.password, salt);
+  // generate hash based on username, for gravatar art
+  const avatarHash = md5(user.username);
+  return { ...user, password: passHash, avatarHash };
+  // update user object with new credentials
+});
