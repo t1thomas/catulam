@@ -326,7 +326,6 @@ export default new Vuex.Store({
       state.snackBar.type = '';
     },
     set_snackBarShow(state, obj) {
-      console.log(obj.message);
       state.snackBar.message = obj.message;
       state.snackBar.type = obj.type;
       state.snackBar.show = true;

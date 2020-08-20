@@ -259,7 +259,6 @@ export default {
         }).catch((error) => {
           this.setSaving();
           this.onCancel();
-          console.log('heree');
           this.$store.dispatch('snackBarOn', {
             message: `Unable to Create Project ${error}`,
             type: 'error',
