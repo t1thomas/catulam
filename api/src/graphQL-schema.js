@@ -225,6 +225,7 @@ const resolvers = {
             pubSub.publish('ADD_PRO_MEMBER', { addProMem: mem });
           }
         });
+        console.log(params);
         return result;
       } catch (e) {
         console.error(e);

@@ -21,6 +21,6 @@ deploy:
   bucket_name: "elasticbeanstalk-eu-west-2-553268653483"
   bucket_path: "catulam1"
   on:
-    branch: 011-project-analytics-feat
+    branch: master
   access_key_id: $AWS_ACCESS_KEY
   secret_access_key: $AWS_SECRET_KEY

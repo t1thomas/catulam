@@ -118,6 +118,23 @@ Object {
 }
 `;
 
+exports[`sequentially run tests Mutations Create a project 1`] = `
+Object {
+  "data": Object {
+    "CreateProject": null,
+  },
+  "errors": Array [
+    [GraphQLError: Cannot read property 'cookies' of undefined],
+  ],
+  "extensions": undefined,
+  "http": Object {
+    "headers": Headers {
+      Symbol(map): Object {},
+    },
+  },
+}
+`;
+
 exports[`sequentially run tests Mutations Link 3 Tickets to Sprints 1`] = `
 Object {
   "SprintTic1": Object {

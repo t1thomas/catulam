@@ -39,40 +39,35 @@ const gqlQueries = {
                 }
             }
         }`,
-  CREATE_PROJECTS: gql`
-        mutation {
-            prog1: CreateProject(
-                id: "p1test"
-                desc: "First test project"
-                title: "Test Project 1"
-                label: "TP1"
+  CREATE_PROJECT: gql`
+        mutation(
+            $title: String!
+            $desc: String
+            $label: String!
+            $startDate: String!
+            $endDate: String!
+            $members: [_UserInput]!
+        ) {
+            CreateProject(
+                title: $title
+                label: $label
+                desc: $desc
+                startDate: $startDate
+                endDate: $endDate
+                members: $members
             ) {
                 id
-                desc
                 title
                 label
-            }
-            prog2: CreateProject(
-                id: "p2test"
-                desc: "Second test project"
-                title: "Test Project 2"
-                label: "TP2"
-            ) {
-                id
+                startDate
+                endDate
                 desc
-                title
-                label
-            }
-            prog3: CreateProject(
-                id: "p3test"
-                desc: "Third test project"
-                title: "Test Project 3"
-                label: "TP3"
-            ) {
-                id
-                desc
-                title
-                label
+                noOfTicks
+                noOfSprints
+                members {
+                    id
+                    role
+                }
             }
         }`,
   CURRENT_USER: gql`query {
@@ -263,11 +258,12 @@ const gqlQueries = {
                 }
             }
         }`,
-  LOGIN_USER: gql`
-        mutation($username: String!, $password: String!) {
-            loginUser(username: $username, password: $password) {
-                token
-            }
-        }`,
+
+  LOGIN_USER: gql`mutation($username: String!, $password: String!) {
+    loginUser(username: $username, password: $password)
+  }`,
+  LOGIN_USER_graphql_request: /* GraphQL */`mutation($username: String!, $password: String!) {
+    loginUser(username: $username, password: $password)
+  }`,
 };
 module.exports = gqlQueries;
