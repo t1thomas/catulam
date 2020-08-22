@@ -1,7 +1,16 @@
+const neo4j = require('neo4j-driver');
 const newUsers = require('./seed-users');
-const driver = require('../neo4jDriver');
+require('dotenv').config();
 
-const initializeDatabase = async () => {
+const driver = neo4j.driver(
+  process.env.NEO4J_URI || 'bolt://localhost:7687',
+  neo4j.auth.basic(
+    process.env.NEO4J_USER || 'neo4j',
+    process.env.NEO4J_PASSWORD || 'neo4j',
+  ),
+);
+
+const initDb = async () => {
   const session = driver.session();
   try {
     // eslint-disable-next-line no-restricted-syntax
@@ -17,16 +26,13 @@ const initializeDatabase = async () => {
                 + 'SET u.role = $user.role\n'
                 + 'RETURN u', { user });
     }
+    console.log('Database seeding finished!');
   } catch (error) {
     throw new Error(error);
   } finally {
     await session.close();
+    await driver.close();
   }
 };
 
-initializeDatabase()
-  .then(() => {
-    console.log('Database seeding finished!');
-  })
-  .catch((e) => console.error(e))
-  .finally(() => process.exit());
+module.exports = () => initDb();

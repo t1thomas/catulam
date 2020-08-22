@@ -7,8 +7,9 @@
     "nodemon": "nodemon src/index.js",
     "start": "node src/index.js",
     "lint": "eslint",
-    "test": "jest --detectOpenHandles",
-    "seedDb": "node src/seed/seedDb.js"
+    "test": "jest",
+    "seedDb": "node -e \"require('./src/seed/seedDb')()\"",
+    "clearDb": "node -e \"require('./src/clearDb/clearDb')()\""
   },
   "jest": {
     "setupFilesAfterEnv": [
