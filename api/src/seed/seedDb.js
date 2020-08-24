@@ -26,7 +26,6 @@ const initDb = async () => {
                 + 'SET u.role = $user.role\n'
                 + 'RETURN u', { user });
     }
-    console.log('Database seeding finished!');
   } catch (error) {
     throw new Error(error);
   } finally {

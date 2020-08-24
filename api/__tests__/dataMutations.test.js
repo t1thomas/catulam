@@ -4,23 +4,34 @@ const jwt = require('jsonwebtoken');
 const setCookie = require('set-cookie-parser');
 const initDb = require('../src/seed/seedDb');
 const clearDb = require('../src/clearDb/clearDb');
-
+// const { startServer, stopServer } = require('../test-resourses/testserver');
 const authScopes = require('../src/authScopes');
+// const http = require('http');
 
-const gqlQueries = require('../test-queries/gql-queries-mutations');
+const gqlQueries = require('../test-resourses/gql-queries-mutations');
 
 require('dotenv').config();
 
 // schema used for testing is same as production
 const httpEndpoint = process.env.GRAPHQL_URI;
-
-const graphQLClient = new GraphQLClient(httpEndpoint, {
-  credentials: 'include',
-  mode: 'cors',
+beforeAll(async () => {
+  await initDb();
+  // await startServer();
 });
-beforeAll(() => initDb());
-afterAll(() => clearDb());
+// clear all db data after tests finish
+
+afterAll(async () => {
+  await clearDb();
+  // await stopServer();
+});
+
 describe('Login as PM', () => {
+  // test graphQl client
+  const graphQLClient = new GraphQLClient(httpEndpoint, {
+    credentials: 'include',
+    mode: 'cors',
+  });
+  // global variables accessible to tests
   let resFull;
   let resData;
   let decoded;
@@ -76,99 +87,4 @@ describe('Login as PM', () => {
     const checkExp = expTime.isBetween(timeA, timeB, 'seconds', '[)');
     expect(checkExp).toBe(true);
   });
-  // test('test response cookie expires value', async () => {
-  //   console.log(parseCookie);
-  // const expires  = parseCookie.expires;
-  // // get cookie from response headers
-  // const resCookie = resFull.headers.get('Set-Cookie');
-  // // parse cookie into object
-  // parseCookie = setCookie.parseString(resCookie);
-  // // verify jwt and decode
-  // const jwtCookie = jwt.verify(parseCookie.value, process.env.JWT_SECRET);
-  // // timeA =  currTime + 7days  timeB =  currTime + 7days & 5 min
-  // const timeA = moment().add(7, 'days');
-  // const timeB = moment(timeA).add(5, 'minutes');
-  // // get exp time from token
-  // const expTime = moment.unix(jwtCookie.exp);
-  // // check if expiration falls between timeA and timeB
-  // const checkExp = expTime.isBetween(timeA, timeB, 'seconds', '[)');
-  // expect(checkExp).toBe(true);
-  // });
 });
-
-// const { exp } = res.loginUser;
-//
-// // console.log(exp);
-// // console.log(decoded);
-// const expTime = moment.unix(exp);
-// const checkExp = expTime.isBetween(timeA, timeB, 'seconds', '[)'); // true
-// console.log(checkExp);
-// console.log(expTime);
-// console.log(timeA);
-// console.log(timeB);
-// expect(res).toEqual(expect.objectContaining({
-//   locationId: expect.any(Number),
-//   geo: expect.any(Array),
-//   isFetching: expect.any(Boolean),
-// }));
-// console.log(res);
-// expect(res.data).toMatchSnapshot();
-// it('Create a project', async () => {
-//   const res = await mutate({
-//     mutation: gqlQueries.CREATE_PROJECT,
-//     variables: {
-//       title: 'Software Project ',
-//       desc: 'Some description ',
-//       label: 'PRO-1',
-//       startDate: '2020-07-23',
-//       endDate: '2020-07-27',
-//       members: [
-//         { id: 'b87c5f80-e964-4a23-a2d9-ba7cb88ed0b5' },
-//         { id: 'a8a113ac-5c7b-4689-82b8-cc3c42a711b9' },
-//       ],
-//     },
-//   });
-//   expect(res).toMatchSnapshot();
-// });
-
-// it('Create 3 tickets', async () => {
-//   const res = await mutate({
-//     mutation: gqlQueries.CREATE_TICKETS,
-//   });
-//   expect(res.data).toMatchSnapshot();
-// });
-//
-// it('Create 3 UserStories', async () => {
-//   const res = await mutate({
-//     mutation: gqlQueries.CREATE_USER_STORY,
-//   });
-//   expect(res.data).toMatchSnapshot();
-// });
-//
-// it('Create 3 Sprints', async () => {
-//   const res = await mutate({
-//     mutation: gqlQueries.CREATE_SPRINTS,
-//   });
-//   expect(res.data).toMatchSnapshot();
-// });
-//
-// it('Link 3 Tickets to UserStories', async () => {
-//   const res = await mutate({
-//     mutation: gqlQueries.ADD_USER_STORY_TICKETS,
-//   });
-//   expect(res.data).toMatchSnapshot();
-// });
-//
-// it('Link 3 Tickets to Sprints', async () => {
-//   const res = await mutate({
-//     mutation: gqlQueries.ADD_SPRINT_TICKETS,
-//   });
-//   expect(res.data).toMatchSnapshot();
-// });
-//
-// it('Add project data', async () => {
-//   const res = await mutate({
-//     mutation: gqlQueries.ADD_PROJECT_DATA,
-//   });
-//   expect(res.data).toMatchSnapshot();
-// });

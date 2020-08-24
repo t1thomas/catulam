@@ -1,6 +1,6 @@
 FROM node:lts-alpine
 
-WORKDIR /catulam-backend-api
+WORKDIR /app
 
 # copy both 'package.json' and 'package-lock.json' (if available)
 COPY package*.json ./
@@ -12,4 +12,4 @@ COPY . .
 
 EXPOSE 4000
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "start"]
