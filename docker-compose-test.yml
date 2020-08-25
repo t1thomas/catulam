@@ -38,14 +38,14 @@ services:
       - GRAPHQL_URI=http://localhost:4000/graphql
       - NODE_ENV=production
       - DB_HOST=neo4j
-    command: /bin/sh -c 'pwd'
+   command: sh -c 'wait-for neo4j:7687 -- npm test'
+#    command: /bin/sh -c 'pwd'
 #    command: ["/bin/sh", "-c", "ls", "/app/wait-for"]
 #    command: ["/bin/sh", "-c", "ls"]
 #    command: ["/bin/sh", "-c", "./wait-for", "neo4j:7687", "--", "npm", "test"]
 #    command: ["ls", "./", "&&", "wait-for", "neo4j:7687", "--", "npm", "test"]
 #    command: ["ls", "&&", "wait-for", "neo4j:7687", "--", "npm", "test"]
 #    command: ["pwd", "&&", "ls", "&&", "wait-for", "neo4j:7687", "--", "npm", "test"]
-#    command: sh -c 'wait-for neo4j:7687 -- npm test'
 #    command: ["/app/wait-for", "neo4j:7687", "--", "npm", "test"]
 #    command: ["/bin/sh","-c","wait-for", "neo4j:7687", "--", "npm", "test"]
 #    command: ["wait-for.sh-it.sh", "neo4j:7687", "--", "npm", "test"]
