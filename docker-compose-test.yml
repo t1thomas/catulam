@@ -36,23 +36,8 @@ services:
       - JWT_SECRET=catulam2A34iaeDwefdAaawe12s0wfha048
       - BCRYPTHASHCOST=10
       - GRAPHQL_URI=http://localhost:4000/graphql
-      - NODE_ENV=production
       - DB_HOST=neo4j
-#    command: ["wait-for", "neo4j:7687", "--", "npm", "test"]
-#    command: ["wait-for-it.sh", "-t", "300", "neo4j:7687", "--", "npm", "test"]
-#    command: ["/bin/sh", "-c", "wait-for-it.sh", "neo4j:7687", "--", "npm", "test"]
-#    command: ["neo4jupyet.sh", "neo4j", "--", "npm", "test"]
-#    command: sh -c 'wait-for neo4j:7687 -- npm test'
-#    command: /bin/sh -c 'pwd'
-#    command: ["/bin/sh", "-c", "ls", "/app/wait-for"]
-#    command: ["/bin/sh", "-c", "ls"]
-#    command: ["/bin/sh", "-c", "./wait-for", "neo4j:7687", "--", "npm", "test"]
-#    command: ["ls", "./", "&&", "wait-for", "neo4j:7687", "--", "npm", "test"]
-#    command: ["ls", "&&", "wait-for", "neo4j:7687", "--", "npm", "test"]
-#    command: ["pwd", "&&", "ls", "&&", "wait-for", "neo4j:7687", "--", "npm", "test"]
-#    command: ["/bin/sh","-c","wait-for", "neo4j:7687", "--", "npm", "test"]
-
-#    command: bash -c 'wait-for-it.sh neo4j:7687 -- npm test'
+    command: ["wait-for-it.sh", "neo4j:7687", "--", "npm", "test"]
 
 
 
