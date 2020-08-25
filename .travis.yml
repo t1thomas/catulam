@@ -2,14 +2,15 @@ services:
     - docker
 
 before_install:
-  - docker-compose build
+  - docker-compose -f docker-compose-test.yml build
+  - docker-compose -f docker-compose-test.yml run neo4j
 
 script:
-  - docker-compose up
-  - sleep 120
-  - docker exec api npm test
+  - docker-compose -f docker-compose-test.yml run api
 
 after_success:
+  - docker-compose -f docker-compose-test.yml down --rmi all
+  - docker-compose build
   - echo "$DOCKER_PASS" | docker login -u "$DOCKER_ID" --password-stdin
   - docker-compose push
 

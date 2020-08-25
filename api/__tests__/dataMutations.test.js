@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const setCookie = require('set-cookie-parser');
 const initDb = require('../src/seed/seedDb');
 const clearDb = require('../src/clearDb/clearDb');
+const { startServer, stopServer } = require('../test-resourses/testserver');
 const authScopes = require('../src/authScopes');
 
 const gqlQueries = require('../test-resourses/gql-queries-mutations');
@@ -14,11 +15,13 @@ require('dotenv').config();
 const httpEndpoint = process.env.GRAPHQL_URI;
 beforeAll(async () => {
   await initDb();
+  await startServer();
 });
 // clear all db data after tests finish
 
 afterAll(async () => {
   await clearDb();
+  await stopServer();
 });
 
 describe('Login as PM', () => {
