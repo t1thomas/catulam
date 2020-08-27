@@ -10,38 +10,3 @@ Caṭulam is a new approach to tackle problems faced by users of traditional iss
 * Integrate Agile specific tools to aid stand-ups, retros, sprint planning, backlog management.
 
 Trello Board Link: https://trello.com/b/pq9wvvC9/fyp
-
-# catulam-frontend
-
-## Project setup
-```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Run your unit tests
-```
-npm run test:unit
-```
-
-### Run your end-to-end tests
-```
-npm run test:e2e
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

@@ -1,0 +1,49 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "nodemon": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "lint": "eslint",
+    "test": "jest --forceExit",
+    "seedDb": "node -e \"require('./src/seed/seedDb')()\"",
+    "clearDb": "node -e \"require('./src/clearDb/clearDb')()\""
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "jest-extended"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server-express": "^2.15.0",
+    "bcrypt": "^4.0.1",
+    "body-parser": "latest",
+    "cookie-parser": "^1.4.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "graphql": "^14.6.0",
+    "graphql-request": "^3.0.0",
+    "graphql-tag": "^2.10.3",
+    "graphql-type-json": "^0.3.2",
+    "jsonwebtoken": "^8.5.1",
+    "md5": "^2.2.1",
+    "moment": "^2.27.0",
+    "neo4j-driver": "^4.1.0",
+    "neo4j-graphql-js": "^2.15.1",
+    "neode": "^0.4.5",
+    "jest": "^25.5.4",
+    "jest-extended": "^0.11.5",
+    "set-cookie-parser": "^2.4.6"
+  },
+  "devDependencies": {
+    "eslint": "^7.3.1",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.21.2",
+    "nodemon": "^2.0.4"
+  }
+}
