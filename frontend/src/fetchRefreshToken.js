@@ -10,7 +10,7 @@ export default async function refreshToken() {
     credentials: 'include',
     mode: 'cors',
   });
-  return graphQLClient.request(gqlQueries.REFRESH_TOKEN).then((response) => {
+  return graphQLClient.request(gqlQueries.REFRESH_TOKEN_graphql_request).then((response) => {
     const { token } = response.refreshAccess;
     if (typeof localStorage !== 'undefined') {
       localStorage.setItem(AUTH_TOKEN, token);

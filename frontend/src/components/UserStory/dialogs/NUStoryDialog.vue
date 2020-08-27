@@ -1,5 +1,7 @@
 <template>
-  <v-row justify="center">
+  <v-row
+    justify="center"
+  >
     <v-dialog
       v-model="showDialog"
       persistent
@@ -42,7 +44,7 @@
           <small>*indicates required field</small>
           <v-spacer />
           <v-btn
-            color="blue darken-1"
+            color="primary darken-1"
             text
             @click="onCancel"
           >
@@ -62,7 +64,7 @@
 
 <script>
 import { mapActions, mapState } from 'vuex';
-import gqlQueries from '../../../graphql/gql-queries';
+import gqlQueries from '@/graphql/gql-queries';
 
 export default {
   name: 'NUStoryDialog',
@@ -93,6 +95,7 @@ export default {
     },
     onCancel() {
       this.nUStoryDialogShow({ show: false });
+      this.$refs.uStoryForm.reset();
     },
     async onCreate() {
       if (this.$refs.uStoryForm.validate()) {
@@ -104,25 +107,17 @@ export default {
             storyText: this.desc,
             project: { id: this.proId },
           },
-        }).then((response) => {
-          const { CreateUserStory } = response.data;
-          if (CreateUserStory === null) {
-            throw new Error('Unable to Create User Story');
-          } else {
-            // show success notification of sprint creation
-            this.snackBarOn({
-              message: `Created User Story #${CreateUserStory.issueNumber} Successfully`,
-              type: 'success',
-            });
-          }
+        }).then(() => {
+          this.setSaving();
+          this.onCancel();
         }).catch((error) => {
-          this.snackBarOn({
-            message: error,
+          this.setSaving();
+          this.onCancel();
+          this.$store.dispatch('snackBarOn', {
+            message: `Unable to Create User Story: ${error}`,
             type: 'error',
           });
         });
-        this.setSaving();
-        this.onCancel();
       }
     },
     setSaving() {

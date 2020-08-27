@@ -4,95 +4,95 @@
     app
     temporary
     right
-    style="width: fit-content"
+    style="width: fit-content;"
   >
-    <v-container
-      v-if="dataLoaded"
+    <div
+      v-if="tickId !== null"
+      class="grid-container"
     >
-      <v-overlay
-        absolute
-        :value="overlay"
-        opacity="0.78"
-      >
-        <del-tic-dialog @closeDialog="overlay = false" />
-      </v-overlay>
       <topSection />
-      <v-divider />
-      <details-section />
-      <v-divider />
+      <details-parent />
       <desc-section />
+      <updates-parent />
+    </div>
+    <v-overlay
+      absolute
+      :value="overlay"
+      opacity="0.78"
+    >
+      <del-tic-dialog @closeOverlay="overlay = false" />
+    </v-overlay>
+    <template v-slot:append>
       <delete-section @delDialog="overlay = true" />
-    </v-container>
-
-
-    <v-progress-circular
-      v-if="!dataLoaded"
-      style="display: contents"
-      :size="50"
-      color="primary"
-      indeterminate
-    />
+    </template>
   </v-navigation-drawer>
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
+import { mapState } from 'vuex';
 import topSection from './Sections/topSection.vue';
-import detailsSection from './Sections/detailsSection.vue';
+import detailsParent from './Sections/detailsSection/detailsParent.vue';
 import descSection from './Sections/descSection.vue';
 import deleteSection from './Sections/deleteSection.vue';
 import DelTicDialog from '../dialogs/DelTicDialog.vue';
+import updatesParent from './Sections/Comments&CommitsSection/updatesParent.vue';
 
 export default {
-  name: 'DetailsDrawer',
+  name: 'TicDetailsDrawer',
   components: {
     topSection,
-    detailsSection,
+    detailsParent,
     descSection,
     deleteSection,
     DelTicDialog,
+    updatesParent,
   },
   data: () => ({
     overlay: false,
+    tickets: [
+      {
+        id: 'se340fh-34-fh3-3igfb',
+        title: 'Ticket 1',
+        hourEstimate: 8,
+      },
+      {
+        id: 'se33sssrg-f43--3igfb',
+        title: 'Ticket 2',
+        hourEstimate: 5,
+      },
+      {
+        id: '556aas-a6d-a6-asdfbe',
+        title: 'Ticket 3',
+        hourEstimate: 6,
+      }],
   }),
   computed: {
-    dataLoaded() {
-      return this.ticket !== null;
-    },
     ...mapState({
       show: (state) => state.detailsDrawer.show,
-      ticketId: (state) => state.detailsDrawer.ticketId,
-      ticket: (state) => state.currentTicket,
+      tickId: (state) => state.detailsDrawer.ticketId,
     }),
     drawer: {
       get() {
         return this.show;
       },
       set(val) {
-        this.$store.commit('set_DrawerShow', { show: val });
         if (val === false) {
+          this.$store.dispatch('detDrawShow', { show: val });
           this.overlay = false;
+          this.$store.dispatch('showAddCommitOverLay', false);
         }
       },
     },
-  },
-  watch: {
-    async show(val) {
-      // if val === true i.e if drawer is showing
-      if (val) {
-        await this.fetchCurrTicket(this.ticketId);
-      }
-    },
-  },
-  methods: {
-    ...mapActions([
-      'detDrawShow',
-      'fetchCurrTicket',
-    ]),
   },
 };
 </script>
 
 <style scoped>
-
+.grid-container {
+  height: inherit;
+  width: 37vw;
+  display: grid;
+  overflow: hidden;
+  grid-template-rows: auto;
+}
 </style>

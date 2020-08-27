@@ -24,9 +24,9 @@
     <v-card-actions>
       <v-spacer />
       <v-btn
-        color="blue darken-1"
+        color="primary darken-1"
         text
-        @click="$emit('closeDialog')"
+        @click="$emit('closeOverlay')"
       >
         Cancel
       </v-btn>
@@ -47,8 +47,8 @@
 </template>
 
 <script>
-import { mapActions, mapState } from 'vuex';
-import gqlQueries from '../../../graphql/gql-queries';
+import { mapGetters } from 'vuex';
+import gqlQueries from '@/graphql/gql-queries';
 
 export default {
   name: 'DelTicDialog',
@@ -56,38 +56,31 @@ export default {
     deleting: false,
   }),
   computed: {
-    ...mapState({
-      ticket: 'currentTicket',
+    ...mapGetters({
+      ticket: 'getCurrTick',
     }),
   },
   methods: {
-    ...mapActions([
-      'snackBarOn',
-    ]),
     async deleteTicket() {
-      this.deleting = true;
+      this.setDeleting();
       await this.$apollo.mutate({
         mutation: gqlQueries.DELETE_TICKET,
         fetchPolicy: 'no-cache',
         variables: {
-          ticket: { id: this.ticket.id },
+          tick: { id: this.ticket.id },
           project: { id: this.ticket.project.id },
         },
-      }).then(() => {
-        this.snackBarOn({
-          message: 'Deleted Successfully',
-          type: 'success',
-        });
-        this.deleting = false;
-        this.$store.commit('set_DrawerShow', { show: false });
       }).catch((error) => {
-        this.deleting = false;
-        this.$emit('closeDialog');
-        this.snackBarOn({
-          message: error,
+        this.setDeleting();
+        this.$emit('closeOverlay');
+        this.$store.dispatch('snackBarOn', {
+          message: `Unable to delete ticket: ${error}`,
           type: 'error',
         });
       });
+    },
+    setDeleting() {
+      this.deleting = !this.deleting;
     },
   },
 };

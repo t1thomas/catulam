@@ -1,7 +1,8 @@
 {
     "env": {
         "es2020": true,
-        "node": true
+        "node": true,
+        "jest": true
     },
     "extends": [
         "airbnb-base"
@@ -12,6 +13,7 @@
     },
     "rules": {
         "no-console": "off",
-        "linebreak-style": 0
+        "linebreak-style": 0,
+        "import/no-extraneous-dependencies": ["error", {"devDependencies": true}]
     }
 }

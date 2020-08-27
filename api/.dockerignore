@@ -1,8 +1,6 @@
 .DS_Store
 node_modules
 /dist
-/tests
-/__snapshots__
 
 
 # local env files

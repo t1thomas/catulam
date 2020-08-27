@@ -1,49 +1,37 @@
-const { setContext } = require('apollo-link-context');
-
-const { ApolloClient } = require('apollo-client');
-const fetch = require('node-fetch');
-const { createHttpLink } = require('apollo-link-http');
-const { InMemoryCache } = require('apollo-cache-inmemory');
-const jwt = require('jsonwebtoken');
-const authScopes = require('../authScopes');
-
-const dBMutations = require('./seed-mutations');
-
+const neo4j = require('neo4j-driver');
+const newUsers = require('./seed-users');
 require('dotenv').config();
 
-// generate admin token, so CreateUser mutation can be used seed the database.
-function generateAdminToken() {
-  //  token expiration, 2min from current time
-  const exp = Math.floor(Date.now() / 1000) + (2 * 60);
-  const role = 'admin';
-  // get scopes based on user role 'admin'
-  const scope = authScopes.admin();
-  return jwt.sign({ exp, scope, role }, process.env.JWT_SECRET);
-}
-const httpLink = createHttpLink({
-  uri: process.env.GRAPHQL_URI,
-  fetch,
-  credentials: 'include',
-});
+const driver = neo4j.driver(
+  process.env.NEO4J_URI || 'bolt://localhost:7687',
+  neo4j.auth.basic(
+    process.env.NEO4J_USER || 'neo4j',
+    process.env.NEO4J_PASSWORD || 'neo4j',
+  ),
+);
 
-const authLink = setContext(async (_, { headers }) => {
-  const token = await generateAdminToken();
-  // return the headers to the context so httpLink can read them
-  return {
-    headers: {
-      ...headers,
-      authorization: token,
-    },
-  };
-});
+const initDb = async () => {
+  const session = driver.session();
+  try {
+    // eslint-disable-next-line no-restricted-syntax
+    for await (const user of newUsers) {
+      await session.run('CREATE (u:User)\n'
+                + 'SET u.id = apoc.create.uuid()\n'
+                + 'SET u.firstName = $user.firstName\n'
+                + 'SET u.lastName = $user.lastName\n'
+                + 'SET u.username = $user.username\n'
+                + 'SET u.password = $user.password\n'
+                + 'SET u.avatar = $user.avatarHash\n'
+                + 'SET u.viewingPro = $user.viewingPro\n'
+                + 'SET u.role = $user.role\n'
+                + 'RETURN u', { user });
+    }
+  } catch (error) {
+    throw new Error(error);
+  } finally {
+    await session.close();
+    await driver.close();
+  }
+};
 
-const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
-});
-
-client.mutate({
-  fetchPolicy: 'no-cache',
-  mutation: dBMutations,
-}).then((data) => console.log(data))
-  .catch((error) => console.error(error));
+module.exports = () => initDb();

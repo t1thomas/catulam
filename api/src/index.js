@@ -3,10 +3,9 @@ const { ApolloServer } = require('apollo-server-express');
 const http = require('http');
 const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
-const driver = require('./neo4jDriver');
+const neo4j = require('neo4j-driver');
 const schema = require('./graphQL-schema');
-const verifyToken = require('./authenticate');
-
+const verifyToken = require('./verifyAndDecodeToken');
 require('dotenv').config();
 
 const PORT = process.env.GRAPHQL_LISTEN_PORT;
@@ -20,17 +19,42 @@ const corsOptions = {
   credentials: true,
 };
 
+/*
+ * Create a Neo4j driver instance to connect to the database
+ * using credentials specified as environment variables
+ * with fallback to defaults
+ */
+
+const driver = neo4j.driver(
+  process.env.NEO4J_URI || 'bolt://localhost:7687',
+  neo4j.auth.basic(
+    process.env.NEO4J_USER || 'neo4j',
+    process.env.NEO4J_PASSWORD || 'neo4j',
+  ),
+);
+/*
+ * Create a new instance of ApolloServer which serves the GraphQL schema
+ * and Neo4j driver injected into the context object
+ * Generated Database Resolvers to Connect.
+ */
 const server = new ApolloServer({
   context: async ({ req, res, connection }) => {
     if (connection) {
       const { token } = connection.context;
       return {
-        currentUser: await verifyToken(token),
+        cypherParams: {
+          currentUser: await verifyToken(token),
+        },
+        driver,
+        req,
+        res,
       };
     }
     const token = req.headers.authorization;
     return {
-      currentUser: await verifyToken(token),
+      cypherParams: {
+        currentUser: await verifyToken(token),
+      },
       driver,
       req,
       res,
@@ -42,6 +66,7 @@ const server = new ApolloServer({
       const token = connectionParams.Authorization;
       return { token };
     },
+    path: '/ws',
   },
 });
 
@@ -50,11 +75,6 @@ const httpServer = http.createServer(app);
 server.installSubscriptionHandlers(httpServer);
 
 httpServer.listen(PORT, () => {
-  if (process.env.NODE_ENV === 'production') {
-    console.log(`🚀 Server ready at ${process.env.CORS_ORIGIN}:${PORT}${server.graphqlPath}`);
-    console.log(`🚀 Subscriptions ready at ${process.env.CORS_ORIGIN.replace('http', 'ws')}:${PORT}${server.subscriptionsPath}`);
-  } else {
-    console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
-    console.log(`🚀 Subscriptions ready at ws://localhost:${PORT}${server.subscriptionsPath}`);
-  }
+  console.log(`🚀 Server ready at ${process.env.CORS_ORIGIN}:${PORT}${server.graphqlPath}`);
+  console.log(`🚀 Subscriptions ready at ${process.env.CORS_ORIGIN.replace('http', 'ws')}:${PORT}${server.subscriptionsPath}`);
 });

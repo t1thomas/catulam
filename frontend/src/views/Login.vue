@@ -1,7 +1,7 @@
 <template>
   <v-container
-    fill-height
     fluid
+    class="fill-height"
   >
     <v-row
       align="center"
@@ -18,7 +18,7 @@
             dark
             flat
           >
-            <v-toolbar-title>Login form</v-toolbar-title>
+            <v-toolbar-title>Login</v-toolbar-title>
           </v-toolbar>
           <v-card-text>
             <form>

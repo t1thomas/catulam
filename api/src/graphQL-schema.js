@@ -1,15 +1,13 @@
 const { GraphQLJSON } = require('graphql-type-json');
 const { PubSub, withFilter, AuthenticationError } = require('apollo-server-express');
-const { GraphQLObjectType, GraphQLString, GraphQLList } = require('graphql');
 const { makeAugmentedSchema, neo4jgraphql } = require('neo4j-graphql-js');
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const md5 = require('md5');
 const neode = require('./neode');
 const authScopes = require('./authScopes');
-const verifyToken = require('./authenticate');
+const verifyToken = require('./verifyAndDecodeToken');
 
 const typeDefs = fs.readFileSync(path.join(__dirname, 'schema.graphql')).toString('utf-8');
 
@@ -17,12 +15,6 @@ require('dotenv').config();
 
 const pubSub = new PubSub();
 
-const idListScalar = new GraphQLObjectType({
-  name: 'ids',
-  fields: () => ({
-    ids: { type: new GraphQLList(GraphQLString) },
-  }),
-});
 // name of the cookie that will be set as refresh token
 const cookieName = 'catulam_token';
 
@@ -31,7 +23,7 @@ function createAccessToken(id, role) {
   const exp = Math.floor(Date.now() / 1000) + (60 * 60);
 
   // get scopes based on user role
-  const scope = authScopes[role]();
+  const scope = authScopes[role];
   // returns token string
   return ({
     token: jwt.sign({
@@ -76,34 +68,67 @@ function validatePass(pass, user) {
     });
   });
 }
-const resolveFunctions = {
+const resolvers = {
   JSON: GraphQLJSON,
-  idList: idListScalar,
   User: {
     fullName(obj) {
       return `${obj.firstName} ${obj.lastName}`;
     },
   },
+  Subscription: {
+    tickUpdate: {
+      subscribe: withFilter(() => pubSub.asyncIterator('TICKET_UPDATE'),
+        (payload, variables) => payload.tickUpdate.project.id === variables.project.id),
+    },
+    tickDelete: {
+      subscribe: withFilter(() => pubSub.asyncIterator('TICKET_DELETE'),
+        (payload, variables) => payload.tickDelete.project.id === variables.project.id),
+    },
+    uSUpdate: {
+      subscribe: withFilter(() => pubSub.asyncIterator('USER_STORY_UPDATE'),
+        (payload, variables) => payload.uSUpdate.project.id === variables.project.id),
+    },
+    uSDelete: {
+      subscribe: withFilter(() => pubSub.asyncIterator('USER_STORY_DELETE'),
+        (payload, variables) => payload.uSDelete.project.id === variables.project.id),
+    },
+    spUpdate: {
+      subscribe: withFilter(() => pubSub.asyncIterator('SPRINT_UPDATE'),
+        (payload, variables) => payload.spUpdate.project.id === variables.project.id),
+    },
+    spDelete: {
+      subscribe: withFilter(() => pubSub.asyncIterator('SPRINT_DELETE'),
+        (payload, variables) => payload.spDelete.project.id === variables.project.id),
+    },
+    removeProMem: {
+      subscribe: withFilter(() => pubSub.asyncIterator('REMOVE_PRO_MEMBER'),
+        (payload, variables) => payload.removeProMem.id === variables.user.id),
+    },
+    addProMem: {
+      subscribe: withFilter(() => pubSub.asyncIterator('ADD_PRO_MEMBER'),
+        (payload, variables) => payload.addProMem.id === variables.user.id),
+    },
+  },
   Token: {
     ttl(obj) {
-      return obj.ttl / 1000;
+      // the apoc generated ttl value is in 'ms', which will through an error as
+      // Int cannot represent value greater than 32-bit signed integer
+      // so this resolver divides value by 1000 to show timestamp in 's'
+      return Math.round(obj.ttl / 1000);
     },
   },
   Query: {
     getCurrentUser: async (object, params, ctx, resolveInfo) => {
-      if (!ctx.currentUser) {
+      if (!ctx.cypherParams.currentUser) {
+        console.log('getCurrentUser');
         throw new AuthenticationError('No Token');
       }
-      const { id } = ctx.currentUser;
-      // update the params so, cypher query contains id.
-      Object.assign(params, {
-        id,
-      });
       return neo4jgraphql(object, params, ctx, resolveInfo);
     },
   },
   Mutation: {
     refreshAccess: async (object, params, ctx, resolveInfo) => {
+      console.log('refreshAccess');
       try {
         // get refresh token from cookie
         const oldTokenString = ctx.req.cookies[cookieName];
@@ -185,14 +210,42 @@ const resolveFunctions = {
         });
         return neo4jgraphql(object, params, ctx, resolveInfo);
       })
-      .catch(() => {
+      .catch((err) => {
+        console.log(err);
         throw new Error('Invalid username/password');
       }),
-
-    StartToSprint: async (object, params, ctx, resolveInfo) => {
+    CreateProject: async (object, params, ctx, resolveInfo) => {
+      try {
+        const currUserId = ctx.cypherParams.currentUser.id;
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        // get added members
+        const { members } = result;
+        members.forEach((mem) => {
+          if (mem.id !== currUserId) {
+            pubSub.publish('ADD_PRO_MEMBER', { addProMem: mem });
+          }
+        });
+        console.log(params);
+        return result;
+      } catch (e) {
+        console.error(e);
+        throw new Error(e);
+      }
+    },
+    AddProjectMember: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('ADD_PRO_MEMBER', { addProMem: result });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
+    StartToSprint: async (object, params, ctx, resolveInfo) => {
+      try {
+        // console.log(object);
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
@@ -201,214 +254,111 @@ const resolveFunctions = {
     SprintToStart: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
       }
     },
-    SwitchSprint: async (object, params, ctx, resolveInfo) => {
+    TicketLocSwitch: async (object, params, ctx, resolveInfo) => {
+      const session = ctx.driver.session();
       try {
+        // construct cypher query based on arguments provided
+        // run cypher query using driver
+        if (params.uStoryRemove !== undefined) {
+          await session.run(
+            'MATCH (:UserStory {id: $uStoryRemove.id})-[rel:SUB_TASK]->(:Ticket {id: $tick.id})'
+              + ' DELETE rel',
+            { tick: params.tick, uStoryRemove: params.uStoryRemove },
+          );
+        }
+        if (params.uStoryAdd !== undefined) {
+          await session.run(
+            'MATCH (t: Ticket {id: $tick.id}), (us: UserStory {id: $uStoryAdd.id})'
+              + ' CREATE (us)-[:SUB_TASK]->(t)',
+            { tick: params.tick, uStoryAdd: params.uStoryAdd },
+          );
+        }
+        if (params.sprintRemove !== undefined) {
+          await session.run(
+            'MATCH (:Sprint {id: $sprintRemove.id})-[rel:SPRINT_TASK]->(:Ticket {id: $tick.id})'
+              + ' DELETE rel',
+            { tick: params.tick, sprintRemove: params.sprintRemove },
+          );
+        }
+        if (params.sprintAdd !== undefined) {
+          await session.run(
+            'MATCH (t: Ticket {id: $tick.id}), (sp: Sprint {id: $sprintAdd.id})'
+              + ' CREATE (sp)-[:SPRINT_TASK]->(t)',
+            { tick: params.tick, sprintAdd: params.sprintAdd },
+          );
+        }
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
-        return result;
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
+        return neo4jgraphql(object, params, ctx, resolveInfo);
       } catch (e) {
         throw new Error(e);
-      }
-    },
-    UStoryTicketSwitch: async (_, {
-      project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd,
-    }) => {
-      try {
-        let query = '';
-        let params;
-        switch (true) {
-          case uStoryRemove !== undefined && uStoryAdd !== undefined
-          && sprintRemove === undefined && sprintAdd === undefined:
-            // UserStory Switch Only
-            query = 'MATCH (a:Ticket { id:$tick.id })-[rel:SUB_TASK]->(b:UserStory{ id:$uStoryRemove.id })'
-                            + ' MATCH (c:UserStory { id:$uStoryAdd.id })'
-                            + ' CALL apoc.refactor.to(rel, c)'
-                            + ' YIELD input, output, error'
-                            + ' RETURN c';
-            params = { tick, uStoryRemove, uStoryAdd };
-            break;
-          case uStoryRemove !== undefined && uStoryAdd !== undefined
-          && sprintAdd !== undefined && sprintRemove === undefined:
-            // Switch User Story and add sprint
-            query = 'MATCH (t:Ticket { id:$tick.id })-[rel:SUB_TASK]->(b:UserStory{ id:$uStoryRemove.id })'
-                            + ' MATCH (c:UserStory { id:$uStoryAdd.id })'
-                            + ' CALL apoc.refactor.to(rel, c)'
-                            + ' YIELD input, output, error'
-                            + ' WITH t'
-                            + ' MATCH (s:Sprint{id:$sprintAdd.id})'
-                            + ' CREATE (t)-[rel1:SPRINT_TASK]->(s)';
-            params = {
-              tick, uStoryRemove, uStoryAdd, sprintAdd,
-            };
-            break;
-          case uStoryRemove !== undefined && uStoryAdd !== undefined
-          && sprintRemove !== undefined && sprintAdd === undefined:
-            // Switch User Story and remove sprint
-            query = 'MATCH (t:Ticket { id:$tick.id })-[rel:SUB_TASK]->(b:UserStory{ id:$uStoryRemove.id })'
-                            + ' MATCH (c:UserStory { id:$uStoryAdd.id })'
-                            + ' CALL apoc.refactor.to(rel, c)'
-                            + ' YIELD input, output, error'
-                            + ' WITH t'
-                            + ' MATCH (t)-[rel1:SPRINT_TASK]->(s:Sprint{id:$sprintRemove.id})'
-                            + ' DELETE rel1';
-            params = {
-              tick, uStoryRemove, uStoryAdd, sprintRemove,
-            };
-            break;
-          case uStoryAdd !== undefined && sprintAdd !== undefined
-          && uStoryRemove !== undefined && sprintRemove !== undefined:
-            // change sprint and change user story
-            query = 'MATCH (t:Ticket { id:$tick.id })-[rel:SUB_TASK]->(u1:UserStory{ id:$uStoryRemove.id })'
-                            + ' MATCH (u2:UserStory { id:$uStoryAdd.id })'
-                            + ' CALL apoc.refactor.to(rel,u2)'
-                            + ' YIELD input, output, error'
-                            + ' WITH t'
-                            + ' MATCH (t)-[rel1:SPRINT_TASK]->(s1:Sprint{id:$sprintRemove.id})'
-                            + ' MATCH (s2:Sprint { id:$sprintAdd.id })'
-                            + ' CALL apoc.refactor.to(rel1, s2)'
-                            + ' YIELD input, output, error'
-                            + ' RETURN input, output, error';
-            params = {
-              tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd,
-            };
-            break;
-          default:
-            throw Error('Query does not contain necessary params');
-        }
-        return neode.cypher(query, params)
-          .then(() => {
-            // trigger DOM update for all subscribers
-            pubSub.publish('project', { update: project.id });
-            return tick.id;
-          })
-          .catch((e) => {
-            throw e;
-          });
-      } catch (e) {
-        throw new Error(e);
-      }
-    },
-    UnassignedTicketSwitch: async (_, {
-      project, tick, uStoryRemove, sprintRemove, uStoryAdd, sprintAdd,
-    }) => {
-      try {
-        let query = '';
-        let params;
-        switch (true) {
-          case uStoryRemove !== undefined && sprintRemove === undefined
-          && uStoryAdd === undefined && sprintAdd === undefined:
-            // UserStory Remove Only
-            query = 'MATCH (t:Ticket {id:$tick.id})-[rel:SUB_TASK]->(u:UserStory {id:$uStoryRemove.id}) DELETE rel ';
-            params = { tick, uStoryRemove };
-            break;
-          case uStoryRemove !== undefined && sprintRemove === undefined
-          && uStoryAdd === undefined && sprintAdd !== undefined:
-            // UserStory Remove Only and add sprint
-            query = 'MATCH (t:Ticket {id:$tick.id})-[rel:SUB_TASK]->(u:UserStory {id:$uStoryRemove.id})'
-                            + ' DELETE rel'
-                            + ' WITH t'
-                            + ' MATCH (s:Sprint{id:$sprintAdd.id})'
-                            + ' CREATE (t)-[rel1:SPRINT_TASK]->(s)';
-            params = { tick, uStoryRemove, sprintAdd };
-            break;
-          case uStoryRemove !== undefined && sprintRemove !== undefined
-          && uStoryAdd === undefined && sprintAdd === undefined:
-            // REMOVE_USERSTORY_REMOVE_SPRINT
-            query = 'MATCH (s:Sprint {id:$sprintRemove.id})<-[rel1:SPRINT_TASK]-(t:Ticket {id:$tick.id})-[rel2:SUB_TASK]->(u:UserStory {id:$uStoryRemove.id})'
-                            + ' DELETE rel1, rel2 ';
-            params = { tick, uStoryRemove, sprintRemove };
-            break;
-          case uStoryRemove !== undefined && sprintRemove !== undefined
-          && uStoryAdd === undefined && sprintAdd !== undefined:
-            // REMOVE_USERSTORY_CHANGE_SPRINT
-            query = 'MATCH (s:Sprint {id:$sprintRemove.id})<-[rel1:SPRINT_TASK]-(t:Ticket {id:$tick.id})-[rel2:SUB_TASK]->(u:UserStory {id:$uStoryRemove.id})'
-                            + ' DELETE rel1, rel2'
-                            + ' WITH t'
-                            + ' MATCH (s2:Sprint{id:$sprintAdd.id})'
-                            + ' CREATE (t)-[rel1:SPRINT_TASK]->(s2)';
-            params = {
-              tick, uStoryRemove, sprintRemove, sprintAdd,
-            };
-            break;
-          case uStoryRemove === undefined && sprintRemove === undefined
-          && uStoryAdd !== undefined && sprintAdd === undefined:
-            // ADD_NEW_USERSTORY only
-            query = 'MATCH (t:Ticket),(u:UserStory)'
-                            + ' WHERE t.id = $tick.id AND u.id = $uStoryAdd.id'
-                            + ' CREATE (t)-[rel:SUB_TASK]->(u)';
-            params = { tick, uStoryAdd };
-            break;
-          case uStoryRemove === undefined && sprintRemove !== undefined
-          && uStoryAdd !== undefined && sprintAdd === undefined:
-            // ADD_NEW_USERSTORY_CHANGE_SPRINT
-            query = 'MATCH (t:Ticket),(u:UserStory)'
-                            + ' WHERE t.id = $tick.id AND u.id = $uStoryAdd.id'
-                            + ' CREATE (t)-[rel:SUB_TASK]->(u)'
-                            + ' WITH t'
-                            + ' MATCH (s:Sprint {id:$sprintRemove.id})<-[rel1:SPRINT_TASK]-(t)'
-                            + ' DELETE rel1';
-            params = { tick, uStoryAdd, sprintRemove };
-            break;
-          case uStoryRemove === undefined && sprintRemove !== undefined
-          && uStoryAdd !== undefined && sprintAdd !== undefined:
-            // ADD_NEW_USERSTORY_CHANGE_SPRINT
-            query = 'MATCH (t:Ticket),(u:UserStory)'
-                            + ' WHERE t.id = $tick.id AND u.id = $uStoryAdd.id'
-                            + ' CREATE (t)-[rel:SUB_TASK]->(u)'
-                            + ' WITH t'
-                            + ' MATCH (s:Sprint {id:$sprintRemove.id})<-[rel1:SPRINT_TASK]-(t)'
-                            + ' DELETE rel1'
-                            + ' WITH t'
-                            + ' MATCH (s2:Sprint{id:$sprintAdd.id})'
-                            + ' CREATE (t)-[rel1:SPRINT_TASK]->(s2)';
-            params = {
-              tick, uStoryAdd, sprintRemove, sprintAdd,
-            };
-            break;
-          case uStoryAdd !== undefined && sprintAdd !== undefined
-          && uStoryRemove === undefined && sprintRemove === undefined:
-            // ADD_NEW_USERSTORY_ADD_NEW_SPRINT
-            query = 'MATCH (t:Ticket), (u:UserStory), (s:Sprint)'
-                            + ' WHERE t.id = $tick.id AND u.id = $uStoryAdd.id AND s.id = $sprintAdd.id'
-                            + ' CREATE (s)<-[rel1:SPRINT_TASK]-(t)-[rel2:SUB_TASK]->(u)';
-            params = { tick, uStoryAdd, sprintAdd };
-            break;
-          default:
-            throw Error('Query does not contain necessary params');
-        }
-        return neode.cypher(query, params)
-          .then(() => {
-            // trigger DOM update for all subscribers
-            pubSub.publish('project', { update: project.id });
-            return tick.id;
-          })
-          .catch((e) => {
-            throw e;
-          });
-      } catch (e) {
-        throw new Error(e);
+      } finally {
+        await session.close();
       }
     },
     UpdateTicket: async (object, params, ctx, resolveInfo) => {
-      // const alias = resolveInfo.fieldNodes[0].alias;
-      const tickId = params.id;
+      const session = ctx.driver.session();
       try {
-        // query for the project id linked to the current ticket
-        const proId = await neode.cypher('MATCH (a:Ticket { id:$tickId})-[rel:TICKET]->(b:Project)'
-                    + ' RETURN b.id', { tickId })
-          .then((result) => result.records[0].get('b.id'))
-          .catch((e) => {
-            throw e;
-          });
-        // using project Id found,
-        pubSub.publish('project', { update: proId });
-        return await neo4jgraphql(object, params, ctx, resolveInfo);
+        // construct cypher query based on arguments provided
+        const paramString = Object.keys(params).reduce((arr, key) => {
+          if (key !== 'tick') {
+            arr.push(`${key}:$params.${key}`);
+          }
+          return arr;
+        }, []).join(', ');
+        // run cypher query using driver
+        await session.run(
+          'MATCH (t: Ticket {id: $params.tick.id})'
+            + ` SET t += { ${paramString} }`, {
+            params,
+          },
+        );
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      } finally {
+        await session.close();
+      }
+    },
+    UpdateSprint: async (object, params, ctx, resolveInfo) => {
+      const session = ctx.driver.session();
+      try {
+        // construct cypher query based on arguments provided
+        const paramString = Object.keys(params).reduce((arr, key) => {
+          if (key !== 'sprint') {
+            arr.push(`${key}:$params.${key}`);
+          }
+          return arr;
+        }, []).join(', ');
+        // run cypher query using driver
+        await session.run(
+          'MATCH (sp: Sprint {id: $params.sprint.id})'
+            + ` SET sp += { ${paramString} }`, {
+            params,
+          },
+        );
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('SPRINT_UPDATE', { spUpdate: result });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      } finally {
+        await session.close();
+      }
+    },
+    UpdateUserStory: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('USER_STORY_UPDATE', { uSUpdate: result });
+        return result;
       } catch (e) {
         throw new Error(e);
       }
@@ -416,77 +366,52 @@ const resolveFunctions = {
     CreateUserStory: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('USER_STORY_UPDATE', { uSUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
       }
     },
-    UpdateTicketAssignee: async (_, {
-      tick, remUser, addUser, project,
-    }) => {
-      if (remUser && !addUser) {
-        try {
-          return neode.cypher(
-            'MATCH (t:Ticket { id: $tick.id })<-[rel:ASSIGNED_TASK]-(u:User { id: $remUser.id })'
-                        + ' DELETE rel'
-                        + ' RETURN u',
-            { tick, remUser },
-          )
-            .then(() => {
-              pubSub.publish('project', { update: project.id });
-              return null;
-            })
-            .catch((e) => {
-              throw e;
-            });
-        } catch (e) {
-          throw new Error(e);
-        }
-      } else if (!remUser && addUser) {
-        try {
-          return neode.cypher('MATCH (t:Ticket),(u:User)'
-                        + ' WHERE t.id = $tick.id AND u.id = $addUser.id'
-                        + ' CREATE (u)-[rel:ASSIGNED_TASK]->(t)'
-                        + ' RETURN u',
-          { tick, addUser })
-            .then((result) => {
-              pubSub.publish('project', { update: project.id });
-              return result.records[0].get('u').properties;
-            })
-            .catch((e) => {
-              throw e;
-            });
-        } catch (e) {
-          throw new Error(e);
-        }
-      } else if (remUser && addUser) {
-        // reassign ticket
-        try {
-          return neode.cypher('MATCH (a:Ticket { id:$tick.id })<-[rel:ASSIGNED_TASK]-(b:User{ id:$remUser.id })'
-                        + ' MATCH (c:User { id:$addUser.id })'
-                        + ' CALL apoc.refactor.from(rel, c)'
-                        + ' YIELD input, output, error'
-                        + ' RETURN c',
-          { tick, remUser, addUser })
-            .then((result) => {
-              pubSub.publish('project', { update: project.id });
-              return result.records[0].get('c').properties;
-            })
-            .catch((e) => {
-              throw e;
-            });
-        } catch (e) {
-          throw new Error(e);
-        }
-      } else {
-        throw new Error('Query does not contain necessary params');
+    AddTicketComments: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
+    AddTicketCommits: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
+    UpdateTicketAssignee: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
+    RemoveTicketAssignee: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
+        return result;
+      } catch (e) {
+        throw new Error(e);
       }
     },
     CreateTicket: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
@@ -495,34 +420,13 @@ const resolveFunctions = {
     DeleteTicket: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: params.project.id });
-        return result;
-      } catch (e) {
-        throw new Error(e);
-      }
-    },
-    TicToToDo: async (object, params, ctx, resolveInfo) => {
-      try {
-        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
-        return result;
-      } catch (e) {
-        throw new Error(e);
-      }
-    },
-    TicToDoing: async (object, params, ctx, resolveInfo) => {
-      try {
-        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
-        return result;
-      } catch (e) {
-        throw new Error(e);
-      }
-    },
-    UpdateUserStory: async (object, params, ctx, resolveInfo) => {
-      try {
-        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('TICKET_DELETE',
+          {
+            tickDelete: {
+              id: result.id,
+              project: { id: params.project.id },
+            },
+          });
         return result;
       } catch (e) {
         throw new Error(e);
@@ -531,7 +435,31 @@ const resolveFunctions = {
     DeleteUserStory: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('USER_STORY_DELETE',
+          {
+            uSDelete: {
+              id: result.id,
+              project: { id: params.project.id },
+            },
+          });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
+    TicToToDo: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
+        return result;
+      } catch (e) {
+        throw new Error(e);
+      }
+    },
+    TicToDoing: async (object, params, ctx, resolveInfo) => {
+      try {
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
@@ -540,7 +468,7 @@ const resolveFunctions = {
     TicToDone: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('TICKET_UPDATE', { tickUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
@@ -549,44 +477,37 @@ const resolveFunctions = {
     CreateSprint: async (object, params, ctx, resolveInfo) => {
       try {
         const result = await neo4jgraphql(object, params, ctx, resolveInfo);
-        await pubSub.publish('project', { update: result.project.id });
+        await pubSub.publish('SPRINT_UPDATE', { spUpdate: result });
         return result;
       } catch (e) {
         throw new Error(e);
       }
     },
-    CreateUser: async (object, params, ctx, resolveInfo) => {
+    RemoveProjectMember: async (object, params, ctx, resolveInfo) => {
       try {
-        const salt = bcrypt.genSaltSync(Number(process.env.BCRYPTHASHCOST));
-        // update params that will be inserted into db
-        Object.assign(params, {
-          // generate hash of pass to be saved in db
-          password: bcrypt.hashSync(params.password, salt),
-          // generate hash based on username, for gravatar art
-          avatarHash: await md5(params.username),
-        });
-        return await neo4jgraphql(object, params, ctx, resolveInfo);
+        console.log('RemoveProjectMember');
+        console.log(params);
+
+        const result = await neo4jgraphql(object, params, ctx, resolveInfo);
+        await pubSub.publish('REMOVE_PRO_MEMBER', { removeProMem: result });
+        return result;
       } catch (e) {
         throw new Error(e);
       }
     },
   },
-  Subscription: {
-    update: {
-      subscribe: withFilter(() => pubSub.asyncIterator('project'),
-        (payload, variables) => payload.update === variables.proId),
-    },
-  },
 };
+
 const schema = makeAugmentedSchema({
   typeDefs,
-  resolvers: resolveFunctions,
+  resolvers,
   config: {
     auth: {
       isAuthenticated: true,
       hasRole: true,
       hasScope: true,
     },
+    // debug: true,
   },
 });
 

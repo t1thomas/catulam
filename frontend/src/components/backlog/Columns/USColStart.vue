@@ -11,7 +11,7 @@
       >
         <template v-if="noUs">
           <v-card-subtitle>
-            Unassigned tickets
+            No User Story
           </v-card-subtitle>
         </template>
         <template v-else>
@@ -38,16 +38,21 @@
         class="pa-0"
         cols="8"
       >
-        <draggable-tick-list
-          v-if="!noUs"
-          :list-properties="tickListConfig"
-          :ticket-ids="tickIds(userStoryId)"
-        />
-        <draggable-tick-list
-          v-else
-          :list-properties="tickListConfig"
-          :ticket-ids="tickIdsNoUs"
-        />
+        <draggable
+          tag="div"
+          v-bind="dragOptions"
+          class="v-list v-list--dense"
+          style="background: #17429b66; width: 100%; height: 100%; overflow-y: auto"
+          @end="tickMoved"
+          @add="uSCDAddedTo(listProperties)"
+          @remove="uSCDRemovedFrom(listProperties)"
+        >
+          <ticket-card-slim
+            v-for="tick in tickets"
+            :key="tick.id"
+            :ticket="tick"
+          />
+        </draggable>
       </v-col>
     </div>
   </v-card>
@@ -56,12 +61,14 @@
 <script>
 
 import { mapGetters, mapActions } from 'vuex';
-import DraggableTickList from '../DraggableTickList.vue';
+import draggable from 'vuedraggable';
+import ticketCardSlim from '@/components/Ticket/card/ticketCardSlim.vue';
 
 export default {
   name: 'USColumnStart',
   components: {
-    DraggableTickList,
+    draggable,
+    ticketCardSlim,
   },
   props: {
     userStoryId: {
@@ -73,33 +80,54 @@ export default {
     editBtn: false,
   }),
   computed: {
+    dragOptions() {
+      return {
+        animation: 200,
+        group: 'ticketList',
+        disabled: false,
+        ghostClass: 'ghost',
+      };
+    },
+    proId() {
+      return this.$route.query.proId;
+    },
     noUs() {
       return this.userStoryId === 'noUs';
     },
-    tickListConfig() {
-      if (!this.noUs) {
-        return {
-          userStoryId: this.userStoryId,
-          columnType: 'start',
-          disabled: false,
-        };
-      }
+    listProperties() {
       return {
-        userStoryId: null,
+        userStoryId: this.userStoryId,
         columnType: 'start',
         disabled: false,
       };
     },
     ...mapGetters({
       storyById: 'getUserStoryText',
-      tickIds: 'getTicksUsNoSp',
-      tickIdsNoUs: 'getTicksNoUsNoSp',
+      ticksNoUsNoSp: 'getTicksNoUsNoSp',
+      ticksUsNoSp: 'getTicksUsNoSp',
     }),
+    tickets() {
+      if (this.noUs) {
+        return this.ticksNoUsNoSp(this.proId);
+      }
+      return this.ticksUsNoSp(this.userStoryId, this.proId);
+    },
   },
   methods: {
     ...mapActions({
       showDrawer: 'detDrawUStoryShow',
     }),
+    ...mapActions([
+      'uSCDRemovedFrom',
+      'uSCDAddedTo',
+      'uSCDEvt',
+      'uSCDTicketId',
+    ]),
+    tickMoved(evt) {
+      this.uSCDTicketId(evt.item.id);
+      this.uSCDEvt(evt);
+      this.$emit('ticketMove');
+    },
   },
 };
 </script>

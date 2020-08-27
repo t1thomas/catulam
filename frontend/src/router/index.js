@@ -1,12 +1,11 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
+import SprintPlanner from '@/views/SprintPlanner.vue';
+import MemberManagement from '@/views/MemberManagement.vue';
 import Home from '../views/Home.vue';
 import backlog from '../views/Backlog.vue';
-import ProjectPage from '../views/ProjectPage.vue';
 import login from '../views/Login.vue';
-import TicketPage from '../components/Ticket/drawer component/Sections/TicketPage.vue';
-import UserStoryPage from '../components/UserStory/UserStoryPage.vue';
-import SprintBoard from '../views/SprintBoard.vue';
+import SprintBoard from '../views/SprintPage.vue';
 import AuthGuard from '../AuthGuard';
 
 Vue.use(VueRouter);
@@ -34,27 +33,21 @@ const routes = [
     beforeEnter: AuthGuard,
   },
   {
-    path: '/uStory',
-    name: 'uStory',
-    component: UserStoryPage,
-    beforeEnter: AuthGuard,
-  },
-  {
-    path: '/ticket',
-    name: 'ticket',
-    component: TicketPage,
-    beforeEnter: AuthGuard,
-  },
-  {
     path: '/backlog',
     name: 'backlog',
     component: backlog,
     beforeEnter: AuthGuard,
   },
   {
-    path: '/project',
-    name: 'ProjectPage',
-    component: ProjectPage,
+    path: '/sPlanner',
+    name: 'SprintPlanner',
+    component: SprintPlanner,
+    beforeEnter: AuthGuard,
+  },
+  {
+    path: '/mManagement',
+    name: 'mManagement',
+    component: MemberManagement,
     beforeEnter: AuthGuard,
   },
 ];

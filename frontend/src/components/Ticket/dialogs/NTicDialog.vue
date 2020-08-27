@@ -67,7 +67,7 @@
         <v-card-actions>
           <v-spacer />
           <v-btn
-            color="blue darken-1"
+            color="primary darken-1"
             text
             @click="onCancel"
           >
@@ -86,7 +86,7 @@
 </template>
 <script>
 import { mapActions, mapState } from 'vuex';
-import gqlQueries from '../../../graphql/gql-queries';
+import gqlQueries from '@/graphql/gql-queries';
 
 export default {
   name: 'NTicDialog',
@@ -103,7 +103,6 @@ export default {
     },
     ...mapState({
       showDialog: (state) => state.nTicketDialog.show,
-      currUser: (state) => state.currentUser,
     }),
   },
   methods: {
@@ -126,6 +125,7 @@ export default {
     },
     onCancel() {
       this.nTicDialogShow({ show: false });
+      this.$refs.ticForm.reset();
     },
     async onCreate() {
       if (this.$refs.ticForm.validate()) {
@@ -138,27 +138,18 @@ export default {
             title: this.title,
             desc: this.desc,
             project: { id: this.proId },
-            user: { id: this.currUser.id },
           },
-        }).then((response) => {
-          const { CreateTicket } = response.data;
-          if (CreateTicket === null) {
-            throw new Error('Unable to Create Ticket');
-          } else {
-            // show success notification of Ticket creation
-            this.snackBarOn({
-              message: `Created Ticket ${CreateTicket.title} #${CreateTicket.issueNumber} Successfully`,
-              type: 'success',
-            });
-          }
+        }).then(() => {
+          this.setSaving();
+          this.onCancel();
         }).catch((error) => {
-          this.snackBarOn({
-            message: error,
+          this.setSaving();
+          this.onCancel();
+          this.$store.dispatch('snackBarOn', {
+            message: `Unable to Create Ticket: ${error}`,
             type: 'error',
           });
         });
-        this.setSaving();
-        this.onCancel();
       }
     },
     setSaving() {

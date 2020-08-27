@@ -1,5 +1,3 @@
-import moment from 'moment';
-
 import Vue from 'vue';
 import dotenv from 'dotenv';
 
@@ -14,7 +12,6 @@ import { createProvider } from './vue-apollo';
 
 dotenv.config();
 
-Vue.$moment = moment;
 Vue.config.productionTip = false;
 Vue.$store = store;
 Vue.$router = router;

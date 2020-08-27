@@ -7,13 +7,20 @@
       height="5.5rem"
       :elevation="hover ? 12 : 2"
       width="100%"
+      @dblclick="detDrawShow({ show: true, ticketId: tickId })"
     >
       <v-card-title class="pt-1 pb-0 px-2">
-        <span class="font-weight-bold body-2">
+        <span
+          class="font-weight-bold body-2"
+          :class="{'double-line': ticket.done}"
+        >
           {{ ticket.title }}
         </span>
         <v-spacer />
-        <span class="font-weight-thin body-2">
+        <span
+          class="font-weight-thin body-2"
+          :class="{'double-line': ticket.done}"
+        >
           #{{ ticket.issueNumber }}
         </span>
       </v-card-title>
@@ -27,6 +34,7 @@
           <v-list-item-subtitle
             class="font-weight-light"
             style="font-size: 0.75rem"
+            :class="{'double-line': ticket.done}"
           >
             {{ ticket.desc }}
           </v-list-item-subtitle>
@@ -54,8 +62,8 @@
             tile
           >
             <v-img
-              v-if="assignee"
-              :src="gravatar"
+              v-if="ticket.assignee !== null"
+              :src="getGravatar(ticket.assignee.id)"
             />
             <v-icon
               v-else
@@ -64,7 +72,7 @@
               mdi-help-circle
             </v-icon>
           </v-avatar>
-          {{ fullName(assignee) }}
+          {{ fullName }}
         </v-chip>
       </v-card-actions>
     </v-card>
@@ -72,7 +80,7 @@
 </template>
 
 <script>
-import { mapGetters, mapState } from 'vuex';
+import { mapActions, mapGetters } from 'vuex';
 
 export default {
   name: 'TicketCard',
@@ -83,34 +91,25 @@ export default {
     },
   },
   computed: {
-    ...mapState({
-      members: (state) => state.currProElements.members,
-    }),
     ...mapGetters([
       'getTicketById',
-      'getProMemberById',
+      'getGravatar',
+      'getFullName',
     ]),
-    assignee() {
-      if (this.ticket.assignee === null) {
-        return null;
-      }
-      // const memObj = this.members.find((member) => member.User.id === this.ticket.assignee.id);
-      return this.getProMemberById(this.ticket.assignee.id);
-    },
     ticket() {
       return this.getTicketById(this.tickId);
     },
-    gravatar() {
-      return `https://gravatar.com/avatar/${this.assignee.avatar}?d=identicon`;
+    fullName() {
+      if (this.ticket.assignee === null) {
+        return 'n/a';
+      }
+      return this.getFullName(this.ticket.assignee.id);
     },
   },
   methods: {
-    fullName() {
-      if (this.assignee === null) {
-        return 'Unassigned';
-      }
-      return this.assignee.fullName;
-    },
+    ...mapActions([
+      'detDrawShow',
+    ]),
   },
 };
 </script>
@@ -120,5 +119,16 @@ export default {
     position:absolute;
     bottom:1px;
     right:1px;
+  }
+  .dash {
+    border: 0.1rem solid white;
+    width: 10%;
+    left: 0.4rem;
+    z-index: 5;
+  }
+  .double-line {
+    text-decoration-line: line-through;
+    text-decoration-style: double;
+    text-decoration-color: #ffffff;
   }
 </style>
