@@ -2,8 +2,9 @@ const neo4j = require('neo4j-driver');
 const newUsers = require('./seed-users');
 require('dotenv').config();
 
+console.log(process.env.NEO4J_PASSWORD);
 const driver = neo4j.driver(
-  process.env.NEO4J_URI || 'bolt://localhost:7687',
+  process.env.NEO4J_URI || 'http://localhost:7474',
   neo4j.auth.basic(
     process.env.NEO4J_USER || 'neo4j',
     process.env.NEO4J_PASSWORD || 'neo4j',
